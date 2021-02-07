@@ -16,6 +16,7 @@ class Config:
   def __init__(self):
     '''Initialize the class'''
     self.config = configparser.ConfigParser()
+    self.read_config()
 
   def config_exists(self):
     '''Checks if the default config exists'''
@@ -45,6 +46,13 @@ class Config:
       print("Wrote configuration file")
     else:
       print("Configuration file exists")
+
+  def read_config(self):
+    '''Read in the config file from the system'''
+    if self.config_exists:
+      self.config.read(CONFIG_FILE)
+    else:
+      self.create_default_config()
 
   def get_config_value(self, section, key):
     '''Returns the value in the config file as a string at the section/key'''
