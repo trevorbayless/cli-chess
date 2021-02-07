@@ -1,56 +1,44 @@
+import configparser
 import os
-
-try:
-  import configparser
-except ImportError:
-  import ConfigParser as configparser
-
-CONFIG_FILE = "config.ini"
-BOARD_CFG = 'board'
-UI_CFG = 'ui'
-LICHESS_CFG = 'lichess'
 
 class Config:
   '''Class to manage and read from the config file'''
 
-  def __init__(self):
+  def __init__(self, config_file):
     '''Initialize the class'''
+    self.CONFIG_FILE = config_file
     self.config = configparser.ConfigParser()
     self.read_config()
 
   def config_exists(self):
     '''Checks if the default config exists'''
-    return os.path.isfile(CONFIG_FILE)
+    return os.path.isfile(self.CONFIG_FILE)
 
   def create_default_config(self, overwrite=False):
     '''Creates the default configuration file'''
     if not self.config_exists() or overwrite:
       is_unix = os.name == "posix"
 
-      self.config[BOARD_CFG] = {}
-      self.config[BOARD_CFG]['board_color'] = 'default'                                 # board color
-      self.config[BOARD_CFG]['blindfold_mode'] = 'no'                                   # invisible pieces
-      self.config[BOARD_CFG]['show_board_highlights'] = 'yes'                           # last moves and check
-      self.config[BOARD_CFG]['show_board_coordinates'] = 'yes'                          # display A-H, 1-8
-      self.config[BOARD_CFG]['move_notation_style'] = 'symbol' if is_unix else 'letter' # symbol or letter
+      self.config[Config.Sections.BOARD] = {}
+      self.config[Config.Sections.BOARD]['board_color'] = 'default'                                 # board color
+      self.config[Config.Sections.BOARD]['blindfold_mode'] = 'no'                                   # invisible pieces
+      self.config[Config.Sections.BOARD]['show_board_highlights'] = 'yes'                           # last moves and check
+      self.config[Config.Sections.BOARD]['show_board_coordinates'] = 'yes'                          # display A-H, 1-8
+      self.config[Config.Sections.BOARD]['move_notation_style'] = 'symbol' if is_unix else 'letter' # symbol or letter
 
-      self.config[UI_CFG] = {}
-      self.config[UI_CFG]['zen_mode'] = 'no' # simple ui
+      self.config[Config.Sections.UI] = {}
+      self.config[Config.Sections.UI]['zen_mode'] = 'no' # simple ui
 
-      self.config[LICHESS_CFG] = {}
-      self.config[LICHESS_CFG]['api_key'] = '' # lichess api key
+      self.config[Config.Sections.LICHESS] = {}
+      self.config[Config.Sections.LICHESS]['api_key'] = '' # lichess api key
       
-      with open(CONFIG_FILE, 'w') as config_file:
+      with open(self.CONFIG_FILE, 'w') as config_file:
         self.config.write(config_file)
-
-      print("Wrote configuration file")
-    else:
-      print("Configuration file exists")
 
   def read_config(self):
     '''Read in the config file from the system'''
-    if self.config_exists:
-      self.config.read(CONFIG_FILE)
+    if self.config_exists():
+      self.config.read(self.CONFIG_FILE)
     else:
       self.create_default_config()
 
@@ -75,6 +63,12 @@ class Config:
     if not self.config_exists():
       self.create_default_config()
 
-    with open(CONFIG_FILE, 'w') as config_file:
+    with open(self.CONFIG_FILE, 'w') as config_file:
       self.config[section][key] = value
       self.config.write(config_file)
+
+  class Sections:
+    '''Class which holds the sections in the config file'''
+    BOARD = 'board'
+    UI = 'ui'
+    LICHESS = 'lichess'
