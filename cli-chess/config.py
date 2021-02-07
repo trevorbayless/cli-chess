@@ -20,17 +20,19 @@ class Config:
       is_unix = os.name == "posix"
 
       self.config[Config.Sections.BOARD] = {}
-      self.config[Config.Sections.BOARD]['board_color'] = 'default'                                 # board color
-      self.config[Config.Sections.BOARD]['blindfold_mode'] = 'no'                                   # invisible pieces
-      self.config[Config.Sections.BOARD]['show_board_highlights'] = 'yes'                           # last moves and check
-      self.config[Config.Sections.BOARD]['show_board_coordinates'] = 'yes'                          # display A-H, 1-8
-      self.config[Config.Sections.BOARD]['move_notation_style'] = 'symbol' if is_unix else 'letter' # symbol or letter
+      self.config[Config.Sections.BOARD][Config.Sections.BoardKeys.BOARD_COLOR] = 'default'
+      self.config[Config.Sections.BOARD][Config.Sections.BoardKeys.PIECE_NOTATION] = 'symbol' if is_unix else 'letter'
+      self.config[Config.Sections.BOARD][Config.Sections.BoardKeys.LIGHT_PIECE_COLOR] = 'white'
+      self.config[Config.Sections.BOARD][Config.Sections.BoardKeys.DARK_PIECE_COLOR] = 'black'
+      self.config[Config.Sections.BOARD][Config.Sections.BoardKeys.BLINDFOLD_MODE] = 'no'
+      self.config[Config.Sections.BOARD][Config.Sections.BoardKeys.SHOW_BOARD_HIGHLIGHTS] = 'yes'
+      self.config[Config.Sections.BOARD][Config.Sections.BoardKeys.SHOW_BOARD_COORDINATES] = 'yes'
 
       self.config[Config.Sections.UI] = {}
-      self.config[Config.Sections.UI]['zen_mode'] = 'no' # simple ui
+      self.config[Config.Sections.UI][Config.Sections.UiKeys.ZEN_MODE] = 'no'
 
       self.config[Config.Sections.LICHESS] = {}
-      self.config[Config.Sections.LICHESS]['api_key'] = '' # lichess api key
+      self.config[Config.Sections.LICHESS][Config.Sections.LichessKeys.API_KEY] = ''
       
       with open(self.CONFIG_FILE, 'w') as config_file:
         self.config.write(config_file)
@@ -47,7 +49,7 @@ class Config:
     if not self.config_exists():
       self.create_default_config()
     
-    return self.config.get(section, key)
+    return self.config.get(section, key).strip()
 
   def get_boolean_config_value(self, section, key):
     '''Returns the value in the config file as a boolean at the section/key.
@@ -68,7 +70,24 @@ class Config:
       self.config.write(config_file)
 
   class Sections:
-    '''Class which holds the sections in the config file'''
     BOARD = 'board'
     UI = 'ui'
     LICHESS = 'lichess'
+
+    class BoardKeys:
+      '''Holds the board section keys'''
+      BOARD_COLOR = 'board_color'                       # board color
+      PIECE_NOTATION = 'piece_notation'                 # symbol or letter
+      LIGHT_PIECE_COLOR = 'light_piece_color'           # light piece color
+      DARK_PIECE_COLOR = 'dark_piece_color'             # dark piece color
+      BLINDFOLD_MODE = 'blindfold_mode'                 # invisible pieces
+      SHOW_BOARD_HIGHLIGHTS = 'show_board_highlights'   # last moves and check
+      SHOW_BOARD_COORDINATES = 'show_board_coordinates' # display A-H, 1-8
+
+    class UiKeys:
+      '''Holds the ui section keys'''
+      ZEN_MODE = 'zen_mode' # simple ui
+
+    class LichessKeys:
+      '''Holds the lichess section keys'''
+      API_KEY = 'api_key'  # lichess api key
