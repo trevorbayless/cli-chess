@@ -1,5 +1,5 @@
-import configparser
 import os
+import configparser
 
 class Config:
     '''Class to create, update, and read from the configuration file'''
@@ -30,27 +30,27 @@ class Config:
         '''Creates the default 'board' section in the config file'''
         is_unix = os.name == "posix"
         self.config[Config.Sections.BOARD] = {}
-        self.config[Config.Sections.BOARD][Config.Sections.BoardKeys.BOARD_COLOR] = 'default'
-        self.config[Config.Sections.BOARD][Config.Sections.BoardKeys.PIECE_NOTATION] = 'symbol' if is_unix else 'letter'
-        self.config[Config.Sections.BOARD][Config.Sections.BoardKeys.LIGHT_PIECE_COLOR] = 'white'
-        self.config[Config.Sections.BOARD][Config.Sections.BoardKeys.DARK_PIECE_COLOR] = 'black'
-        self.config[Config.Sections.BOARD][Config.Sections.BoardKeys.BLINDFOLD_MODE] = 'no'
-        self.config[Config.Sections.BOARD][Config.Sections.BoardKeys.SHOW_BOARD_HIGHLIGHTS] = 'yes'
-        self.config[Config.Sections.BOARD][Config.Sections.BoardKeys.SHOW_BOARD_COORDINATES] = 'yes'
+        self.config[Config.Sections.BOARD][Config.Sections.BoardKeys.BOARD_COLOR] = "default"
+        self.config[Config.Sections.BOARD][Config.Sections.BoardKeys.PIECE_NOTATION] = "symbol" if is_unix else "letter"
+        self.config[Config.Sections.BOARD][Config.Sections.BoardKeys.LIGHT_PIECE_COLOR] = "white"
+        self.config[Config.Sections.BOARD][Config.Sections.BoardKeys.DARK_PIECE_COLOR] = "black"
+        self.config[Config.Sections.BOARD][Config.Sections.BoardKeys.BLINDFOLD_MODE] = "no"
+        self.config[Config.Sections.BOARD][Config.Sections.BoardKeys.SHOW_BOARD_HIGHLIGHTS] = "yes"
+        self.config[Config.Sections.BOARD][Config.Sections.BoardKeys.SHOW_BOARD_COORDINATES] = "yes"
         self.write_config()
 
 
     def create_default_ui_section(self):
         '''Creates the default 'ui' section in the config file'''
         self.config[Config.Sections.UI] = {}
-        self.config[Config.Sections.UI][Config.Sections.UiKeys.ZEN_MODE] = 'no'
+        self.config[Config.Sections.UI][Config.Sections.UiKeys.ZEN_MODE] = "no"
         self.write_config()
 
 
     def create_default_lichess_section(self):
         '''Creates the default 'lichess' section in the config file'''
         self.config[Config.Sections.LICHESS] = {}
-        self.config[Config.Sections.LICHESS][Config.Sections.LichessKeys.API_KEY] = ''
+        self.config[Config.Sections.LICHESS][Config.Sections.LichessKeys.API_KEY] = ""
         self.write_config()
 
 
@@ -111,24 +111,24 @@ class Config:
 
     class Sections:
         '''Holds the section names'''
-        BOARD = 'board'
-        UI = 'ui'
-        LICHESS = 'lichess'
+        BOARD = "board"
+        UI = "ui"
+        LICHESS = "lichess"
 
         class BoardKeys:
             '''Holds the board section keys'''
-            BOARD_COLOR = 'board_color'                       # board color
-            PIECE_NOTATION = 'piece_notation'                 # symbol or letter
-            LIGHT_PIECE_COLOR = 'light_piece_color'           # light piece color
-            DARK_PIECE_COLOR = 'dark_piece_color'             # dark piece color
-            BLINDFOLD_MODE = 'blindfold_mode'                 # invisible pieces
-            SHOW_BOARD_HIGHLIGHTS = 'show_board_highlights'   # last moves and check
-            SHOW_BOARD_COORDINATES = 'show_board_coordinates' # display A-H, 1-8
+            BOARD_COLOR = "board_color"                       # board color
+            PIECE_NOTATION = "piece_notation"                 # symbol or letter
+            LIGHT_PIECE_COLOR = "light_piece_color"           # light piece color
+            DARK_PIECE_COLOR = "dark_piece_color"             # dark piece color
+            BLINDFOLD_MODE = "blindfold_mode"                 # invisible pieces
+            SHOW_BOARD_HIGHLIGHTS = "show_board_highlights"   # last moves and check
+            SHOW_BOARD_COORDINATES = "show_board_coordinates" # display A-H, 1-8
 
         class UiKeys:
             '''Holds the ui section keys'''
-            ZEN_MODE = 'zen_mode' # simple ui
+            ZEN_MODE = "zen_mode" # simple ui
 
         class LichessKeys:
             '''Holds the lichess section keys'''
-            API_KEY = 'api_key'  # lichess api key
+            API_KEY = "api_key"  # lichess api key
