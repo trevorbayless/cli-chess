@@ -37,6 +37,7 @@ class Config:
         self.config[Config.Sections.BOARD][Config.Sections.BoardKeys.BLINDFOLD_MODE] = "no"
         self.config[Config.Sections.BOARD][Config.Sections.BoardKeys.SHOW_BOARD_HIGHLIGHTS] = "yes"
         self.config[Config.Sections.BOARD][Config.Sections.BoardKeys.SHOW_BOARD_COORDINATES] = "yes"
+        self.config[Config.Sections.BOARD][Config.Sections.BoardKeys.SHOW_MOVE_LIST] = "yes"
         self.write_config()
 
 
@@ -124,6 +125,7 @@ class Config:
             BLINDFOLD_MODE = "blindfold_mode"                 # invisible pieces
             SHOW_BOARD_HIGHLIGHTS = "show_board_highlights"   # last moves and check
             SHOW_BOARD_COORDINATES = "show_board_coordinates" # display A-H, 1-8
+            SHOW_MOVE_LIST = "show_move_list"                 # display the move list
 
         class UiKeys:
             '''Holds the ui section keys'''
