@@ -1,113 +1,162 @@
 import os
 import configparser
 
-class Config:
-    '''Class to create, update, and read from the configuration file'''
+#TODO: Handle exceptions
+
+class BaseConfig:
     def __init__(self, config_file):
-        '''Initialize the class'''
-        self.CONFIG_FILE = config_file
-        self.config = configparser.ConfigParser()
-        self.read_config()
+        '''Initialize the base class'''
+        self.filename = config_file
+        self.parser = configparser.SafeConfigParser()
 
 
     def read_config(self):
-        '''Read in the config file from the system'''
-        if self.config_exists():
-            self.config.read(self.CONFIG_FILE)
-        else:
+        '''Read in the config file from the system
+           Returns True if the config file exists'''
+        self.parser.read(self.filename)
+        return self.config_exists()
+
+
+    def write_config(self):
+        '''Writes to the configuration file'''
+        with open(self.filename, 'w') as config_file:
+            self.parser.write(config_file)
+
+
+    def config_exists(self):
+        '''Checks if the default config exists'''
+        return os.path.isfile(self.filename)
+
+
+    def add_section(self, section_name):
+        '''Add a section to the configuration file'''
+        self.parser[section_name] = {}
+        self.write_config()
+
+
+    def set_key_value(self, section_name, key, value):
+        '''Add a key to a section in the configuration file'''
+        self.parser[section_name][key] = value
+        self.write_config()
+
+
+    def update_config_value(self, section, key, value):
+        '''Update the config files section/key with the value passed in'''
+        with open(self.filename, 'w') as config_file:
+            self.parser[section][key] = value
+            self.parser.write(config_file)
+
+
+    def get_config_filename(self):
+        '''Returns the configurations filename'''
+        return self.filename
+
+
+    def get_key_value(self, section, key):
+        '''Returns the value at the passed in section/key pair'''
+        try:
+            return self.parser.get(section, key).lower().strip()
+        except Exception as e:
+            self.handle_exception(e)
+
+
+    def get_key_boolean_value(self, section, key):
+        try:
+            return self.parser.getboolean(section, key)
+        except Exception as e:
+            self.handle_exception(e)
+
+
+    def handle_exception(self, exception):
+        '''Handles exceptions that occur while parsing the configuration file'''
+        #TODO: Handle base class exceptions
+        print("Exception caught while handling the configuration file")
+
+
+class Config(BaseConfig):
+    '''Class to create, update, and read from the configuration file'''
+    def __init__(self, config_file):
+        '''Initialize the class'''
+        super().__init__(config_file)
+        if not super().read_config():
             self.create_default_config()
 
 
     def create_default_config(self, overwrite=False):
         '''Creates the default configuration file'''
-        if not self.config_exists() or overwrite:
-            self.create_default_board_section()
-            self.create_default_ui_section()
-            self.create_default_lichess_section()
+        if not super().config_exists() or overwrite:
+            self.create_board_section()
+            self.create_ui_section()
+            self.create_lichess_section()
 
 
-    def create_default_board_section(self):
+    def create_board_section(self):
         '''Creates the default 'board' section in the config file'''
         is_unix = os.name == "posix"
-        self.config[Config.Sections.BOARD] = {}
-        self.config[Config.Sections.BOARD][Config.Sections.BoardKeys.BOARD_COLOR] = "default"
-        self.config[Config.Sections.BOARD][Config.Sections.BoardKeys.PIECE_NOTATION] = "symbol" if is_unix else "letter"
-        self.config[Config.Sections.BOARD][Config.Sections.BoardKeys.LIGHT_PIECE_COLOR] = "white"
-        self.config[Config.Sections.BOARD][Config.Sections.BoardKeys.DARK_PIECE_COLOR] = "black"
-        self.config[Config.Sections.BOARD][Config.Sections.BoardKeys.BLINDFOLD_MODE] = "no"
-        self.config[Config.Sections.BOARD][Config.Sections.BoardKeys.SHOW_BOARD_HIGHLIGHTS] = "yes"
-        self.config[Config.Sections.BOARD][Config.Sections.BoardKeys.SHOW_BOARD_COORDINATES] = "yes"
-        self.config[Config.Sections.BOARD][Config.Sections.BoardKeys.SHOW_MOVE_LIST] = "yes"
-        self.write_config()
+        super().add_section(Config.Sections.BOARD)
+        self.set_board_value(Config.BoardKeys.BOARD_COLOR, "green")
+        self.set_board_value(Config.BoardKeys.PIECE_NOTATION, "symbol" if is_unix else "letter")
+        self.set_board_value(Config.BoardKeys.BLINDFOLD_MODE, "no")
+        self.set_board_value(Config.BoardKeys.SHOW_BOARD_HIGHLIGHTS, "yes")
+        self.set_board_value(Config.BoardKeys.SHOW_BOARD_COORDINATES, "yes")
+        self.set_board_value(Config.BoardKeys.SHOW_MOVE_LIST, "yes")
 
 
-    def create_default_ui_section(self):
+    def create_ui_section(self):
         '''Creates the default 'ui' section in the config file'''
-        self.config[Config.Sections.UI] = {}
-        self.config[Config.Sections.UI][Config.Sections.UiKeys.ZEN_MODE] = "no"
-        self.write_config()
+        super().add_section(Config.Sections.UI)
+        self.set_ui_value(Config.UiKeys.ZEN_MODE, "no")
 
 
-    def create_default_lichess_section(self):
+    def create_lichess_section(self):
         '''Creates the default 'lichess' section in the config file'''
-        self.config[Config.Sections.LICHESS] = {}
-        self.config[Config.Sections.LICHESS][Config.Sections.LichessKeys.API_KEY] = ""
-        self.write_config()
+        super().add_section(Config.Sections.LICHESS)
+        self.set_lichess_value(Config.LichessKeys.API_KEY, "")
 
 
-    def write_config(self):
-        '''Writes to the configuration file'''
-        with open(self.CONFIG_FILE, 'w') as config_file:
-            self.config.write(config_file)
+    def set_board_value(self, key, value):
+        '''Modify (or add) a BOARD key value'''
+        super().set_key_value(Config.Sections.BOARD, key, value)
 
 
-    def config_exists(self):
-        '''Checks if the default config exists'''
-        return os.path.isfile(self.CONFIG_FILE)
+    def set_ui_value(self, key, value):
+        '''Modify (or add) a UI key value'''
+        super().set_key_value(Config.Sections.UI, key, value)
 
 
-    def update_config_value(self, section, key, value):
-        '''Update the config files section/key with the value passed in'''
-        if not self.config_exists():
-            self.create_default_config()
-
-        with open(self.CONFIG_FILE, 'w') as config_file:
-            self.config[section][key] = value
-            self.config.write(config_file)
+    def set_lichess_value(self, key, value):
+        '''Modify (or add) a LICHESS key value'''
+        super().set_key_value(Config.Sections.LICHESS, key, value)
 
 
-    def get_config_value(self, section, key):
-        '''Returns the value in the config file as a string at the section/key'''
-        if not self.config_exists():
-            self.create_default_config()
-
-        try:
-            return self.config.get(section, key).lower().strip()
-        except Exception as e:
-            self.handle_exception(e)
-        return self.config.get(section, key).lower().strip()
+    def get_board_value(self, key):
+        '''Returns a value from the BOARD section'''
+        return super().get_key_value(Config.Sections.BOARD, key)
 
 
-    def get_boolean_config_value(self, section, key):
-        '''Returns the value in the config file as a boolean at the section/key.
-          This should only be used on known boolean values in the config file.
-        '''
-        if not self.config_exists():
-            self.create_default_config()
-        
-        try:
-            return self.config.getboolean(section, key)
-        except Exception as e:
-            self.handle_exception(e)
-        return self.config.getboolean(section, key)
+    def get_ui_value(self, key):
+        '''Returns a value from the UI section'''
+        return super().get_key_value(Config.Sections.UI, key)
 
 
-    def handle_exception(self, exception):
-        '''Handles exceptions that occur while parsing the configuration file'''
-        #TODO: Setup logging to log this event, remove print statement
-        #TODO: Handle the specific exception passed in and avoid wiping/recreating the config file
-        print(f"Exception caught while handling the configuration file. Recreating configuration.")
-        self.create_default_config(True)
+    def get_lichess_value(self, key):
+        '''Returns a value from the LICHESS section'''
+        return super().get_key_value(Config.Sections.LICHESS, key)
+
+
+    def get_board_boolean(self, key):
+        '''Returns a boolean value from the BOARD section'''
+        return super().get_key_boolean_value(Config.Sections.BOARD, key)
+
+
+    def get_ui_boolean(self, key):
+        '''Returns a boolean value from the UI section'''
+        return super().get_key_boolean_value(Config.Sections.UI, key)
+
+
+    def get_lichess_boolean(self, key):
+        '''Returns a boolean value from the UI section'''
+        return super().get_key_boolean_value(Config.Sections.LICHESS, key)
 
 
     class Sections:
@@ -116,21 +165,25 @@ class Config:
         UI = "ui"
         LICHESS = "lichess"
 
-        class BoardKeys:
-            '''Holds the board section keys'''
-            BOARD_COLOR = "board_color"                       # board color
-            PIECE_NOTATION = "piece_notation"                 # symbol or letter
-            LIGHT_PIECE_COLOR = "light_piece_color"           # light piece color
-            DARK_PIECE_COLOR = "dark_piece_color"             # dark piece color
-            BLINDFOLD_MODE = "blindfold_mode"                 # invisible pieces
-            SHOW_BOARD_HIGHLIGHTS = "show_board_highlights"   # last moves and check
-            SHOW_BOARD_COORDINATES = "show_board_coordinates" # display A-H, 1-8
-            SHOW_MOVE_LIST = "show_move_list"                 # display the move list
 
-        class UiKeys:
-            '''Holds the ui section keys'''
-            ZEN_MODE = "zen_mode" # simple ui
+    class BoardKeys:
+        '''Holds the name of keys in the BOARD section'''
+        BOARD_COLOR = "board_color"                       # board color
+        PIECE_NOTATION = "piece_notation"                 # symbol or letter
+        BLINDFOLD_MODE = "blindfold_mode"                 # invisible pieces
+        SHOW_BOARD_HIGHLIGHTS = "show_board_highlights"   # last moves and check
+        SHOW_BOARD_COORDINATES = "show_board_coordinates" # display A-H, 1-8
+        SHOW_MOVE_LIST = "show_move_list"                 # display the move list
 
-        class LichessKeys:
-            '''Holds the lichess section keys'''
-            API_KEY = "api_key"  # lichess api key
+
+    class UiKeys:
+        '''Holds the name of keys in the UI section'''
+        ZEN_MODE = "zen_mode" # simple ui
+
+
+    class LichessKeys:
+        '''Holds the name of keys in the LICHESS section'''
+        API_KEY = "api_key"  # lichess api key
+
+
+config = Config("config.ini")
