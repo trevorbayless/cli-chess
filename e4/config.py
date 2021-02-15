@@ -52,10 +52,13 @@ class BaseConfig:
         return self.filename
 
 
-    def get_key_value(self, section, key):
+    def get_key_value(self, section, key, lowercase=True):
         '''Returns the value at the passed in section/key pair'''
         try:
-            return self.parser.get(section, key).lower().strip()
+            key_value = self.parser.get(section, key).strip()
+            if lowercase:
+                key_value = key_value.lower()
+            return key_value
         except Exception as e:
             self.handle_exception(e)
 
@@ -102,10 +105,40 @@ class Config(BaseConfig):
         self.set_board_value(Config.BoardKeys.SHOW_MOVE_LIST, "yes")
 
 
+    def set_board_value(self, key, value):
+        '''Modify (or add) a BOARD key value'''
+        super().set_key_value(Config.Sections.BOARD, key, value)
+
+
+    def get_board_value(self, key):
+        '''Returns a value from the BOARD section'''
+        return super().get_key_value(Config.Sections.BOARD, key)
+
+
+    def get_board_boolean(self, key):
+        '''Returns a boolean value from the BOARD section'''
+        return super().get_key_boolean_value(Config.Sections.BOARD, key)
+
+
     def create_ui_section(self):
         '''Creates the default 'ui' section in the config file'''
         super().add_section(Config.Sections.UI)
         self.set_ui_value(Config.UiKeys.ZEN_MODE, "no")
+
+
+    def set_ui_value(self, key, value):
+        '''Modify (or add) a UI key value'''
+        super().set_key_value(Config.Sections.UI, key, value)
+
+
+    def get_ui_value(self, key):
+        '''Returns a value from the UI section'''
+        return super().get_key_value(Config.Sections.UI, key)
+
+
+    def get_ui_boolean(self, key):
+        '''Returns a boolean value from the UI section'''
+        return super().get_key_boolean_value(Config.Sections.UI, key)
 
 
     def create_lichess_section(self):
@@ -114,29 +147,9 @@ class Config(BaseConfig):
         self.set_lichess_value(Config.LichessKeys.API_KEY, "")
 
 
-    def set_board_value(self, key, value):
-        '''Modify (or add) a BOARD key value'''
-        super().set_key_value(Config.Sections.BOARD, key, value)
-
-
-    def set_ui_value(self, key, value):
-        '''Modify (or add) a UI key value'''
-        super().set_key_value(Config.Sections.UI, key, value)
-
-
     def set_lichess_value(self, key, value):
         '''Modify (or add) a LICHESS key value'''
         super().set_key_value(Config.Sections.LICHESS, key, value)
-
-
-    def get_board_value(self, key):
-        '''Returns a value from the BOARD section'''
-        return super().get_key_value(Config.Sections.BOARD, key)
-
-
-    def get_ui_value(self, key):
-        '''Returns a value from the UI section'''
-        return super().get_key_value(Config.Sections.UI, key)
 
 
     def get_lichess_value(self, key):
@@ -144,14 +157,14 @@ class Config(BaseConfig):
         return super().get_key_value(Config.Sections.LICHESS, key)
 
 
-    def get_board_boolean(self, key):
-        '''Returns a boolean value from the BOARD section'''
-        return super().get_key_boolean_value(Config.Sections.BOARD, key)
+    def get_lichess_api_key(self):
+        '''Returns the stored lichess api key'''
+        api_key = super().get_key_value(Config.Sections.LICHESS, Config.LichessKeys.API_KEY, False)
 
-
-    def get_ui_boolean(self, key):
-        '''Returns a boolean value from the UI section'''
-        return super().get_key_boolean_value(Config.Sections.UI, key)
+        if api_key != "":
+            return api_key
+        else:
+            return None
 
 
     def get_lichess_boolean(self, key):
