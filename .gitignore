@@ -1,4 +1,6 @@
 config.ini
+*.swp
+*.~
 *.spec
 *.egg-info
 dist/
