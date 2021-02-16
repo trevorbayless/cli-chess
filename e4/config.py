@@ -7,7 +7,7 @@ class BaseConfig:
     def __init__(self, config_file):
         '''Initialize the base class'''
         self.filename = config_file
-        self.parser = configparser.SafeConfigParser()
+        self.parser = configparser.ConfigParser()
 
 
     def read_config(self):
@@ -144,7 +144,7 @@ class Config(BaseConfig):
     def create_lichess_section(self):
         '''Creates the default 'lichess' section in the config file'''
         super().add_section(Config.Sections.LICHESS)
-        self.set_lichess_value(Config.LichessKeys.API_KEY, "")
+        self.set_lichess_value(Config.LichessKeys.API_TOKEN, "")
 
 
     def set_lichess_value(self, key, value):
@@ -157,12 +157,12 @@ class Config(BaseConfig):
         return super().get_key_value(Config.Sections.LICHESS, key)
 
 
-    def get_lichess_api_key(self):
-        '''Returns the stored lichess api key'''
-        api_key = super().get_key_value(Config.Sections.LICHESS, Config.LichessKeys.API_KEY, False)
+    def get_lichess_api_token(self):
+        '''Returns the stored lichess api token'''
+        api_token = super().get_key_value(Config.Sections.LICHESS, Config.LichessKeys.API_TOKEN, False)
 
-        if api_key != "":
-            return api_key
+        if api_token != "":
+            return api_token
         else:
             return None
 
@@ -196,7 +196,7 @@ class Config(BaseConfig):
 
     class LichessKeys:
         '''Holds the name of keys in the LICHESS section'''
-        API_KEY = "api_key"  # lichess api key
+        API_TOKEN = "api_token"  # lichess api token
 
 
 config = Config("config.ini")
