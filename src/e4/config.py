@@ -94,8 +94,8 @@ class Config(BaseConfig):
         is_unix = os.name == "posix"
         super().add_section(Config.Sections.BOARD)
         self.set_board_value(Config.BoardKeys.BOARD_COLOR, "green")
-        self.set_board_value(Config.BoardKeys.PIECE_NOTATION, "symbol" if is_unix else "letter")
         self.set_board_value(Config.BoardKeys.BLINDFOLD_MODE, "no")
+        self.set_board_value(Config.BoardKeys.USE_UNICODE_PIECES, "yes" if is_unix else "no")
         self.set_board_value(Config.BoardKeys.SHOW_BOARD_HIGHLIGHTS, "yes")
         self.set_board_value(Config.BoardKeys.SHOW_BOARD_COORDINATES, "yes")
         self.set_board_value(Config.BoardKeys.SHOW_MOVE_LIST, "yes")
@@ -178,10 +178,10 @@ class Config(BaseConfig):
     class BoardKeys:
         """Holds the name of keys in the BOARD section"""
         BOARD_COLOR = "board_color"                       # board color
-        PIECE_NOTATION = "piece_notation"                 # symbol or letter
         BLINDFOLD_MODE = "blindfold_mode"                 # invisible pieces
+        USE_UNICODE_PIECES = "use_unicode_pieces"         # use unicode pieces instead of symbols
         SHOW_BOARD_HIGHLIGHTS = "show_board_highlights"   # last moves and check
-        SHOW_BOARD_COORDINATES = "show_board_coordinates" # display A-H, 1-8
+        SHOW_BOARD_COORDINATES = "show_board_coordinates" # display A-H, 1-8 labels
         SHOW_MOVE_LIST = "show_move_list"                 # display the move list
 
 
