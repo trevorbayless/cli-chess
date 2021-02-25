@@ -17,7 +17,7 @@ class BoardDisplay:
 
     def perspective_is_white(self):
         '''Returns True is the board perspective is set as "white"'''
-        if self.perspective == "black":
+        if self.perspective == "white":
             return True
         else:
             return False
