@@ -3,10 +3,10 @@ import chess
 
 class BoardDisplay:
     '''Class to manage a chess boards display'''
-    def __init__(self):
+    def __init__(self, fen, perspective):
         '''Initialize the class'''
-        self.board = chess.Board()
-        self.perspective = self.set_board_perspective()
+        self.board = chess.Board(fen)
+        self.perspective = perspective
         self.square_numbers = self.get_square_numbers()
 
 
@@ -65,6 +65,7 @@ class BoardDisplay:
         rank_names = self.get_rank_names()
         file_names = self.get_file_names()
         show_board_coordinates = config.get_board_boolean(config.BoardKeys.SHOW_BOARD_COORDINATES)
+        blindfold_mode = config.get_board_boolean(config.BoardKeys.BLINDFOLD_CHESS)
         use_unicode_pieces = config.get_board_boolean(config.BoardKeys.USE_UNICODE_PIECES)
 
         for square in self.square_numbers:
@@ -73,12 +74,13 @@ class BoardDisplay:
 
             piece = self.board.piece_at(square)
             if piece:
-                if use_unicode_pieces:
-                    board_output += piece.unicode_symbol() + " "
-                else:
-                    board_output += piece.symbol() + " "
+                if not blindfold_mode:
+                    if use_unicode_pieces:
+                        board_output += piece.unicode_symbol() + " "
+                    else:
+                        board_output += piece.symbol() + " "
             else:
-                board_output += ". "
+                board_output += "  "
 
             if count >= len(chess.FILE_NAMES) - 1:
                 board_output += "\n"
@@ -94,4 +96,5 @@ class BoardDisplay:
             board_output += "  "
             for file_name in file_names:
                 board_output += file_name + " "
-        print(board_output)
+
+        print(board_output + "\n")
