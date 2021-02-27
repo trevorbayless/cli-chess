@@ -103,16 +103,12 @@ class Board(BoardBase):
 
             piece = self.board.piece_at(square)
 
-            if piece:
+            if piece and not blindfold_chess:
                 piece_color = self.get_piece_display_color(piece)
-                if not blindfold_chess:
-                    if use_unicode_pieces:
-                        if piece.color:
-                            board_output += f"<style fg='{piece_color}' bg='{square_color}'>{piece.unicode_symbol()} </style>"
-                        else:
-                            board_output += f"<style fg='{piece_color}' bg='{square_color}'>{piece.unicode_symbol()} </style>"
-                    else:
-                        board_output += piece.symbol() + " "
+                if use_unicode_pieces:
+                    board_output += f"<style fg='{piece_color}' bg='{square_color}'>{piece.unicode_symbol()} </style>"
+                else:
+                    board_output += f"<style fg='{piece_color}' bg='{square_color}'>{piece.symbol()} </style>"
             else:
                 board_output += f"<style bg='{square_color}'>  </style>"
 
