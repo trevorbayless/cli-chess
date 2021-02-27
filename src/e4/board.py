@@ -1,5 +1,6 @@
-from .config import config
 import chess
+from .config import config
+from prompt_toolkit import HTML, print_formatted_text as print
 
 def get_square_numbers(orientation):
     '''Returns the square numbers as a list based on board orientation'''
@@ -57,6 +58,24 @@ class BoardBase:
             return False
 
 
+    def get_piece_display_color(self, piece):
+        '''Returns the color to display the piece as a string'''
+        base_is_white = piece.color == True
+        if base_is_white:
+            return config.get_board_value(config.BoardKeys.LIGHT_PIECE_COLOR)
+        else:
+            return config.get_board_value(config.BoardKeys.DARK_PIECE_COLOR)
+
+
+    def get_square_display_color(self, file_index, rank_index):
+        '''Returns the color to display the square as a string'''
+        is_light_square = (file_index % 2) != (rank_index % 2)
+        if is_light_square:
+            return config.get_board_value(config.BoardKeys.LIGHT_SQUARE_COLOR)
+        else:
+            return config.get_board_value(config.BoardKeys.DARK_SQUARE_COLOR)
+
+
 class Board(BoardBase):
     '''Class to manage a chess board display'''
     def __init__(self, orientation, fen=chess.STARTING_FEN):
@@ -71,22 +90,31 @@ class Board(BoardBase):
         new_line = True
         board_output = ""
         show_board_coordinates = config.get_board_boolean(config.BoardKeys.SHOW_BOARD_COORDINATES)
-        blindfold_mode = config.get_board_boolean(config.BoardKeys.BLINDFOLD_CHESS)
+        blindfold_chess = config.get_board_boolean(config.BoardKeys.BLINDFOLD_CHESS)
         use_unicode_pieces = config.get_board_boolean(config.BoardKeys.USE_UNICODE_PIECES)
 
         for square in self.square_numbers:
+            file_index = chess.square_file(square)
+            rank_index = chess.square_rank(square)
+            square_color = self.get_square_display_color(file_index, rank_index)
+
             if show_board_coordinates and new_line:
                 board_output += self.rank_names[rank_count] + " "
 
             piece = self.board.piece_at(square)
+
             if piece:
-                if not blindfold_mode:
+                piece_color = self.get_piece_display_color(piece)
+                if not blindfold_chess:
                     if use_unicode_pieces:
-                        board_output += piece.unicode_symbol() + " "
+                        if piece.color:
+                            board_output += f"<style fg='{piece_color}' bg='{square_color}'>{piece.unicode_symbol()} </style>"
+                        else:
+                            board_output += f"<style fg='{piece_color}' bg='{square_color}'>{piece.unicode_symbol()} </style>"
                     else:
                         board_output += piece.symbol() + " "
             else:
-                board_output += "  "
+                board_output += f"<style bg='{square_color}'>  </style>"
 
             if count >= len(chess.FILE_NAMES) - 1:
                 board_output += "\n"
@@ -103,4 +131,4 @@ class Board(BoardBase):
             for file_name in self.file_names:
                 board_output += file_name + " "
 
-        print(board_output + "\n")
+        print(HTML(board_output + "\n"))
