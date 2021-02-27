@@ -2,6 +2,7 @@ import os
 import configparser
 
 #TODO: Handle exceptions
+#TODO: Handle new config options on updates (do not overwrite full config)
 
 class BaseConfig:
     def __init__(self, full_filename):
@@ -93,7 +94,10 @@ class Config(BaseConfig):
         """Creates the default 'BOARD' section in the config file"""
         is_unix = os.name == "posix"
         super().add_section(Config.Sections.BOARD)
-        self.set_board_value(Config.BoardKeys.BOARD_COLOR, "green")
+        self.set_board_value(Config.BoardKeys.LIGHT_SQUARE_COLOR, "burlywood")
+        self.set_board_value(Config.BoardKeys.DARK_SQUARE_COLOR, "forestgreen")
+        self.set_board_value(Config.BoardKeys.LIGHT_PIECE_COLOR, "white")
+        self.set_board_value(Config.BoardKeys.DARK_PIECE_COLOR, "black")
         self.set_board_value(Config.BoardKeys.BLINDFOLD_CHESS, "no")
         self.set_board_value(Config.BoardKeys.USE_UNICODE_PIECES, "yes" if is_unix else "no")
         self.set_board_value(Config.BoardKeys.SHOW_BOARD_HIGHLIGHTS, "yes")
@@ -177,7 +181,10 @@ class Config(BaseConfig):
 
     class BoardKeys:
         """Holds the name of keys in the BOARD section"""
-        BOARD_COLOR = "board_color"                       # board color
+        LIGHT_SQUARE_COLOR = "light_square_color"         # color to use for light squares
+        DARK_SQUARE_COLOR = "dark_square_color"           # color to use for dark squares
+        LIGHT_PIECE_COLOR = "light_piece_color"           # color to use for light pieces
+        DARK_PIECE_COLOR = "dark_piece_color"             # color to use for dark pieces
         BLINDFOLD_CHESS = "blindfold_chess"               # invisible pieces
         USE_UNICODE_PIECES = "use_unicode_pieces"         # use unicode pieces instead of symbols
         SHOW_BOARD_HIGHLIGHTS = "show_board_highlights"   # last moves and check
