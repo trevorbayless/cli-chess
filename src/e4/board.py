@@ -28,22 +28,6 @@ def get_square_numbers(orientation):
         return square_numbers
 
 
-def get_file_names(orientation):
-    '''Return the file names as a list based on board orientation'''
-    if orientation == "white":
-        return chess.FILE_NAMES
-    else:
-        return chess.FILE_NAMES[::-1]
-
-
-def get_rank_names(orientation):
-    '''Return the rank names as a list based on board orientation'''
-    if orientation == "white":
-        return chess.RANK_NAMES[::-1]
-    else:
-        return chess.RANK_NAMES
-
-
 def get_piece_unicode_symbol(symbol):
     '''Returns the unicode symbol associated to the symbol passed in'''
     return UNICODE_PIECE_SYMBOLS[symbol.lower()]
@@ -55,8 +39,6 @@ class BoardBase:
         self.board = chess.Board(fen)
         self.orientation = orientation
         self.square_numbers = get_square_numbers(self.orientation)
-        self.file_names = get_file_names(self.orientation)
-        self.rank_names = get_rank_names(self.orientation)
 
 
     def set_orientation(self, orientation):
@@ -97,13 +79,35 @@ class Board(BoardBase):
         super().__init__(orientation, fen)
 
 
+    def add_rank_label(self, rank_index, new_line):
+        '''Add a rank label if needed'''
+        rank_label = ""
+        show_board_coordinates = config.get_board_boolean(config.BoardKeys.SHOW_BOARD_COORDINATES)
+        if show_board_coordinates and new_line:
+            rank_label = chess.RANK_NAMES[rank_index] + " "
+        return rank_label
+
+
+    def add_file_labels(self):
+        '''Add a fiel labels if needed'''
+        file_names = "  "
+        show_board_coordinates = config.get_board_boolean(config.BoardKeys.SHOW_BOARD_COORDINATES)
+        if show_board_coordinates:
+            if self.orientation == "black":
+                for file_name in chess.FILE_NAMES[::-1]:
+                    file_names += file_name + " "
+            else:
+                for file_name in chess.FILE_NAMES:
+                    file_names += file_name + " "
+        return file_names
+
+
     def draw_board(self):
-        '''Draws the board based on stored positions'''
+        '''Draws the board (top left to bottom right) based on stored positions and orientation'''
         rank_count = 0
         count = 0
         new_line = True
         board_output = ""
-        show_board_coordinates = config.get_board_boolean(config.BoardKeys.SHOW_BOARD_COORDINATES)
         blindfold_chess = config.get_board_boolean(config.BoardKeys.BLINDFOLD_CHESS)
         use_unicode_pieces = config.get_board_boolean(config.BoardKeys.USE_UNICODE_PIECES)
 
@@ -112,18 +116,13 @@ class Board(BoardBase):
             rank_index = chess.square_rank(square)
             square_color = self.get_square_display_color(file_index, rank_index)
 
-            if show_board_coordinates and new_line:
-                board_output += self.rank_names[rank_count] + " "
+            board_output += self.add_rank_label(rank_index, new_line)
 
             piece = self.board.piece_at(square)
-
             if piece and not blindfold_chess:
+                piece_display = get_piece_unicode_symbol(piece.symbol()) if use_unicode_pieces else piece.symbol()
                 piece_color = self.get_piece_display_color(piece)
-                if use_unicode_pieces:
-                    unicode_symbol = get_piece_unicode_symbol(piece.symbol())
-                    board_output += f"<style fg='{piece_color}' bg='{square_color}'>{unicode_symbol} </style>"
-                else:
-                    board_output += f"<style fg='{piece_color}' bg='{square_color}'>{piece.symbol()} </style>"
+                board_output += f"<style fg='{piece_color}' bg='{square_color}'>{piece_display} </style>"
             else:
                 board_output += f"<style bg='{square_color}'>  </style>"
 
@@ -137,9 +136,6 @@ class Board(BoardBase):
                 count += 1
                 new_line = False
 
-        if show_board_coordinates:
-            board_output += "  "
-            for file_name in self.file_names:
-                board_output += file_name + " "
+        board_output += self.add_file_labels()
 
         print(HTML(board_output + "\n"))
