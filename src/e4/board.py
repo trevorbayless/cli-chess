@@ -2,6 +2,15 @@ import chess
 from .config import config
 from prompt_toolkit import HTML, print_formatted_text as print
 
+UNICODE_PIECE_SYMBOLS = {
+    "r": "♜",
+    "n": "♞",
+    "b": "♝",
+    "q": "♛",
+    "k": "♚",
+    "p": "♟",
+}
+
 def get_square_numbers(orientation):
     '''Returns the square numbers as a list based on board orientation'''
     square_numbers = []
@@ -33,6 +42,11 @@ def get_rank_names(orientation):
         return chess.RANK_NAMES[::-1]
     else:
         return chess.RANK_NAMES
+
+
+def get_piece_unicode_symbol(symbol):
+    '''Returns the unicode symbol associated to the symbol passed in'''
+    return UNICODE_PIECE_SYMBOLS[symbol.lower()]
 
 
 class BoardBase:
@@ -106,7 +120,8 @@ class Board(BoardBase):
             if piece and not blindfold_chess:
                 piece_color = self.get_piece_display_color(piece)
                 if use_unicode_pieces:
-                    board_output += f"<style fg='{piece_color}' bg='{square_color}'>{piece.unicode_symbol()} </style>"
+                    unicode_symbol = get_piece_unicode_symbol(piece.symbol())
+                    board_output += f"<style fg='{piece_color}' bg='{square_color}'>{unicode_symbol} </style>"
                 else:
                     board_output += f"<style fg='{piece_color}' bg='{square_color}'>{piece.symbol()} </style>"
             else:
