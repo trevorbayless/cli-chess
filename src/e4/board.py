@@ -24,8 +24,8 @@ def get_square_numbers(orientation):
 
     if orientation == "black":
         return square_numbers[::-1]
-    else:
-        return square_numbers
+
+    return square_numbers
 
 
 def get_piece_unicode_symbol(symbol):
@@ -79,63 +79,79 @@ class Board(BoardBase):
         super().__init__(orientation, fen)
 
 
-    def add_rank_label(self, rank_index, new_line):
-        '''Add a rank label if needed'''
-        rank_label = ""
-        show_board_coordinates = config.get_board_boolean(config.BoardKeys.SHOW_BOARD_COORDINATES)
-        if show_board_coordinates and new_line:
-            rank_label = chess.RANK_NAMES[rank_index] + " "
-        return rank_label
-
-
-    def add_file_labels(self):
-        '''Add a fiel labels if needed'''
-        file_names = "  "
-        show_board_coordinates = config.get_board_boolean(config.BoardKeys.SHOW_BOARD_COORDINATES)
-        if show_board_coordinates:
-            if self.orientation == "black":
-                for file_name in chess.FILE_NAMES[::-1]:
-                    file_names += file_name + " "
-            else:
-                for file_name in chess.FILE_NAMES:
-                    file_names += file_name + " "
-        return file_names
-
-
     def draw_board(self):
         '''Draws the board (top left to bottom right) based on stored positions and orientation'''
-        rank_count = 0
-        count = 0
-        new_line = True
-        board_output = ""
         blindfold_chess = config.get_board_boolean(config.BoardKeys.BLINDFOLD_CHESS)
         use_unicode_pieces = config.get_board_boolean(config.BoardKeys.USE_UNICODE_PIECES)
+        board_output = ""
 
         for square in self.square_numbers:
             file_index = chess.square_file(square)
             rank_index = chess.square_rank(square)
             square_color = self.get_square_display_color(file_index, rank_index)
-
-            board_output += self.add_rank_label(rank_index, new_line)
-
             piece = self.board.piece_at(square)
+            square_output = ""
+
             if piece and not blindfold_chess:
-                piece_display = get_piece_unicode_symbol(piece.symbol()) if use_unicode_pieces else piece.symbol()
                 piece_color = self.get_piece_display_color(piece)
-                board_output += f"<style fg='{piece_color}' bg='{square_color}'>{piece_display} </style>"
+                piece_character = get_piece_unicode_symbol(piece.symbol()) if use_unicode_pieces else piece.symbol()
+                square_output = f"<style fg='{piece_color}' bg='{square_color}'>{piece_character} </style>"
             else:
-                board_output += f"<style bg='{square_color}'>  </style>"
+                square_output = f"<style bg='{square_color}'>  </style>"
 
-            if count >= len(chess.FILE_NAMES) - 1:
-                board_output += "\n"
-                count = 0
-                rank_count += 1
-                new_line = True
+            board_output += self.get_rank_label(file_index, rank_index)
+            board_output += square_output
+            board_output += self.start_new_line(file_index)
 
+        board_output += self.get_file_labels() + "\n"
+
+        print(HTML(board_output))
+
+
+    def get_rank_label(self, file_index, rank_index):
+        '''Add a rank label if needed'''
+        rank_label = ""
+        proper_file_index = False
+        show_board_coordinates = config.get_board_boolean(config.BoardKeys.SHOW_BOARD_COORDINATES)
+
+        if self.is_white_orientation() and file_index == 0:
+            proper_file_index = True
+        elif not self.is_white_orientation() and file_index == 7:
+            proper_file_index = True
+
+        if show_board_coordinates and proper_file_index:
+            rank_label = chess.RANK_NAMES[rank_index] + " "
+
+        return rank_label
+
+
+    def get_file_labels(self):
+        '''Returns a string containing the file labels depending
+           on the rank index and configuration settings
+        '''
+        file_labels = ""
+        show_board_coordinates = config.get_board_boolean(config.BoardKeys.SHOW_BOARD_COORDINATES)
+
+        if show_board_coordinates:
+            file_labels = "  "
+            if self.orientation == "black":
+                for name in chess.FILE_NAMES[::-1]:
+                    file_labels += name + " "
             else:
-                count += 1
-                new_line = False
+                for name in chess.FILE_NAMES:
+                    file_labels += name + " "
 
-        board_output += self.add_file_labels()
+        return file_labels
 
-        print(HTML(board_output + "\n"))
+
+    def start_new_line(self, file_index):
+        '''Returns a new line if the board output needs to start on a new
+           line based on the board orientation and file index
+        '''
+        output = ""
+        if self.is_white_orientation() and file_index == 7:
+            output = "\n"
+        elif not self.is_white_orientation() and file_index == 0:
+            output = "\n"
+
+        return output
