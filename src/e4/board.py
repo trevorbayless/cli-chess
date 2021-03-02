@@ -1,6 +1,9 @@
 import chess
 from .config import config
 from prompt_toolkit import HTML, print_formatted_text as print
+from prompt_toolkit.output import ColorDepth
+
+board_keys = config.BoardKeys
 
 UNICODE_PIECE_SYMBOLS = {
     "r": "♜",
@@ -60,7 +63,7 @@ class Board:
 
     def print_board(self):
         '''Prints the board'''
-        print(HTML(self.board_display))
+        print(HTML(self.board_display), color_depth=ColorDepth.TRUE_COLOR)
 
 
     def get_squares_final_display(self, square):
@@ -71,8 +74,8 @@ class Board:
         square_color = self.get_square_color(square)
         square_output = ""
 
-        blindfold_chess = config.get_board_boolean(config.BoardKeys.BLINDFOLD_CHESS)
-        use_unicode_pieces = config.get_board_boolean(config.BoardKeys.USE_UNICODE_PIECES)
+        blindfold_chess = config.get_board_boolean(board_keys.BLINDFOLD_CHESS)
+        use_unicode_pieces = config.get_board_boolean(board_keys.USE_UNICODE_PIECES)
 
         if piece and not blindfold_chess:
             piece_color = self.get_piece_color(piece)
@@ -91,9 +94,9 @@ class Board:
         piece_color = ""
         base_is_white = piece.color == True
         if base_is_white:
-            piece_color = config.get_board_value(config.BoardKeys.LIGHT_PIECE_COLOR)
+            piece_color = config.get_board_value(board_keys.LIGHT_PIECE_COLOR)
         else:
-            piece_color = config.get_board_value(config.BoardKeys.DARK_PIECE_COLOR)
+            piece_color = config.get_board_value(board_keys.DARK_PIECE_COLOR)
 
         return piece_color
 
@@ -102,14 +105,37 @@ class Board:
         '''Returns a string with the color to display the
            square based on configuration settings
         '''
+        square_color = ""
         file_index = chess.square_file(square)
         rank_index = chess.square_rank(square)
 
         is_light_square = (file_index % 2) != (rank_index % 2)
         if is_light_square:
-            return config.get_board_value(config.BoardKeys.LIGHT_SQUARE_COLOR)
+            square_color = config.get_board_value(board_keys.LIGHT_SQUARE_COLOR)
         else:
-            return config.get_board_value(config.BoardKeys.DARK_SQUARE_COLOR)
+            square_color = config.get_board_value(board_keys.DARK_SQUARE_COLOR)
+
+        show_board_highlights = config.get_board_boolean(board_keys.SHOW_BOARD_HIGHLIGHTS)
+        if show_board_highlights:
+            if self.square_in_check(square):
+                square_color = config.get_board_value(board_keys.IN_CHECK_COLOR)
+
+        return square_color
+
+
+    def square_in_check(self, square):
+        '''Returns True if a king who's turn it is
+           is in check as the passed in square
+        '''
+        if self.board.is_check():
+            piece = self.board.piece_at(square)
+            if piece:
+                is_king_piece = piece.piece_type == chess.KING
+                proper_turn = piece.color == self.board.turn
+
+                if is_king_piece and proper_turn:
+                    return True
+        return False
 
 
     def get_file_labels(self):
@@ -117,7 +143,7 @@ class Board:
            on the rank index and configuration settings
         '''
         file_labels = ""
-        show_board_coordinates = config.get_board_boolean(config.BoardKeys.SHOW_BOARD_COORDINATES)
+        show_board_coordinates = config.get_board_boolean(board_keys.SHOW_BOARD_COORDINATES)
 
         if show_board_coordinates:
             file_labels = "  "
@@ -136,7 +162,7 @@ class Board:
            square passed in. Return is based on '''
         rank_label = ""
         proper_file_index = False
-        show_board_coordinates = config.get_board_boolean(config.BoardKeys.SHOW_BOARD_COORDINATES)
+        show_board_coordinates = config.get_board_boolean(board_keys.SHOW_BOARD_COORDINATES)
 
         file_index = chess.square_file(square)
         rank_index = chess.square_rank(square)
