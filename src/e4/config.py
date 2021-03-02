@@ -94,15 +94,18 @@ class Config(BaseConfig):
         """Creates the default 'BOARD' section in the config file"""
         is_unix = os.name == "posix"
         super().add_section(Config.Sections.BOARD)
-        self.set_board_value(Config.BoardKeys.LIGHT_SQUARE_COLOR, "burlywood")
-        self.set_board_value(Config.BoardKeys.DARK_SQUARE_COLOR, "forestgreen")
-        self.set_board_value(Config.BoardKeys.LIGHT_PIECE_COLOR, "white")
-        self.set_board_value(Config.BoardKeys.DARK_PIECE_COLOR, "black")
+        self.set_board_value(Config.BoardKeys.SHOW_BOARD_COORDINATES, "yes")
+        self.set_board_value(Config.BoardKeys.RANK_LABEL_COLOR, "white")
+        self.set_board_value(Config.BoardKeys.FILE_LABEL_COLOR, "white")
+        self.set_board_value(Config.BoardKeys.SHOW_BOARD_HIGHLIGHTS, "yes")
+        self.set_board_value(Config.BoardKeys.LAST_MOVES_COLOR, "teal")
+        self.set_board_value(Config.BoardKeys.LIGHT_SQUARE_COLOR, "lightslategray")
+        self.set_board_value(Config.BoardKeys.DARK_SQUARE_COLOR, "darkorchid")
+        self.set_board_value(Config.BoardKeys.IN_CHECK_COLOR, "red")
         self.set_board_value(Config.BoardKeys.BLINDFOLD_CHESS, "no")
         self.set_board_value(Config.BoardKeys.USE_UNICODE_PIECES, "yes" if is_unix else "no")
-        self.set_board_value(Config.BoardKeys.SHOW_BOARD_HIGHLIGHTS, "yes")
-        self.set_board_value(Config.BoardKeys.SHOW_BOARD_COORDINATES, "yes")
-        self.set_board_value(Config.BoardKeys.SHOW_MOVE_LIST, "yes")
+        self.set_board_value(Config.BoardKeys.LIGHT_PIECE_COLOR, "whitesmoke")
+        self.set_board_value(Config.BoardKeys.DARK_PIECE_COLOR, "black")
 
 
     def set_board_value(self, key, value):
@@ -181,15 +184,18 @@ class Config(BaseConfig):
 
     class BoardKeys:
         """Holds the name of keys in the BOARD section"""
+        SHOW_BOARD_COORDINATES = "show_board_coordinates" # display A-H, 1-8 labels
+        RANK_LABEL_COLOR = "rank_label_color"             # color to display rank labels
+        FILE_LABEL_COLOR = "file_label_color"             # color to display file labels
+        SHOW_BOARD_HIGHLIGHTS = "show_board_highlights"   # last moves and check
+        LAST_MOVES_COLOR = "last_moves_color"             # color to use to indicate the last moves
         LIGHT_SQUARE_COLOR = "light_square_color"         # color to use for light squares
         DARK_SQUARE_COLOR = "dark_square_color"           # color to use for dark squares
+        IN_CHECK_COLOR = "in_check_color"                 # color to highlight the king in check square
+        BLINDFOLD_CHESS = "blindfold_chess"               # pices are not shown
+        USE_UNICODE_PIECES = "use_unicode_pieces"         # use unicode pieces instead of symbols
         LIGHT_PIECE_COLOR = "light_piece_color"           # color to use for light pieces
         DARK_PIECE_COLOR = "dark_piece_color"             # color to use for dark pieces
-        BLINDFOLD_CHESS = "blindfold_chess"               # invisible pieces
-        USE_UNICODE_PIECES = "use_unicode_pieces"         # use unicode pieces instead of symbols
-        SHOW_BOARD_HIGHLIGHTS = "show_board_highlights"   # last moves and check
-        SHOW_BOARD_COORDINATES = "show_board_coordinates" # display A-H, 1-8 labels
-        SHOW_MOVE_LIST = "show_move_list"                 # display the move list
 
 
     class UiKeys:
