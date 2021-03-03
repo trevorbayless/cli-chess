@@ -68,7 +68,7 @@ class BaseConfig:
     def handle_exception(self, e):
         """Handles exceptions that occur while parsing the configuration file"""
         #TODO: Handle base class exceptions
-        print("Exception caught while handling the configuration file")
+        print("Exception caught while handling the configuration file. Please recreate the configuration file.")
 
 
 class Config(BaseConfig):
@@ -98,8 +98,8 @@ class Config(BaseConfig):
         self.set_board_value(Config.BoardKeys.RANK_LABEL_COLOR, "white")
         self.set_board_value(Config.BoardKeys.FILE_LABEL_COLOR, "white")
         self.set_board_value(Config.BoardKeys.SHOW_BOARD_HIGHLIGHTS, "yes")
-        self.set_board_value(Config.BoardKeys.LAST_MOVES_COLOR, "teal")
-        self.set_board_value(Config.BoardKeys.LIGHT_SQUARE_COLOR, "lightslategray")
+        self.set_board_value(Config.BoardKeys.LAST_MOVE_COLOR, "teal")
+        self.set_board_value(Config.BoardKeys.LIGHT_SQUARE_COLOR, "#C290FF")
         self.set_board_value(Config.BoardKeys.DARK_SQUARE_COLOR, "darkorchid")
         self.set_board_value(Config.BoardKeys.IN_CHECK_COLOR, "red")
         self.set_board_value(Config.BoardKeys.BLINDFOLD_CHESS, "no")
@@ -187,8 +187,8 @@ class Config(BaseConfig):
         SHOW_BOARD_COORDINATES = "show_board_coordinates" # display A-H, 1-8 labels
         RANK_LABEL_COLOR = "rank_label_color"             # color to display rank labels
         FILE_LABEL_COLOR = "file_label_color"             # color to display file labels
-        SHOW_BOARD_HIGHLIGHTS = "show_board_highlights"   # last moves and check
-        LAST_MOVES_COLOR = "last_moves_color"             # color to use to indicate the last moves
+        SHOW_BOARD_HIGHLIGHTS = "show_board_highlights"   # last move and check
+        LAST_MOVE_COLOR = "last_move_color"               # color to use to indicate the last move
         LIGHT_SQUARE_COLOR = "light_square_color"         # color to use for light squares
         DARK_SQUARE_COLOR = "dark_square_color"           # color to use for dark squares
         IN_CHECK_COLOR = "in_check_color"                 # color to highlight the king in check square
