@@ -1,6 +1,6 @@
-import chess
+import chess.variant
 from .config import config
-from prompt_toolkit import HTML, print_formatted_text as print
+from prompt_toolkit import HTML, styles, print_formatted_text as print
 from prompt_toolkit.output import ColorDepth
 
 board_keys = config.BoardKeys
@@ -38,12 +38,11 @@ def get_piece_unicode_symbol(symbol):
 
 class Board:
     '''Class to manage a chess board display'''
-    def __init__(self, orientation, fen=chess.STARTING_FEN):
+    def __init__(self, orientation, variant="Standard", fen=chess.STARTING_FEN):
         '''Initialize the class'''
-        self.board = chess.Board(fen)
+        self.board = chess.variant.find_variant(variant)(fen)
         self.board_orientation = orientation
         self.board_display = self.generate_board()
-
 
     def generate_board(self):
         '''Generates and returns the board as a HTML string (top left to bottom right)
@@ -53,7 +52,7 @@ class Board:
         board_squares = get_board_squares(self.board_orientation)
         for square in board_squares:
             board_output += self.get_rank_label(square)
-            board_output += self.get_squares_final_display(square)
+            board_output += self.get_square_final_display(square)
             board_output += self.start_new_line(square)
 
         board_output += self.get_file_labels() + "\n"
@@ -67,12 +66,12 @@ class Board:
         print(HTML(self.board_display), color_depth=ColorDepth.TRUE_COLOR)
 
 
-    def get_squares_final_display(self, square):
+    def get_square_final_display(self, square):
         '''Returns as a HTML string containing the final display for the passed in square.
            This includes the square color, and piece within the square.
         '''
         piece = self.board.piece_at(square)
-        square_color = self.get_square_color(square)
+        square_color = self.get_square_display_color(square)
         square_output = ""
 
         blindfold_chess = config.get_board_boolean(board_keys.BLINDFOLD_CHESS)
@@ -102,9 +101,9 @@ class Board:
         return piece_color
 
 
-    def get_square_color(self, square):
+    def get_square_display_color(self, square):
         '''Returns a string with the color to display the
-           square based on configuration settings
+           square based on configuration settings, last move, and check.
         '''
         square_color = ""
         file_index = chess.square_file(square)
@@ -118,6 +117,14 @@ class Board:
 
         show_board_highlights = config.get_board_boolean(board_keys.SHOW_BOARD_HIGHLIGHTS)
         if show_board_highlights:
+            try:
+                last_move = self.board.peek()
+                if square == last_move.to_square or square == last_move.from_square:
+                    square_color = config.get_board_value(board_keys.LAST_MOVE_COLOR)
+                    #TODO: Lighten last move color if on light square
+            except:
+                pass
+
             if self.square_in_check(square):
                 square_color = config.get_board_value(board_keys.IN_CHECK_COLOR)
 
@@ -128,7 +135,7 @@ class Board:
         '''Returns True if a king who's turn it is
            is in check as the passed in square
         '''
-        if self.board.is_check():
+        if self.board.is_check() or self.board.is_checkmate():
             piece = self.board.piece_at(square)
             if piece:
                 is_king_piece = piece.piece_type == chess.KING
