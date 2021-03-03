@@ -42,7 +42,6 @@ class Board:
         '''Initialize the class'''
         self.board = chess.Board(fen)
         self.board_orientation = orientation
-        self.board_squares = get_board_squares(self.board_orientation)
         self.board_display = self.generate_board()
 
 
@@ -51,13 +50,15 @@ class Board:
            based on the board orientation, and stored piece positions
         '''
         board_output = ""
-        for square in self.board_squares:
+        board_squares = get_board_squares(self.board_orientation)
+        for square in board_squares:
             board_output += self.get_rank_label(square)
             board_output += self.get_squares_final_display(square)
             board_output += self.start_new_line(square)
 
         board_output += self.get_file_labels() + "\n"
 
+        self.board_display = board_output
         return board_output
 
 
