@@ -14,7 +14,7 @@ UNICODE_PIECE_SYMBOLS = {
     "p": "♟",
 }
 
-def get_board_squares(orientation):
+def get_board_squares(orientation) -> list:
     '''Returns the boards square numbers as a list based on board orientation'''
     square_numbers = []
     square_names = []
@@ -31,20 +31,21 @@ def get_board_squares(orientation):
     return square_numbers
 
 
-def get_piece_unicode_symbol(symbol):
+def get_piece_unicode_symbol(symbol) -> str:
     '''Returns the unicode symbol associated to the symbol passed in'''
     return UNICODE_PIECE_SYMBOLS[symbol.lower()]
 
 
 class Board:
     '''Class to manage a chess board display'''
-    def __init__(self, orientation, variant="Standard", fen=chess.STARTING_FEN):
+    def __init__(self, orientation, variant="Standard", fen=chess.STARTING_FEN) -> None:
         '''Initialize the class'''
         self.board = chess.variant.find_variant(variant)(fen)
         self.board_orientation = orientation
         self.board_display = self.generate_board()
 
-    def generate_board(self):
+
+    def generate_board(self) -> str:
         '''Generates and returns the board as a HTML string (top left to bottom right)
            based on the board orientation, and stored piece positions
         '''
@@ -61,12 +62,12 @@ class Board:
         return board_output
 
 
-    def print_board(self):
+    def print_board(self) -> None:
         '''Prints the board'''
         print(HTML(self.board_display), color_depth=ColorDepth.TRUE_COLOR)
 
 
-    def get_square_final_display(self, square):
+    def get_square_final_display(self, square) -> str:
         '''Returns as a HTML string containing the final display for the passed in square.
            This includes the square color, and piece within the square.
         '''
@@ -87,7 +88,7 @@ class Board:
         return square_output
 
 
-    def get_piece_color(self, piece):
+    def get_piece_color(self, piece) -> str:
         '''Returns a string with the color to display the
            piece as based on configuration settings
         '''
@@ -101,7 +102,7 @@ class Board:
         return piece_color
 
 
-    def get_square_display_color(self, square):
+    def get_square_display_color(self, square) -> str:
         '''Returns a string with the color to display the
            square based on configuration settings, last move, and check.
         '''
@@ -131,7 +132,7 @@ class Board:
         return square_color
 
 
-    def square_in_check(self, square):
+    def square_in_check(self, square) -> bool:
         '''Returns True if a king who's turn it is
            is in check as the passed in square
         '''
@@ -146,7 +147,7 @@ class Board:
         return False
 
 
-    def get_file_labels(self):
+    def get_file_labels(self) -> str:
         '''Returns a string containing the file labels depending
            on the rank index and configuration settings
         '''
@@ -165,7 +166,7 @@ class Board:
         return file_labels
 
 
-    def get_rank_label(self, square):
+    def get_rank_label(self, square) -> str:
         '''Returns a string with the rank label at the
            square passed in. Return is based on '''
         rank_label = ""
@@ -186,7 +187,7 @@ class Board:
         return rank_label
 
 
-    def start_new_line(self, square):
+    def start_new_line(self, square) -> str:
         '''Returns a new line if the board output needs to start on a new
            line based on the board orientation and file index
         '''
@@ -201,7 +202,7 @@ class Board:
         return output
 
 
-    def is_white_orientation(self):
+    def is_white_orientation(self) -> bool:
         '''Returns True if the board orientation is set as white'''
         if self.board_orientation == "white":
             return True
@@ -209,7 +210,7 @@ class Board:
             return False
 
 
-    def make_move(self, move):
+    def make_move(self, move) -> None:
         '''Make a move on the chess board'''
         try:
             move = self.board.push_san(move)
@@ -224,7 +225,7 @@ class Board:
             return e
 
 
-    def is_game_over(self):
+    def is_game_over(self) -> bool:
         '''Returns True if the game is over'''
         is_variant_end = self.board.is_variant_end()
         is_checkmate = self.board.is_checkmate()
