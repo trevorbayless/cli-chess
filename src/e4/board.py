@@ -217,9 +217,6 @@ class Board:
             self.generate_board()
             self.print_board()
 
-            if self.is_game_over():
-                print("Game over")
-
         except Exception as e:
             print(f"Invalid move: {move}")
             return e
@@ -227,11 +224,12 @@ class Board:
 
     def is_game_over(self) -> bool:
         '''Returns True if the game is over'''
-        is_variant_end = self.board.is_variant_end()
-        is_checkmate = self.board.is_checkmate()
-        is_insufficient_material = self.board.is_insufficient_material()
-
-        if is_variant_end or is_checkmate or is_insufficient_material:
+        if self.board.is_game_over():
             return True
         else:
             return False
+
+
+    def game_result(self) -> str:
+        '''Returns a string containing the result of the game'''
+        return self.board.result()
