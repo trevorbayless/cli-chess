@@ -38,8 +38,11 @@ def get_piece_unicode_symbol(symbol) -> str:
 
 class Board:
     '''Class to manage a chess board display'''
-    def __init__(self, orientation, variant="Standard", fen=chess.STARTING_FEN) -> None:
+    def __init__(self, *, orientation="white", variant="Standard", fen=None) -> None:
         '''Initialize the class'''
+        if not fen:
+            fen = chess.variant.find_variant(variant).starting_fen
+
         self.board = chess.variant.find_variant(variant)(fen)
         self.board_orientation = orientation
         self.board_display = self.generate_board()
