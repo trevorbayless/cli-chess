@@ -232,4 +232,20 @@ class Board:
 
     def game_result(self) -> str:
         '''Returns a string containing the result of the game'''
-        return self.board.result()
+        game_result = self.board.result()
+        is_checkmate = self.board.is_checkmate()
+        output = "Game over"
+
+        if is_checkmate:
+            output = "Checkmate - "
+        if game_result == "1-0":
+            output += "White is victorious"
+        elif game_result == "0-1":
+            output += "Black is victorious"
+        elif game_result == "1/2-1/2":
+            if self.board.is_stalemate():
+                output = "Stalemate"
+            else:
+                output = "Draw"
+
+        return output
