@@ -156,9 +156,10 @@ class Board:
         '''
         file_labels = ""
         show_board_coordinates = config.get_board_boolean(board_keys.SHOW_BOARD_COORDINATES)
+        color = config.get_board_value(board_keys.FILE_LABEL_COLOR)
 
         if show_board_coordinates:
-            file_labels = "  "
+            file_labels = ""
             if self.board_orientation == "black":
                 for name in chess.FILE_NAMES[::-1]:
                     file_labels += name + " "
@@ -166,6 +167,7 @@ class Board:
                 for name in chess.FILE_NAMES:
                     file_labels += name + " "
 
+        file_labels = f"<style fg='{color}'>  {file_labels}</style>"
         return file_labels
 
 
@@ -175,6 +177,7 @@ class Board:
         rank_label = ""
         proper_file_index = False
         show_board_coordinates = config.get_board_boolean(board_keys.SHOW_BOARD_COORDINATES)
+        color = config.get_board_value(board_keys.RANK_LABEL_COLOR)
 
         file_index = chess.square_file(square)
         rank_index = chess.square_rank(square)
@@ -187,6 +190,7 @@ class Board:
         if show_board_coordinates and proper_file_index:
             rank_label = chess.RANK_NAMES[rank_index] + " "
 
+        rank_label = f"<style fg='{color}'>{rank_label}</style>"
         return rank_label
 
 
