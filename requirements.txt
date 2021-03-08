@@ -1,2 +1,3 @@
 chess~=1.4.0
 berserk~=0.10.0
+prompt-toolkit~=3.0.16
