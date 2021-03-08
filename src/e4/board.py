@@ -1,5 +1,5 @@
 import chess.variant
-from .config import config
+from e4 import config
 from prompt_toolkit import HTML, styles, print_formatted_text as print
 from prompt_toolkit.output import ColorDepth
 
@@ -151,8 +151,8 @@ class Board:
 
 
     def get_file_labels(self) -> str:
-        '''Returns a string containing the file labels depending
-           on the rank index and configuration settings
+        '''Returns a HTML string containing the file labels
+           depending on the rank index and configuration settings
         '''
         file_labels = ""
         show_board_coordinates = config.get_board_boolean(board_keys.SHOW_BOARD_COORDINATES)
@@ -172,8 +172,9 @@ class Board:
 
 
     def get_rank_label(self, square) -> str:
-        '''Returns a string with the rank label at the
-           square passed in. Return is based on '''
+        '''Returns a HTML string with the rank label at
+           the square passed in. Return is based on
+        '''
         rank_label = ""
         proper_file_index = False
         show_board_coordinates = config.get_board_boolean(board_keys.SHOW_BOARD_COORDINATES)
