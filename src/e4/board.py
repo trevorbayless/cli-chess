@@ -224,14 +224,15 @@ class Board:
 
 
     def make_move(self, move) -> None:
-        """Make a move on the chess board"""
+        """Make a move on the chess board. Raises a
+           ValueError if the move is illegal
+        """
         try:
             move = self.board.push_san(move)
             self.generate_board()
 
-        except Exception as e:
-            print(f"Invalid move: {move}")
-            return e
+        except Exception:
+            raise ValueError(f"Illegal move: {move}")
 
 
     def is_game_over(self) -> bool:
