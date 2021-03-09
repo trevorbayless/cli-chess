@@ -4,6 +4,7 @@ from e4 import is_unix_system
 
 #TODO: Handle exceptions
 #TODO: Handle new config options on updates (do not overwrite full config)
+#TODO: Add a "force_update" to pull new values if they have been changed during runtime
 
 class BaseConfig:
     def __init__(self, full_filename) -> None:
@@ -98,13 +99,13 @@ class Config(BaseConfig):
         self.set_board_value(Config.BoardKeys.RANK_LABEL_COLOR, "gray")
         self.set_board_value(Config.BoardKeys.FILE_LABEL_COLOR, "gray")
         self.set_board_value(Config.BoardKeys.SHOW_BOARD_HIGHLIGHTS, "yes")
-        self.set_board_value(Config.BoardKeys.LAST_MOVE_COLOR, "teal")
-        self.set_board_value(Config.BoardKeys.LIGHT_SQUARE_COLOR, "#C290FF")
-        self.set_board_value(Config.BoardKeys.DARK_SQUARE_COLOR, "darkorchid")
+        self.set_board_value(Config.BoardKeys.LAST_MOVE_COLOR, "yellowgreen")
+        self.set_board_value(Config.BoardKeys.LIGHT_SQUARE_COLOR, "cadetblue")
+        self.set_board_value(Config.BoardKeys.DARK_SQUARE_COLOR, "darkslateblue")
         self.set_board_value(Config.BoardKeys.IN_CHECK_COLOR, "red")
         self.set_board_value(Config.BoardKeys.BLINDFOLD_CHESS, "no")
         self.set_board_value(Config.BoardKeys.USE_UNICODE_PIECES, "yes" if is_unix_system() else "no")
-        self.set_board_value(Config.BoardKeys.LIGHT_PIECE_COLOR, "whitesmoke")
+        self.set_board_value(Config.BoardKeys.LIGHT_PIECE_COLOR, "white")
         self.set_board_value(Config.BoardKeys.DARK_PIECE_COLOR, "black")
 
 
