@@ -4,4 +4,3 @@ setup(
     name = "e4",
     install_requires = ["chess", "berserk", "prompt-toolkit"],
 )
-
