@@ -1,6 +1,6 @@
 from os import path
 import configparser
-from e4 import is_unix_system
+from cli_chess import is_unix_system
 
 #TODO: Handle exceptions
 #TODO: Handle new config options on updates (do not overwrite full config)

@@ -1,5 +1,5 @@
 import chess.variant
-from e4 import config
+from cli_chess import config
 from prompt_toolkit import HTML, styles, print_formatted_text as print
 from prompt_toolkit.output import ColorDepth
 

@@ -1,6 +1,6 @@
 from setuptools import setup
 
 setup(
-    name = "e4",
+    name = "cli-chess",
     install_requires = ["chess", "berserk", "prompt-toolkit"],
 )
