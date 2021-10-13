@@ -3,7 +3,7 @@ config.ini
 *.~
 *.spec
 *.egg-info
-venv/
+.venv/
 dist/
 build/
 __pycache__/
