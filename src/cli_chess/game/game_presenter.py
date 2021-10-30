@@ -1,19 +1,17 @@
-from cli_chess.game.game_model import GameModel
-from cli_chess.event_handler import Observer, Event
+from .game_model import GameModel
 
-
-class GamePresenter(Observer):
+class GamePresenter:
     """ Mediator between the GameModel and the GameView.
         Takes events from GameModel and GameView and translates
         into actions each can understand.
     """
-    def __init__(self, view):
-        Observer.__init__(self)
-        self.game_view = view
+    def __init__(self):
         self.game_model = GameModel()
 
 
-    def make_move(self):
-        move = self.game_view.get_move_input_text()
-        status = self.game_model.make_move(move)
-        self.game_view.set_status_text(status)
+    def get_board_output(self) -> str:
+        return self.game_model.board.get_board_display()
+
+
+    def receive_input(self, input):
+        self.game_model.make_move(input)

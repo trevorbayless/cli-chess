@@ -1,5 +1,4 @@
-from cli_chess.game import Board
-
+from .board import Board
 
 class GameModel:
     """ Business data. GameModel should have no knowledge of GameView
@@ -10,4 +9,4 @@ class GameModel:
 
 
     def make_move(self, move):
-        return move
+        self.board.make_move(move)
