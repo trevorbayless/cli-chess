@@ -1,7 +1,5 @@
 import chess.variant
 from cli_chess import config
-from prompt_toolkit import HTML, styles, print_formatted_text as print
-from prompt_toolkit.output import ColorDepth
 
 board_keys = config.BoardKeys
 
@@ -45,11 +43,11 @@ class Board:
 
         self.board = chess.variant.find_variant(variant)(fen)
         self.board_orientation = orientation
-        self.board_display = self.generate_board()
+        self.board_display = self.update_board()
 
 
-    def generate_board(self) -> str:
-        """Generates and returns the board as a HTML string (top left to bottom right)
+    def update_board(self) -> str:
+        """Updates and returns the board as a HTML string (top left to bottom right)
            based on the board orientation, and stored piece positions
         """
         board_output = ""
@@ -65,9 +63,9 @@ class Board:
         return board_output
 
 
-    def print_board(self) -> None:
-        """Prints the board"""
-        print(HTML(self.board_display), color_depth=ColorDepth.TRUE_COLOR)
+    def get_board_display(self) -> str:
+        """Returns the HTML formatted board display"""
+        return self.board_display
 
 
     def get_square_final_display(self, square) -> str:
@@ -172,8 +170,8 @@ class Board:
 
 
     def get_rank_label(self, square) -> str:
-        """Returns a HTML string with the rank label at
-           the square passed in. Return is based on
+        """Returns a HTML formatted string with
+           the rank label at the square passed in.
         """
         rank_label = ""
         proper_file_index = False
@@ -229,7 +227,9 @@ class Board:
         """
         try:
             move = self.board.push_san(move)
-            self.generate_board()
+
+            #TODO: Wrap this in a move push function?
+            self.update_board()
 
         except Exception:
             raise ValueError(f"Illegal move: {move}")
