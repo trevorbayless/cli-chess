@@ -1,7 +1,5 @@
 import os
 import berserk
-from prompt_toolkit.widgets import Label
-from prompt_toolkit.layout import AnyContainer, VSplit
 
 
 def is_unix_system():
@@ -34,11 +32,3 @@ def handle_api_exceptions(e):
             print(e)
     else:
         print(e)
-
-
-def create_title(text: str, dont_extend_width: bool = False) -> Label:
-    return Label(text, style="fg:ansiblue", dont_extend_width=dont_extend_width)
-
-
-def indent_container(container: AnyContainer, amount: int = 2) -> AnyContainer:
-    return VSplit([Label("", width=amount), container])
