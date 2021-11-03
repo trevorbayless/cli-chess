@@ -81,39 +81,3 @@ class APITokenInput:
     def __pt_container__(self) -> Dialog:
         """Returns the dialog for container use"""
         return self.dialog
-
-
-# def show_request_to_generate_token():
-#     """Display a message box asking if the browser can
-#        be opened to generate a Lichess API token. If 'Yes',
-#        the Lichess website will be opened at the token creation URL.
-#        If 'No', the prompt to input the API token will be displayed.
-#     """
-#     result = yes_no_dialog(
-#         title="Generate Lichess API Token?",
-#         text="A valid Lichess API token is required to connect with Lichess.\n" +
-#               "To be taken to the Lichess site to generate your token, select 'Yes'.\n"
-#               "Please keep all defaults set on the page and copy/paste your API token on the next screen.\n\n" +
-#               "Are you ready to open the browser to generate your token?"
-#     ).run()
-
-#     if result:
-#         webbrowser.open(API_TOKEN_CREATION_URL)
-
-#     return show_api_token_input()
-
-
-# def show_api_token_input():
-#     """Show API token input screen"""
-#     user_cancelled = None
-#     api_token = input_dialog(
-#         title='Lichess API Token',
-#         text='Please input your Lichess API token:',
-#         validator=api_token_validator,
-#         ).run()
-
-#     if not user_cancelled and is_valid_lichess_token(api_token):
-#         config.set_lichess_value(config.LichessKeys.API_TOKEN, api_token)
-#         return True
-#     else:
-#         return False
