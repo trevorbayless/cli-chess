@@ -1,7 +1,7 @@
 from enum import Enum
 from cli_chess import is_valid_lichess_token
 from cli_chess import config
-from cli_chess.ui.main_menu import show_main_menu
+from cli_chess.ui import MainMenu
 from prompt_toolkit import HTML
 from prompt_toolkit.application import get_app
 from prompt_toolkit.layout.dimension import D
@@ -75,7 +75,7 @@ class APITokenInput:
 
     def cancel_handler(self) -> str:
         """Handler for the 'Cancel' button"""
-        show_main_menu()
+        MainMenu()
 
 
     def __pt_container__(self) -> Dialog:
