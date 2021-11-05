@@ -1,5 +1,5 @@
 from .game_model import GameModel
-from .game_view import *
+from .game_view import GameView
 
 class GamePresenter:
     """ Mediator between the GameModel and the GameView.
@@ -13,9 +13,9 @@ class GamePresenter:
 
 
     def initialize_view(self):
-        self.game_view.update_board_output(self.game_model.board.get_board_display())
+        self.game_view.update_board_output_container(self.game_model.board.get_board_display())
 
 
     def input_received(self, input):
         self.game_model.make_move(input)
-        self.game_view.update_board_output(self.game_model.board.get_board_display())
+        self.game_view.update_board_output_container(self.game_model.board.get_board_display())
