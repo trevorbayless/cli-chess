@@ -1,4 +1,4 @@
-from typing import Text
+from cli_chess.board import BoardView
 from prompt_toolkit import HTML, print_formatted_text as print
 from prompt_toolkit.layout.dimension import D
 from prompt_toolkit.widgets import Frame, TextArea
@@ -10,16 +10,11 @@ from prompt_toolkit.application import get_app
 from prompt_toolkit.layout.layout import Layout
 
 class GameViewBase:
-    def __init__(self, presenter):
+    def __init__(self, presenter, board_view):
         self.presenter = presenter
-        self.board_output_container = self._create_board_output_container()
+        self.board_output_container = board_view.get_container()
         self.move_list_container = self._create_move_list_container()
         self.input_field_container = self._create_input_field_container()
-
-
-    def _create_board_output_container(self) -> FormattedTextControl:
-        """Returns a FormattedTextControl holding the initial board output"""
-        return FormattedTextControl("No board set")
 
 
     def _create_move_list_container(self) -> TextArea:
@@ -58,13 +53,7 @@ class GameViewBase:
             self.input_field_container.text = ''
 
 
-    def update_board_output_container(self, board_output : str):
-        """Updates the board output container with the passed in text"""
-        self.board_output_container.text = HTML(board_output)
-
-
     def get_board_output_container(self) -> FormattedTextControl:
-        """Returns the board output container"""
         return self.board_output_container
 
 
@@ -79,8 +68,8 @@ class GameViewBase:
 
 
 class GameView(GameViewBase):
-    def __init__(self, presenter):
-        super().__init__(presenter)
+    def __init__(self, presenter, board_view : BoardView):
+        super().__init__(presenter, board_view)
         self.container = self.create_container()
         get_app().layout = Layout(self.container, super().get_input_field_container())
 
@@ -90,7 +79,7 @@ class GameView(GameViewBase):
             [
                 VSplit(
                     [
-                        Window(super().get_board_output_container(), width=20),
+                        super().get_board_output_container(),
                         HSplit([super().get_move_list_container()])
                     ]),
                 super().get_input_field_container()

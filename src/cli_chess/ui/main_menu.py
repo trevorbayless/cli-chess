@@ -1,4 +1,5 @@
 from cli_chess.ui.about import show_about
+from cli_chess.board import BoardModel, BoardPresenter
 from cli_chess.game import GameModel, GamePresenter
 from enum import Enum
 from prompt_toolkit import HTML
@@ -8,8 +9,9 @@ from prompt_toolkit.layout.containers import Container, HSplit, VSplit
 from prompt_toolkit.application import get_app
 
 def play_online() -> None:
-    model = GameModel()
-    presenter = GamePresenter(model)
+    board_model = BoardModel()
+    game_model = GameModel()
+    game_presenter = GamePresenter(game_model, board_model)
 
 
 def play_offline() -> None:

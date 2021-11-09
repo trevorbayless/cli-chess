@@ -1,21 +1,13 @@
-from .game_model import GameModel
-from .game_view import GameView
+from cli_chess.board import BoardModel, BoardPresenter
+from cli_chess.game import GameModel, GameView
 
 class GamePresenter:
-    """ Mediator between the GameModel and the GameView.
-        Takes events from GameModel and GameView and translates
-        into actions each can understand.
-    """
-    def __init__(self, model : GameModel):
+    def __init__(self, model : GameModel, board_model : BoardModel):
+        self.board_presenter = BoardPresenter(board_model)
+
         self.game_model = model
-        self.game_view = GameView(self)
-        self.initialize_view()
-
-
-    def initialize_view(self):
-        self.game_view.update_board_output_container(self.game_model.board.get_board_display())
+        self.game_view = GameView(self, self.board_presenter.get_view())
 
 
     def input_received(self, input):
-        self.game_model.make_move(input)
-        self.game_view.update_board_output_container(self.game_model.board.get_board_display())
+        self.board_presenter.make_move(input)
