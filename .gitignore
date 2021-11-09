@@ -4,6 +4,7 @@ config.ini
 *.spec
 *.egg-info
 .venv/
+.vscode/
 venv/
 dist/
 build/
