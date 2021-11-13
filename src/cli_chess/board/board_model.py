@@ -1,6 +1,5 @@
 import chess.variant
-from chess import Move, Board
-from typing import Type
+from chess import Move
 
 class BoardModel:
     def __init__(self, orientation="white", variant="Standard", fen=None) -> None:
@@ -26,11 +25,6 @@ class BoardModel:
         return self.board_orientation
 
 
-    def get_board(self) -> Type[Board]:
-        """Returns the board object"""
-        return self.board
-
-
     def get_board_squares(self) -> list:
         """Returns the boards square numbers as a list based current orientation"""
         square_numbers = []
@@ -46,11 +40,6 @@ class BoardModel:
             return square_numbers[::-1]
 
         return square_numbers
-
-
-    def get_piece_at_square(self, square):
-        """Returns the piece at the passed in square"""
-        return self.board.piece_at(square)
 
 
     def get_square_file(self, square):
@@ -97,23 +86,13 @@ class BoardModel:
         return rank_label
 
 
-    def get_previous_move(self):
-        """Returns the previous move"""
-        return self.board.peek()
-
-
     def is_square_in_check(self, square) -> bool:
         """Returns True if a king who's turn it is
            is in check as the passed in square
         """
-        if self.board.is_check() or self.board.is_checkmate():
-            piece = self.board.piece_at(square)
-            if piece:
-                is_king_piece = piece.piece_type == chess.KING
-                proper_turn = piece.color == self.board.turn
-
-                if is_king_piece and proper_turn:
-                    return True
+        king_square = self.board.king(self.board.turn)
+        if square == king_square and self.board.is_check():
+            return True
         return False
 
 
@@ -123,18 +102,3 @@ class BoardModel:
             return True
         else:
             return False
-
-
-    def get_game_over_result(self) -> str:
-        """Returns a string with the game over result"""
-        return self.board.result()
-
-
-    def is_checkmate(self):
-        """Returns True if the current position is checkmate"""
-        return self.board.is_checkmate()
-
-
-    def is_stalemate(self):
-        """Returns true if the current position is stalemate"""
-        return self.board.is_stalemate()
