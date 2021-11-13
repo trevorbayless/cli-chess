@@ -1,5 +1,5 @@
 import unittest
-from cli_chess.board.board_model import BoardModel, Move
+from cli_chess.board.board_model import BoardModel
 from cli_chess.board.board_presenter import BoardPresenter
 
 
