@@ -29,15 +29,16 @@ class BoardPresenter:
         return self.board_view
 
 
-    def make_move(self, move) -> None:
-        """Make a move on the chess board. Raises a
-           ValueError if the move is illegal
+    def make_move(self, move) -> str:
+        """Make a move on the chess board. On a valid move, returns the move
+           as a string. Otherwise, raises a ValueError on an illegal move.
         """
         try:
             move = self.board_model.make_move(move)
 
             #TODO: Wrap this in a move push function?
             self.update_board()
+            return move
 
         except Exception:
             raise ValueError(f"Illegal move: {move}")
@@ -92,7 +93,7 @@ class BoardPresenter:
         """Returns as a HTML string containing the final display for the passed in square.
            This includes the square color, and piece within the square.
         """
-        piece = self.board_model.get_piece_at_square(square)
+        piece = self.board_model.board.piece_at(square)
         square_color = self.get_square_display_color(square)
         square_output = ""
 
@@ -155,7 +156,7 @@ class BoardPresenter:
         show_board_highlights = config.get_board_boolean(board_keys.SHOW_BOARD_HIGHLIGHTS)
         if show_board_highlights:
             try:
-                last_move = self.board_model.get_previous_move()
+                last_move = self.board_model.board.peek()
                 if square == last_move.to_square or square == last_move.from_square:
                     square_color = config.get_board_value(board_keys.LAST_MOVE_COLOR)
                     #TODO: Lighten last move color if on light square
@@ -170,8 +171,8 @@ class BoardPresenter:
 
     def game_result(self) -> str:
         """Returns a string containing the result of the game"""
-        game_result = self.board_model.get_game_over_result()
-        is_checkmate = self.board_model.is_checkmate()
+        game_result = self.board_model.board.result()
+        is_checkmate = self.board_model.board.is_checkmate()
         output = "Game over"
 
         if is_checkmate:
@@ -181,7 +182,7 @@ class BoardPresenter:
         elif game_result == "0-1":
             output += "Black is victorious"
         elif game_result == "1/2-1/2":
-            if self.board_model.is_stalemate():
+            if self.board_model.board.is_stalemate():
                 output = "Stalemate"
             else:
                 output = "Draw"
