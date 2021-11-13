@@ -1,5 +1,6 @@
+import chess
 import chess.variant
-from chess import Move
+
 
 class BoardModel:
     def __init__(self, orientation="white", variant="Standard", fen=None) -> None:
@@ -10,7 +11,7 @@ class BoardModel:
         self.board_orientation = orientation
 
 
-    def make_move(self, move) -> Move:
+    def make_move(self, move) -> chess.Move:
         """Makes a move on the board"""
         return self.board.push_san(move)
 
@@ -42,14 +43,9 @@ class BoardModel:
         return square_numbers
 
 
-    def get_square_file(self, square):
-        """Returns the file of the passed in square"""
+    def get_square_file_index(self, square) -> int:
+        """Returns the file index of the passed in square"""
         return chess.square_file(square)
-
-
-    def get_square_rank(self, square):
-        """Returns the rank of the passed in square"""
-        return chess.square_rank(square)
 
 
     def get_file_labels(self) -> str:
@@ -67,23 +63,14 @@ class BoardModel:
         return file_labels
 
 
-    def get_rank_label(self, square) -> str:
-        """Returns the rank label as a string based on the square passed in"""
-        rank_label = ""
-        starting_index = False
+    def get_square_rank_index(self, square) -> int:
+        """Returns the rank index of the passed in square"""
+        return chess.square_rank(square)
 
-        file_index = chess.square_file(square)
-        rank_index = chess.square_rank(square)
 
-        if self.is_white_orientation() and file_index == 0:
-            starting_index = True
-        elif not self.is_white_orientation() and file_index == 7:
-            starting_index = True
-
-        if starting_index:
-            rank_label = chess.RANK_NAMES[rank_index] + " "
-
-        return rank_label
+    def get_rank_label(self, rank_index) -> str:
+        """Returns the rank label at the index passed in"""
+        return chess.RANK_NAMES[rank_index]
 
 
     def is_square_in_check(self, square) -> bool:

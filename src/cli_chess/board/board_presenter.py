@@ -79,12 +79,22 @@ class BoardPresenter:
         """Returns a HTML formatted string with
            the rank label at the square passed in.
         """
+        rank_label = ""
+        starting_index = False
+        file_index = self.board_model.get_square_file_index(square)
+        rank_index = self.board_model.get_square_rank_index(square)
+
+        if self.board_model.is_white_orientation() and file_index == 0:
+            starting_index = True
+        elif not self.board_model.is_white_orientation() and file_index == 7:
+            starting_index = True
+
         show_board_coordinates = config.get_board_boolean(board_keys.SHOW_BOARD_COORDINATES)
+
+        if starting_index and show_board_coordinates:
+            rank_label = " " + self.board_model.get_rank_label(rank_index)
+
         color = config.get_board_value(board_keys.RANK_LABEL_COLOR)
-
-        if show_board_coordinates:
-            rank_label = self.board_model.get_rank_label(square)
-
         rank_label = f"<style fg='{color}'>{rank_label}</style>"
         return rank_label
 
@@ -115,7 +125,7 @@ class BoardPresenter:
            line based on the board orientation and file index
         """
         output = ""
-        file_index = self.board_model.get_square_file(square)
+        file_index = self.board_model.get_square_file_index(square)
 
         if self.board_model.is_white_orientation() and file_index == 7:
             output = "\n"
@@ -144,8 +154,8 @@ class BoardPresenter:
            square based on configuration settings, last move, and check.
         """
         square_color = ""
-        file_index = self.board_model.get_square_file(square)
-        rank_index = self.board_model.get_square_rank(square)
+        file_index = self.board_model.get_square_file_index(square)
+        rank_index = self.board_model.get_square_rank_index(square)
 
         is_light_square = (file_index % 2) != (rank_index % 2)
         if is_light_square:
