@@ -137,14 +137,16 @@ class BoardPresenter:
 
     def get_piece_color(self, piece) -> str:
         """Returns a string with the color to display the
-           piece as based on configuration settings
+           piece based on configuration settings
         """
         piece_color = ""
-        base_is_white = piece.color == True
-        if base_is_white:
-            piece_color = config.get_board_value(board_keys.LIGHT_PIECE_COLOR)
-        else:
-            piece_color = config.get_board_value(board_keys.DARK_PIECE_COLOR)
+
+        if piece:
+            piece_is_light = piece.color == True
+            if piece_is_light:
+                piece_color = config.get_board_value(board_keys.LIGHT_PIECE_COLOR)
+            else:
+                piece_color = config.get_board_value(board_keys.DARK_PIECE_COLOR)
 
         return piece_color
 
@@ -183,7 +185,7 @@ class BoardPresenter:
         """Returns a string containing the result of the game"""
         game_result = self.board_model.board.result()
         is_checkmate = self.board_model.board.is_checkmate()
-        output = "Game over"
+        output = ""
 
         if is_checkmate:
             output = "Checkmate - "
@@ -196,5 +198,7 @@ class BoardPresenter:
                 output = "Stalemate"
             else:
                 output = "Draw"
+        elif game_result == "*":
+            output = "Draw"
 
         return output
