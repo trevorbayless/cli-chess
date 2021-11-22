@@ -1,5 +1,5 @@
 from cli_chess.ui.about import show_about
-from cli_chess.board import BoardModel, BoardPresenter
+from cli_chess.game.board import BoardModel, BoardPresenter
 from cli_chess.game import GameModel, GamePresenter
 from enum import Enum
 from prompt_toolkit import HTML
@@ -8,13 +8,14 @@ from prompt_toolkit.layout.layout import Layout
 from prompt_toolkit.layout.containers import Container, HSplit, VSplit
 from prompt_toolkit.application import get_app
 
-def play_online() -> None:
+
+def play_offline() -> None:
     board_model = BoardModel()
     game_model = GameModel()
     game_presenter = GamePresenter(game_model, board_model)
 
 
-def play_offline() -> None:
+def play_online() -> None:
     pass
 
 
@@ -26,11 +27,12 @@ class MainMenuOptions(Enum):
 
 
 menu_map = {
-    MainMenuOptions.PLAY_ONLINE: play_online,
     MainMenuOptions.PLAY_OFFLINE: play_offline,
+    MainMenuOptions.PLAY_ONLINE: play_online,
     MainMenuOptions.SETTINGS: None,
     MainMenuOptions.ABOUT: show_about
 }
+
 
 class MainMenu:
     """Defines the Main Menu"""
@@ -44,8 +46,8 @@ class MainMenu:
 
     def get_menu_options(self) -> list:
         """Return the main menu options"""
-        options = [(MainMenuOptions.PLAY_ONLINE, "Play online"),
-                   (MainMenuOptions.PLAY_OFFLINE, "Play offline"),
+        options = [(MainMenuOptions.PLAY_OFFLINE, "Play offline"),
+                   (MainMenuOptions.PLAY_ONLINE, "Play online"),
                    (MainMenuOptions.SETTINGS, "Manage settings"),
                    (MainMenuOptions.ABOUT, "About")]
         return options

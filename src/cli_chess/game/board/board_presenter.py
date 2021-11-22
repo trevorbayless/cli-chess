@@ -1,4 +1,4 @@
-from cli_chess.board import BoardModel, BoardView
+from . import BoardModel, BoardView
 from cli_chess import config
 
 board_keys = config.BoardKeys

@@ -1,5 +1,6 @@
-from cli_chess.board import BoardModel, BoardPresenter
-from cli_chess.game import GameModel, GameView
+from . import GameModel, GameView
+from .board import BoardModel, BoardPresenter
+
 
 class GamePresenter:
     def __init__(self, model : GameModel, board_model : BoardModel):

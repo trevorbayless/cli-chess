@@ -1,4 +1,4 @@
-from cli_chess.board import BoardView
+from .board import BoardView
 from prompt_toolkit import HTML, print_formatted_text as print
 from prompt_toolkit.layout.dimension import D
 from prompt_toolkit.widgets import Frame, TextArea

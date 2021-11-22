@@ -1,6 +1,6 @@
 import unittest
 import chess
-from cli_chess.board import BoardModel, BoardPresenter
+from cli_chess.game.board import BoardModel, BoardPresenter
 from cli_chess import config
 
 board_keys = config.BoardKeys
