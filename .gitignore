@@ -3,6 +3,7 @@ config.ini
 *.~
 *.spec
 *.egg-info
+*.pyc
 .venv/
 .vscode/
 venv/
