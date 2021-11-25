@@ -12,11 +12,6 @@ UNICODE_PIECE_SYMBOLS = {
     "p": "♟",
 }
 
-def get_piece_unicode_symbol(symbol) -> str:
-    """Returns the unicode symbol associated to the symbol passed in"""
-    return UNICODE_PIECE_SYMBOLS[symbol.lower()]
-
-
 class BoardPresenter:
     def __init__(self, model : BoardModel) -> None:
         self.board_model = model
@@ -55,23 +50,23 @@ class BoardPresenter:
             board_output += self.get_square_final_display(square)
             board_output += self.start_new_line(square)
 
-        board_output += self.get_file_labels() + "\n"
+        board_output += self.apply_file_labels()
         self.board_output = board_output
         self.board_view.update_board_output(self.board_output)
 
 
-    def get_file_labels(self) -> str:
+    def apply_file_labels(self) -> str:
         """Returns a HTML string containing the file labels
            depending on the rank index and configuration settings
         """
         file_labels = ""
         show_board_coordinates = config.get_board_boolean(board_keys.SHOW_BOARD_COORDINATES)
-        color = config.get_board_value(board_keys.FILE_LABEL_COLOR)
 
         if show_board_coordinates:
             file_labels = self.board_model.get_file_labels()
+            color = config.get_board_value(board_keys.FILE_LABEL_COLOR)
+            file_labels = f"<style fg='{color}'>  {file_labels}</style>"
 
-        file_labels = f"<style fg='{color}'>  {file_labels}</style>"
         return file_labels
 
 
@@ -93,15 +88,25 @@ class BoardPresenter:
 
         if starting_index and show_board_coordinates:
             rank_label = " " + self.board_model.get_rank_label(rank_index)
+            color = config.get_board_value(board_keys.RANK_LABEL_COLOR)
+            rank_label = f"<style fg='{color}'>{rank_label}</style>"
 
-        color = config.get_board_value(board_keys.RANK_LABEL_COLOR)
-        rank_label = f"<style fg='{color}'>{rank_label}</style>"
         return rank_label
 
 
+    def get_piece_unicode_symbol(self, symbol) -> str:
+        """Returns the unicode symbol associated to the symbol passed in"""
+        unicode_symbol = ""
+        symbol = symbol.lower()
+        if symbol in UNICODE_PIECE_SYMBOLS:
+            unicode_symbol = UNICODE_PIECE_SYMBOLS[symbol]
+
+        return unicode_symbol
+
+
     def get_square_final_display(self, square) -> str:
-        """Returns as a HTML string containing the final display for the passed in square.
-           This includes the square color, and piece within the square.
+        """Returns a HTML string containing the final display for the passed in
+           square. This includes the square color, and piece within the square.
         """
         piece = self.board_model.board.piece_at(square)
         square_color = self.get_square_display_color(square)
@@ -112,7 +117,7 @@ class BoardPresenter:
 
         if piece and not blindfold_chess:
             piece_color = self.get_piece_color(piece)
-            piece_character = get_piece_unicode_symbol(piece.symbol()) if use_unicode_pieces else piece.symbol()
+            piece_character = self.get_piece_unicode_symbol(piece.symbol()) if use_unicode_pieces else piece.symbol()
             square_output = f"<style fg='{piece_color}' bg='{square_color}'><b>{piece_character} </b></style>"
         else:
             square_output = f"<style bg='{square_color}'>  </style>"
@@ -156,11 +161,7 @@ class BoardPresenter:
            square based on configuration settings, last move, and check.
         """
         square_color = ""
-        file_index = self.board_model.get_square_file_index(square)
-        rank_index = self.board_model.get_square_rank_index(square)
-
-        is_light_square = (file_index % 2) != (rank_index % 2)
-        if is_light_square:
+        if self.board_model.is_light_square(square):
             square_color = config.get_board_value(board_keys.LIGHT_SQUARE_COLOR)
         else:
             square_color = config.get_board_value(board_keys.DARK_SQUARE_COLOR)

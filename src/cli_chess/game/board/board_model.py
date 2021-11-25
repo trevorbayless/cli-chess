@@ -83,6 +83,14 @@ class BoardModel:
         return False
 
 
+    def is_light_square(self, square) -> bool:
+        """Returns True if the square passed in is a light square"""
+        file_index = self.get_square_file_index(square)
+        rank_index = self.get_square_rank_index(square)
+
+        return (file_index % 2) != (rank_index % 2)
+
+
     def is_white_orientation(self) -> bool:
         """Returns True if the board orientation is set as white"""
         if self.board_orientation == "white":
