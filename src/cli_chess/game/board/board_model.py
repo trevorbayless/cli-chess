@@ -85,10 +85,13 @@ class BoardModel:
 
     def is_light_square(self, square) -> bool:
         """Returns True if the square passed in is a light square"""
-        file_index = self.get_square_file_index(square)
-        rank_index = self.get_square_rank_index(square)
+        if square in chess.SQUARES:
+            file_index = self.get_square_file_index(square)
+            rank_index = self.get_square_rank_index(square)
 
-        return (file_index % 2) != (rank_index % 2)
+            return (file_index % 2) != (rank_index % 2)
+        else:
+            raise(ValueError(f"Illegal square: {square}"))
 
 
     def is_white_orientation(self) -> bool:
