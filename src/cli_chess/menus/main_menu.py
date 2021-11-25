@@ -1,4 +1,4 @@
-from cli_chess.ui.about import show_about
+from cli_chess.dialogs.about import show_about
 from cli_chess.game.board import BoardModel, BoardPresenter
 from cli_chess.game import GameModel, GamePresenter
 from enum import Enum

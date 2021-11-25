@@ -1,13 +1,13 @@
 import argparse
 from importlib import metadata
-from cli_chess import start_app
+from cli_chess import run_app
 from cli_chess import common_utils
 from cli_chess import config
 
 def run() -> None:
     """Main entry point"""
     parse_args()
-    start_app()
+    run_app()
 
 
 def parse_args():
