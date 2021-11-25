@@ -103,6 +103,14 @@ class BoardModelTestCase(unittest.TestCase):
         self.assertFalse(model.is_square_in_check(model.board.king(model.board.turn)))
 
 
+    def test_is_light_square(self):
+        model = BoardModel()
+        self.assertFalse(model.is_light_square(chess.H8))
+        self.assertTrue(model.is_light_square(chess.A2))
+        with self.assertRaises(ValueError):
+            model.is_light_square(100)
+
+
     def test_is_white_orientation(self):
         model = BoardModel()
         self.assertTrue(model.is_white_orientation())
