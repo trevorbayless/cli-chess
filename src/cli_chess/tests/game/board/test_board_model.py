@@ -16,6 +16,18 @@ class BoardModelTestCase(unittest.TestCase):
             move = model.make_move("Qe6")
 
 
+    def test_get_move_stack(self):
+        pass
+
+
+    def test_get_initial_fen(self):
+        pass
+
+
+    def test_get_variant_name(self):
+        pass
+
+
     def test_set_board_orientation(self):
         model = BoardModel()
         self.assertEqual(model.get_board_orientation(), "white")

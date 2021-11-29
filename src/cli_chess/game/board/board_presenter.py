@@ -52,7 +52,7 @@ class BoardPresenter:
 
         board_output += self.apply_file_labels()
         self.board_output = board_output
-        self.board_view.update_board_output(self.board_output)
+        self.board_view.update(self.board_output)
 
 
     def apply_file_labels(self) -> str:

@@ -7,13 +7,29 @@ class BoardModel:
         if not fen:
             fen = chess.variant.find_variant(variant).starting_fen
 
-        self.board = chess.variant.find_variant(variant)(fen)
+        self.initial_fen = fen
+        self.board = chess.variant.find_variant(variant)(self.initial_fen)
         self.board_orientation = orientation
 
 
     def make_move(self, move) -> chess.Move:
         """Makes a move on the board"""
         return self.board.push_san(move)
+
+
+    def get_move_stack(self):
+        """Returns the boards move stack"""
+        return self.board.move_stack
+
+
+    def get_initial_fen(self) -> str:
+        """Returns a string holding the initial board fen"""
+        return self.initial_fen
+
+
+    def get_variant_name(self) -> str:
+        """Returns a string holding the board variant name"""
+        return self.board.uci_variant
 
 
     def set_board_orientation(self, orientation) -> None:

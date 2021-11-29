@@ -1,6 +1,5 @@
-from cli_chess.dialogs.about import show_about
-from cli_chess.game.board import BoardModel, BoardPresenter
 from cli_chess.game import GameModel, GamePresenter
+from cli_chess.dialogs.about import show_about
 from enum import Enum
 from prompt_toolkit import HTML
 from prompt_toolkit.widgets import Frame, Label, RadioList, Button, Box
@@ -10,9 +9,8 @@ from prompt_toolkit.application import get_app
 
 
 def play_offline() -> None:
-    board_model = BoardModel()
     game_model = GameModel()
-    game_presenter = GamePresenter(game_model, board_model)
+    game_presenter = GamePresenter(game_model)
 
 
 def play_online() -> None:
