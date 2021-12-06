@@ -1,16 +1,8 @@
 from . import BoardModel, BoardView
+from cli_chess.game.common import get_piece_unicode_symbol
 from cli_chess import config
 
 board_keys = config.BoardKeys
-
-UNICODE_PIECE_SYMBOLS = {
-    "r": "♜",
-    "n": "♞",
-    "b": "♝",
-    "q": "♛",
-    "k": "♚",
-    "p": "♟",
-}
 
 class BoardPresenter:
     def __init__(self, model : BoardModel) -> None:
@@ -94,16 +86,6 @@ class BoardPresenter:
         return rank_label
 
 
-    def get_piece_unicode_symbol(self, symbol) -> str:
-        """Returns the unicode symbol associated to the symbol passed in"""
-        unicode_symbol = ""
-        symbol = symbol.lower()
-        if symbol in UNICODE_PIECE_SYMBOLS:
-            unicode_symbol = UNICODE_PIECE_SYMBOLS[symbol]
-
-        return unicode_symbol
-
-
     def get_square_final_display(self, square) -> str:
         """Returns a HTML string containing the final display for the passed in
            square. This includes the square color, and piece within the square.
@@ -117,7 +99,7 @@ class BoardPresenter:
 
         if piece and not blindfold_chess:
             piece_color = self.get_piece_color(piece)
-            piece_character = self.get_piece_unicode_symbol(piece.symbol()) if use_unicode_pieces else piece.symbol()
+            piece_character = get_piece_unicode_symbol(piece.symbol()) if use_unicode_pieces else piece.symbol()
             square_output = f"<style fg='{piece_color}' bg='{square_color}'><b>{piece_character} </b></style>"
         else:
             square_output = f"<style bg='{square_color}'>  </style>"

@@ -1,7 +1,6 @@
 from cli_chess.game.board import BoardModel, BoardPresenter
-from cli_chess.game.board.board_presenter import UNICODE_PIECE_SYMBOLS
+from cli_chess.game.common import get_piece_unicode_symbol
 from cli_chess import config
-from string import ascii_lowercase
 import unittest
 import chess
 
@@ -91,20 +90,6 @@ class BoardPresenterTestCase(unittest.TestCase):
                 self.assertEqual(presenter.apply_rank_label(square), "")
 
 
-    def test_get_piece_unicode_symbol(self):
-        model = BoardModel()
-        presenter = BoardPresenter(model)
-
-        alphabet = list(ascii_lowercase)
-        for letter in alphabet:
-            if letter in UNICODE_PIECE_SYMBOLS:
-                self.assertEqual(presenter.get_piece_unicode_symbol(letter), UNICODE_PIECE_SYMBOLS[letter])
-                self.assertEqual(presenter.get_piece_unicode_symbol(letter.upper()), UNICODE_PIECE_SYMBOLS[letter])
-            else:
-                self.assertEqual(presenter.get_piece_unicode_symbol(letter), "")
-                self.assertEqual(presenter.get_piece_unicode_symbol(letter.upper()), "")
-
-
     def test_get_square_final_display(self):
         model = BoardModel()
         presenter = BoardPresenter(model)
@@ -149,7 +134,7 @@ class BoardPresenterTestCase(unittest.TestCase):
 
                 # Test unicode piece
                 config.set_board_value(board_keys.USE_UNICODE_PIECES, "yes")
-                piece_character = presenter.get_piece_unicode_symbol(piece.symbol())
+                piece_character = get_piece_unicode_symbol(piece.symbol())
                 expected_output = f"<style fg='{piece_color}' bg='{square_color}'><b>{piece_character} </b></style>"
                 self.assertEqual(presenter.get_square_final_display(square), expected_output)
             else:

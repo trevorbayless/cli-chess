@@ -1,5 +1,5 @@
 from cli_chess.game.board import BoardModel
-from chess import Move, Board, WHITE
+from chess import Move, Board, piece_symbol, WHITE, BLACK
 from typing import List
 
 class MoveListModel:
@@ -12,21 +12,18 @@ class MoveListModel:
                                      fen=self.board_model.get_initial_fen())
 
 
-    def get_san_move_list(self) -> List[str]:
-        """Returns the move list in standard notation"""
-        san_move_list = []
+    def get_move_list_data(self) -> List[dict]:
+        """Returns a list of dictionaries holding the move data"""
+        move_list_data = []
         for move in self.board_model.get_move_stack():
             if not move:
                 raise ValueError("Invalid move retrieved from move stack")
 
-            if self.board_copy.board.turn == WHITE:
-                san_move_list.append(f"{self.board_copy.board.san_and_push(move)}    ")
-            elif not san_move_list:
-                san_move_list.append(f"...{self.board_copy.board.san_and_push(move)}")
-                san_move_list.append("\n")
-            else:
-                san_move_list.append(self.board_copy.board.san_and_push(move))
-                san_move_list.append("\n")
+            color = WHITE if self.board_copy.board.turn == WHITE else BLACK
+            san_move = self.board_copy.board.san_and_push(move)
+            move_data = {'turn': color, 'move': san_move}
+
+            move_list_data.append(move_data)
 
         self.board_copy.board.reset()
-        return san_move_list
+        return move_list_data

@@ -1,4 +1,7 @@
 from . import MoveListView, MoveListModel
+from cli_chess.game.common import get_piece_unicode_symbol
+from cli_chess import config
+from chess import WHITE
 
 class MoveListPresenter:
     def __init__(self, model: MoveListModel):
@@ -6,18 +9,47 @@ class MoveListPresenter:
         self.move_list_view = MoveListView(self)
 
 
-    def get_view(self):
+    def get_view(self) -> MoveListView:
         """Return the move list view"""
         return self.move_list_view
+
+
+    def get_move_as_unicode(self, move) -> str:
+        """Returns the passed in SAN move to unicode display"""
+        output = ""
+        if move:
+            if len(move) > 2:  # Stops moves like "b4" from being converted incorrectly
+                piece_symbol = get_piece_unicode_symbol(move[0])
+                if piece_symbol:
+                    output = piece_symbol + move[1:]
+
+        if not output:
+            output = move
+        return output
 
 
     def format_move_list(self) -> str:
         """Returns the formatted move list as a string"""
         output = ""
-        move_list = self.move_list_model.get_san_move_list()
-        for move in move_list:
-            output += move
+        move_list_data = self.move_list_model.get_move_list_data()
+        use_unicode = config.get_board_boolean(config.BoardKeys.USE_UNICODE_PIECES)
 
+        for entry in move_list_data:
+            turn = entry['turn']
+            move = str(entry['move'])
+
+            if use_unicode:
+                move = self.get_move_as_unicode(move)
+
+            if turn == WHITE:
+                output += move.ljust(8)
+            elif not output:  # The list starts with a move from black
+                output += "...".ljust(8)
+                output += move
+                output += "\n"
+            else:
+                output += move
+                output += "\n"
         return output
 
 
