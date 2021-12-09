@@ -1,5 +1,5 @@
 from cli_chess.game.board import BoardModel
-from chess import Move, Board, piece_symbol, WHITE, BLACK
+from chess import Move, piece_symbol, WHITE, BLACK
 from typing import List
 
 class MoveListModel:
@@ -20,8 +20,17 @@ class MoveListModel:
                 raise ValueError("Invalid move retrieved from move stack")
 
             color = WHITE if self.board_copy.board.turn == WHITE else BLACK
+
+            piece_type = self.board_copy.board.piece_type_at(move.from_square)
+            symbol = piece_symbol(piece_type)
             san_move = self.board_copy.board.san_and_push(move)
-            move_data = {'turn': color, 'move': san_move}
+            promotion_symbol = None if move.promotion is None else piece_symbol(move.promotion)
+
+            move_data = {'turn': color,
+                         'move': san_move,
+                         'piece_type': piece_type,
+                         'piece_symbol': symbol,
+                         'promotion_symbol': promotion_symbol}
 
             move_list_data.append(move_data)
 
