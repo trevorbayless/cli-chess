@@ -2,18 +2,15 @@ from . import BoardModel, BoardView
 from cli_chess.game.common import get_piece_unicode_symbol
 from cli_chess import config
 
+
 board_keys = config.BoardKeys
+
 
 class BoardPresenter:
     def __init__(self, model : BoardModel) -> None:
-        self.board_model = model
-        self.board_view = BoardView(self)
+        self.model = model
+        self.view = BoardView(self)
         self.board_output = self.update_board()
-
-
-    def get_view(self):
-        """Return the board view"""
-        return self.board_view
 
 
     def make_move(self, move) -> str:
@@ -21,7 +18,7 @@ class BoardPresenter:
            as a string. Otherwise, raises a ValueError on an illegal move.
         """
         try:
-            move = self.board_model.make_move(move)
+            move = self.model.make_move(move)
 
             #TODO: Wrap this in a move push function?
             self.update_board()
@@ -36,7 +33,7 @@ class BoardPresenter:
            on orientation and sends it to the view for display
         """
         board_output = ""
-        board_squares = self.board_model.get_board_squares()
+        board_squares = self.model.get_board_squares()
         for square in board_squares:
             board_output += self.apply_rank_label(square)
             board_output += self.get_square_final_display(square)
@@ -44,7 +41,7 @@ class BoardPresenter:
 
         board_output += self.apply_file_labels()
         self.board_output = board_output
-        self.board_view.update(self.board_output)
+        self.view.update(self.board_output)
 
 
     def apply_file_labels(self) -> str:
@@ -55,7 +52,7 @@ class BoardPresenter:
         show_board_coordinates = config.get_board_boolean(board_keys.SHOW_BOARD_COORDINATES)
 
         if show_board_coordinates:
-            file_labels = self.board_model.get_file_labels()
+            file_labels = self.model.get_file_labels()
             color = config.get_board_value(board_keys.FILE_LABEL_COLOR)
             file_labels = f"<style fg='{color}'>  {file_labels}</style>"
 
@@ -68,18 +65,18 @@ class BoardPresenter:
         """
         rank_label = ""
         starting_index = False
-        file_index = self.board_model.get_square_file_index(square)
-        rank_index = self.board_model.get_square_rank_index(square)
+        file_index = self.model.get_square_file_index(square)
+        rank_index = self.model.get_square_rank_index(square)
 
-        if self.board_model.is_white_orientation() and file_index == 0:
+        if self.model.is_white_orientation() and file_index == 0:
             starting_index = True
-        elif not self.board_model.is_white_orientation() and file_index == 7:
+        elif not self.model.is_white_orientation() and file_index == 7:
             starting_index = True
 
         show_board_coordinates = config.get_board_boolean(board_keys.SHOW_BOARD_COORDINATES)
 
         if starting_index and show_board_coordinates:
-            rank_label = " " + self.board_model.get_rank_label(rank_index)
+            rank_label = " " + self.model.get_rank_label(rank_index)
             color = config.get_board_value(board_keys.RANK_LABEL_COLOR)
             rank_label = f"<style fg='{color}'>{rank_label}</style>"
 
@@ -90,7 +87,7 @@ class BoardPresenter:
         """Returns a HTML string containing the final display for the passed in
            square. This includes the square color, and piece within the square.
         """
-        piece = self.board_model.board.piece_at(square)
+        piece = self.model.board.piece_at(square)
         square_color = self.get_square_display_color(square)
         square_output = ""
 
@@ -112,11 +109,11 @@ class BoardPresenter:
            line based on the board orientation and file index
         """
         output = ""
-        file_index = self.board_model.get_square_file_index(square)
+        file_index = self.model.get_square_file_index(square)
 
-        if self.board_model.is_white_orientation() and file_index == 7:
+        if self.model.is_white_orientation() and file_index == 7:
             output = "\n"
-        elif not self.board_model.is_white_orientation() and file_index == 0:
+        elif not self.model.is_white_orientation() and file_index == 0:
             output = "\n"
 
         return output
@@ -143,7 +140,7 @@ class BoardPresenter:
            square based on configuration settings, last move, and check.
         """
         square_color = ""
-        if self.board_model.is_light_square(square):
+        if self.model.is_light_square(square):
             square_color = config.get_board_value(board_keys.LIGHT_SQUARE_COLOR)
         else:
             square_color = config.get_board_value(board_keys.DARK_SQUARE_COLOR)
@@ -151,14 +148,14 @@ class BoardPresenter:
         show_board_highlights = config.get_board_boolean(board_keys.SHOW_BOARD_HIGHLIGHTS)
         if show_board_highlights:
             try:
-                last_move = self.board_model.board.peek()
+                last_move = self.model.board.peek()
                 if square == last_move.to_square or square == last_move.from_square:
                     square_color = config.get_board_value(board_keys.LAST_MOVE_COLOR)
                     #TODO: Lighten last move color if on light square
             except:
                 pass
 
-            if self.board_model.is_square_in_check(square):
+            if self.model.is_square_in_check(square):
                 square_color = config.get_board_value(board_keys.IN_CHECK_COLOR)
 
         return square_color
@@ -166,8 +163,8 @@ class BoardPresenter:
 
     def game_result(self) -> str:
         """Returns a string containing the result of the game"""
-        game_result = self.board_model.board.result()
-        is_checkmate = self.board_model.board.is_checkmate()
+        game_result = self.model.board.result()
+        is_checkmate = self.model.board.is_checkmate()
         output = ""
 
         if is_checkmate:
@@ -177,7 +174,7 @@ class BoardPresenter:
         elif game_result == "0-1":
             output += "Black is victorious"
         elif game_result == "1/2-1/2":
-            if self.board_model.board.is_stalemate():
+            if self.model.board.is_stalemate():
                 output = "Stalemate"
             else:
                 output = "Draw"

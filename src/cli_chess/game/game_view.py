@@ -9,6 +9,7 @@ from prompt_toolkit.styles import Style
 from prompt_toolkit.application import get_app
 from prompt_toolkit.layout.layout import Layout
 
+
 class GameViewBase:
     def __init__(self, presenter, board_view, move_list_view):
         self.presenter = presenter

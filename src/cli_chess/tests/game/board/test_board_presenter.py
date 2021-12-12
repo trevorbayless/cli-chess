@@ -7,12 +7,6 @@ import chess
 board_keys = config.BoardKeys
 
 class BoardPresenterTestCase(unittest.TestCase):
-    def test_get_view(self):
-        model = BoardModel()
-        presenter = BoardPresenter(model)
-        self.assertEqual(presenter.get_view(), presenter.board_view)
-
-
     def test_make_move(self):
         model = BoardModel()
         presenter = BoardPresenter(model)

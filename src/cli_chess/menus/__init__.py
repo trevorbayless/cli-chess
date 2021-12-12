@@ -1,1 +1,1 @@
-from .main_menu import MainMenu
+from .main_menu.main_menu_presenter import MainMenuPresenter

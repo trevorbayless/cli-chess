@@ -2,6 +2,7 @@ from prompt_toolkit.layout.controls import FormattedTextControl
 from prompt_toolkit.layout.containers import Window
 from prompt_toolkit import HTML
 
+
 class BoardView:
     def __init__(self, presenter, initial_board="Initial board not set"):
         self.board_presenter = presenter
