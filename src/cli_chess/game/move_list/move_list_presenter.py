@@ -1,6 +1,6 @@
 from . import MoveListView, MoveListModel
 from cli_chess.game.common import get_piece_unicode_symbol
-from cli_chess import config
+from cli_chess.utils import config
 from chess import WHITE, PAWN
 
 

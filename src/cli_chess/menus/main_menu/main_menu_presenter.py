@@ -26,4 +26,3 @@ class MainMenuPresenter:
     def ok_handler(self) -> None:
         """Handler for the 'Ok' button"""
         menu_map[self.view.get_selected_option()]()
-

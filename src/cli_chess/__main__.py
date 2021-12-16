@@ -1,8 +1,7 @@
 import argparse
 from importlib import metadata
 from cli_chess import run_app
-from cli_chess import common_utils
-from cli_chess import config
+from cli_chess.utils import config, is_valid_lichess_token
 
 def run() -> None:
     """Main entry point"""
@@ -15,7 +14,7 @@ def parse_args():
     args = setup_argparse().parse_args()
 
     if args.api_token:
-        if common_utils.is_valid_lichess_token(args.api_token):
+        if is_valid_lichess_token(args.api_token):
             config.set_lichess_value(config.LichessKeys.API_TOKEN, args.api_token)
         else:
             return print(f"Invalid Lichess API Token: {args.api_token}")

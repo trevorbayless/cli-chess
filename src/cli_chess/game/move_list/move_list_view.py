@@ -22,7 +22,7 @@ class MoveListView:
 
 
     def update(self, output : str):
-        """Updates the mvoe list output with the passed in text"""
+        """Updates the move list output with the passed in text"""
         self.move_list_output.text = output
 
 
