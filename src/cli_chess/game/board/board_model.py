@@ -1,5 +1,6 @@
 import chess
 import chess.variant
+from cli_chess.utils import Event
 
 
 class BoardModel:
@@ -10,11 +11,20 @@ class BoardModel:
         self.initial_fen = fen
         self.board = chess.variant.find_variant(variant)(self.initial_fen)
         self.board_orientation = orientation
+        self.e_board_model_updated = Event()
 
 
-    def make_move(self, move) -> chess.Move:
-        """Makes a move on the board"""
-        return self.board.push_san(move)
+    def _board_model_updated(self) -> None:
+        """Used to notify listeners of board model updates"""
+        self.e_board_model_updated.notify()
+
+
+    def make_move(self, move) -> None:
+        """Attempts to make a move on the board.
+           Raises a ValueError on illegal moves.
+        """
+        self.board.push_san(move)
+        self._board_model_updated()
 
 
     def get_move_stack(self):

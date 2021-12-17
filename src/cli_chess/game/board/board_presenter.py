@@ -4,25 +4,20 @@ from cli_chess.utils import config
 
 board_keys = config.BoardKeys
 
-
 class BoardPresenter:
     def __init__(self, model : BoardModel) -> None:
         self.model = model
+        self.model.e_board_model_updated.add_listener(self.update_board)
         self.view = BoardView(self)
         self.board_output = self.update_board()
 
 
     def make_move(self, move) -> str:
-        """Make a move on the chess board. On a valid move, returns the move
-           as a string. Otherwise, raises a ValueError on an illegal move.
+        """Sends a move to the board model to attempt to make.
+           Raises a ValueError on illegal moves.
         """
         try:
-            move = self.model.make_move(move)
-
-            #TODO: Wrap this in a move push function?
-            self.update_board()
-            return move
-
+            self.model.make_move(move)
         except Exception:
             raise ValueError(f"Illegal move: {move}")
 

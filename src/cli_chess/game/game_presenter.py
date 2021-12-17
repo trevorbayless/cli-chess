@@ -25,4 +25,3 @@ class GamePresenter:
 
     def input_received(self, input):
         self.board_presenter.make_move(input)
-        self.move_list_presenter.update_move_list()

@@ -7,6 +7,7 @@ from chess import WHITE, PAWN
 class MoveListPresenter:
     def __init__(self, model: MoveListModel):
         self.model = model
+        self.model.e_move_list_model_updated.add_listener(self.update_move_list)
         self.view = MoveListView(self)
 
 

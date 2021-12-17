@@ -1,4 +1,5 @@
 from cli_chess.game.board import BoardModel
+from cli_chess.utils import Event
 from chess import Move, piece_symbol, WHITE, BLACK
 from typing import List
 
@@ -6,16 +7,25 @@ from typing import List
 class MoveListModel:
     def __init__(self, model: BoardModel) -> None:
         self.model = model
+        self.model.e_board_model_updated.add_listener(self.update_move_list_data)
 
+        self.move_list_data = []
         # The board copy is used to generate the move list output
         # by using the move stack of the actual game on the board copy
         self.board_copy = BoardModel(variant=self.model.get_variant_name(),
                                      fen=self.model.get_initial_fen())
+        self.e_move_list_model_updated = Event()
 
 
-    def get_move_list_data(self) -> List[dict]:
-        """Returns a list of dictionaries holding the move data"""
-        move_list_data = []
+    def _move_list_model_updated(self) -> None:
+        """Used to notify listeners of board model updates"""
+        self.e_move_list_model_updated.notify()
+
+
+    def update_move_list_data(self) -> None:
+        """Updates the move list data using moves from the move stack"""
+        self.move_list_data.clear()
+
         for move in self.model.get_move_stack():
             if not move:
                 raise ValueError("Invalid move retrieved from move stack")
@@ -34,7 +44,11 @@ class MoveListModel:
                          'piece_symbol': symbol,
                          'promotion_symbol': promotion_symbol}
 
-            move_list_data.append(move_data)
-
+            self.move_list_data.append(move_data)
         self.board_copy.board.reset()
-        return move_list_data
+        self._move_list_model_updated()
+
+
+    def get_move_list_data(self) -> List[dict]:
+        """Returns the move list data"""
+        return self.move_list_data
