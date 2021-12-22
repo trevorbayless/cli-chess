@@ -2,9 +2,9 @@ import os
 import berserk
 
 
-def is_unix_system():
-    """Returns True if on a unix system"""
-    return False if os.name == "nt" else True
+def is_windows_system():
+    """Returns True if on a Windows system"""
+    return True if os.name == "nt" else False
 
 
 def is_valid_lichess_token(api_token):

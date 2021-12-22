@@ -1,6 +1,6 @@
 from os import path
 import configparser
-from cli_chess import is_unix_system
+from cli_chess.utils import is_windows_system
 
 #TODO: Handle exceptions
 #TODO: Handle new config options on updates (do not overwrite full config)
@@ -104,7 +104,7 @@ class Config(BaseConfig):
         self.set_board_value(Config.BoardKeys.DARK_SQUARE_COLOR, "darkslateblue")
         self.set_board_value(Config.BoardKeys.IN_CHECK_COLOR, "red")
         self.set_board_value(Config.BoardKeys.BLINDFOLD_CHESS, "no")
-        self.set_board_value(Config.BoardKeys.USE_UNICODE_PIECES, "yes" if is_unix_system() else "no")
+        self.set_board_value(Config.BoardKeys.USE_UNICODE_PIECES, "no" if is_windows_system() else "yes")
         self.set_board_value(Config.BoardKeys.LIGHT_PIECE_COLOR, "white")
         self.set_board_value(Config.BoardKeys.DARK_PIECE_COLOR, "black")
 
