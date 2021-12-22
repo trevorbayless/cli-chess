@@ -1,6 +1,6 @@
 from cli_chess.game.board import BoardModel, BoardPresenter
 from cli_chess.game.common import get_piece_unicode_symbol
-from cli_chess import config
+from cli_chess.utils import config
 import unittest
 import chess
 
@@ -11,9 +11,11 @@ class BoardPresenterTestCase(unittest.TestCase):
         model = BoardModel()
         presenter = BoardPresenter(model)
 
-        # Valid move
-        move = presenter.make_move("e4")
-        self.assertEqual(model.board.peek(), move)
+        # Test a valid move
+        try:
+            presenter.make_move("e4")
+        except Exception as e:
+            self.fail(f"test_make_move raised {e}")
 
         # Illegal move
         with self.assertRaises(ValueError):
