@@ -105,3 +105,14 @@ class MaterialDifferenceModel:
             difference = abs(self.score[WHITE] - self.score[BLACK])
             self.score[color_ahead] = difference
             self.score[not color_ahead] = 0
+
+
+    def get_material_difference(self, color: Color) -> Dict[PieceType, int]:
+        """Returns the material difference dictionary for passed in color"""
+        return self.material_difference[color]
+
+
+    def get_score(self, color: Color) -> int:
+        """Returns the material difference
+           score for the passed in color"""
+        return self.score[color]
