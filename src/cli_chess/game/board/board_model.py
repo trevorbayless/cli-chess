@@ -11,6 +11,7 @@ class BoardModel:
         self.initial_fen = fen
         self.board = chess.variant.find_variant(variant)(self.initial_fen)
         self.board_orientation = orientation
+
         self.e_board_model_updated = Event()
 
 

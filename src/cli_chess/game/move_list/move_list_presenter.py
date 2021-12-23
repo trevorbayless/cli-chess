@@ -1,20 +1,20 @@
-from . import MoveListView, MoveListModel
+from . import MoveListModel, MoveListView
 from cli_chess.game.common import get_piece_unicode_symbol
 from cli_chess.utils import config
 from chess import WHITE, PAWN
 
 
 class MoveListPresenter:
-    def __init__(self, model: MoveListModel):
-        self.model = model
-        self.model.e_move_list_model_updated.add_listener(self.update_move_list)
+    def __init__(self, move_list_model: MoveListModel):
+        self.move_list_model = move_list_model
+        self.move_list_model.e_move_list_model_updated.add_listener(self.update_move_list)
         self.view = MoveListView(self)
 
 
     def format_move_list(self) -> str:
         """Returns the formatted move list as a string"""
         output = ""
-        move_list_data = self.model.get_move_list_data()
+        move_list_data = self.move_list_model.get_move_list_data()
         use_unicode = config.get_board_boolean(config.BoardKeys.USE_UNICODE_PIECES)
 
         for entry in move_list_data:

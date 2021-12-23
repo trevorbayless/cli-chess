@@ -1,4 +1,4 @@
-from prompt_toolkit.layout.containers import Window, ConditionalContainer
+from prompt_toolkit.layout.containers import ConditionalContainer
 from prompt_toolkit.layout.dimension import D
 from prompt_toolkit.widgets import TextArea
 from prompt_toolkit import HTML
@@ -16,8 +16,6 @@ class MoveListView:
                                          focus_on_click=True,
                                          scrollbar=True,
                                          read_only=True)
-
-        #self.container = Window(self.move_list_output, width = 20)
         self.container = ConditionalContainer(self.move_list_output, True)
 
 
@@ -26,6 +24,6 @@ class MoveListView:
         self.move_list_output.text = output
 
 
-    def __pt_container__(self) -> Window:
+    def __pt_container__(self) -> ConditionalContainer:
         """Returns the move_list container"""
         return self.container

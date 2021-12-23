@@ -7,13 +7,14 @@ from typing import List
 class MoveListModel:
     def __init__(self, model: BoardModel) -> None:
         self.model = model
-        self.model.e_board_model_updated.add_listener(self.update_move_list_data)
+        self.model.e_board_model_updated.add_listener(self._update)
 
-        self.move_list_data = []
         # The board copy is used to generate the move list output
         # by using the move stack of the actual game on the board copy
         self.board_copy = BoardModel(variant=self.model.get_variant_name(),
                                      fen=self.model.get_initial_fen())
+        self.move_list_data = []
+
         self.e_move_list_model_updated = Event()
 
 
@@ -22,8 +23,8 @@ class MoveListModel:
         self.e_move_list_model_updated.notify()
 
 
-    def update_move_list_data(self) -> None:
-        """Updates the move list data using moves from the move stack"""
+    def _update(self) -> None:
+        """Updates the move list data using the latest move stack"""
         self.move_list_data.clear()
 
         for move in self.model.get_move_stack():
