@@ -1,4 +1,4 @@
-from os import path
+from os import path, makedirs
 import configparser
 from cli_chess.utils import is_windows_system
 
@@ -7,27 +7,41 @@ from cli_chess.utils import is_windows_system
 #TODO: Add a "force_update" to pull new values if they have been changed during runtime
 
 class BaseConfig:
-    def __init__(self, full_filename) -> None:
+    def __init__(self, filename) -> None:
         """Default base class constructor"""
-        self.filename = full_filename
+        self.file_path = self.generate_file_path()
+        self.full_filename = self.file_path + filename
         self.parser = configparser.ConfigParser()
+
+
+    def generate_file_path(self) -> str:
+        """Generated the filepath to use based on OS"""
+        file_path = "$HOME/.config/cli-chess/"
+
+        if is_windows_system():
+            file_path = "$APPDATA/cli-chess/"
+
+        return path.expandvars(file_path)
 
 
     def read_config(self) -> bool:
         """Attempts to read the configuration file (True if file exists)"""
-        self.parser.read(self.filename)
+        self.parser.read(self.full_filename)
         return self.config_exists()
 
 
     def write_config(self) -> None:
         """Writes to the configuration file"""
-        with open(self.filename, 'w') as config_file:
+        if not path.exists(self.file_path):
+            makedirs(self.file_path)
+
+        with open(self.full_filename, 'w') as config_file:
             self.parser.write(config_file)
 
 
     def config_exists(self) -> None:
         """Returns True if the configuration file exists"""
-        return path.isfile(self.filename)
+        return path.isfile(self.full_filename)
 
 
     def add_section(self, section) -> None:
@@ -45,7 +59,7 @@ class BaseConfig:
 
     def get_config_filename(self) -> str:
         """Returns the configuration filename"""
-        return self.filename
+        return self.full_filename
 
 
     def get_key_value(self, section, key, lowercase=True) -> str:
@@ -75,11 +89,11 @@ class BaseConfig:
 
 class Config(BaseConfig):
     """Class to create, update, and read from the configuration file"""
-    def __init__(self, full_filename) -> None:
+    def __init__(self, filename) -> None:
         """Default constructor. Calls the base class to read the configuration
            file. If the file does not exist, the default configuration is created.
         """
-        super().__init__(full_filename)
+        super().__init__(filename)
         if not super().read_config():
             self.create_default_config()
 
