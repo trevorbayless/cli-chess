@@ -5,14 +5,14 @@ from typing import List
 
 
 class MoveListModel:
-    def __init__(self, model: BoardModel) -> None:
-        self.model = model
-        self.model.e_board_model_updated.add_listener(self._update)
+    def __init__(self, board_model: BoardModel) -> None:
+        self.board_model = board_model
+        self.board_model.e_board_model_updated.add_listener(self._update)
 
         # The board copy is used to generate the move list output
         # by using the move stack of the actual game on the board copy
-        self.board_copy = BoardModel(variant=self.model.get_variant_name(),
-                                     fen=self.model.get_initial_fen())
+        self.board_copy = BoardModel(variant=self.board_model.get_variant_name(),
+                                     fen=self.board_model.get_initial_fen())
         self.move_list_data = []
 
         self.e_move_list_model_updated = Event()
@@ -27,9 +27,9 @@ class MoveListModel:
         """Updates the move list data using the latest move stack"""
         self.move_list_data.clear()
 
-        for move in self.model.get_move_stack():
+        for move in self.board_model.get_move_stack():
             if not move:
-                raise ValueError("Invalid move retrieved from move stack")
+                raise ValueError(f"Invalid move ({move}) retrieved from move stack")
 
             color = WHITE if self.board_copy.board.turn == WHITE else BLACK
 
@@ -46,6 +46,7 @@ class MoveListModel:
                          'promotion_symbol': promotion_symbol}
 
             self.move_list_data.append(move_data)
+
         self.board_copy.board.reset()
         self._move_list_model_updated()
 
