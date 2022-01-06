@@ -2,11 +2,12 @@ import argparse
 from importlib import metadata
 from cli_chess import run_app
 from cli_chess.utils import config, is_valid_lichess_token
+import asyncio
 
 def run() -> None:
     """Main entry point"""
     parse_args()
-    run_app()
+    asyncio.get_event_loop().run_until_complete(run_app())
 
 
 def parse_args():
