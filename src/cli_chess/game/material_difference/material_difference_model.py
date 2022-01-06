@@ -15,6 +15,7 @@ PIECE_VALUE: Dict[PieceType, int] = {
     PAWN: 1,
 }
 
+
 class MaterialDifferenceModel:
     def __init__(self, board_model: BoardModel):
         self.board_model = board_model
@@ -23,6 +24,7 @@ class MaterialDifferenceModel:
         self.piece_count: Dict[Color, Dict[PieceType, int]] = self.empty_count()
         self.material_difference: Dict[Color, Dict[PieceType, int]] = self.empty_count()
         self.score: Dict[Color, int] = self.empty_score()
+
         self.e_material_difference_model_updated = Event()
 
 

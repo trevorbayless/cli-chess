@@ -1,33 +1,27 @@
-from cli_chess.game.material_difference import material_difference_presenter
 from . import GameModel, GameView
-from .board import BoardModel, BoardPresenter
-from .move_list import MoveListModel, MoveListPresenter
-from .material_difference import MaterialDifferenceModel, MaterialDifferencePresenter
+from .game_model import OfflineGameModel
+from .board import BoardPresenter
+from .move_list import MoveListPresenter
+from .material_difference import MaterialDifferencePresenter
+from cli_chess.game.offline.engine import EnginePresenter
 from chess import WHITE, BLACK
+import asyncio
 
 
 def play_offline() -> None:
-    game_model = GameModel()
-    game_presenter = GamePresenter(game_model)
+    game_model = OfflineGameModel()
+    game_presenter = OfflineGamePresenter(game_model)
 
 
 class GamePresenter:
-    def __init__(self, model: GameModel):
-        # Create the board
-        self.board_model = BoardModel()
-        self.board_presenter = BoardPresenter(self.board_model)
+    def __init__(self, game_model: GameModel):
+        self.game_model = game_model
 
-        # Create the move list
-        self.move_list_model = MoveListModel(self.board_model)
-        self.move_list_presenter = MoveListPresenter(self.move_list_model)
+        self.board_presenter = BoardPresenter(self.game_model.board_model)
+        self.move_list_presenter = MoveListPresenter(self.game_model.move_list_model)
+        self.material_diff_presenter_white = MaterialDifferencePresenter(self.game_model.material_diff_model, WHITE)
+        self.material_diff_presenter_black = MaterialDifferencePresenter(self.game_model.material_diff_model, BLACK)
 
-        # Create material difference
-        self.material_diff_model = MaterialDifferenceModel(self.board_model)
-        self.material_diff_presenter_white = MaterialDifferencePresenter(self.material_diff_model, WHITE)
-        self.material_diff_presenter_black = MaterialDifferencePresenter(self.material_diff_model, BLACK)
-
-        # Setup for this game
-        self.game_model = model
         self.game_view = GameView(self, self.board_presenter.view,
                                         self.move_list_presenter.view,
                                         self.material_diff_presenter_white.view,
@@ -35,4 +29,25 @@ class GamePresenter:
 
 
     def input_received(self, input):
-        self.board_presenter.make_move(input)
+        #TODO: Determine if this is a move, or other type of input
+        self.make_move(input)
+
+
+    def make_move(self, move):
+        self.board_presenter.make_move(move)
+
+
+class OfflineGamePresenter(GamePresenter):
+    def __init__(self, game_model: OfflineGameModel):
+        super().__init__(game_model)
+        self.engine_presenter = EnginePresenter(game_model.engine_model)
+
+
+    def input_received(self, input):
+        super().input_received(input)
+        asyncio.create_task(self.make_engine_move())
+
+
+    async def make_engine_move(self):
+        engine_move = await self.engine_presenter.get_best_move()
+        self.make_move(str(engine_move.move))

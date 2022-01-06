@@ -103,6 +103,7 @@ class Config(BaseConfig):
         if not super().config_exists() or overwrite:
             self.create_board_section()
             self.create_ui_section()
+            self.create_engine_section()
             self.create_lichess_section()
 
 
@@ -159,6 +160,22 @@ class Config(BaseConfig):
         return super().get_key_boolean_value(Config.Sections.UI, key)
 
 
+    def create_engine_section(self) -> None:
+        """Creates the default 'ENGINE' section in the config file"""
+        super().add_section(Config.Sections.ENGINE)
+        self.set_engine_value(Config.EngineKeys.ENGINE_PATH, "")
+
+
+    def set_engine_value(self, key, value) -> None:
+        """Modify (or add) a keys value at the 'LICHESS' section at the passed in key"""
+        super().set_key_value(Config.Sections.ENGINE, key, value)
+
+
+    def get_engine_value(self, key, lowercase=True) -> str:
+        """Returns a value from the 'LICHESS' section at the passed in key"""
+        return super().get_key_value(Config.Sections.ENGINE, key, lowercase)
+
+
     def create_lichess_section(self) -> None:
         """Creates the default 'LICHESS' section in the config file"""
         super().add_section(Config.Sections.LICHESS)
@@ -185,6 +202,7 @@ class Config(BaseConfig):
         """Holds the section names"""
         BOARD = "board"
         UI = "ui"
+        ENGINE = "engine"
         LICHESS = "lichess"
 
 
@@ -207,6 +225,11 @@ class Config(BaseConfig):
     class UiKeys:
         """Holds the name of keys in the UI section"""
         ZEN_MODE = "zen_mode" # simple ui
+
+
+    class EngineKeys:
+        """Holds the name of keys in the ENGINE section"""
+        ENGINE_PATH = "engine_path"
 
 
     class LichessKeys:
