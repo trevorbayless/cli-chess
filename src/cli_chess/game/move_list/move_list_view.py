@@ -5,8 +5,8 @@ from prompt_toolkit import HTML
 
 
 class MoveListView:
-    def __init__(self, presenter, initial_output="No moves..."):
-        self.presenter = presenter
+    def __init__(self, move_list_presenter, initial_output: str):
+        self.move_list_presenter = move_list_presenter
         self.move_list_output = TextArea(text=initial_output,
                                          width=D(min=1, max=20),
                                          height=D(min=1, max=4),

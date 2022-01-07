@@ -4,13 +4,13 @@ from prompt_toolkit import HTML
 
 
 class BoardView:
-    def __init__(self, presenter, initial_board="Initial board not set"):
-        self.board_presenter = presenter
+    def __init__(self, board_presenter, initial_board: str):
+        self.board_presenter = board_presenter
         self.board_output = FormattedTextControl(HTML(initial_board))
         self.container = Window(self.board_output, width = 20)
 
 
-    def update(self, board_output : str):
+    def update(self, board_output: str):
         """Updates the board output with the passed in text"""
         self.board_output.text = HTML(board_output)
 

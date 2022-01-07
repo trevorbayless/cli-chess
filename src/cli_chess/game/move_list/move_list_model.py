@@ -7,7 +7,7 @@ from typing import List
 class MoveListModel:
     def __init__(self, board_model: BoardModel) -> None:
         self.board_model = board_model
-        self.board_model.e_board_model_updated.add_listener(self._update)
+        self.board_model.e_board_model_updated.add_listener(self.update)
 
         # The board copy is used to generate the move list output
         # by using the move stack of the actual game on the board copy
@@ -16,14 +16,15 @@ class MoveListModel:
         self.move_list_data = []
 
         self.e_move_list_model_updated = Event()
+        self.update()
 
 
     def _move_list_model_updated(self) -> None:
-        """Used to notify listeners of board model updates"""
+        """Notifies listeners of move list model updates"""
         self.e_move_list_model_updated.notify()
 
 
-    def _update(self) -> None:
+    def update(self) -> None:
         """Updates the move list data using the latest move stack"""
         self.move_list_data.clear()
 

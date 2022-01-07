@@ -1,6 +1,7 @@
 import chess
 import chess.variant
 from cli_chess.utils import Event
+from typing import List
 
 
 class BoardModel:
@@ -16,7 +17,7 @@ class BoardModel:
 
 
     def _board_model_updated(self) -> None:
-        """Used to notify listeners of board model updates"""
+        """Notifies listeners of board model updates"""
         self.e_board_model_updated.notify()
 
 
@@ -24,11 +25,16 @@ class BoardModel:
         """Attempts to make a move on the board.
            Raises a ValueError on illegal moves.
         """
-        self.board.push_san(move)
-        self._board_model_updated()
+        try:
+            self.board.push_san(move)
+            self._board_model_updated()
+        except Exception as e:
+            #TODO: Look at other exceptions that can be raised
+            raise e
+            #raise ValueError(f"Illegal move: {move}")
 
 
-    def get_move_stack(self):
+    def get_move_stack(self) -> List[chess.Move]:
         """Returns the boards move stack"""
         return self.board.move_stack
 

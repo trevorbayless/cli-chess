@@ -4,9 +4,9 @@ from prompt_toolkit.widgets import TextArea
 
 
 class MaterialDifferenceView:
-    def __init__(self, presenter):
-        self.presenter = presenter
-        self.difference_output = TextArea(text="",
+    def __init__(self, material_diff_presenter, initial_diff: str):
+        self.material_diff_presenter = material_diff_presenter
+        self.difference_output = TextArea(text=initial_diff,
                                           width=D(min=1, max=20),
                                           height=D(min=1, max=1),
                                           read_only=True,

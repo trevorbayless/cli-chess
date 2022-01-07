@@ -7,8 +7,14 @@ from chess import WHITE, PAWN
 class MoveListPresenter:
     def __init__(self, move_list_model: MoveListModel):
         self.move_list_model = move_list_model
-        self.move_list_model.e_move_list_model_updated.add_listener(self.update_move_list)
-        self.view = MoveListView(self)
+        self.view = MoveListView(self, self.format_move_list())
+
+        self.move_list_model.e_move_list_model_updated.add_listener(self.update)
+
+
+    def update(self) -> None:
+        """Update the move list output"""
+        self.view.update(self.format_move_list())
 
 
     def format_move_list(self) -> str:
@@ -33,7 +39,7 @@ class MoveListPresenter:
             else:
                 output += move
                 output += "\n"
-        return output
+        return output if output else "No moves..."
 
 
     def get_move_as_unicode(self, move_data: dict) -> str:
@@ -55,8 +61,3 @@ class MoveListPresenter:
         if not output:
             output = move
         return output
-
-
-    def update_move_list(self):
-        """Update the move list output"""
-        self.view.update(self.format_move_list())

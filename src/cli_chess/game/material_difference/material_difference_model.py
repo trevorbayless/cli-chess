@@ -26,10 +26,11 @@ class MaterialDifferenceModel:
         self.score: Dict[Color, int] = self.empty_score()
 
         self.e_material_difference_model_updated = Event()
+        self.update()
 
 
     def _material_difference_model_updated(self) -> None:
-        """Used to notify listeners of material difference model updates"""
+        """Notifies listeners of material difference model updates"""
         self.e_material_difference_model_updated.notify()
 
 

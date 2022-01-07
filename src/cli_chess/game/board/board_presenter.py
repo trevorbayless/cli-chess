@@ -8,9 +8,14 @@ board_keys = config.BoardKeys
 class BoardPresenter:
     def __init__(self, board_model: BoardModel) -> None:
         self.board_model = board_model
-        self.board_model.e_board_model_updated.add_listener(self.update_board)
-        self.view = BoardView(self)
-        self.board_output = self.update_board()
+        self.view = BoardView(self, self.build_board_output())
+
+        self.board_model.e_board_model_updated.add_listener(self.update)
+
+
+    def update(self) -> None:
+        """Updates the board output"""
+        self.view.update(self.build_board_output())
 
 
     def make_move(self, move) -> str:
@@ -24,9 +29,9 @@ class BoardPresenter:
             raise e
 
 
-    def update_board(self):
-        """Updates the board output (top left to bottom right) based
-           on orientation and sends it to the view for display
+    def build_board_output(self) -> str:
+        """Builds the board output (top left to bottom right) based
+           on orientation. Returns a string containing the board.
         """
         board_output = ""
         board_squares = self.board_model.get_board_squares()
@@ -36,8 +41,7 @@ class BoardPresenter:
             board_output += self.start_new_line(square)
 
         board_output += self.apply_file_labels()
-        self.board_output = board_output
-        self.view.update(self.board_output)
+        return board_output
 
 
     def apply_file_labels(self) -> str:
