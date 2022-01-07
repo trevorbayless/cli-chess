@@ -42,14 +42,14 @@ class MoveListPresenter:
         move = move_data['move']
         if move:
             output = move
-            if move_data['piece_type'] != PAWN:
+            if move_data['piece_type'] != PAWN and not move_data['is_castling']:
                 piece_unicode_symbol = get_piece_unicode_symbol(move_data['piece_symbol'])
                 output = piece_unicode_symbol + move[1:]
 
-            if move_data['promotion_symbol']: # This is a promotion move
+            if move_data['is_promotion']:
                 eq_index = output.find("=")
                 if eq_index != -1:
-                    promotion_unicode_symbol = get_piece_unicode_symbol(move_data['promotion_symbol'])
+                    promotion_unicode_symbol = get_piece_unicode_symbol(output[eq_index+1])
                     output = output[:eq_index+1] + promotion_unicode_symbol + output[eq_index+2:]
 
         if not output:

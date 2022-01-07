@@ -36,14 +36,16 @@ class MoveListModel:
             # Use the drop piece type if this is a crazyhouse drop
             piece_type = self.board_copy.board.piece_type_at(move.from_square) if move.drop is None else move.drop
             symbol = piece_symbol(piece_type)
+            is_castling = self.board_copy.board.is_castling(move)
             san_move = self.board_copy.board.san_and_push(move)
-            promotion_symbol = None if move.promotion is None else piece_symbol(move.promotion)
 
             move_data = {'turn': color,
                          'move': san_move,
                          'piece_type': piece_type,
                          'piece_symbol': symbol,
-                         'promotion_symbol': promotion_symbol}
+                         'is_castling': is_castling,
+                         'is_promotion': True if move.promotion else False
+            }
 
             self.move_list_data.append(move_data)
 
