@@ -6,6 +6,7 @@ config.ini
 *.pyc
 .venv/
 .vscode/
+.idea/
 venv/
 dist/
 build/
