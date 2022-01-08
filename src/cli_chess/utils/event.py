@@ -10,12 +10,10 @@ class Event:
         """Adds the passed in listener to the notification list"""
         self.listeners.append(listener)
 
-
     def remove_listener(self, listener: Callable) -> None:
         """Removes the passed in listener from the notification list"""
         if listener is self.listeners:
             self.listeners.remove(listener)
-
 
     def __iadd__(self, listener: Callable) -> Event:
         """Allows using += to add a listener"""
@@ -26,7 +24,6 @@ class Event:
         """Allows using -= to remove a listener"""
         self.remove_listener(listener)
         return self
-
 
     def notify(self, *args: str, **kwargs: int) -> None:
         """Notifies all listeners of the event"""

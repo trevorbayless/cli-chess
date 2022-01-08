@@ -1,6 +1,6 @@
 from cli_chess.game.board import BoardModel
 from cli_chess.utils import Event
-from chess import Move, piece_symbol, WHITE, BLACK
+from chess import piece_symbol, WHITE, BLACK
 from typing import List
 
 
@@ -18,11 +18,9 @@ class MoveListModel:
         self.e_move_list_model_updated = Event()
         self.update()
 
-
     def _move_list_model_updated(self) -> None:
         """Notifies listeners of move list model updates"""
         self.e_move_list_model_updated.notify()
-
 
     def update(self) -> None:
         """Updates the move list data using the latest move stack"""
@@ -36,7 +34,11 @@ class MoveListModel:
             color = WHITE if self.move_replay_board.board.turn == WHITE else BLACK
 
             # Use the drop piece type if this is a crazyhouse drop
-            piece_type = self.move_replay_board.board.piece_type_at(move.from_square) if move.drop is None else move.drop
+            if move.drop is None:
+                piece_type = self.move_replay_board.board.piece_type_at(move.from_square)
+            else:
+                piece_type = move.drop
+
             symbol = piece_symbol(piece_type)
             is_castling = self.move_replay_board.board.is_castling(move)
             san_move = self.move_replay_board.board.san_and_push(move)
@@ -47,12 +49,11 @@ class MoveListModel:
                          'piece_symbol': symbol,
                          'is_castling': is_castling,
                          'is_promotion': True if move.promotion else False
-            }
+                         }
 
             self.move_list_data.append(move_data)
 
         self._move_list_model_updated()
-
 
     def get_move_list_data(self) -> List[dict]:
         """Returns the move list data"""

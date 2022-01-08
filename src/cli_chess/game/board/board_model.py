@@ -5,7 +5,7 @@ import chess
 
 
 class BoardModel:
-    def __init__(self, orientation: str="white", variant: str="Standard", fen: str="") -> None:
+    def __init__(self, orientation: str = "white", variant: str = "Standard", fen: str = "") -> None:
         if not fen:
             fen = chess.variant.find_variant(variant).starting_fen
 
@@ -15,13 +15,11 @@ class BoardModel:
 
         self.e_board_model_updated = Event()
 
-
     def _board_model_updated(self) -> None:
         """Notifies listeners of board model updates"""
         self.e_board_model_updated.notify()
 
-
-    def make_move(self, move: chess.Move) -> None:
+    def make_move(self, move: str) -> None:
         """Attempts to make a move on the board.
            Raises a ValueError on illegal moves.
         """
@@ -29,35 +27,28 @@ class BoardModel:
             self.board.push_san(move)
             self._board_model_updated()
         except Exception as e:
-            #TODO: Look at other exceptions that can be raised
+            # TODO: Look at other exceptions that can be raised
             raise e
-            #raise ValueError(f"Illegal move: {move}")
-
 
     def get_move_stack(self) -> List[chess.Move]:
         """Returns the boards move stack"""
         return self.board.move_stack
 
-
     def get_initial_fen(self) -> str:
         """Returns a string holding the initial board fen"""
         return self.initial_fen
-
 
     def get_variant_name(self) -> str:
         """Returns a string holding the board variant name"""
         return self.board.uci_variant
 
-
     def set_board_orientation(self, orientation: str) -> None:
         """Sets the board orientation"""
         self.board_orientation = orientation
 
-
     def get_board_orientation(self) -> str:
         """Returns the board orientation as a string"""
         return self.board_orientation
-
 
     def get_board_squares(self) -> list:
         """Returns the boards square numbers as a list based current orientation"""
@@ -75,11 +66,9 @@ class BoardModel:
 
         return square_numbers
 
-
     def get_square_file_index(self, square: chess.Square) -> int:
         """Returns the file index of the passed in square"""
         return chess.square_file(square)
-
 
     def get_file_labels(self) -> str:
         """Returns a string containing the file
@@ -95,26 +84,22 @@ class BoardModel:
 
         return file_labels
 
-
     def get_square_rank_index(self, square: chess.Square) -> int:
         """Returns the rank index of the passed in square"""
         return chess.square_rank(square)
-
 
     def get_rank_label(self, rank_index: int) -> str:
         """Returns the rank label at the index passed in"""
         return chess.RANK_NAMES[rank_index]
 
-
     def is_square_in_check(self, square: chess.Square) -> bool:
-        """Returns True if a king who's turn it is
-           is in check as the passed in square
+        """Returns True if a king whose turn it is
+           is in check at the passed in square
         """
         king_square = self.board.king(self.board.turn)
         if square == king_square and self.board.is_check():
             return True
         return False
-
 
     def is_light_square(self, square: chess.Square) -> bool:
         """Returns True if the square passed in is a light square"""
@@ -125,7 +110,6 @@ class BoardModel:
             return (file_index % 2) != (rank_index % 2)
         else:
             raise(ValueError(f"Illegal square: {square}"))
-
 
     def is_white_orientation(self) -> bool:
         """Returns True if the board orientation is set as white"""

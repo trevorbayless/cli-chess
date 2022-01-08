@@ -15,19 +15,20 @@ def is_valid_lichess_token(api_token: str) -> bool:
     try:
         if client.get():
             return True
-    except Exception:
+    except berserk.exceptions.ResponseError as e:
+        print(e.message)
         return False
 
 
 def handle_api_exceptions(e: Exception) -> None:
-    #TODO: Handle specific exceptions
+    # TODO: Handle specific exceptions
     if e.message != "":
         if "No such token" in e.message:
             print("!! Invalid Lichess API token")
         elif "No such game" in e.message:
             print("Invalid game-id")
         elif "Not your game" in e.message:
-            print("!! This game is not assocaited with your account")
+            print("!! This game is not associated with your account")
         else:
             print(e)
     else:

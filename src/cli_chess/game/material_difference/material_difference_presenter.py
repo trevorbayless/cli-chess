@@ -12,11 +12,9 @@ class MaterialDifferencePresenter:
 
         self.material_diff_model.e_material_difference_model_updated.add_listener(self.update)
 
-
     def update(self) -> None:
         """Updates the material difference"""
         self.view.update(self.format_diff_output())
-
 
     def format_diff_output(self) -> str:
         """Returns the formatted difference as a string"""

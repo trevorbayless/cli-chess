@@ -1,5 +1,6 @@
 import threading
 
+
 class GameIncomingEvent(threading.Thread):
     def __init__(self, client):
         super().__init__()
@@ -7,8 +8,7 @@ class GameIncomingEvent(threading.Thread):
         self.my_games = []
         self.my_challenge_queue = []
 
-
-    def run(self):
+    def run(self) -> None:
         for event in self.client.board.stream_incoming_events():
             if event['type'] == 'gameStart':  # Start of a game
                 self.my_games.append(event)
@@ -21,7 +21,7 @@ class GameIncomingEvent(threading.Thread):
                 pass
                 # When an initial challenge is created online, it's created as a "open" challenge.
                 # Anyone that is given the URL can join that challenge. destUser == None
-                #self.my_challenge_queue.append(event)
+                # self.my_challenge_queue.append(event)
                 # {'challenge': {'challenger': {'id': 'trevorbayless',
                 #                               'name': 'trevorbayless',
                 #                               'online': True,
@@ -49,7 +49,6 @@ class GameIncomingEvent(threading.Thread):
                 #                            'name': 'Standard',
                 #                            'short': 'Std'}},
                 #  'type': 'challenge'}
-
 
             elif event['type'] == 'challengeCanceled':  # A challenge was cancelled
                 pass
@@ -80,7 +79,6 @@ class GameIncomingEvent(threading.Thread):
                 #                            'name': 'Crazyhouse',
                 #                            'short': 'Crazy'}},
                 #  'type': 'challengeCanceled'}
-
 
             elif event['type'] == 'challengeDeclined':  # A challenge was declined
                 pass
@@ -114,13 +112,11 @@ class GameIncomingEvent(threading.Thread):
                 #                            'short': 'Std'}},
                 #  'type': 'challengeDeclined'}
 
-
-    def get_active_games(self):
+    def get_active_games(self) -> list:
         """Returns a list of games in progress for this account"""
         return self.my_games
 
-
-    def get_challenge_queue(self):
+    def get_challenge_queue(self) -> list:
         """Returns a list of challenges sent to this account
            which are waiting for a response
         """

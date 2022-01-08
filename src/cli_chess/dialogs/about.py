@@ -1,8 +1,9 @@
-from prompt_toolkit.widgets import TextArea, Label, Button, Dialog
+from prompt_toolkit.widgets import Label, Button, Dialog
 from prompt_toolkit.layout.containers import HSplit
 from prompt_toolkit.layout.layout import Layout
 from prompt_toolkit.layout.dimension import D
 from prompt_toolkit.application import get_app
+
 
 def show_about() -> None:
     """Sets the app layout to the Main Menu"""
@@ -17,7 +18,6 @@ class About:
         self.dialog = self.create_dialog()
         self.previous_screen = get_app().layout
 
-
     def create_dialog(self) -> Dialog:
         """Create the Dialog wrapper"""
         return Dialog(title="cli-chess",
@@ -30,13 +30,11 @@ class About:
                       buttons=[self.ok_button],
                       with_background=True)
 
-
-    def ok_handler(self) -> str:
+    def ok_handler(self) -> None:
         """Handler for the 'Ok' button.
            Returns to the previous container
         """
         get_app().layout = self.previous_screen
-
 
     def __pt_container__(self) -> Dialog:
         """Returns the dialog for container use"""

@@ -10,4 +10,4 @@ async def run_app() -> None:
                       mouse_support=True,
                       full_screen=True)
 
-    result = await app.run_async()
+    await app.run_async()

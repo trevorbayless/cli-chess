@@ -6,6 +6,7 @@ import chess
 
 board_keys = config.BoardKeys
 
+
 class BoardPresenterTestCase(unittest.TestCase):
     def test_make_move(self):
         model = BoardModel()
@@ -19,8 +20,7 @@ class BoardPresenterTestCase(unittest.TestCase):
 
         # Illegal move
         with self.assertRaises(ValueError):
-            move = presenter.make_move("O-O-O")
-
+            presenter.make_move("O-O-O")
 
     def test_apply_file_labels(self):
         model = BoardModel()
@@ -43,7 +43,6 @@ class BoardPresenterTestCase(unittest.TestCase):
         model.set_board_orientation("black")
         expected_output = "<style fg='gray'>  h g f e d c b a </style>"
         self.assertEqual(presenter.apply_file_labels(), expected_output)
-
 
     def test_apply_rank_label(self):
         model = BoardModel()
@@ -85,7 +84,6 @@ class BoardPresenterTestCase(unittest.TestCase):
             else:
                 self.assertEqual(presenter.apply_rank_label(square), "")
 
-
     def test_get_square_final_display(self):
         model = BoardModel()
         presenter = BoardPresenter(model)
@@ -118,7 +116,7 @@ class BoardPresenterTestCase(unittest.TestCase):
 
                 # Test blindfold mode
                 config.set_board_value(board_keys.BLINDFOLD_CHESS, "yes")
-                expected_output = expected_output = f"<style bg='{square_color}'>  </style>"
+                expected_output = f"<style bg='{square_color}'>  </style>"
                 self.assertEqual(presenter.get_square_final_display(square), expected_output)
                 config.set_board_value(board_keys.BLINDFOLD_CHESS, "no")
 
@@ -135,9 +133,8 @@ class BoardPresenterTestCase(unittest.TestCase):
                 self.assertEqual(presenter.get_square_final_display(square), expected_output)
             else:
                 # Test square that doesn't have a piece on it
-                expected_output = expected_output = f"<style bg='{square_color}'>  </style>"
+                expected_output = f"<style bg='{square_color}'>  </style>"
                 self.assertEqual(presenter.get_square_final_display(square), expected_output)
-
 
     def test_start_new_line(self):
         model = BoardModel()
@@ -167,7 +164,6 @@ class BoardPresenterTestCase(unittest.TestCase):
             else:
                 self.assertEqual(output, "")
 
-
     def test_get_piece_color(self):
         model = BoardModel()
         presenter = BoardPresenter(model)
@@ -190,7 +186,6 @@ class BoardPresenterTestCase(unittest.TestCase):
             piece = model.board.piece_at(square)
             self.assertEqual(presenter.get_piece_color(piece), "")
 
-
     def test_get_square_display_color(self):
         model = BoardModel()
         presenter = BoardPresenter(model)
@@ -206,7 +201,7 @@ class BoardPresenterTestCase(unittest.TestCase):
         last_move_color = config.get_board_value(board_keys.LAST_MOVE_COLOR)
 
         model.board.set_fen("rnbqkbnr/ppppp1pp/8/5p2/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 1")
-        model.make_move("Qh5") # black in check
+        model.make_move("Qh5")  # black in check
         last_move = model.board.peek()
 
         for square in range(chess.A1, len(chess.SQUARES)):
@@ -220,7 +215,6 @@ class BoardPresenterTestCase(unittest.TestCase):
                 self.assertEqual(presenter.get_square_display_color(square), dark_square_color)
             else:
                 self.fail("Unexpected case caught")
-
 
     def test_game_result(self):
         model = BoardModel()

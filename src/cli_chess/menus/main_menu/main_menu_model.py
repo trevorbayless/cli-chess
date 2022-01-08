@@ -13,7 +13,6 @@ class MainMenuModel:
                         (MainMenuOptions.SETTINGS, "Manage settings"),
                         (MainMenuOptions.ABOUT, "About")]
 
-
     def get_menu_options(self) -> list:
         """Returns the list of main menu options"""
         return self.options

@@ -11,8 +11,7 @@ class EngineModel:
             'think_time': 1.0
         }
 
-
-    async def get_best_move(self) -> str:
+    async def get_best_move(self) -> chess.engine.PlayResult:
         if self.engine_settings['engine_path']:
             _, engine = await chess.engine.popen_uci(self.engine_settings['engine_path'])
 

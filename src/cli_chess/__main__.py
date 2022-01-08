@@ -4,13 +4,14 @@ from cli_chess import run_app
 from cli_chess.utils import config, is_valid_lichess_token
 import asyncio
 
+
 def run() -> None:
     """Main entry point"""
     parse_args()
     asyncio.get_event_loop().run_until_complete(run_app())
 
 
-def parse_args():
+def parse_args() -> None:
     """Parse the arguments passed in at """
     args = setup_argparse().parse_args()
 
@@ -18,7 +19,8 @@ def parse_args():
         if is_valid_lichess_token(args.api_token):
             config.set_lichess_value(config.LichessKeys.API_TOKEN, args.api_token)
         else:
-            return print(f"Invalid Lichess API Token: {args.api_token}")
+            print(f"Invalid Lichess API Token: {args.api_token}")
+            exit(1)
 
 
 def setup_argparse() -> argparse.ArgumentParser:

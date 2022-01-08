@@ -17,18 +17,14 @@ class BoardModelTestCase(unittest.TestCase):
         with self.assertRaises(ValueError):
             model.make_move("Qe6")
 
-
     def test_get_move_stack(self):
         pass
-
 
     def test_get_initial_fen(self):
         pass
 
-
     def test_get_variant_name(self):
         pass
-
 
     def test_set_board_orientation(self):
         model = BoardModel()
@@ -36,7 +32,6 @@ class BoardModelTestCase(unittest.TestCase):
 
         model.set_board_orientation("black")
         self.assertEqual(model.get_board_orientation(), "black")
-
 
     def test_get_board_orientation(self):
         model = BoardModel("black")
@@ -47,7 +42,6 @@ class BoardModelTestCase(unittest.TestCase):
 
         model.set_board_orientation("black")
         self.assertEqual(model.get_board_orientation(), "black")
-
 
     def test_get_board_squares(self):
         model = BoardModel()
@@ -67,7 +61,6 @@ class BoardModelTestCase(unittest.TestCase):
         model.set_board_orientation("black")
         self.assertEqual(model.get_board_squares(), square_numbers[::-1])
 
-
     def test_get_square_file_index(self):
         model = BoardModel()
         file_index = model.get_square_file_index(chess.E4)
@@ -75,7 +68,6 @@ class BoardModelTestCase(unittest.TestCase):
 
         file_index = model.get_square_file_index(chess.G6)
         self.assertEqual(file_index, 6)
-
 
     def test_get_file_labels(self):
         model = BoardModel()
@@ -86,7 +78,6 @@ class BoardModelTestCase(unittest.TestCase):
         file_labels = model.get_file_labels()
         self.assertEqual(file_labels, "h g f e d c b a ")
 
-
     def test_get_square_rank_index(self):
         model = BoardModel()
         rank_index = model.get_square_rank_index(chess.E4)
@@ -94,7 +85,6 @@ class BoardModelTestCase(unittest.TestCase):
 
         rank_index = model.get_square_rank_index(chess.G6)
         self.assertEqual(rank_index, 5)
-
 
     def test_get_rank_label(self):
         model = BoardModel()
@@ -106,7 +96,6 @@ class BoardModelTestCase(unittest.TestCase):
         rank_label = model.get_rank_label(rank_index)
         self.assertEqual(rank_label, "8")
 
-
     def test_is_square_in_check(self):
         in_check_fen = "8/8/8/8/6K1/8/8/4Q1k1 b - - 21 61"
         model = BoardModel(fen=in_check_fen)
@@ -116,14 +105,12 @@ class BoardModelTestCase(unittest.TestCase):
         model.board.set_fen(not_in_check_fen)
         self.assertFalse(model.is_square_in_check(model.board.king(model.board.turn)))
 
-
     def test_is_light_square(self):
         model = BoardModel()
         self.assertFalse(model.is_light_square(chess.H8))
         self.assertTrue(model.is_light_square(chess.A2))
         with self.assertRaises(ValueError):
             model.is_light_square(100)
-
 
     def test_is_white_orientation(self):
         model = BoardModel()

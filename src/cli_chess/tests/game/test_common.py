@@ -2,6 +2,7 @@ from cli_chess.game.common import *
 from string import ascii_lowercase
 import unittest
 
+
 class CommonTestCase(unittest.TestCase):
     def test_get_piece_unicode_symbol(self):
         alphabet = list(ascii_lowercase)

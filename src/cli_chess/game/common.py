@@ -7,6 +7,7 @@ UNICODE_PIECE_SYMBOLS = {
     "p": "♟",
 }
 
+
 def get_piece_unicode_symbol(symbol: str) -> str:
     """Returns the unicode symbol associated to the symbol passed in"""
     unicode_symbol = ""

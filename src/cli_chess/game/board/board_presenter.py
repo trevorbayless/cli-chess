@@ -1,7 +1,7 @@
 from . import BoardModel, BoardView
 from cli_chess.game.common import get_piece_unicode_symbol
 from cli_chess.utils import config
-from chess import Move, Piece, Square
+from chess import Piece, Square
 
 board_keys = config.BoardKeys
 
@@ -13,22 +13,19 @@ class BoardPresenter:
 
         self.board_model.e_board_model_updated.add_listener(self.update)
 
-
     def update(self) -> None:
         """Updates the board output"""
         self.view.update(self.build_board_output())
 
-
-    def make_move(self, move: Move) -> str:
+    def make_move(self, move: str) -> None:
         """Sends a move to the board model to attempt to make.
            Raises an exception on invalid moves
         """
         try:
             self.board_model.make_move(move)
         except Exception as e:
-            #TODO: Handle specific exceptions (Invalid move, ambiguous, etc )
+            # TODO: Handle specific exceptions (Invalid move, ambiguous, etc )
             raise e
-
 
     def build_board_output(self) -> str:
         """Builds the board output (top left to bottom right) based
@@ -44,7 +41,6 @@ class BoardPresenter:
         board_output += self.apply_file_labels()
         return board_output
 
-
     def apply_file_labels(self) -> str:
         """Returns a HTML string containing the file labels
            depending on the rank index and configuration settings
@@ -58,7 +54,6 @@ class BoardPresenter:
             file_labels = f"<style fg='{color}'>  {file_labels}</style>"
 
         return file_labels
-
 
     def apply_rank_label(self, square: Square) -> str:
         """Returns a HTML formatted string with
@@ -83,14 +78,12 @@ class BoardPresenter:
 
         return rank_label
 
-
     def get_square_final_display(self, square: Square) -> str:
         """Returns a HTML string containing the final display for the passed in
            square. This includes the square color, and piece within the square.
         """
         piece = self.board_model.board.piece_at(square)
         square_color = self.get_square_display_color(square)
-        square_output = ""
 
         blindfold_chess = config.get_board_boolean(board_keys.BLINDFOLD_CHESS)
         use_unicode_pieces = config.get_board_boolean(board_keys.USE_UNICODE_PIECES)
@@ -103,7 +96,6 @@ class BoardPresenter:
             square_output = f"<style bg='{square_color}'>  </style>"
 
         return square_output
-
 
     def start_new_line(self, square: Square) -> str:
         """Returns a new line if the board output needs to start on a new
@@ -119,7 +111,6 @@ class BoardPresenter:
 
         return output
 
-
     def get_piece_color(self, piece: Piece) -> str:
         """Returns a string with the color to display the
            piece based on configuration settings
@@ -127,7 +118,7 @@ class BoardPresenter:
         piece_color = ""
 
         if piece:
-            piece_is_light = piece.color == True
+            piece_is_light = True if piece.color else False
             if piece_is_light:
                 piece_color = config.get_board_value(board_keys.LIGHT_PIECE_COLOR)
             else:
@@ -135,12 +126,10 @@ class BoardPresenter:
 
         return piece_color
 
-
     def get_square_display_color(self, square) -> str:
         """Returns a string with the color to display the
            square based on configuration settings, last move, and check.
         """
-        square_color = ""
         if self.board_model.is_light_square(square):
             square_color = config.get_board_value(board_keys.LIGHT_SQUARE_COLOR)
         else:
@@ -152,15 +141,14 @@ class BoardPresenter:
                 last_move = self.board_model.board.peek()
                 if square == last_move.to_square or square == last_move.from_square:
                     square_color = config.get_board_value(board_keys.LAST_MOVE_COLOR)
-                    #TODO: Lighten last move color if on light square
-            except:
+                    # TODO: Lighten last move color if on light square
+            except IndexError:
                 pass
 
             if self.board_model.is_square_in_check(square):
                 square_color = config.get_board_value(board_keys.IN_CHECK_COLOR)
 
         return square_color
-
 
     def game_result(self) -> str:
         """Returns a string containing the result of the game"""

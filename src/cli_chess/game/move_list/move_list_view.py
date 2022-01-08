@@ -2,7 +2,6 @@ from __future__ import annotations
 from prompt_toolkit.layout.containers import ConditionalContainer
 from prompt_toolkit.layout.dimension import D
 from prompt_toolkit.widgets import TextArea
-from prompt_toolkit import HTML
 
 
 class MoveListView:
@@ -19,11 +18,9 @@ class MoveListView:
                                          read_only=True)
         self.container = ConditionalContainer(self.move_list_output, True)
 
-
-    def update(self, output : str):
+    def update(self, output: str):
         """Updates the move list output with the passed in text"""
         self.move_list_output.text = output
-
 
     def __pt_container__(self) -> ConditionalContainer:
         """Returns the move_list container"""

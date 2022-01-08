@@ -17,11 +17,9 @@ class MainMenuPresenter:
         self.model = MainMenuModel()
         self.view = MainMenuView(self)
 
-
     def get_menu_options(self) -> list:
         """Return the main menu options"""
         return self.model.get_menu_options()
-
 
     def ok_handler(self) -> None:
         """Handler for the 'Ok' button"""

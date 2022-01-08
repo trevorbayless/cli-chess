@@ -11,11 +11,9 @@ class MoveListPresenter:
 
         self.move_list_model.e_move_list_model_updated.add_listener(self.update)
 
-
     def update(self) -> None:
         """Update the move list output"""
         self.view.update(self.format_move_list())
-
 
     def format_move_list(self) -> str:
         """Returns the formatted move list as a string"""
@@ -40,7 +38,6 @@ class MoveListPresenter:
                 output += move
                 output += "\n"
         return output if output else "No moves..."
-
 
     def get_move_as_unicode(self, move_data: dict) -> str:
         """Returns the passed in SAN move to unicode display"""

@@ -3,8 +3,8 @@ from .game_model import OfflineGameModel
 from .board import BoardPresenter
 from .move_list import MoveListPresenter
 from .material_difference import MaterialDifferencePresenter
-from cli_chess.game.offline.engine import EnginePresenter
-from chess import Move, WHITE, BLACK
+from .offline.engine import EnginePresenter
+from chess import WHITE, BLACK
 import asyncio
 
 
@@ -22,18 +22,17 @@ class GamePresenter:
         self.material_diff_presenter_white = MaterialDifferencePresenter(self.game_model.material_diff_model, WHITE)
         self.material_diff_presenter_black = MaterialDifferencePresenter(self.game_model.material_diff_model, BLACK)
 
-        self.game_view = GameView(self, self.board_presenter.view,
-                                        self.move_list_presenter.view,
-                                        self.material_diff_presenter_white.view,
-                                        self.material_diff_presenter_black.view)
-
+        self.game_view = GameView(self,
+                                  self.board_presenter.view,
+                                  self.move_list_presenter.view,
+                                  self.material_diff_presenter_white.view,
+                                  self.material_diff_presenter_black.view)
 
     def input_received(self, input: str) -> None:
-        #TODO: Determine if this is a move, or other type of input
+        # TODO: Determine if this is a move, or other type of input
         self.make_move(input)
 
-
-    def make_move(self, move: Move) -> None:
+    def make_move(self, move: str) -> None:
         self.board_presenter.make_move(move)
 
 
@@ -42,12 +41,10 @@ class OfflineGamePresenter(GamePresenter):
         super().__init__(game_model)
         self.engine_presenter = EnginePresenter(game_model.engine_model)
 
-
     def input_received(self, input) -> None:
         super().input_received(input)
         asyncio.create_task(self.make_engine_move())
 
-
     async def make_engine_move(self) -> None:
         engine_move = await self.engine_presenter.get_best_move()
-        self.make_move(str(engine_move.move))
+        self.make_move(engine_move.move.uci())
