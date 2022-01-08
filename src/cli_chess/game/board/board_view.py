@@ -1,10 +1,11 @@
+from __future__ import annotations
 from prompt_toolkit.layout.controls import FormattedTextControl
 from prompt_toolkit.layout.containers import Window
 from prompt_toolkit import HTML
 
 
 class BoardView:
-    def __init__(self, board_presenter, initial_board: str):
+    def __init__(self, board_presenter: BoardPresenter, initial_board: str):
         self.board_presenter = board_presenter
         self.board_output = FormattedTextControl(HTML(initial_board))
         self.container = Window(self.board_output, width = 20)

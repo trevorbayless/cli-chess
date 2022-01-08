@@ -4,7 +4,7 @@ from .board import BoardPresenter
 from .move_list import MoveListPresenter
 from .material_difference import MaterialDifferencePresenter
 from cli_chess.game.offline.engine import EnginePresenter
-from chess import WHITE, BLACK
+from chess import Move, WHITE, BLACK
 import asyncio
 
 
@@ -28,12 +28,12 @@ class GamePresenter:
                                         self.material_diff_presenter_black.view)
 
 
-    def input_received(self, input):
+    def input_received(self, input: str) -> None:
         #TODO: Determine if this is a move, or other type of input
         self.make_move(input)
 
 
-    def make_move(self, move):
+    def make_move(self, move: Move) -> None:
         self.board_presenter.make_move(move)
 
 
@@ -43,11 +43,11 @@ class OfflineGamePresenter(GamePresenter):
         self.engine_presenter = EnginePresenter(game_model.engine_model)
 
 
-    def input_received(self, input):
+    def input_received(self, input) -> None:
         super().input_received(input)
         asyncio.create_task(self.make_engine_move())
 
 
-    async def make_engine_move(self):
+    async def make_engine_move(self) -> None:
         engine_move = await self.engine_presenter.get_best_move()
         self.make_move(str(engine_move.move))

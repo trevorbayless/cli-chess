@@ -2,12 +2,12 @@ import os
 import berserk
 
 
-def is_windows_system():
+def is_windows_system() -> bool:
     """Returns True if on a Windows system"""
     return True if os.name == "nt" else False
 
 
-def is_valid_lichess_token(api_token):
+def is_valid_lichess_token(api_token: str) -> bool:
     """Returns True if the api token passed in is valid"""
     session = berserk.TokenSession(api_token)
     client = berserk.clients.Account(session)
@@ -19,7 +19,7 @@ def is_valid_lichess_token(api_token):
         return False
 
 
-def handle_api_exceptions(e):
+def handle_api_exceptions(e: Exception) -> None:
     #TODO: Handle specific exceptions
     if e.message != "":
         if "No such token" in e.message:

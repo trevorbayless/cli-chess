@@ -1,11 +1,11 @@
-import chess
-import chess.variant
 from cli_chess.utils import Event
 from typing import List
+import chess.variant
+import chess
 
 
 class BoardModel:
-    def __init__(self, orientation="white", variant="Standard", fen=None) -> None:
+    def __init__(self, orientation: str="white", variant: str="Standard", fen: str="") -> None:
         if not fen:
             fen = chess.variant.find_variant(variant).starting_fen
 
@@ -21,7 +21,7 @@ class BoardModel:
         self.e_board_model_updated.notify()
 
 
-    def make_move(self, move) -> None:
+    def make_move(self, move: chess.Move) -> None:
         """Attempts to make a move on the board.
            Raises a ValueError on illegal moves.
         """
@@ -49,7 +49,7 @@ class BoardModel:
         return self.board.uci_variant
 
 
-    def set_board_orientation(self, orientation) -> None:
+    def set_board_orientation(self, orientation: str) -> None:
         """Sets the board orientation"""
         self.board_orientation = orientation
 
@@ -76,7 +76,7 @@ class BoardModel:
         return square_numbers
 
 
-    def get_square_file_index(self, square) -> int:
+    def get_square_file_index(self, square: chess.Square) -> int:
         """Returns the file index of the passed in square"""
         return chess.square_file(square)
 
@@ -96,17 +96,17 @@ class BoardModel:
         return file_labels
 
 
-    def get_square_rank_index(self, square) -> int:
+    def get_square_rank_index(self, square: chess.Square) -> int:
         """Returns the rank index of the passed in square"""
         return chess.square_rank(square)
 
 
-    def get_rank_label(self, rank_index) -> str:
+    def get_rank_label(self, rank_index: int) -> str:
         """Returns the rank label at the index passed in"""
         return chess.RANK_NAMES[rank_index]
 
 
-    def is_square_in_check(self, square) -> bool:
+    def is_square_in_check(self, square: chess.Square) -> bool:
         """Returns True if a king who's turn it is
            is in check as the passed in square
         """
@@ -116,7 +116,7 @@ class BoardModel:
         return False
 
 
-    def is_light_square(self, square) -> bool:
+    def is_light_square(self, square: chess.Square) -> bool:
         """Returns True if the square passed in is a light square"""
         if square in chess.SQUARES:
             file_index = self.get_square_file_index(square)

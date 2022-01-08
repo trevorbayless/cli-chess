@@ -1,3 +1,4 @@
+from __future__ import annotations
 from prompt_toolkit import HTML
 from prompt_toolkit.widgets import Frame, Label, RadioList, Button, Box
 from prompt_toolkit.layout.layout import Layout
@@ -6,7 +7,7 @@ from prompt_toolkit.application import get_app
 
 
 class MainMenuView:
-    def __init__(self, presenter):
+    def __init__(self, presenter: MainMenuPresenter):
         self.presenter = presenter
         self.menu_list = RadioList(self.presenter.get_menu_options())
         self.ok_button = Button(text="Ok", handler=self.presenter.ok_handler)
@@ -24,7 +25,7 @@ class MainMenuView:
                             VSplit([self.ok_button, self.quit_button])])))
 
 
-    def get_selected_option(self):
+    def get_selected_option(self) -> str:
         """Returns the currently selected value"""
         return self.menu_list.current_value
 

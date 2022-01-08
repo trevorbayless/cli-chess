@@ -1,6 +1,7 @@
 from . import BoardModel, BoardView
 from cli_chess.game.common import get_piece_unicode_symbol
 from cli_chess.utils import config
+from chess import Move, Piece, Square
 
 board_keys = config.BoardKeys
 
@@ -18,7 +19,7 @@ class BoardPresenter:
         self.view.update(self.build_board_output())
 
 
-    def make_move(self, move) -> str:
+    def make_move(self, move: Move) -> str:
         """Sends a move to the board model to attempt to make.
            Raises an exception on invalid moves
         """
@@ -59,7 +60,7 @@ class BoardPresenter:
         return file_labels
 
 
-    def apply_rank_label(self, square) -> str:
+    def apply_rank_label(self, square: Square) -> str:
         """Returns a HTML formatted string with
            the rank label at the square passed in.
         """
@@ -83,7 +84,7 @@ class BoardPresenter:
         return rank_label
 
 
-    def get_square_final_display(self, square) -> str:
+    def get_square_final_display(self, square: Square) -> str:
         """Returns a HTML string containing the final display for the passed in
            square. This includes the square color, and piece within the square.
         """
@@ -104,7 +105,7 @@ class BoardPresenter:
         return square_output
 
 
-    def start_new_line(self, square) -> str:
+    def start_new_line(self, square: Square) -> str:
         """Returns a new line if the board output needs to start on a new
            line based on the board orientation and file index
         """
@@ -119,7 +120,7 @@ class BoardPresenter:
         return output
 
 
-    def get_piece_color(self, piece) -> str:
+    def get_piece_color(self, piece: Piece) -> str:
         """Returns a string with the color to display the
            piece based on configuration settings
         """

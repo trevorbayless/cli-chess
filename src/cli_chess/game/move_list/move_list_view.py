@@ -1,3 +1,4 @@
+from __future__ import annotations
 from prompt_toolkit.layout.containers import ConditionalContainer
 from prompt_toolkit.layout.dimension import D
 from prompt_toolkit.widgets import TextArea
@@ -5,7 +6,7 @@ from prompt_toolkit import HTML
 
 
 class MoveListView:
-    def __init__(self, move_list_presenter, initial_output: str):
+    def __init__(self, move_list_presenter: MoveListPresenter, initial_output: str):
         self.move_list_presenter = move_list_presenter
         self.move_list_output = TextArea(text=initial_output,
                                          width=D(min=1, max=20),

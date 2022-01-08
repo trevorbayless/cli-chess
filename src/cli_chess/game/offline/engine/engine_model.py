@@ -12,7 +12,7 @@ class EngineModel:
         }
 
 
-    async def get_best_move(self):
+    async def get_best_move(self) -> str:
         if self.engine_settings['engine_path']:
             _, engine = await chess.engine.popen_uci(self.engine_settings['engine_path'])
 

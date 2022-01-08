@@ -7,7 +7,7 @@ from cli_chess.utils import is_windows_system
 #TODO: Add a "force_update" to pull new values if they have been changed during runtime
 
 class BaseConfig:
-    def __init__(self, filename) -> None:
+    def __init__(self, filename: str) -> None:
         """Default base class constructor"""
         self.file_path = self.generate_file_path()
         self.full_filename = self.file_path + filename
@@ -44,13 +44,13 @@ class BaseConfig:
         return path.isfile(self.full_filename)
 
 
-    def add_section(self, section) -> None:
+    def add_section(self, section: str) -> None:
         """Add a section to the configuration file"""
         self.parser[section] = {}
         self.write_config()
 
 
-    def set_key_value(self, section, key, value) -> None:
+    def set_key_value(self, section: str, key: str, value: str) -> None:
         """Set (or add) a key/value to a section in the configuration file"""
         #TODO: Raise error if section does not exist
         self.parser[section][key] = value
@@ -62,7 +62,7 @@ class BaseConfig:
         return self.full_filename
 
 
-    def get_key_value(self, section, key, lowercase=True) -> str:
+    def get_key_value(self, section: str, key: str, lowercase: bool=True) -> str:
         """Retrieve the value at the passed in section/key pair"""
         try:
             key_value = self.parser.get(section, key).strip()
@@ -73,7 +73,7 @@ class BaseConfig:
             self.handle_exception(e)
 
 
-    def get_key_boolean_value(self, section, key) -> bool:
+    def get_key_boolean_value(self, section: str, key: str) -> bool:
         """Retrieve the boolean value at the passed in section/key pair"""
         try:
             return self.parser.getboolean(section, key)
@@ -81,7 +81,7 @@ class BaseConfig:
             self.handle_exception(e)
 
 
-    def handle_exception(self, e) -> None:
+    def handle_exception(self, e: Exception) -> None:
         """Handles exceptions that occur while parsing the configuration file"""
         #TODO: Handle base class exceptions
         print("Exception caught while handling the configuration file. Please recreate the configuration file.")
@@ -89,7 +89,7 @@ class BaseConfig:
 
 class Config(BaseConfig):
     """Class to create, update, and read from the configuration file"""
-    def __init__(self, filename) -> None:
+    def __init__(self, filename: str) -> None:
         """Default constructor. Calls the base class to read the configuration
            file. If the file does not exist, the default configuration is created.
         """
@@ -98,7 +98,7 @@ class Config(BaseConfig):
             self.create_default_config()
 
 
-    def create_default_config(self, overwrite=False) -> None:
+    def create_default_config(self, overwrite: bool=False) -> None:
         """Creates the default configuration file"""
         if not super().config_exists() or overwrite:
             self.create_board_section()
@@ -124,17 +124,17 @@ class Config(BaseConfig):
         self.set_board_value(Config.BoardKeys.DARK_PIECE_COLOR, "black")
 
 
-    def set_board_value(self, key, value) -> None:
+    def set_board_value(self, key: str, value: str) -> None:
         """Modify (or add) a keys value at the 'BOARD' section"""
         super().set_key_value(Config.Sections.BOARD, key, value)
 
 
-    def get_board_value(self, key, lowercase=True) -> bool:
+    def get_board_value(self, key: str, lowercase: bool=True) -> bool:
         """Returns a value from the 'BOARD' section at the passed in key"""
         return super().get_key_value(Config.Sections.BOARD, key, lowercase)
 
 
-    def get_board_boolean(self, key) -> bool:
+    def get_board_boolean(self, key: str) -> bool:
         """Returns a boolean value from the 'BOARD' section at the passed in key"""
         return super().get_key_boolean_value(Config.Sections.BOARD, key)
 
@@ -145,17 +145,17 @@ class Config(BaseConfig):
         self.set_ui_value(Config.UiKeys.ZEN_MODE, "no")
 
 
-    def set_ui_value(self, key, value) -> None:
+    def set_ui_value(self, key: str, value: str) -> None:
         """Modify (or add) a keys value at the 'UI' section"""
         super().set_key_value(Config.Sections.UI, key, value)
 
 
-    def get_ui_value(self, key, lowercase=True) -> str:
+    def get_ui_value(self, key: str, lowercase: bool=True) -> str:
         """Returns a value from the 'UI' section at the passed in key"""
         return super().get_key_value(Config.Sections.UI, key, lowercase)
 
 
-    def get_ui_boolean(self, key) -> bool:
+    def get_ui_boolean(self, key: str) -> bool:
         """Returns a boolean value from the 'UI' section at the passed in key"""
         return super().get_key_boolean_value(Config.Sections.UI, key)
 
@@ -166,12 +166,12 @@ class Config(BaseConfig):
         self.set_engine_value(Config.EngineKeys.ENGINE_PATH, "")
 
 
-    def set_engine_value(self, key, value) -> None:
+    def set_engine_value(self, key: str, value: str) -> None:
         """Modify (or add) a keys value at the 'LICHESS' section at the passed in key"""
         super().set_key_value(Config.Sections.ENGINE, key, value)
 
 
-    def get_engine_value(self, key, lowercase=True) -> str:
+    def get_engine_value(self, key: str, lowercase: bool=True) -> str:
         """Returns a value from the 'LICHESS' section at the passed in key"""
         return super().get_key_value(Config.Sections.ENGINE, key, lowercase)
 
@@ -183,17 +183,17 @@ class Config(BaseConfig):
         self.set_lichess_value(Config.LichessKeys.USERNAME, "")
 
 
-    def set_lichess_value(self, key, value) -> None:
+    def set_lichess_value(self, key: str, value: str) -> None:
         """Modify (or add) a keys value at the 'LICHESS' section at the passed in key"""
         super().set_key_value(Config.Sections.LICHESS, key, value)
 
 
-    def get_lichess_value(self, key, lowercase=True) -> str:
+    def get_lichess_value(self, key: str, lowercase: bool=True) -> str:
         """Returns a value from the 'LICHESS' section at the passed in key"""
         return super().get_key_value(Config.Sections.LICHESS, key, lowercase)
 
 
-    def get_lichess_boolean(self, key) -> bool:
+    def get_lichess_boolean(self, key: str) -> bool:
         """Returns a boolean value from the UI section at the passed in key"""
         return super().get_key_boolean_value(Config.Sections.LICHESS, key)
 
