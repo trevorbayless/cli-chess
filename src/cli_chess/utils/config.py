@@ -7,21 +7,22 @@ from cli_chess.utils import is_windows_system
 # TODO: Add a "force_update" to pull new values if they have been changed during runtime
 
 
+def get_config_path() -> str:
+    """Returns the config filepath to use based on OS"""
+    file_path = "$HOME/.config/cli-chess/"
+
+    if is_windows_system():
+        file_path = "$APPDATA/cli-chess/"
+
+    return path.expandvars(file_path)
+
+
 class BaseConfig:
     def __init__(self, filename: str) -> None:
         """Default base class constructor"""
-        self.file_path = self.generate_file_path()
+        self.file_path = get_config_path()
         self.full_filename = self.file_path + filename
         self.parser = configparser.ConfigParser()
-
-    def generate_file_path(self) -> str:
-        """Generated the filepath to use based on OS"""
-        file_path = "$HOME/.config/cli-chess/"
-
-        if is_windows_system():
-            file_path = "$APPDATA/cli-chess/"
-
-        return path.expandvars(file_path)
 
     def read_config(self) -> bool:
         """Attempts to read the configuration file (True if file exists)"""

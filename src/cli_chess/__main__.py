@@ -1,12 +1,14 @@
-import argparse
-from importlib import metadata
-from cli_chess import run_app
 from cli_chess.utils import config, is_valid_lichess_token
+from cli_chess.utils.logging import start_logger
+from cli_chess import run_app
+from importlib import metadata
+import argparse
 import asyncio
 
 
 def run() -> None:
     """Main entry point"""
+    start_logger()
     parse_args()
     asyncio.get_event_loop().run_until_complete(run_app())
 
