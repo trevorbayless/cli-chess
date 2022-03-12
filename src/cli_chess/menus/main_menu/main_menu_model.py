@@ -13,21 +13,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from enum import Enum, auto
+from cli_chess.menus import MenuModelBase
+from cli_chess.menus import MainMenuOptions
 
 
-class MainMenuOptions(Enum):
-    PLAY_OFFLINE = auto()
-    SETTINGS = auto()
-    ABOUT = auto()
-
-
-class MainMenuModel:
+class MainMenuModel(MenuModelBase):
     def __init__(self):
-        self.options = [(MainMenuOptions.PLAY_OFFLINE, "Play offline"),
-                        (MainMenuOptions.SETTINGS, "Manage settings"),
-                        (MainMenuOptions.ABOUT, "About")]
-
-    def get_menu_options(self) -> list:
-        """Returns the list of main menu options"""
-        return self.options
+        super().__init__(MainMenuOptions)

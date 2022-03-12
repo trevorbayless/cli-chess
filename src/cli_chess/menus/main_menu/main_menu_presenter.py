@@ -13,28 +13,21 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from .main_menu_model import MainMenuModel, MainMenuOptions
+from cli_chess.menus import MenuPresenterBase, MainMenuOptions
+from .main_menu_model import MainMenuModel
 from .main_menu_view import MainMenuView
-from cli_chess.game import play_offline
-from cli_chess.dialogs.about import show_about
+
+from cli_chess.menus.play_offline_menu import show_play_offline_menu
 
 menu_map = {
-    MainMenuOptions.PLAY_OFFLINE: play_offline,
+    MainMenuOptions.PLAY_OFFLINE: show_play_offline_menu,
     MainMenuOptions.SETTINGS: None,
-    MainMenuOptions.ABOUT: show_about
+    MainMenuOptions.ABOUT: None,
+    MainMenuOptions.QUIT: quit
 }
 
 
-class MainMenuPresenter:
+class MainMenuPresenter(MenuPresenterBase):
     """Defines the Main Menu"""
     def __init__(self):
-        self.model = MainMenuModel()
-        self.view = MainMenuView(self)
-
-    def get_menu_options(self) -> list:
-        """Return the main menu options"""
-        return self.model.get_menu_options()
-
-    def ok_handler(self) -> None:
-        """Handler for the 'Ok' button"""
-        menu_map[self.view.get_selected_option()]()
+        super().__init__(MainMenuModel(), MainMenuView(self), menu_map)
