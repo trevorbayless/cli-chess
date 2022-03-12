@@ -22,6 +22,11 @@ def is_windows_system() -> bool:
     return True if os.name == "nt" else False
 
 
+def clear_screen() -> None:
+    """Clears the terminal output"""
+    os.system("cls") if is_windows_system() else os.system("clear")
+
+
 def is_valid_lichess_token(api_token: str) -> bool:
     """Returns True if the api token passed in is valid"""
     session = berserk.TokenSession(api_token)
