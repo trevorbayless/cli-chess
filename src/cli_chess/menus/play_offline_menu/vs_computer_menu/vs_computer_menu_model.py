@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from cli_chess.menus import GameOptions
+from cli_chess.menus import OfflineGameOptions
 
 
 class VsComputerMenuModel:
@@ -24,30 +24,39 @@ class VsComputerMenuModel:
                 "name": "variant",
                 "message": "Select the variant",
                 "instruction": " ",
-                "choices": [option.value for option in GameOptions.VariantOptions],
+                "choices": [option for option in OfflineGameOptions.variant_options_dict],
                 "use_shortcuts": True,
                 "use_jk_keys": True,
             },
             {
                 "type": "select",
-                "name": "time_control_pre",
+                "name": "time_control",
                 "message": "Select the time control",
                 "instruction": " ",
-                "choices": [option.value for option in GameOptions.TimeControlOptions],
+                "choices": [option for option in OfflineGameOptions.time_control_options_dict],
                 "use_shortcuts": True,
                 "use_jk_keys": True,
             },
             {
                 "type": "select",
-                "name": "strength_pre",
-                "message": "Select the time control",
+                "name": "strength",
+                "message": "Select the computers strength",
                 "instruction": " ",
-                "choices": [option.value for option in GameOptions.StrengthOptions],
+                "choices": [option for option in OfflineGameOptions.skill_level_options_dict],
+                "use_shortcuts": True,
+                "use_jk_keys": True,
+            },
+            {
+                "type": "select",
+                "name": "color",
+                "message": "Select the color to play as",
+                "instruction": " ",
+                "choices": [option for option in OfflineGameOptions.color_options_dict],
                 "use_shortcuts": True,
                 "use_jk_keys": True,
             },
         ]
 
-    def get_questions(self) -> list[dict]:
+    def get_questions(self):
         """Returns the dictionary of questions"""
         return self.questions

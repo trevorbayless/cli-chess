@@ -13,22 +13,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from .vs_computer_menu_model import VsComputerMenuModel
-from .vs_computer_menu_view import VsComputerMenuView
+from __future__ import annotations
+from questionary import prompt
 
-from pprint import pprint
+class VsComputerMenuView:
+    def __init__(self, presenter: VsComputerMenuPresenter):
+        self.presenter = presenter
 
-def show_vs_computer_menu():
-    return VsComputerMenuPresenter().show_menu()
-
-
-class VsComputerMenuPresenter:
-    def __init__(self):
-        self.model = VsComputerMenuModel()
-        self.view = VsComputerMenuView(self)
-
-    def get_questions(self) -> list[dict]:
-        return self.model.get_questions()
-
-    def show_menu(self):
-        pprint(self.view.show_menu())
+    def show(self) -> dict[str, Any]:
+        return prompt(self.presenter.get_questions(),
+                      true_color=True)
