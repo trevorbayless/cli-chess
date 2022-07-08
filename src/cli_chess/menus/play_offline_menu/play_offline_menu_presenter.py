@@ -16,12 +16,11 @@
 from cli_chess.menus import MenuPresenterBase, PlayOfflineMenuOptions
 from .play_offline_menu_model import PlayOfflineMenuModel
 from .play_offline_menu_view import PlayOfflineMenuView
-from .vs_computer import show_vs_computer_menu
+from .vs_computer_menu import show_vs_computer_menu
 
 menu_map = {
     PlayOfflineMenuOptions.VS_COMPUTER: show_vs_computer_menu,
-    PlayOfflineMenuOptions.BOTH_SIDES: None,
-    PlayOfflineMenuOptions.PUZZLES: None,
+    PlayOfflineMenuOptions.BOTH_SIDES: None
 }
 
 

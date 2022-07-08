@@ -16,6 +16,7 @@
 from cli_chess.menus import MenuModelBase
 from cli_chess.menus import PlayOfflineMenuOptions
 
+
 class PlayOfflineMenuModel(MenuModelBase):
     def __init__(self):
         super().__init__(PlayOfflineMenuOptions)

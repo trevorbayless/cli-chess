@@ -13,12 +13,18 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+from typing import Type
 from enum import Enum
 
-class MenuModelBase:
-    def __init__(self, menu_options):
-        self.menu_options = menu_options
 
-    def get_menu_options(self) -> Enum:
-        """Returns the menu options as an enum"""
-        return self.menu_options
+class MenuModelBase:
+    def __init__(self, menu_options: Type[Enum]):
+        self.menu_options_type = menu_options
+
+    def get_menu_options_type(self) -> Type[Enum]:
+        """Returns the menu options enum"""
+        return self.menu_options_type
+
+    def get_menu_options(self) -> list:
+        """Returns the menu options as a list"""
+        return [option.value for option in self.menu_options_type]

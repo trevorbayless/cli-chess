@@ -22,10 +22,10 @@ class MenuViewBase:
     def __init__(self, presenter: MenuPresenterBase):
         self.presenter = presenter
 
-    def show_menu(self, title: str = "") -> Question:
+    def show(self, title: str = "") -> Question:
         clear_screen()
         return select(title,
-                      self.presenter.get_menu_options(),
+                      choices=[option for option in self.presenter.get_menu_options()],
                       qmark="*",
                       instruction=" ",
                       use_shortcuts=True).ask()

@@ -22,5 +22,5 @@ class PlayOfflineMenuView(MenuViewBase):
         super().__init__(presenter)
         self.presenter = presenter
 
-    def show_menu(self):
-        return super().show_menu("Play Offline")
+    def show(self):
+        return super().show("Play Offline")

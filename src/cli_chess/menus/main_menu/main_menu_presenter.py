@@ -21,8 +21,6 @@ from cli_chess.menus.play_offline_menu import show_play_offline_menu
 
 menu_map = {
     MainMenuOptions.PLAY_OFFLINE: show_play_offline_menu,
-    MainMenuOptions.SETTINGS: None,
-    MainMenuOptions.ABOUT: None,
     MainMenuOptions.QUIT: quit
 }
 

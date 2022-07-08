@@ -21,5 +21,5 @@ class MainMenuView(MenuViewBase):
     def __init__(self, presenter: MainMenuPresenter):
         super().__init__(presenter)
 
-    def show_menu(self):
-        return super().show_menu("Main Menu")
+    def show(self):
+        return super().show("Main Menu")

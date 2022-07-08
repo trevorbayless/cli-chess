@@ -13,7 +13,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-#from cli_chess.menus import MenuModelBase, MenuViewBase
 
 class MenuPresenterBase:
     def __init__(self, model, view, menu_map):
@@ -23,12 +22,12 @@ class MenuPresenterBase:
 
     def get_menu_options(self) -> list:
         """Returns the menu options as a list"""
-        return [option.value for option in self.model.get_menu_options()]
+        return self.model.get_menu_options()
 
     def show_menu(self) -> None:
-        selection = self.view.show_menu()
+        selection = self.view.show()
         self.selection_handler(selection)
 
     def selection_handler(self, selection: str) -> None:
         """Handler for the selection made"""
-        self.menu_map[self.model.get_menu_options()(selection)]()
+        self.menu_map[self.model.get_menu_options_type()(selection)]()
