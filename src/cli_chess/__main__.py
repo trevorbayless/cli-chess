@@ -20,16 +20,19 @@ from importlib import metadata
 import argparse
 import asyncio
 
+from cli_chess.menus import MainMenuPresenter
+
 
 def run() -> None:
     """Main entry point"""
     start_logger()
     parse_args()
-    asyncio.get_event_loop().run_until_complete(run_app())
+    MainMenuPresenter().show_menu()
+    #asyncio.get_event_loop().run_until_complete(run_app())
 
 
 def parse_args() -> None:
-    """Parse the arguments passed in at """
+    """Parse the arguments passed in at startup"""
     args = setup_argparse().parse_args()
 
     if args.api_token:

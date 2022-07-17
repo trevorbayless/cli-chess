@@ -16,7 +16,6 @@
 from .vs_computer_menu_model import VsComputerMenuModel
 from .vs_computer_menu_view import VsComputerMenuView
 from cli_chess.menus.menu_options import OfflineGameOptions
-
 from pprint import pprint
 
 
@@ -33,9 +32,10 @@ class VsComputerMenuPresenter:
         return self.model.get_questions()
 
     def show_menu(self) -> None:
-        answers = self.view.show()
-        self.process_input(answers)
+        game_parameters = self.view.show()
+        self.process_input(game_parameters)
 
-    def process_input(self, answers: dict) -> None:
-        pprint(answers)
-        pprint(OfflineGameOptions.variant_options_dict[answers['variant']])
+    def process_input(self, game_parameters: dict) -> None:
+        # Todo: Validate answers
+        pprint(game_parameters)
+        pprint(OfflineGameOptions.skill_level_options_dict[game_parameters['strength']])
