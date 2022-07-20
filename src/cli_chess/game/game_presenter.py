@@ -23,9 +23,10 @@ from chess import WHITE, BLACK
 import asyncio
 
 
-def play_offline() -> None:
+def play_offline(game_parameters: dict) -> None:
     game_model = OfflineGameModel()
     game_presenter = OfflineGamePresenter(game_model)
+    game_presenter.game_view.app.run()
 
 
 class GamePresenter:

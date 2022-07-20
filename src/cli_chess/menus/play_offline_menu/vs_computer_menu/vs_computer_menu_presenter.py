@@ -18,6 +18,10 @@ from .vs_computer_menu_view import VsComputerMenuView
 from cli_chess.menus.menu_options import OfflineGameOptions
 from pprint import pprint
 
+### Testing
+from cli_chess.game import play_offline
+###
+
 
 def show_vs_computer_menu():
     return VsComputerMenuPresenter().show_menu()
@@ -39,3 +43,4 @@ class VsComputerMenuPresenter:
         # Todo: Validate answers
         pprint(game_parameters)
         pprint(OfflineGameOptions.skill_level_options_dict[game_parameters['strength']])
+        play_offline(game_parameters)

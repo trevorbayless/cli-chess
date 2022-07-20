@@ -27,8 +27,14 @@ def run() -> None:
     """Main entry point"""
     start_logger()
     parse_args()
-    MainMenuPresenter().show_menu()
-    #asyncio.get_event_loop().run_until_complete(run_app())
+
+    while True:
+        try:
+            MainMenuPresenter().show_menu()
+
+        except KeyboardInterrupt:
+            # Todo: Need to handle keyboard interrupt within the menu presenter
+            exit(0)
 
 
 def parse_args() -> None:
@@ -48,7 +54,7 @@ def setup_argparse() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="cli-chess: Play chess in your terminal")
     parser.add_argument(
         "-t",
-        "--api-token", type=str, help="Sets your Lichess API token to the value passed in."
+        "--api-token", type=str, help="The API token associated to your Lichess account"
     )
     parser.add_argument(
         "-v",

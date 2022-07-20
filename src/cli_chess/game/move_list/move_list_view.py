@@ -31,7 +31,7 @@ class MoveListView:
                                          focus_on_click=True,
                                          scrollbar=True,
                                          read_only=True)
-        self.container = ConditionalContainer(self.move_list_output, True)
+        self.root_container = ConditionalContainer(self.move_list_output, True)
 
     def update(self, output: str):
         """Updates the move list output with the passed in text"""
@@ -39,4 +39,4 @@ class MoveListView:
 
     def __pt_container__(self) -> ConditionalContainer:
         """Returns the move_list container"""
-        return self.container
+        return self.root_container
