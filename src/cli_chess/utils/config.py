@@ -163,12 +163,12 @@ class Config(BaseConfig):
         self.set_engine_value(Config.EngineKeys.ENGINE_PATH, "")
 
     def set_engine_value(self, key: str, value: str) -> None:
-        """Modify (or add) a keys value at the 'LICHESS' section at the passed in key"""
+        """Modify (or add) a keys value at the 'ENGINE' section at the passed in key"""
         super().set_key_value(Config.Sections.ENGINE, key, value)
 
-    def get_engine_value(self, key: str, lowercase: bool = True) -> str:
-        """Returns a value from the 'LICHESS' section at the passed in key"""
-        return super().get_key_value(Config.Sections.ENGINE, key, lowercase)
+    def get_engine_value(self, key: str) -> str:
+        """Returns a value from the 'ENGINE' section at the passed in key"""
+        return super().get_key_value(Config.Sections.ENGINE, key, False)
 
     def create_lichess_section(self) -> None:
         """Creates the default 'LICHESS' section in the config file"""
