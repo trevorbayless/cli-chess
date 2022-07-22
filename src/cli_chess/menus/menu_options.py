@@ -14,6 +14,8 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from enum import Enum
+from collections import ChainMap
+from typing import Union
 
 
 class MainMenuOptions(Enum):
@@ -26,7 +28,70 @@ class PlayOfflineMenuOptions(Enum):
     BOTH_SIDES = "Play both sides"
 
 
-class OnlineGameOptions:
+class BaseGameOptions:
+    color_options_dict = {
+        "Random": "random",
+        "White": "white",
+        "Black": "black"
+    }
+
+
+class OfflineGameOptions(BaseGameOptions):
+    variant_options_dict = {
+        "Standard": "standard",
+        "Crazyhouse": "zh",
+        "Chess960": "chess960",
+        "King of the Hill": "koth",
+        "Three-check": "3check",
+        "Antichess": "anti",
+        "Atomic": "atomic",
+        "Horde": "horde",
+        "Racing Kings": "race",
+        "From Position": "setup"
+    }
+
+    time_control_options_dict = {
+        "Custom Time": "custom",
+        "Unlimited": "unlimited",
+        "30+20 (Classical)": "30+20",
+        "30+0 (Classical)": "30+0",
+        "15+10 (Rapid)": "15+10",
+        "10+5 (Rapid)": "10+5",
+        "10+0 (Rapid)": "10+0",
+        "5+3 (Blitz)": "5+3",
+        "5+0 (Blitz)": "5+0",
+        "3+2 (Blitz)": "3+2",
+        "3+0 (Blitz)": "3+0",
+        "2+1 (Bullet)": "2+1",
+        "1+0 (Bullet)": "1+0"
+    }
+
+    skill_level_options_dict = {
+        # These defaults are for the Fairy Stockfish engine
+        # and match what Lichess uses for their computer level settings
+        "Level 1": -9,
+        "Level 2": -5,
+        "Level 3": -1,
+        "Level 4": 3,
+        "Level 5": 7,
+        "Level 6": 11,
+        "Level 7": 16,
+        "Level 8": 20,
+        "Custom Level": "custom"
+    }
+
+    chain_map = ChainMap(BaseGameOptions.color_options_dict,
+                         variant_options_dict,
+                         time_control_options_dict,
+                         skill_level_options_dict)
+
+    # def get_value_from_key(self, key: str) -> Union[str, int]:
+    #     """Searches the OfflineGameOptions dictionaries for
+    #        the key passed in and returns the value
+    #     """
+
+
+class OnlineGameOptions(BaseGameOptions):
     variant_options_dict = {
         "Standard": "standard",
         "Crazyhouse": "zh",
@@ -54,51 +119,7 @@ class OnlineGameOptions:
         "Rated": "rated"
     }
 
-    color_options_dict = {
-        "Random": "random",
-        "White": "white",
-        "Black": "black"
-    }
-
-
-class OfflineGameOptions(OnlineGameOptions):
-    variant_options_dict = {
-        "Standard": "standard",
-        "Crazyhouse": "zh",
-        "Chess960": "chess960",
-        "King of the Hill": "koth",
-        "Three-check": "3check",
-        "Antichess": "anti",
-        "Atomic": "atomic",
-        "Horde": "horde",
-        "Racing Kings": "race",
-        "From Position": "setup"
-    }
-
-    time_control_options_dict = {
-        "Custom Time": "custom",
-        "Unlimited": "Unlimited",
-        "30+20 (Classical)": "30+20",
-        "30+0 (Classical)": "30+0",
-        "15+10 (Rapid)": "15+10",
-        "10+5 (Rapid)": "10+5",
-        "10+0 (Rapid)": "10+0",
-        "5+3 (Blitz)": "5+3",
-        "5+0 (Blitz)": "5+0",
-        "3+2 (Blitz)": "3+2",
-        "3+0 (Blitz)": "3+0",
-        "2+1 (Bullet)": "2+1",
-        "1+0 (Bullet)": "1+0"
-    }
-
-    skill_level_options_dict = {
-        "Level 1": -9,
-        "Level 2": -5,
-        "Level 3": -1,
-        "Level 4": 3,
-        "Level 5": 7,
-        "Level 6": 11,
-        "Level 7": 16,
-        "Level 8": 20,
-        "Custom Level": "custom"
-    }
+    chain_map = ChainMap(BaseGameOptions.color_options_dict,
+                         variant_options_dict,
+                         time_control_options_dict,
+                         mode_options_dict)
