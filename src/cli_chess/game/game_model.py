@@ -20,13 +20,13 @@ from cli_chess.game.offline.engine import EngineModel
 
 
 class GameModel:
-    def __init__(self):
-        self.board_model = BoardModel()
+    def __init__(self, game_parameters: dict):
+        self.board_model = BoardModel(game_parameters)
         self.move_list_model = MoveListModel(self.board_model)
         self.material_diff_model = MaterialDifferenceModel(self.board_model)
 
 
 class OfflineGameModel(GameModel):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, game_parameters: dict):
+        super().__init__(game_parameters)
         self.engine_model = EngineModel(self.board_model)

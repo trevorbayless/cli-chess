@@ -24,7 +24,7 @@ import asyncio
 
 
 def play_offline(game_parameters: dict) -> None:
-    game_model = OfflineGameModel()
+    game_model = OfflineGameModel(game_parameters)
     game_presenter = OfflineGamePresenter(game_model)
     game_presenter.game_view.app.run()
 

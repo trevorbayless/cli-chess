@@ -106,7 +106,7 @@ class BoardPresenter:
         if piece and not blindfold_chess:
             piece_color = self.get_piece_color(piece)
             piece_character = get_piece_unicode_symbol(piece.symbol()) if use_unicode_pieces else piece.symbol()
-            square_output = f"<style fg='{piece_color}' bg='{square_color}'><b>{piece_character} </b></style>"
+            square_output = f"<style fg='{piece_color}' bg='{square_color}'>{piece_character} </style>"
         else:
             square_output = f"<style bg='{square_color}'>  </style>"
 

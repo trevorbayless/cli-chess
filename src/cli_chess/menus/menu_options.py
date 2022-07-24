@@ -15,7 +15,7 @@
 
 from enum import Enum
 from collections import ChainMap
-from typing import Union
+from typing import Dict
 
 
 class MainMenuOptions(Enum):
@@ -29,6 +29,20 @@ class PlayOfflineMenuOptions(Enum):
 
 
 class BaseGameOptions:
+    def __init__(self, *options: dict):
+        self.chain_map = ChainMap(self.color_options_dict, *options)
+
+    def transpose_selection_dict(self, menu_selections: dict) -> Dict:
+        """Lookup the key from the menu selections in the
+           game options ChainMap and replace the value
+        """
+        # Todo: Handle raised errors
+        for key in menu_selections:
+            value = menu_selections[key]
+            menu_selections[key] = self.chain_map[value]
+
+        return menu_selections
+
     color_options_dict = {
         "Random": "random",
         "White": "white",
@@ -37,16 +51,21 @@ class BaseGameOptions:
 
 
 class OfflineGameOptions(BaseGameOptions):
+    def __init__(self):
+        super().__init__(self.variant_options_dict,
+                         self.time_control_options_dict,
+                         self.skill_level_options_dict)
+
     variant_options_dict = {
-        "Standard": "standard",
-        "Crazyhouse": "zh",
+        "Standard": "chess",
+        "Crazyhouse": "crazyhouse",
         "Chess960": "chess960",
-        "King of the Hill": "koth",
+        "King of the Hill": "kingofthehill",
         "Three-check": "3check",
-        "Antichess": "anti",
+        "Antichess": "antichess",
         "Atomic": "atomic",
         "Horde": "horde",
-        "Racing Kings": "race",
+        "Racing Kings": "racingkings",
         "From Position": "setup"
     }
 
@@ -80,18 +99,13 @@ class OfflineGameOptions(BaseGameOptions):
         "Custom Level": "custom"
     }
 
-    chain_map = ChainMap(BaseGameOptions.color_options_dict,
-                         variant_options_dict,
-                         time_control_options_dict,
-                         skill_level_options_dict)
-
-    # def get_value_from_key(self, key: str) -> Union[str, int]:
-    #     """Searches the OfflineGameOptions dictionaries for
-    #        the key passed in and returns the value
-    #     """
-
 
 class OnlineGameOptions(BaseGameOptions):
+    def __init__(self):
+        super().__init__(self.variant_options_dict,
+                         self.time_control_options_dict,
+                         self.mode_options_dict)
+
     variant_options_dict = {
         "Standard": "standard",
         "Crazyhouse": "zh",
@@ -118,8 +132,3 @@ class OnlineGameOptions(BaseGameOptions):
         "Casual": "casual",
         "Rated": "rated"
     }
-
-    chain_map = ChainMap(BaseGameOptions.color_options_dict,
-                         variant_options_dict,
-                         time_control_options_dict,
-                         mode_options_dict)

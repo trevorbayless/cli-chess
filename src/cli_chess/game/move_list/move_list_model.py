@@ -26,7 +26,7 @@ class MoveListModel:
 
         # The move replay board is used to generate the move list output
         # by replaying the move stack of the actual game on the replay board
-        self.move_replay_board = BoardModel(variant=self.board_model.get_variant_name(),
+        self.move_replay_board = BoardModel(self.board_model.game_parameters,
                                             fen=self.board_model.get_initial_fen())
         self.move_list_data = []
 

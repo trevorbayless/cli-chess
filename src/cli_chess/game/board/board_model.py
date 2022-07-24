@@ -14,20 +14,33 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from cli_chess.utils import Event
-from typing import List
 import chess.variant
 import chess
+from random import getrandbits, randint
+from typing import List
 
 
 class BoardModel:
-    def __init__(self, orientation: str = "white", variant: str = "Standard", fen: str = "") -> None:
-        if not fen:
-            fen = chess.variant.find_variant(variant).starting_fen
+    def __init__(self, game_parameters: dict, fen: str = "") -> None:
+        self.game_parameters = game_parameters
+        self.board_orientation = self._get_initial_orientation(self.game_parameters['color'])
+        self.variant = self.game_parameters['variant']
+        self.is_chess960 = self.variant == "chess960"
 
-        self.initial_fen = fen
-        self.board = chess.variant.find_variant(variant)(self.initial_fen)
-        self.board_orientation = orientation
+        if not self.is_chess960:
+            if fen:
+                self.board = chess.variant.find_variant(self.variant)(fen)
+            else:
+                self.board = chess.variant.find_variant(self.variant)()
 
+        else:
+            if fen:
+                self.board = chess.Board(fen, chess960=True)
+            else:
+                # Todo: allow setting custom chess960 position by supplying a custom starting pos int
+                self.board = chess.Board.from_chess960_pos(randint(0, 959))
+
+        self.initial_fen = self.board.board_fen()
         self.e_board_model_updated = Event()
 
     def _board_model_updated(self) -> None:
@@ -57,16 +70,23 @@ class BoardModel:
         """Returns a string holding the board variant name"""
         return self.board.uci_variant
 
-    def set_board_orientation(self, orientation: str) -> None:
-        """Sets the board orientation"""
-        self.board_orientation = orientation
+    def _get_initial_orientation(self, color: str) -> chess.Color:
+        """Gets the initial board orientation based on the color string passed in"""
+        if color.lower() in chess.COLOR_NAMES:
+            return chess.Color(chess.COLOR_NAMES.index(color))
+        else:  # Get random orientation
+            return chess.Color(getrandbits(1))
 
-    def get_board_orientation(self) -> str:
-        """Returns the board orientation as a string"""
+    def get_board_orientation(self) -> chess.Color:
+        """Returns the board orientation"""
         return self.board_orientation
 
+    def set_board_orientation(self, color: chess.Color) -> None:
+        """Sets the board's orientation to the color passed in"""
+        self.board_orientation = color
+
     def get_board_squares(self) -> list:
-        """Returns the boards square numbers as a list based current orientation"""
+        """Returns the boards square numbers as a list based current board orientation"""
         square_numbers = []
         square_names = []
 
@@ -76,7 +96,7 @@ class BoardModel:
                 square_names.append(chess.square_name(square_index))
                 square_numbers.append(chess.square(file, rank))
 
-        if self.board_orientation == "black":
+        if self.board_orientation is chess.BLACK:
             return square_numbers[::-1]
 
         return square_numbers
@@ -87,10 +107,10 @@ class BoardModel:
 
     def get_file_labels(self) -> str:
         """Returns a string containing the file
-           labels based on the board orientation
+           labels based on the board orientation'
         """
         file_labels = ""
-        if self.board_orientation == "black":
+        if self.board_orientation is chess.BLACK:
             for name in chess.FILE_NAMES[::-1]:
                 file_labels += name + " "
         else:
@@ -128,7 +148,7 @@ class BoardModel:
 
     def is_white_orientation(self) -> bool:
         """Returns True if the board orientation is set as white"""
-        if self.board_orientation == "white":
+        if self.board_orientation is chess.WHITE:
             return True
         else:
             return False
