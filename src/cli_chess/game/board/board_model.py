@@ -40,7 +40,6 @@ class BoardModel:
                 # Todo: allow setting custom chess960 position by supplying a custom starting pos int
                 self.board = chess.Board.from_chess960_pos(randint(0, 959))
 
-        self.initial_fen = self.board.board_fen()
         self.e_board_model_updated = Event()
 
     def _board_model_updated(self) -> None:
@@ -61,10 +60,6 @@ class BoardModel:
     def get_move_stack(self) -> List[chess.Move]:
         """Returns the boards move stack"""
         return self.board.move_stack
-
-    def get_initial_fen(self) -> str:
-        """Returns a string holding the initial board fen"""
-        return self.initial_fen
 
     def get_variant_name(self) -> str:
         """Returns a string holding the board variant name"""

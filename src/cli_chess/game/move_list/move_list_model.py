@@ -26,8 +26,9 @@ class MoveListModel:
 
         # The move replay board is used to generate the move list output
         # by replaying the move stack of the actual game on the replay board
-        self.move_replay_board = BoardModel(self.board_model.game_parameters,
-                                            fen=self.board_model.get_initial_fen())
+        self.move_replay_board = self.board_model.board.copy()
+
+        self.initial_fen = self.move_replay_board.fen()
         self.move_list_data = []
 
         self.e_move_list_model_updated = Event()
@@ -40,31 +41,32 @@ class MoveListModel:
     def update(self) -> None:
         """Updates the move list data using the latest move stack"""
         self.move_list_data.clear()
-        self.move_replay_board.board.set_fen(self.board_model.get_initial_fen())
+        self.move_replay_board.set_fen(self.initial_fen)
 
         for move in self.board_model.get_move_stack():
             if not move:
                 raise ValueError(f"Invalid move ({move}) retrieved from move stack")
 
-            color = WHITE if self.move_replay_board.board.turn == WHITE else BLACK
+            color = WHITE if self.move_replay_board.turn == WHITE else BLACK
 
             # Use the drop piece type if this is a crazyhouse drop
             if move.drop is None:
-                piece_type = self.move_replay_board.board.piece_type_at(move.from_square)
+                piece_type = self.move_replay_board.piece_type_at(move.from_square)
             else:
                 piece_type = move.drop
 
             symbol = piece_symbol(piece_type)
-            is_castling = self.move_replay_board.board.is_castling(move)
-            san_move = self.move_replay_board.board.san_and_push(move)
+            is_castling = self.move_replay_board.is_castling(move)
+            san_move = self.move_replay_board.san_and_push(move)
 
-            move_data = {'turn': color,
-                         'move': san_move,
-                         'piece_type': piece_type,
-                         'piece_symbol': symbol,
-                         'is_castling': is_castling,
-                         'is_promotion': True if move.promotion else False
-                         }
+            move_data = {
+                'turn': color,
+                'move': san_move,
+                'piece_type': piece_type,
+                'piece_symbol': symbol,
+                'is_castling': is_castling,
+                'is_promotion': True if move.promotion else False
+            }
 
             self.move_list_data.append(move_data)
 

@@ -35,9 +35,6 @@ class BoardModelTestCase(unittest.TestCase):
     def test_get_move_stack(self):
         pass
 
-    def test_get_initial_fen(self):
-        pass
-
     def test_get_variant_name(self):
         pass
 
