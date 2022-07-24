@@ -14,12 +14,12 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 UNICODE_PIECE_SYMBOLS = {
-    "r": "♜",
-    "n": "♞",
-    "b": "♝",
-    "q": "♛",
-    "k": "♚",
-    "p": "♟",
+    "r": "♜",  # \u265C
+    "n": "♞",  # \u265E
+    "b": "♝",  # \u265D
+    "q": "♛",  # \u265B
+    "k": "♚",  # \u265A
+    "p": "♟",  # \u265F
 }
 
 
