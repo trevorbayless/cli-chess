@@ -20,7 +20,7 @@ from prompt_toolkit.widgets import TextArea
 
 
 class MaterialDifferenceView:
-    def __init__(self, material_diff_presenter: MaterialDifferencePresenter, initial_diff: str):
+    def __init__(self, material_diff_presenter: MaterialDifferencePresenter, initial_diff: str, show: bool = True):
         self.material_diff_presenter = material_diff_presenter
         self.difference_output = TextArea(text=initial_diff,
                                           width=D(min=1, max=20),
@@ -29,7 +29,7 @@ class MaterialDifferenceView:
                                           focusable=False,
                                           multiline=False,
                                           wrap_lines=False)
-        self.root_container = ConditionalContainer(self.difference_output, True)
+        self.root_container = ConditionalContainer(self.difference_output, show)
 
     def update(self, difference: str) -> None:
         """Updates the view output with the passed in text"""

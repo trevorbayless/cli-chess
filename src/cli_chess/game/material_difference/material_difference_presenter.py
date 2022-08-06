@@ -23,13 +23,16 @@ class MaterialDifferencePresenter:
     def __init__(self, material_diff_model: MaterialDifferenceModel, color: Color):
         self.material_diff_model = material_diff_model
         self.color = color
-        self.view = MaterialDifferenceView(self, self.format_diff_output())
+
+        self.is_proper_variant = self.material_diff_model.board_model.game_parameters['variant'] != "horde"
+        self.view = MaterialDifferenceView(self, self.format_diff_output(), self.is_proper_variant)
 
         self.material_diff_model.e_material_difference_model_updated.add_listener(self.update)
 
     def update(self) -> None:
         """Updates the material difference"""
-        self.view.update(self.format_diff_output())
+        if self.is_proper_variant:
+            self.view.update(self.format_diff_output())
 
     def format_diff_output(self) -> str:
         """Returns the formatted difference as a string"""
