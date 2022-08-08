@@ -18,17 +18,23 @@ from cli_chess.utils import config
 import chess.engine
 
 
+async def load_engine() -> chess.engine.UciProtocol:
+    """Load the chess engine"""
+    engine_path = config.get_engine_value(config.EngineKeys.ENGINE_PATH)
+    _, engine = await chess.engine.popen_uci(engine_path)
+    return engine
+
+
 class EngineModel:
-    def __init__(self, board_model: BoardModel):
+    def __init__(self, engine: chess.engine.UciProtocol, board_model: BoardModel):
         self.board_model = board_model
+        self.engine = engine
         self.engine_settings = {
             'engine_path': config.get_engine_value(config.EngineKeys.ENGINE_PATH),
-            'think_time': 1.0
+            'think_time': 0.5
         }
 
     async def get_best_move(self) -> chess.engine.PlayResult:
-        if self.engine_settings['engine_path']:
-            _, engine = await chess.engine.popen_uci(self.engine_settings['engine_path'])
-
-            return await engine.play(self.board_model.board,
-                                     chess.engine.Limit(time=self.engine_settings['think_time']))
+        """Query the engine to get the best move"""
+        return await self.engine.play(self.board_model.board,
+                                      chess.engine.Limit(time=self.engine_settings['think_time']))
