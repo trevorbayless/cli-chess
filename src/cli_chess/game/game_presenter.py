@@ -13,20 +13,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from . import GameModel, GameView
-from .game_model import OfflineGameModel
+from __future__ import annotations
+from . import GameView, GameModel
 from .board import BoardPresenter
 from .move_list import MoveListPresenter
 from .material_difference import MaterialDifferencePresenter
-from .offline.engine import EnginePresenter
 from chess import WHITE, BLACK
-import asyncio
-
-
-def play_offline(game_parameters: dict) -> None:
-    game_model = OfflineGameModel(game_parameters)
-    game_presenter = OfflineGamePresenter(game_model)
-    game_presenter.game_view.app.run()
 
 
 class GamePresenter:
@@ -50,17 +42,3 @@ class GamePresenter:
 
     def make_move(self, move: str) -> None:
         self.board_presenter.make_move(move)
-
-
-class OfflineGamePresenter(GamePresenter):
-    def __init__(self, game_model: OfflineGameModel):
-        super().__init__(game_model)
-        self.engine_presenter = EnginePresenter(game_model.engine_model)
-
-    def input_received(self, input) -> None:
-        super().input_received(input)
-        asyncio.create_task(self.make_engine_move())
-
-    async def make_engine_move(self) -> None:
-        engine_move = await self.engine_presenter.get_best_move()
-        self.make_move(engine_move.move.uci())

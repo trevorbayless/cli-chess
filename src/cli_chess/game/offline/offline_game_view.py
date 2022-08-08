@@ -13,13 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from cli_chess.game.board import BoardModel
-from cli_chess.game.move_list import MoveListModel
-from cli_chess.game.material_difference import MaterialDifferenceModel
 
-
-class GameModel:
-    def __init__(self, game_parameters: dict):
-        self.board_model = BoardModel(game_parameters)
-        self.move_list_model = MoveListModel(self.board_model)
-        self.material_diff_model = MaterialDifferenceModel(self.board_model)
+class OfflineGameView:
+    def __init__(self) -> None:
+        pass

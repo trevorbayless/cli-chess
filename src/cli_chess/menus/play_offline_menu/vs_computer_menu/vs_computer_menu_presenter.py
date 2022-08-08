@@ -16,7 +16,7 @@
 from .vs_computer_menu_model import VsComputerMenuModel
 from .vs_computer_menu_view import VsComputerMenuView
 from cli_chess.menus import OfflineGameOptions
-from cli_chess.game import play_offline
+from cli_chess.game.offline import start_offline_game
 
 
 def show_vs_computer_menu():
@@ -38,4 +38,4 @@ class VsComputerMenuPresenter:
     def process_input(self, menu_selections: dict) -> None:
         # Todo: Validate answers
         game_parameters = OfflineGameOptions().transpose_selection_dict(menu_selections)
-        play_offline(game_parameters)
+        start_offline_game(game_parameters)

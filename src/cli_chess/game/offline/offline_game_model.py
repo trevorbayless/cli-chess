@@ -13,13 +13,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from cli_chess.game.board import BoardModel
-from cli_chess.game.move_list import MoveListModel
-from cli_chess.game.material_difference import MaterialDifferenceModel
+import chess.engine
+from cli_chess.game import GameModel
+from cli_chess.game.offline.engine import EngineModel
 
 
-class GameModel:
-    def __init__(self, game_parameters: dict):
-        self.board_model = BoardModel(game_parameters)
-        self.move_list_model = MoveListModel(self.board_model)
-        self.material_diff_model = MaterialDifferenceModel(self.board_model)
+class OfflineGameModel(GameModel):
+    def __init__(self, engine: chess.engine.UciProtocol, game_parameters: dict):
+        super().__init__(game_parameters)
+        self.engine_model = EngineModel(engine, self.board_model)
