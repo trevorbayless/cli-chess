@@ -19,7 +19,7 @@ UNICODE_PIECE_SYMBOLS = {
     "b": "♝",  # \u265D
     "q": "♛",  # \u265B
     "k": "♚",  # \u265A
-    "p": "♟",  # \u265F
+    "p": "♙",  # \u2659 (avoid \u265F (♟) as it renders as emoji in most fonts)
 }
 
 
