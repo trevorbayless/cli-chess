@@ -14,15 +14,15 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from __future__ import annotations
-from . import GameView, GameModel
+from . import GameViewBase, GameModelBase
 from .board import BoardPresenter
 from .move_list import MoveListPresenter
 from .material_difference import MaterialDifferencePresenter
 from chess import WHITE, BLACK
 
 
-class GamePresenter:
-    def __init__(self, game_model: GameModel):
+class GamePresenterBase:
+    def __init__(self, game_model: GameModelBase):
         self.game_model = game_model
 
         self.board_presenter = BoardPresenter(self.game_model.board_model)
@@ -30,11 +30,11 @@ class GamePresenter:
         self.material_diff_presenter_white = MaterialDifferencePresenter(self.game_model.material_diff_model, WHITE)
         self.material_diff_presenter_black = MaterialDifferencePresenter(self.game_model.material_diff_model, BLACK)
 
-        self.game_view = GameView(self,
-                                  self.board_presenter.view,
-                                  self.move_list_presenter.view,
-                                  self.material_diff_presenter_white.view,
-                                  self.material_diff_presenter_black.view)
+        self.game_view = GameViewBase(self,
+                                      self.board_presenter.view,
+                                      self.move_list_presenter.view,
+                                      self.material_diff_presenter_white.view,
+                                      self.material_diff_presenter_black.view)
 
     def input_received(self, input: str) -> None:
         # TODO: Determine if this is a move, or other type of input

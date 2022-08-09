@@ -27,8 +27,8 @@ from cli_chess.game.move_list import MoveListView
 from cli_chess.game.material_difference import MaterialDifferenceView
 
 
-class GameView:
-    def __init__(self, game_presenter: GamePresenter, board_view: BoardView, move_list_view: MoveListView,
+class GameViewBase:
+    def __init__(self, game_presenter: GamePresenterBase, board_view: BoardView, move_list_view: MoveListView,
                  material_diff_white_view: MaterialDifferenceView, material_diff_black_view: MaterialDifferenceView) -> None:
         self.game_presenter = game_presenter
         self.board_output_container = board_view

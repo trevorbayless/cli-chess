@@ -14,11 +14,11 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 import chess.engine
-from cli_chess.game import GameModel
+from cli_chess.game import GameModelBase
 from cli_chess.game.offline.engine import EngineModel
 
 
-class OfflineGameModel(GameModel):
+class OfflineGameModel(GameModelBase):
     def __init__(self, engine: chess.engine.UciProtocol, game_parameters: dict):
         super().__init__(game_parameters)
         self.engine_model = EngineModel(engine, self.board_model)

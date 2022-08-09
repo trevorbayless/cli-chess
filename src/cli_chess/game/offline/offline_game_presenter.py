@@ -15,7 +15,7 @@
 
 import asyncio
 from .offline_game_model import OfflineGameModel
-from cli_chess.game.game_presenter import GamePresenter
+from cli_chess.game.game_presenter_base import GamePresenterBase
 from .engine import EnginePresenter, load_engine
 
 
@@ -31,7 +31,7 @@ async def _play_offline(game_parameters: dict) -> None:
     await game_presenter.game_view.app.run_async()
 
 
-class OfflineGamePresenter(GamePresenter):
+class OfflineGamePresenter(GamePresenterBase):
     def __init__(self, game_model: OfflineGameModel):
         super().__init__(game_model)
         self.engine_presenter = EnginePresenter(game_model.engine_model)

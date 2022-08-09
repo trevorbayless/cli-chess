@@ -18,7 +18,7 @@ from cli_chess.game.move_list import MoveListModel
 from cli_chess.game.material_difference import MaterialDifferenceModel
 
 
-class GameModel:
+class GameModelBase:
     def __init__(self, game_parameters: dict):
         self.board_model = BoardModel(game_parameters)
         self.move_list_model = MoveListModel(self.board_model)
