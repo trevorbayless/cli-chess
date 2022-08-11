@@ -25,6 +25,7 @@ from prompt_toolkit.output.color_depth import ColorDepth
 from cli_chess.game.board import BoardView
 from cli_chess.game.move_list import MoveListView
 from cli_chess.game.material_difference import MaterialDifferenceView
+from cli_chess.utils import log
 
 
 class GameViewBase:
@@ -84,5 +85,15 @@ class GameViewBase:
         if input.text == "quit":
             get_app().exit()
         else:
-            self.game_presenter.input_received(input.text)
+            self.game_presenter.user_input_received(input.text)
             self.input_field_container.text = ''
+
+    def lock_input(self):
+        """Sets the input field to read only"""
+        self.input_field_container.read_only = True
+        log.info("Input field: set read only flag")
+
+    def unlock_input(self):
+        """Removes the read-only flag from the input field"""
+        self.input_field_container.read_only = False
+        log.info("Input field: removed read only flag")

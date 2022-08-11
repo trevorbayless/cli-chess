@@ -23,7 +23,8 @@ from typing import List
 class BoardModel:
     def __init__(self, game_parameters: dict, fen: str = "") -> None:
         self.game_parameters = game_parameters
-        self.board_orientation = self._get_initial_orientation(self.game_parameters['color'])
+        self.my_color: chess.Color = self._set_my_color(self.game_parameters['color'])
+        self.board_orientation = self.my_color
         self.variant = self.game_parameters['variant']
         self.is_chess960 = self.variant == "chess960"
 
@@ -65,12 +66,16 @@ class BoardModel:
         """Returns a string holding the board variant name"""
         return self.board.uci_variant
 
-    def _get_initial_orientation(self, color: str) -> chess.Color:
-        """Gets the initial board orientation based on the color string passed in"""
+    def _set_my_color(self, color: str) -> chess.Color:
+        """Sets the color to play as based on the color string passed in"""
         if color.lower() in chess.COLOR_NAMES:
             return chess.Color(chess.COLOR_NAMES.index(color))
-        else:  # Get random orientation
+        else:  # Get random color to play as
             return chess.Color(getrandbits(1))
+
+    def get_turn(self) -> chess.Color:
+        """Returns the color of which turn it is"""
+        return self.board.turn
 
     def get_board_orientation(self) -> chess.Color:
         """Returns the board orientation"""

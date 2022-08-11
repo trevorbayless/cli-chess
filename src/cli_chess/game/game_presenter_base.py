@@ -18,6 +18,7 @@ from . import GameViewBase, GameModelBase
 from .board import BoardPresenter
 from .move_list import MoveListPresenter
 from .material_difference import MaterialDifferencePresenter
+from cli_chess.utils import log
 from chess import WHITE, BLACK
 
 
@@ -36,9 +37,13 @@ class GamePresenterBase:
                                       self.material_diff_presenter_white.view,
                                       self.material_diff_presenter_black.view)
 
-    def input_received(self, input: str) -> None:
-        # TODO: Determine if this is a move, or other type of input
-        self.make_move(input)
+    def user_input_received(self, input: str) -> None:
+        try:
+            self.make_move(input)
+        except Exception as e:
+            # TODO: Need to implement displaying a proper error to the user
+            log.error(f"{e}")
+            raise e
 
     def make_move(self, move: str) -> None:
         self.board_presenter.make_move(move)

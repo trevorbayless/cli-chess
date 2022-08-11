@@ -17,6 +17,7 @@ import asyncio
 from .offline_game_model import OfflineGameModel
 from cli_chess.game.game_presenter_base import GamePresenterBase
 from .engine import EnginePresenter, load_engine
+from cli_chess.utils import log
 
 
 def start_offline_game(game_parameters: dict) -> None:
@@ -36,10 +37,18 @@ class OfflineGamePresenter(GamePresenterBase):
         super().__init__(game_model)
         self.engine_presenter = EnginePresenter(game_model.engine_model)
 
-    def input_received(self, input) -> None:
-        super().input_received(input)
-        asyncio.create_task(self.make_engine_move())
+        if self.game_model.board_model.get_turn() != self.game_model.board_model.my_color:
+            asyncio.create_task(self.make_engine_move())
+
+    def user_input_received(self, input) -> None:
+        try:
+            super().user_input_received(input)
+            asyncio.create_task(self.make_engine_move())
+        except Exception as e:
+            log.error(f"{e}")
 
     async def make_engine_move(self) -> None:
+        self.game_view.lock_input()
         engine_move = await self.engine_presenter.get_best_move()
         self.make_move(engine_move.move.uci())
+        self.game_view.unlock_input()
