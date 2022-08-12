@@ -14,7 +14,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from cli_chess.utils import config, is_valid_lichess_token
-from cli_chess.utils.logging import start_logger
+from cli_chess.utils.logging import start_logger, redact_from_logs, log
 from cli_chess import run_app
 from importlib import metadata
 import argparse
@@ -40,12 +40,16 @@ def run() -> None:
 def parse_args() -> None:
     """Parse the arguments passed in at startup"""
     args = setup_argparse().parse_args()
+    redact_from_logs(args.api_token)
+    log.debug(f"parsed_args: {args}")
 
     if args.api_token:
         if is_valid_lichess_token(args.api_token):
             config.set_lichess_value(config.LichessKeys.API_TOKEN, args.api_token)
         else:
-            print(f"Invalid Lichess API Token: {args.api_token}")
+            msg = "Invalid Lichess API token entered"
+            print(msg)
+            log.error(msg)
             exit(1)
 
 
