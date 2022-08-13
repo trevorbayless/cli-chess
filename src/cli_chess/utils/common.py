@@ -15,6 +15,8 @@
 
 import os
 import berserk
+from cli_chess.utils.logging import log
+from typing import Tuple
 
 
 def is_windows_system() -> bool:
@@ -27,29 +29,17 @@ def clear_screen() -> None:
     os.system("cls") if is_windows_system() else os.system("clear")
 
 
-def is_valid_lichess_token(api_token: str) -> bool:
+def is_valid_lichess_token(api_token: str) -> Tuple[bool, str]:
     """Returns True if the api token passed in is valid"""
     session = berserk.TokenSession(api_token)
     client = berserk.clients.Account(session)
 
     try:
         if client.get():
-            return True
-    except berserk.exceptions.ResponseError as e:
-        print(e.message)
-        return False
-
-
-def handle_api_exceptions(e: Exception) -> None:
-    # TODO: Handle specific exceptions
-    if e.message != "":
-        if "No such token" in e.message:
-            print("!! Invalid Lichess API token")
-        elif "No such game" in e.message:
-            print("Invalid game-id")
-        elif "Not your game" in e.message:
-            print("!! This game is not associated with your account")
-        else:
-            print(e)
-    else:
-        print(e)
+            msg = "Successfully authenticated with Lichess"
+            log.info(msg)
+            return True, msg
+    except Exception as e:
+        msg = f"Authentication to Lichess failed - {e.message}"
+        log.error(msg)
+        return False, msg

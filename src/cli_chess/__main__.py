@@ -13,15 +13,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+from cli_chess.menus import MainMenuPresenter
 from cli_chess.utils import config, is_valid_lichess_token
 from cli_chess.utils.logging import start_logger, redact_from_logs, log
 from cli_chess import run_app
 from importlib import metadata
 import argparse
 import asyncio
-
-from cli_chess.menus import MainMenuPresenter
-
 
 def run() -> None:
     """Main entry point"""
@@ -41,15 +39,14 @@ def parse_args() -> None:
     """Parse the arguments passed in at startup"""
     args = setup_argparse().parse_args()
     redact_from_logs(args.api_token)
-    log.debug(f"parsed_args: {args}")
+    log.debug(f"Parsed arguments: {args}")
 
     if args.api_token:
-        if is_valid_lichess_token(args.api_token):
+        valid_token, msg = is_valid_lichess_token(args.api_token)
+        if valid_token:
             config.set_lichess_value(config.LichessKeys.API_TOKEN, args.api_token)
         else:
-            msg = "Invalid Lichess API token entered"
             print(msg)
-            log.error(msg)
             exit(1)
 
 
