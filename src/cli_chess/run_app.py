@@ -14,8 +14,8 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from cli_chess.menus import MainMenuPresenter
-from prompt_toolkit.layout import Layout
 from prompt_toolkit.application import Application
+from prompt_toolkit.layout import Layout
 from prompt_toolkit.output.color_depth import ColorDepth
 
 

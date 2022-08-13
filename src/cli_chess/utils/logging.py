@@ -13,7 +13,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from cli_chess.utils.config import get_config_path
 import logging
 
 log = logging.getLogger("cli-chess")
@@ -22,6 +21,7 @@ log_redactions = []
 
 def start_logger() -> None:
     """Starts the root logger"""
+    from cli_chess.utils.config import get_config_path
     log_format = "%(asctime)s | %(levelname)-8s | %(name)s | %(module)s | %(message)s"
     logging.basicConfig(level=logging.DEBUG,
                         filemode="w",

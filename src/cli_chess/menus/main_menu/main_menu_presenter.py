@@ -13,11 +13,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+from cli_chess.menus.play_offline_menu import show_play_offline_menu
 from cli_chess.menus import MenuPresenterBase, MainMenuOptions
 from .main_menu_model import MainMenuModel
 from .main_menu_view import MainMenuView
-
-from cli_chess.menus.play_offline_menu import show_play_offline_menu
 
 menu_map = {
     MainMenuOptions.PLAY_OFFLINE: show_play_offline_menu,

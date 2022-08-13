@@ -15,7 +15,7 @@
 
 from os import path, makedirs
 import configparser
-from cli_chess.utils import is_windows_system
+from cli_chess.utils.common import is_windows_system
 
 # TODO: Handle exceptions
 # TODO: Handle new config options on updates (do not overwrite full config)
