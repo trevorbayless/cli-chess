@@ -15,31 +15,13 @@
 
 from cli_chess.menus import MainMenuPresenter
 from cli_chess.utils import config, is_valid_lichess_token
-from cli_chess.utils.logging import start_logger, redact_from_logs, log
-from cli_chess import run_app
-from importlib import metadata
-import argparse
-import asyncio
+from cli_chess.utils.argparse import setup_argparse
+from cli_chess.utils.logging import start_logger
 
 def run() -> None:
     """Main entry point"""
     start_logger()
-    parse_args()
-
-    while True:
-        try:
-            MainMenuPresenter().show_menu()
-
-        except KeyboardInterrupt:
-            # Todo: Need to handle keyboard interrupt within the menu presenter
-            exit(0)
-
-
-def parse_args() -> None:
-    """Parse the arguments passed in at startup"""
     args = setup_argparse().parse_args()
-    redact_from_logs(args.api_token)
-    log.debug(f"Parsed arguments: {args}")
 
     if args.api_token:
         valid_token, msg = is_valid_lichess_token(args.api_token)
@@ -49,22 +31,13 @@ def parse_args() -> None:
             print(msg)
             exit(1)
 
+    while True:
+        try:
+            MainMenuPresenter().show_menu()
 
-def setup_argparse() -> argparse.ArgumentParser:
-    """Sets up argparse and returns the argparse object"""
-    parser = argparse.ArgumentParser(description="cli-chess: Play chess in your terminal")
-    parser.add_argument(
-        "-t",
-        "--api-token", type=str, help="The API token associated to your Lichess account"
-    )
-    parser.add_argument(
-        "-v",
-        "--version",
-        action="version",
-        version=metadata.version("cli-chess"),
-    )
-    return parser
-
+        except KeyboardInterrupt:
+            # Todo: Need to handle keyboard interrupt within the menu presenter
+            exit(0)
 
 if __name__ == "__main__":
     run()
