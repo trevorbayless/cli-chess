@@ -14,12 +14,12 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from __future__ import annotations
-from questionary import prompt
+from questionary import unsafe_prompt
 
 class VsComputerMenuView:
     def __init__(self, presenter: VsComputerMenuPresenter):
         self.presenter = presenter
 
     def show(self) -> dict[str, Any]:
-        return prompt(self.presenter.get_questions(),
-                      true_color=True)
+        return unsafe_prompt(self.presenter.get_questions(),
+                             true_color=True)

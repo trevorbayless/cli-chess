@@ -28,4 +28,4 @@ class MenuViewBase:
                       choices=[option for option in self.presenter.get_menu_options()],
                       qmark="*",
                       instruction=" ",
-                      use_shortcuts=True).ask()
+                      use_shortcuts=True).unsafe_ask()

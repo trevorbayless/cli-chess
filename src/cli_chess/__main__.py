@@ -31,13 +31,7 @@ def run() -> None:
             print(msg)
             exit(1)
 
-    while True:
-        try:
-            MainMenuPresenter().show_menu()
-
-        except KeyboardInterrupt:
-            # Todo: Need to handle keyboard interrupt within the menu presenter
-            exit(0)
+    MainMenuPresenter().show_menu()
 
 if __name__ == "__main__":
     run()

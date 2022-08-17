@@ -83,6 +83,7 @@ class GameViewBase:
     def _accept_input(self, input: Buffer):
         """Accept handler for the input field"""
         if input.text == "quit":
+            log.info("User quit")
             get_app().exit()
         else:
             self.game_presenter.user_input_received(input.text)

@@ -13,6 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+from cli_chess.utils.logging import log
 
 class MenuPresenterBase:
     def __init__(self, model, view, menu_map):
@@ -25,8 +26,13 @@ class MenuPresenterBase:
         return self.model.get_menu_options()
 
     def show_menu(self) -> None:
-        selection = self.view.show()
-        self.selection_handler(selection)
+        try:
+            selection = self.view.show()
+            log.info(f"menu_selection: {selection}")
+            self.selection_handler(selection)
+        except KeyboardInterrupt:
+            log.info("User quit - keyboard interrupt")
+            exit(0)
 
     def selection_handler(self, selection: str) -> None:
         """Handler for the selection made"""

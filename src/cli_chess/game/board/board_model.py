@@ -14,6 +14,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from cli_chess.utils.event import Event
+from cli_chess.utils.logging import log
 from random import getrandbits, randint
 from typing import List
 import chess.variant
@@ -54,6 +55,7 @@ class BoardModel:
         try:
             self.board.push_san(move)
             self._board_model_updated()
+            log.info(f"make_move: {move}")
         except Exception as e:
             # TODO: Look at other exceptions that can be raised
             raise e

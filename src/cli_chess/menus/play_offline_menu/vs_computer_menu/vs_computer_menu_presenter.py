@@ -17,6 +17,7 @@ from .vs_computer_menu_model import VsComputerMenuModel
 from .vs_computer_menu_view import VsComputerMenuView
 from cli_chess.menus import OfflineGameOptions
 from cli_chess.game.offline import start_offline_game
+from cli_chess.utils.logging import log
 
 
 def show_vs_computer_menu():
@@ -32,10 +33,15 @@ class VsComputerMenuPresenter:
         return self.model.get_questions()
 
     def show_menu(self) -> None:
-        menu_selections = self.view.show()
-        self.process_input(menu_selections)
+        try:
+            menu_selections = self.view.show()
+            log.info(f"menu_selections: {menu_selections}")
+            self.process_input(menu_selections)
+        except KeyboardInterrupt:
+            log.info("User quit - keyboard interrupt")
+            exit(0)
 
     def process_input(self, menu_selections: dict) -> None:
-        # Todo: Validate answers
         game_parameters = OfflineGameOptions().transpose_selection_dict(menu_selections)
+        log.info(f"game_parameters: {game_parameters}")
         start_offline_game(game_parameters)
