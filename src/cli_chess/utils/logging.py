@@ -22,7 +22,7 @@ log_redactions = []
 def start_logger() -> None:
     """Starts the root logger"""
     from cli_chess.utils.config import get_config_path
-    log_format = "%(asctime)s | %(levelname)-8s | %(name)s | %(module)s | %(message)s"
+    log_format = "%(asctime)s | %(levelname)s | %(name)s | %(module)s | %(message)s"
     logging.basicConfig(level=logging.DEBUG,
                         filemode="w",
                         filename=f"{get_config_path()}" + "cli-chess.log",
