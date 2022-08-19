@@ -19,17 +19,22 @@ log = logging.getLogger("cli-chess")
 log_redactions = []
 
 
-def start_logger() -> None:
-    """Starts the root logger"""
+def configure_logger(name: str, level=logging.DEBUG) -> logging.Logger:
+    """Configures and returns a logger instance"""
     from cli_chess.utils.config import get_config_path
-    log_format = "%(asctime)s | %(levelname)s | %(name)s | %(module)s | %(message)s"
-    logging.basicConfig(level=logging.DEBUG,
-                        filemode="w",
-                        filename=f"{get_config_path()}" + "cli-chess.log",
-                        datefmt="%m/%d/%Y %I:%M:%S%p")
 
-    for handler in logging.root.handlers:
-        handler.setFormatter(LoggingRedactor(log_format))
+    log_file = f"{get_config_path()}" + f"{name}.log"
+    log_format = "%(asctime)s.%(msecs)03d | %(levelname)-5s | %(name)s | %(module)s | %(message)s"
+    time_format = "%m/%d/%Y %I:%M:%S"
+
+    file_handler = logging.FileHandler(log_file, mode="w")
+    file_handler.setFormatter(LoggingRedactor(log_format, time_format))
+
+    logger = logging.getLogger(name)
+    logger.setLevel(level)
+    logger.addHandler(file_handler)
+
+    return logger
 
 
 def redact_from_logs(text: str = "") -> None:

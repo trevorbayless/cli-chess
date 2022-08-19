@@ -83,7 +83,7 @@ class GameViewBase:
     def _accept_input(self, input: Buffer):
         """Accept handler for the input field"""
         if input.text == "quit":
-            log.info("User quit")
+            log.debug("User quit")
             get_app().exit()
         else:
             self.game_presenter.user_input_received(input.text)
@@ -92,9 +92,7 @@ class GameViewBase:
     def lock_input(self):
         """Sets the input field to read only"""
         self.input_field_container.read_only = True
-        log.info("Input field: set read only flag")
 
     def unlock_input(self):
         """Removes the read-only flag from the input field"""
         self.input_field_container.read_only = False
-        log.info("Input field: removed read only flag")

@@ -16,11 +16,11 @@
 from cli_chess.menus import MainMenuPresenter
 from cli_chess.utils import config, is_valid_lichess_token
 from cli_chess.utils.argparse import setup_argparse
-from cli_chess.utils.logging import start_logger
+from cli_chess.utils.logging import configure_logger
 
 def run() -> None:
     """Main entry point"""
-    start_logger()
+    configure_logger("cli-chess")
     args = setup_argparse().parse_args()
 
     if args.api_token:

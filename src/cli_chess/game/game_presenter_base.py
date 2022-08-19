@@ -38,12 +38,7 @@ class GamePresenterBase:
                                       self.material_diff_presenter_black.view)
 
     def user_input_received(self, input: str) -> None:
-        try:
-            self.make_move(input)
-        except Exception as e:
-            # TODO: Need to implement displaying a proper error to the user
-            log.error(f"{e}")
-            raise e
+        self.make_move(input, human=True)
 
-    def make_move(self, move: str) -> None:
-        self.board_presenter.make_move(move)
+    def make_move(self, move: str, human=True) -> None:
+        self.board_presenter.make_move(move, human=human)

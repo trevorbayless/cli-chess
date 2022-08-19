@@ -32,12 +32,12 @@ class BoardPresenter:
         """Updates the board output"""
         self.view.update(self.build_board_output())
 
-    def make_move(self, move: str) -> None:
+    def make_move(self, move: str, human=True) -> None:
         """Sends a move to the board model to attempt to make.
            Raises an exception on invalid moves
         """
         try:
-            self.board_model.make_move(move)
+            self.board_model.make_move(move, human=human)
         except Exception as e:
             # TODO: Handle specific exceptions (Invalid move, ambiguous, etc )
             raise e

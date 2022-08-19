@@ -42,22 +42,24 @@ class BoardModel:
                 # Todo: allow setting custom chess960 position by supplying a custom starting pos int
                 self.board = chess.Board.from_chess960_pos(randint(0, 959))
 
+        self._log_initialization()
         self.e_board_model_updated = Event()
 
     def _board_model_updated(self) -> None:
         """Notifies listeners of board model updates"""
         self.e_board_model_updated.notify()
 
-    def make_move(self, move: str) -> None:
+    def make_move(self, move: str, human=True) -> None:
         """Attempts to make a move on the board.
            Raises a ValueError on illegal moves.
         """
+        player = "human" if human else "engine"
         try:
             self.board.push_san(move)
             self._board_model_updated()
-            log.info(f"make_move: {move}")
+            log.info(f"make_move ({player}): {move}")
         except Exception as e:
-            # TODO: Look at other exceptions that can be raised
+            log.info(f"make_move ({player}): {e}")
             raise e
 
     def get_move_stack(self) -> List[chess.Move]:
@@ -86,6 +88,7 @@ class BoardModel:
     def set_board_orientation(self, color: chess.Color) -> None:
         """Sets the board's orientation to the color passed in"""
         self.board_orientation = color
+        log.debug(f"board orientation set (orientation = {color}")
 
     def get_board_squares(self) -> list:
         """Returns the boards square numbers as a list based current board orientation"""
@@ -141,10 +144,7 @@ class BoardModel:
     def is_light_square(self, square: chess.Square) -> bool:
         """Returns True if the square passed in is a light square"""
         if square in chess.SQUARES:
-            file_index = self.get_square_file_index(square)
-            rank_index = self.get_square_rank_index(square)
-
-            return (file_index % 2) != (rank_index % 2)
+            return chess.BB_LIGHT_SQUARES & chess.BB_SQUARES[square]
         else:
             raise(ValueError(f"Illegal square: {square}"))
 
@@ -154,3 +154,12 @@ class BoardModel:
             return True
         else:
             return False
+
+    def _log_initialization(self):
+        """Logs class initialization"""
+        log.debug("=============== BOARD INITIALIZATION ===============")
+        log.debug(f"Game parameters: {self.game_parameters}")
+        log.debug(f"Color: {chess.COLOR_NAMES[self.my_color]}")
+        log.debug(f"Starting FEN: {self.board.fen()}")
+        log.debug(f"Variant: {self.variant}")
+        log.debug("====================================================")

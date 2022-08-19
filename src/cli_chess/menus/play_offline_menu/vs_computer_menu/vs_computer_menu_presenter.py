@@ -38,10 +38,9 @@ class VsComputerMenuPresenter:
             log.info(f"menu_selections: {menu_selections}")
             self.process_input(menu_selections)
         except KeyboardInterrupt:
-            log.info("User quit - keyboard interrupt")
+            log.debug("User quit - keyboard interrupt")
             exit(0)
 
     def process_input(self, menu_selections: dict) -> None:
         game_parameters = OfflineGameOptions().transpose_selection_dict(menu_selections)
-        log.info(f"game_parameters: {game_parameters}")
         start_offline_game(game_parameters)

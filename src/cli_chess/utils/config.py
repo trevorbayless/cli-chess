@@ -16,6 +16,7 @@
 from os import path, makedirs
 import configparser
 from cli_chess.utils.common import is_windows_system
+from cli_chess.utils.logging import log_redactions
 
 # TODO: Handle exceptions
 # TODO: Handle new config options on updates (do not overwrite full config)
@@ -101,7 +102,9 @@ class Config(BaseConfig):
            file. If the file does not exist, the default configuration is created.
         """
         super().__init__(filename)
-        if not super().read_config():
+        if super().read_config():
+            log_redactions.append(self.get_lichess_value(Config.LichessKeys.API_TOKEN, False))
+        else:
             self.create_default_config()
 
     def create_default_config(self, overwrite: bool = False) -> None:
@@ -178,6 +181,9 @@ class Config(BaseConfig):
 
     def set_lichess_value(self, key: str, value: str) -> None:
         """Modify (or add) a keys value at the 'LICHESS' section at the passed in key"""
+        if key is Config.LichessKeys.API_TOKEN:
+            log_redactions.append(value)
+
         super().set_key_value(Config.Sections.LICHESS, key, value)
 
     def get_lichess_value(self, key: str, lowercase: bool = True) -> str:

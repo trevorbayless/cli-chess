@@ -14,8 +14,11 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from cli_chess.game.board import BoardModel
+from cli_chess.utils.logging import configure_logger
 from cli_chess.utils import config
 import chess.engine
+
+configure_logger("chess.engine")
 
 
 async def load_engine() -> chess.engine.UciProtocol:
