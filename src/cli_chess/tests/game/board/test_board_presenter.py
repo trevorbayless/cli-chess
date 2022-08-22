@@ -15,12 +15,9 @@
 
 from cli_chess.game.board import BoardModel, BoardPresenter
 from cli_chess.game.common import get_piece_unicode_symbol
-from cli_chess.utils import config
+from cli_chess.utils.config import board_config
 import unittest
 import chess
-
-board_keys = config.BoardKeys
-
 
 class BoardPresenterTestCase(unittest.TestCase):
     def test_make_move(self):
@@ -42,12 +39,12 @@ class BoardPresenterTestCase(unittest.TestCase):
         presenter = BoardPresenter(model)
 
         # Test with board coordinates disabled
-        config.set_board_value(board_keys.SHOW_BOARD_COORDINATES, "no")
+        board_config.set_value(board_config.Keys.SHOW_BOARD_COORDINATES, "no")
         self.assertEqual(presenter.apply_file_labels(), "")
 
         # Enable board coordinates
-        config.set_board_value(board_keys.SHOW_BOARD_COORDINATES, "yes")
-        config.set_board_value(board_keys.FILE_LABEL_COLOR, "gray")
+        board_config.set_value(board_config.Keys.SHOW_BOARD_COORDINATES, "yes")
+        board_config.set_value(board_config.Keys.FILE_LABEL_COLOR, "gray")
 
         # Test white board orientation
         model.set_board_orientation("white")
@@ -69,13 +66,13 @@ class BoardPresenterTestCase(unittest.TestCase):
                                               chess.H4, chess.H3, chess.H2, chess.H1]
 
         # Test with board coordinates disabled
-        config.set_board_value(board_keys.SHOW_BOARD_COORDINATES, "no")
+        board_config.set_value(board_config.Keys.SHOW_BOARD_COORDINATES, "no")
         for square in range(chess.A1, len(chess.SQUARES)):
             self.assertEqual(presenter.apply_rank_label(square), "")
 
         # Enable board coordinates
-        config.set_board_value(board_keys.SHOW_BOARD_COORDINATES, "yes")
-        config.set_board_value(board_keys.FILE_LABEL_COLOR, "gray")
+        board_config.set_value(board_config.Keys.SHOW_BOARD_COORDINATES, "yes")
+        board_config.set_value(board_config.Keys.FILE_LABEL_COLOR, "gray")
 
         # Test white and black board orientations
         for square in range(chess.A1, len(chess.SQUARES)):
@@ -104,14 +101,14 @@ class BoardPresenterTestCase(unittest.TestCase):
         presenter = BoardPresenter(model)
 
         # Set and obtain colors
-        config.set_board_value(board_keys.LIGHT_SQUARE_COLOR, "cadetblue")
-        config.set_board_value(board_keys.DARK_SQUARE_COLOR, "darkslateblue")
-        config.set_board_value(board_keys.LIGHT_PIECE_COLOR, "white")
-        config.set_board_value(board_keys.DARK_PIECE_COLOR, "black")
-        light_square_color = config.get_board_value(board_keys.LIGHT_SQUARE_COLOR)
-        dark_square_color = config.get_board_value(board_keys.DARK_SQUARE_COLOR)
-        light_piece_color = config.get_board_value(board_keys.LIGHT_PIECE_COLOR)
-        dark_piece_color = config.get_board_value(board_keys.DARK_PIECE_COLOR)
+        board_config.set_value(board_config.Keys.LIGHT_SQUARE_COLOR, "cadetblue")
+        board_config.set_value(board_config.Keys.DARK_SQUARE_COLOR, "darkslateblue")
+        board_config.set_value(board_config.Keys.LIGHT_PIECE_COLOR, "white")
+        board_config.set_value(board_config.Keys.DARK_PIECE_COLOR, "black")
+        light_square_color = board_config.get_value(board_config.Keys.LIGHT_SQUARE_COLOR)
+        dark_square_color = board_config.get_value(board_config.Keys.DARK_SQUARE_COLOR)
+        light_piece_color = board_config.get_value(board_config.Keys.LIGHT_PIECE_COLOR)
+        dark_piece_color = board_config.get_value(board_config.Keys.DARK_PIECE_COLOR)
 
         for square in range(chess.A1, len(chess.SQUARES)):
             piece = model.board.piece_at(square)
@@ -130,19 +127,19 @@ class BoardPresenterTestCase(unittest.TestCase):
                     piece_color = dark_piece_color
 
                 # Test blindfold mode
-                config.set_board_value(board_keys.BLINDFOLD_CHESS, "yes")
+                board_config.set_value(board_config.Keys.BLINDFOLD_CHESS, "yes")
                 expected_output = f"<style bg='{square_color}'>  </style>"
                 self.assertEqual(presenter.get_square_final_display(square), expected_output)
-                config.set_board_value(board_keys.BLINDFOLD_CHESS, "no")
+                board_config.set_value(board_config.Keys.BLINDFOLD_CHESS, "no")
 
                 # Test letter piece
-                config.set_board_value(board_keys.USE_UNICODE_PIECES, "no")
+                board_config.set_value(board_config.Keys.USE_UNICODE_PIECES, "no")
                 piece_character = piece.symbol()
                 expected_output = f"<style fg='{piece_color}' bg='{square_color}'><b>{piece_character} </b></style>"
                 self.assertEqual(presenter.get_square_final_display(square), expected_output)
 
                 # Test unicode piece
-                config.set_board_value(board_keys.USE_UNICODE_PIECES, "yes")
+                board_config.set_value(board_config.Keys.USE_UNICODE_PIECES, "yes")
                 piece_character = get_piece_unicode_symbol(piece.symbol())
                 expected_output = f"<style fg='{piece_color}' bg='{square_color}'><b>{piece_character} </b></style>"
                 self.assertEqual(presenter.get_square_final_display(square), expected_output)
@@ -183,8 +180,8 @@ class BoardPresenterTestCase(unittest.TestCase):
         model = BoardModel()
         presenter = BoardPresenter(model)
 
-        defined_light_piece_color = config.get_board_value(board_keys.LIGHT_PIECE_COLOR)
-        defined_dark_piece_color = config.get_board_value(board_keys.DARK_PIECE_COLOR)
+        defined_light_piece_color = board_config.get_value(board_config.Keys.LIGHT_PIECE_COLOR)
+        defined_dark_piece_color = board_config.get_value(board_config.Keys.DARK_PIECE_COLOR)
 
         # Test light pieces
         for square in range(chess.A1, chess.H2):
@@ -206,14 +203,14 @@ class BoardPresenterTestCase(unittest.TestCase):
         presenter = BoardPresenter(model)
 
         # Set and obtain colors
-        config.set_board_value(board_keys.LIGHT_SQUARE_COLOR, "cadetblue")
-        config.set_board_value(board_keys.DARK_SQUARE_COLOR, "darkslateblue")
-        config.set_board_value(board_keys.IN_CHECK_COLOR, "red")
-        config.set_board_value(board_keys.LAST_MOVE_COLOR, "yellowgreen")
-        light_square_color = config.get_board_value(board_keys.LIGHT_SQUARE_COLOR)
-        dark_square_color = config.get_board_value(board_keys.DARK_SQUARE_COLOR)
-        in_check_color = config.get_board_value(board_keys.IN_CHECK_COLOR)
-        last_move_color = config.get_board_value(board_keys.LAST_MOVE_COLOR)
+        board_config.set_value(board_config.Keys.LIGHT_SQUARE_COLOR, "cadetblue")
+        board_config.set_value(board_config.Keys.DARK_SQUARE_COLOR, "darkslateblue")
+        board_config.set_value(board_config.Keys.IN_CHECK_COLOR, "red")
+        board_config.set_value(board_config.Keys.LAST_MOVE_COLOR, "yellowgreen")
+        light_square_color = board_config.get_value(board_config.Keys.LIGHT_SQUARE_COLOR)
+        dark_square_color = board_config.get_value(board_config.Keys.DARK_SQUARE_COLOR)
+        in_check_color = board_config.get_value(board_config.Keys.IN_CHECK_COLOR)
+        last_move_color = board_config.get_value(board_config.Keys.LAST_MOVE_COLOR)
 
         model.board.set_fen("rnbqkbnr/ppppp1pp/8/5p2/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 1")
         model.make_move("Qh5")  # black in check

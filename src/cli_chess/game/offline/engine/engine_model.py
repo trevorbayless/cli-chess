@@ -15,7 +15,7 @@
 
 from cli_chess.game.board import BoardModel
 from cli_chess.utils.logging import configure_logger
-from cli_chess.utils import config
+from cli_chess.utils.config import engine_config
 import chess.engine
 
 configure_logger("chess.engine")
@@ -23,7 +23,7 @@ configure_logger("chess.engine")
 
 async def load_engine() -> chess.engine.UciProtocol:
     """Load the chess engine"""
-    engine_path = config.get_engine_value(config.EngineKeys.ENGINE_PATH)
+    engine_path = engine_config.get_value(engine_config.Keys.ENGINE_PATH)
     _, engine = await chess.engine.popen_uci(engine_path)
     return engine
 
@@ -33,8 +33,8 @@ class EngineModel:
         self.board_model = board_model
         self.engine = engine
         self.engine_settings = {
-            'engine_path': config.get_engine_value(config.EngineKeys.ENGINE_PATH),
-            'think_time': 0.5
+            'engine_path': engine_config.get_value(engine_config.Keys.ENGINE_PATH),
+            'think_time': 0.1
         }
 
     async def get_best_move(self) -> chess.engine.PlayResult:

@@ -16,12 +16,11 @@
 import threading
 from pprint import pprint
 from cli_chess.game import Board
-from cli_chess import config
 from prompt_toolkit import prompt
 
 
 def get_my_color(event):
-    my_id = config.get_lichess_value(config.LichessKeys.USERNAME)
+    my_id = "temp" # lichess username
     my_color = "white"
 
     try:

@@ -14,7 +14,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from cli_chess import is_valid_lichess_token
-from cli_chess import config
+from cli_chess.utils.config import lichess_config
 from cli_chess.menus import MainMenu
 from prompt_toolkit.layout.dimension import D
 from prompt_toolkit.widgets import TextArea, Label, Button, Dialog, ValidationToolbar
@@ -69,7 +69,7 @@ class APITokenInput:
            token to the configuration file.
         """
         api_token = self.input.text
-        config.set_lichess_value(config.LichessKeys.API_TOKEN, api_token)
+        lichess_config.set_value(lichess_config.Keys.API_TOKEN, api_token)
 
     def ok_handler(self) -> str:
         """Handler for the 'Ok' button.

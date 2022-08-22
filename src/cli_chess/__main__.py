@@ -14,7 +14,8 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from cli_chess.menus import MainMenuPresenter
-from cli_chess.utils import config, is_valid_lichess_token
+from cli_chess.utils import is_valid_lichess_token
+from cli_chess.utils.config import lichess_config
 from cli_chess.utils.argparse import setup_argparse
 from cli_chess.utils.logging import configure_logger
 
@@ -26,7 +27,7 @@ def run() -> None:
     if args.api_token:
         valid_token, msg = is_valid_lichess_token(args.api_token)
         if valid_token:
-            config.set_lichess_value(config.LichessKeys.API_TOKEN, args.api_token)
+            lichess_config.set_value(lichess_config.Keys.API_TOKEN, args.api_token)
         else:
             print(msg)
             exit(1)

@@ -15,7 +15,7 @@
 
 from . import MaterialDifferenceModel, MaterialDifferenceView
 from cli_chess.game.common import get_piece_unicode_symbol
-from cli_chess.utils import config
+from cli_chess.utils.config import board_config
 from chess import Color, PIECE_TYPES, PIECE_SYMBOLS
 
 
@@ -39,7 +39,7 @@ class MaterialDifferencePresenter:
         output = ""
         material_difference = self.material_diff_model.get_material_difference(self.color)
         score = self.material_diff_model.get_score(self.color)
-        use_unicode = config.get_board_boolean(config.BoardKeys.USE_UNICODE_PIECES)
+        use_unicode = board_config.get_boolean(board_config.Keys.USE_UNICODE_PIECES)
 
         for piece_type in PIECE_TYPES:
             for count in range(material_difference[piece_type]):

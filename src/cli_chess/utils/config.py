@@ -13,10 +13,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from os import path, makedirs
-import configparser
 from cli_chess.utils.common import is_windows_system
-from cli_chess.utils.logging import log_redactions
+from cli_chess.utils.logging import log, redact_from_logs
+from os import path, makedirs
+from enum import Enum
+import configparser
 
 # TODO: Handle exceptions
 # TODO: Handle new config options on updates (do not overwrite full config)
@@ -39,11 +40,7 @@ class BaseConfig:
         self.file_path = get_config_path()
         self.full_filename = self.file_path + filename
         self.parser = configparser.ConfigParser()
-
-    def read_config(self) -> bool:
-        """Attempts to read the configuration file (True if file exists)"""
         self.parser.read(self.full_filename)
-        return self.config_exists()
 
     def write_config(self) -> None:
         """Writes to the configuration file"""
@@ -61,6 +58,9 @@ class BaseConfig:
         """Add a section to the configuration file"""
         self.parser[section] = {}
         self.write_config()
+
+    def has_section(self, section: str) -> bool:
+        return self.parser.has_section(section)
 
     def set_key_value(self, section: str, key: str, value: str) -> None:
         """Set (or add) a key/value to a section in the configuration file"""
@@ -91,143 +91,90 @@ class BaseConfig:
 
     def handle_exception(self, e: Exception) -> None:
         """Handles exceptions that occur while parsing the configuration file"""
-        # TODO: Handle base class exceptions
-        print("Exception caught while handling the configuration file. Please recreate the configuration file.")
+        log.error(f"Exception caught while parsing the configuration file: {e}")
 
 
-class Config(BaseConfig):
-    """Class to create, update, and read from the configuration file"""
-    def __init__(self, filename: str) -> None:
-        """Default constructor. Calls the base class to read the configuration
-           file. If the file does not exist, the default configuration is created.
-        """
+class SectionBase(BaseConfig):
+    def __init__(self, filename: str, section_name: str, section_keys):
         super().__init__(filename)
-        if super().read_config():
-            log_redactions.append(self.get_lichess_value(Config.LichessKeys.API_TOKEN, False))
+        self.section_name = section_name
+        self.section_keys = section_keys
+        self._verify_section_integrity()
+
+    def _verify_section_integrity(self):
+        # Todo: Update this to verify this section and all keys (has_option, has_section)
+        if super().has_section(self.section_name):
+            pass
         else:
-            self.create_default_config()
+            self._rebuild_section()
 
-    def create_default_config(self, overwrite: bool = False) -> None:
-        """Creates the default configuration file"""
-        if not super().config_exists() or overwrite:
-            self.create_board_section()
-            self.create_ui_section()
-            self.create_engine_section()
-            self.create_lichess_section()
+    def _rebuild_section(self) -> None:
+        """Rebuild this section using key value defaults"""
+        super().add_section(self.section_name)
+        for key in self.section_keys:
+            super().set_key_value(self.section_name, key.value["name"], key.value["default"])
 
-    def create_board_section(self) -> None:
-        """Creates the default 'BOARD' section in the config file"""
-        super().add_section(Config.Sections.BOARD)
-        self.set_board_value(Config.BoardKeys.SHOW_BOARD_COORDINATES, "yes")
-        self.set_board_value(Config.BoardKeys.RANK_LABEL_COLOR, "gray")
-        self.set_board_value(Config.BoardKeys.FILE_LABEL_COLOR, "gray")
-        self.set_board_value(Config.BoardKeys.SHOW_BOARD_HIGHLIGHTS, "yes")
-        self.set_board_value(Config.BoardKeys.LAST_MOVE_COLOR, "yellowgreen")
-        self.set_board_value(Config.BoardKeys.LIGHT_SQUARE_COLOR, "cadetblue")
-        self.set_board_value(Config.BoardKeys.DARK_SQUARE_COLOR, "darkslateblue")
-        self.set_board_value(Config.BoardKeys.IN_CHECK_COLOR, "red")
-        self.set_board_value(Config.BoardKeys.BLINDFOLD_CHESS, "no")
-        self.set_board_value(Config.BoardKeys.USE_UNICODE_PIECES, "no" if is_windows_system() else "yes")
-        self.set_board_value(Config.BoardKeys.LIGHT_PIECE_COLOR, "white")
-        self.set_board_value(Config.BoardKeys.DARK_PIECE_COLOR, "black")
+    def get_value(self, key) -> str:
+        return super().get_key_value(self.section_name, key.value["name"], False)
 
-    def set_board_value(self, key: str, value: str) -> None:
-        """Modify (or add) a keys value at the 'BOARD' section"""
-        super().set_key_value(Config.Sections.BOARD, key, value)
+    def set_value(self, key, value: str) -> None:
+        super().set_key_value(self.section_name, key.value["name"], value)
 
-    def get_board_value(self, key: str, lowercase: bool = True) -> str:
-        """Returns a value from the 'BOARD' section at the passed in key"""
-        return super().get_key_value(Config.Sections.BOARD, key, lowercase)
-
-    def get_board_boolean(self, key: str) -> bool:
-        """Returns a boolean value from the 'BOARD' section at the passed in key"""
-        return super().get_key_boolean_value(Config.Sections.BOARD, key)
-
-    def create_ui_section(self) -> None:
-        """Creates the default 'UI' section in the config file"""
-        super().add_section(Config.Sections.UI)
-        self.set_ui_value(Config.UiKeys.ZEN_MODE, "no")
-
-    def set_ui_value(self, key: str, value: str) -> None:
-        """Modify (or add) a keys value at the 'UI' section"""
-        super().set_key_value(Config.Sections.UI, key, value)
-
-    def get_ui_value(self, key: str, lowercase: bool = True) -> str:
-        """Returns a value from the 'UI' section at the passed in key"""
-        return super().get_key_value(Config.Sections.UI, key, lowercase)
-
-    def get_ui_boolean(self, key: str) -> bool:
-        """Returns a boolean value from the 'UI' section at the passed in key"""
-        return super().get_key_boolean_value(Config.Sections.UI, key)
-
-    def create_engine_section(self) -> None:
-        """Creates the default 'ENGINE' section in the config file"""
-        super().add_section(Config.Sections.ENGINE)
-        self.set_engine_value(Config.EngineKeys.ENGINE_PATH, "")
-
-    def set_engine_value(self, key: str, value: str) -> None:
-        """Modify (or add) a keys value at the 'ENGINE' section at the passed in key"""
-        super().set_key_value(Config.Sections.ENGINE, key, value)
-
-    def get_engine_value(self, key: str) -> str:
-        """Returns a value from the 'ENGINE' section at the passed in key"""
-        return super().get_key_value(Config.Sections.ENGINE, key, False)
-
-    def create_lichess_section(self) -> None:
-        """Creates the default 'LICHESS' section in the config file"""
-        super().add_section(Config.Sections.LICHESS)
-        self.set_lichess_value(Config.LichessKeys.API_TOKEN, "")
-        self.set_lichess_value(Config.LichessKeys.USERNAME, "")
-
-    def set_lichess_value(self, key: str, value: str) -> None:
-        """Modify (or add) a keys value at the 'LICHESS' section at the passed in key"""
-        if key is Config.LichessKeys.API_TOKEN:
-            log_redactions.append(value)
-
-        super().set_key_value(Config.Sections.LICHESS, key, value)
-
-    def get_lichess_value(self, key: str, lowercase: bool = True) -> str:
-        """Returns a value from the 'LICHESS' section at the passed in key"""
-        return super().get_key_value(Config.Sections.LICHESS, key, lowercase)
-
-    def get_lichess_boolean(self, key: str) -> bool:
-        """Returns a boolean value from the UI section at the passed in key"""
-        return super().get_key_boolean_value(Config.Sections.LICHESS, key)
-
-    class Sections:
-        """Holds the section names"""
-        BOARD = "board"
-        UI = "ui"
-        ENGINE = "engine"
-        LICHESS = "lichess"
-
-    class BoardKeys:
-        """Holds the name of keys in the BOARD section"""
-        SHOW_BOARD_COORDINATES = "show_board_coordinates"  # display A-H, 1-8 labels
-        RANK_LABEL_COLOR = "rank_label_color"              # color to display rank labels
-        FILE_LABEL_COLOR = "file_label_color"              # color to display file labels
-        SHOW_BOARD_HIGHLIGHTS = "show_board_highlights"    # last move and check
-        LAST_MOVE_COLOR = "last_move_color"                # color to use to indicate the last move
-        LIGHT_SQUARE_COLOR = "light_square_color"          # color to use for light squares
-        DARK_SQUARE_COLOR = "dark_square_color"            # color to use for dark squares
-        IN_CHECK_COLOR = "in_check_color"                  # color to highlight the king in check square
-        BLINDFOLD_CHESS = "blindfold_chess"                # pieces are not shown
-        USE_UNICODE_PIECES = "use_unicode_pieces"          # use unicode pieces instead of symbols
-        LIGHT_PIECE_COLOR = "light_piece_color"            # color to use for light pieces
-        DARK_PIECE_COLOR = "dark_piece_color"              # color to use for dark pieces
-
-    class UiKeys:
-        """Holds the name of keys in the UI section"""
-        ZEN_MODE = "zen_mode"  # simple ui
-
-    class EngineKeys:
-        """Holds the name of keys in the ENGINE section"""
-        ENGINE_PATH = "engine_path"
-
-    class LichessKeys:
-        """Holds the name of keys in the LICHESS section"""
-        API_TOKEN = "api_token"  # lichess api token
-        USERNAME = "username"    # lichess username
+    def get_boolean(self, key) -> bool:
+        return super().get_key_boolean_value(self.section_name, key.value["name"])
 
 
-config = Config("config.ini")
+class BoardSection(SectionBase):
+    """Creates and manages the "board" section of the config"""
+    class Keys(Enum):
+        SHOW_BOARD_COORDINATES = {"name": "show_board_coordinates", "default": "yes"}
+        RANK_LABEL_COLOR = {"name": "rank_label_color", "default": "gray"}
+        FILE_LABEL_COLOR = {"name": "file_label_color", "default": "gray"}
+        SHOW_BOARD_HIGHLIGHTS = {"name": "show_board_highlights", "default": "yes"}
+        LAST_MOVE_COLOR = {"name": "last_move_color", "default": "yellowgreen"}
+        LIGHT_SQUARE_COLOR = {"name": "light_square_color", "default": "cadetblue"}
+        DARK_SQUARE_COLOR = {"name": "dark_square_color", "default": "darkslateblue"}
+        IN_CHECK_COLOR = {"name": "in_check_color", "default": "red"}
+        BLINDFOLD_CHESS = {"name": "blindfold_chess", "default": "no"}
+        USE_UNICODE_PIECES = {"name": "use_unicode_pieces", "default": "no" if is_windows_system() else "yes"}
+        LIGHT_PIECE_COLOR = {"name": "light_piece_color", "default": "white"}
+        DARK_PIECE_COLOR = {"name": "dark_piece_color", "default": "black"}
+
+    def __init__(self, filename: str):
+        super().__init__(filename, "board", self.Keys)
+
+
+class UiSection(SectionBase):
+    """Creates and manages the "ui" section of the config"""
+    class Keys(Enum):
+        ZEN_MODE = {"name": "zen_mode", "default": "no"}
+
+    def __init__(self, filename: str):
+        super().__init__(filename, "ui", self.Keys)
+
+
+class EngineSection(SectionBase):
+    """Creates and manages the "engine" section of the config"""
+    class Keys(Enum):
+        ENGINE_PATH = {"name": "engine_path", "default": ""}
+
+    def __init__(self, filename: str):
+        super().__init__(filename, "engine", self.Keys)
+
+
+class LichessSection(SectionBase):
+    """Creates and manages the "lichess" section of the config"""
+    class Keys(Enum):
+        API_TOKEN = {"name": "api_token", "default": ""}
+
+    def __init__(self, filename: str):
+        super().__init__(filename, "lichess", self.Keys)
+        test = self.get_value(self.Keys.API_TOKEN)
+        redact_from_logs(test)
+
+
+CONFIG_FILENAME = "config.ini"
+board_config = BoardSection(CONFIG_FILENAME)
+ui_config = UiSection(CONFIG_FILENAME)
+engine_config = EngineSection(CONFIG_FILENAME)
+lichess_config = LichessSection(CONFIG_FILENAME)

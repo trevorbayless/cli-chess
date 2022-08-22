@@ -39,7 +39,7 @@ def configure_logger(name: str, level=logging.DEBUG) -> logging.Logger:
 
 def redact_from_logs(text: str = "") -> None:
     """Adds the passed in text to the log redaction list"""
-    if text not in log_redactions and text is not None:
+    if text not in log_redactions and text != "":
         log_redactions.append(text)
 
 
