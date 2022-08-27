@@ -89,6 +89,13 @@ class BaseConfig:
         except Exception as e:
             self.handle_exception(e)
 
+    def get_sections_values(self, section: str) -> dict:
+        """Returns a dictionary of all key/values at the section passed in"""
+        try:
+            return dict(self.parser.items(section))
+        except Exception as e:
+            self.handle_exception(e)
+
     def handle_exception(self, e: Exception) -> None:
         """Handles exceptions that occur while parsing the configuration file"""
         log.error(f"Exception caught while parsing the configuration file: {e}")
@@ -112,33 +119,44 @@ class SectionBase(BaseConfig):
         """Rebuild this section using key value defaults"""
         super().add_section(self.section_name)
         for key in self.section_keys:
-            super().set_key_value(self.section_name, key.value["name"], key.value["default"])
+            super().set_key_value(self.section_name, key["name"], key["default"])
+
+    def get_all_values(self) -> dict:
+        """Returns a dictionary of all key/values in this section"""
+        return dict(super().get_sections_values(self.section_name))
 
     def get_value(self, key) -> str:
-        return super().get_key_value(self.section_name, key.value["name"], False)
+        """Get the value of the key passed in from the configuration file"""
+        return super().get_key_value(self.section_name, key["name"], False)
 
-    def set_value(self, key, value: str) -> None:
-        super().set_key_value(self.section_name, key.value["name"], value)
+    def set_value(self, key: dict, value: str) -> None:
+        """Set a keys value in the configuration file"""
+        super().set_key_value(self.section_name, key["name"], value)
 
-    def get_boolean(self, key) -> bool:
-        return super().get_key_boolean_value(self.section_name, key.value["name"])
+    def get_boolean(self, key: dict) -> bool:
+        """Retrieve the boolean value at the passed in section/key pair"""
+        return super().get_key_boolean_value(self.section_name, key["name"])
 
 
 class BoardSection(SectionBase):
     """Creates and manages the "board" section of the config"""
-    class Keys(Enum):
-        SHOW_BOARD_COORDINATES = {"name": "show_board_coordinates", "default": "yes"}
+    class Keys:
+        SHOW_BOARD_COORDINATES = {"name": "show_board_coordinates", "default": "true"}
         RANK_LABEL_COLOR = {"name": "rank_label_color", "default": "gray"}
         FILE_LABEL_COLOR = {"name": "file_label_color", "default": "gray"}
-        SHOW_BOARD_HIGHLIGHTS = {"name": "show_board_highlights", "default": "yes"}
+        SHOW_BOARD_HIGHLIGHTS = {"name": "show_board_highlights", "default": "true"}
         LAST_MOVE_COLOR = {"name": "last_move_color", "default": "yellowgreen"}
         LIGHT_SQUARE_COLOR = {"name": "light_square_color", "default": "cadetblue"}
         DARK_SQUARE_COLOR = {"name": "dark_square_color", "default": "darkslateblue"}
         IN_CHECK_COLOR = {"name": "in_check_color", "default": "red"}
-        BLINDFOLD_CHESS = {"name": "blindfold_chess", "default": "no"}
-        USE_UNICODE_PIECES = {"name": "use_unicode_pieces", "default": "no" if is_windows_system() else "yes"}
+        BLINDFOLD_CHESS = {"name": "blindfold_chess", "default": "false"}
+        USE_UNICODE_PIECES = {"name": "use_unicode_pieces", "default": "true" if is_windows_system() else "false"}
         LIGHT_PIECE_COLOR = {"name": "light_piece_color", "default": "white"}
         DARK_PIECE_COLOR = {"name": "dark_piece_color", "default": "black"}
+
+        def __getitem__(self):
+            test = "hi"
+            return self["name"]
 
     def __init__(self, filename: str):
         super().__init__(filename, "board", self.Keys)
@@ -147,7 +165,7 @@ class BoardSection(SectionBase):
 class UiSection(SectionBase):
     """Creates and manages the "ui" section of the config"""
     class Keys(Enum):
-        ZEN_MODE = {"name": "zen_mode", "default": "no"}
+        ZEN_MODE = {"name": "zen_mode", "default": "false"}
 
     def __init__(self, filename: str):
         super().__init__(filename, "ui", self.Keys)
@@ -155,7 +173,7 @@ class UiSection(SectionBase):
 
 class EngineSection(SectionBase):
     """Creates and manages the "engine" section of the config"""
-    class Keys(Enum):
+    class Keys:
         ENGINE_PATH = {"name": "engine_path", "default": ""}
 
     def __init__(self, filename: str):
@@ -164,13 +182,12 @@ class EngineSection(SectionBase):
 
 class LichessSection(SectionBase):
     """Creates and manages the "lichess" section of the config"""
-    class Keys(Enum):
+    class Keys:
         API_TOKEN = {"name": "api_token", "default": ""}
 
     def __init__(self, filename: str):
         super().__init__(filename, "lichess", self.Keys)
-        test = self.get_value(self.Keys.API_TOKEN)
-        redact_from_logs(test)
+        redact_from_logs(self.get_value(self.Keys.API_TOKEN))
 
 
 CONFIG_FILENAME = "config.ini"

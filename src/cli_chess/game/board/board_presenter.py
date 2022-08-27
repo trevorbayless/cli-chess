@@ -23,7 +23,6 @@ class BoardPresenter:
     def __init__(self, board_model: BoardModel) -> None:
         self.board_model = board_model
         self.view = BoardView(self, self.build_board_output())
-
         self.board_model.e_board_model_updated.add_listener(self.update)
 
     def update(self) -> None:
@@ -55,7 +54,7 @@ class BoardPresenter:
         return board_output
 
     def apply_file_labels(self) -> str:
-        """Returns a HTML string containing the file labels
+        """Returns an HTML string containing the file labels
            depending on the rank index and configuration settings
         """
         file_labels = ""
@@ -69,7 +68,7 @@ class BoardPresenter:
         return file_labels
 
     def apply_rank_label(self, square: Square) -> str:
-        """Returns a HTML formatted string with
+        """Returns an HTML formatted string with
            the rank label at the square passed in.
         """
         rank_label = ""
