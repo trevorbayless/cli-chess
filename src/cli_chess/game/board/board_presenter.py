@@ -22,11 +22,13 @@ from chess import Piece, Square
 class BoardPresenter:
     def __init__(self, board_model: BoardModel) -> None:
         self.board_model = board_model
+        self.board_config_values = board_config.get_all_values()
         self.view = BoardView(self, self.build_board_output())
         self.board_model.e_board_model_updated.add_listener(self.update)
 
     def update(self) -> None:
         """Updates the board output"""
+        self.board_config_values = board_config.get_all_values()
         self.view.update(self.build_board_output())
 
     def make_move(self, move: str, human=True) -> None:
@@ -58,11 +60,11 @@ class BoardPresenter:
            depending on the rank index and configuration settings
         """
         file_labels = ""
-        show_board_coordinates = board_config.get_boolean(board_config.Keys.SHOW_BOARD_COORDINATES)
+        show_board_coordinates = self.board_config_values[board_config.Keys.SHOW_BOARD_COORDINATES.name.lower()]
 
         if show_board_coordinates:
             file_labels = self.board_model.get_file_labels()
-            color = board_config.get_value(board_config.Keys.FILE_LABEL_COLOR)
+            color = self.board_config_values[board_config.Keys.FILE_LABEL_COLOR.name.lower()]
             file_labels = f"<style fg='{color}'>  {file_labels}</style>"
 
         return file_labels
@@ -81,11 +83,11 @@ class BoardPresenter:
         elif not self.board_model.is_white_orientation() and file_index == 7:
             starting_index = True
 
-        show_board_coordinates = board_config.get_boolean(board_config.Keys.SHOW_BOARD_COORDINATES)
+        show_board_coordinates = self.board_config_values[board_config.Keys.SHOW_BOARD_COORDINATES.name.lower()]
 
         if starting_index and show_board_coordinates:
             rank_label = " " + self.board_model.get_rank_label(rank_index)
-            color = board_config.get_value(board_config.Keys.RANK_LABEL_COLOR)
+            color = self.board_config_values[board_config.Keys.RANK_LABEL_COLOR.name.lower()]
             rank_label = f"<style fg='{color}'>{rank_label}</style>"
 
         return rank_label
@@ -97,8 +99,8 @@ class BoardPresenter:
         piece = self.board_model.board.piece_at(square)
         square_color = self.get_square_display_color(square)
 
-        blindfold_chess = board_config.get_boolean(board_config.Keys.BLINDFOLD_CHESS)
-        use_unicode_pieces = board_config.get_boolean(board_config.Keys.USE_UNICODE_PIECES)
+        blindfold_chess = self.board_config_values[board_config.Keys.BLINDFOLD_CHESS.name.lower()]
+        use_unicode_pieces = self.board_config_values[board_config.Keys.USE_UNICODE_PIECES.name.lower()]
 
         if piece and not blindfold_chess:
             piece_color = self.get_piece_color(piece)
@@ -132,9 +134,9 @@ class BoardPresenter:
         if piece:
             piece_is_light = True if piece.color else False
             if piece_is_light:
-                piece_color = board_config.get_value(board_config.Keys.LIGHT_PIECE_COLOR)
+                piece_color = self.board_config_values[board_config.Keys.LIGHT_PIECE_COLOR.name.lower()]
             else:
-                piece_color = board_config.get_value(board_config.Keys.DARK_PIECE_COLOR)
+                piece_color = self.board_config_values[board_config.Keys.DARK_PIECE_COLOR.name.lower()]
 
         return piece_color
 
@@ -143,22 +145,22 @@ class BoardPresenter:
            square based on configuration settings, last move, and check.
         """
         if self.board_model.is_light_square(square):
-            square_color = board_config.get_value(board_config.Keys.LIGHT_SQUARE_COLOR)
+            square_color = self.board_config_values[board_config.Keys.LIGHT_SQUARE_COLOR.name.lower()]
         else:
-            square_color = board_config.get_value(board_config.Keys.DARK_SQUARE_COLOR)
+            square_color = self.board_config_values[board_config.Keys.DARK_SQUARE_COLOR.name.lower()]
 
-        show_board_highlights = board_config.get_boolean(board_config.Keys.SHOW_BOARD_HIGHLIGHTS)
+        show_board_highlights = self.board_config_values[board_config.Keys.SHOW_BOARD_HIGHLIGHTS.name.lower()]
         if show_board_highlights:
             try:
                 last_move = self.board_model.board.peek()
                 if square == last_move.to_square or square == last_move.from_square:
-                    square_color = board_config.get_value(board_config.Keys.LAST_MOVE_COLOR)
+                    square_color = self.board_config_values[board_config.Keys.LAST_MOVE_COLOR.name.lower()]
                     # TODO: Lighten last move color if on light square
             except IndexError:
                 pass
 
             if self.board_model.is_square_in_check(square):
-                square_color = board_config.get_value(board_config.Keys.IN_CHECK_COLOR)
+                square_color = self.board_config_values[board_config.Keys.IN_CHECK_COLOR.name.lower()]
 
         return square_color
 
