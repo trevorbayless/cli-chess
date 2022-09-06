@@ -20,14 +20,37 @@ from prompt_toolkit import HTML
 
 
 class BoardView:
-    def __init__(self, board_presenter: BoardPresenter, initial_board: str):
+    def __init__(self, board_presenter: BoardPresenter, initial_board_output: list):
         self.board_presenter = board_presenter
-        self.board_output = FormattedTextControl(HTML(initial_board))
+        self.board_output = FormattedTextControl(HTML(self._build_output(initial_board_output)))
         self.root_container = Window(self.board_output, width=20)
 
-    def update(self, board_output: str):
+    def _build_output(self, board_output_list: list) -> str:
+        """Returns a string containing the board output to be used for
+           display. The string returned will contain HTML elements"""
+        board_output_str = ""
+        file_label_color = self.board_presenter.get_file_labels_color()
+        rank_label_color = self.board_presenter.get_rank_labels_color()
+
+        for square in board_output_list:
+            # Pad piece for proper alignment
+            piece_str = square['piece_str']
+            piece_str += " " if square['piece_str'] else "  "
+
+            board_output_str += f"<style fg='{rank_label_color}'>{square['rank_label']}</style>"
+            board_output_str += f"<style fg='{square['piece_display_color']}' bg='{square['square_display_color']}'>{piece_str}</style>"
+
+            if square['is_end_of_rank']:
+                board_output_str += "\n"
+
+        file_labels = " " + self.board_presenter.get_file_labels()
+        board_output_str += f"<style fg='{file_label_color}'>{file_labels}</style>"
+
+        return board_output_str
+
+    def update(self, board_output_list: list):
         """Updates the board output with the passed in text"""
-        self.board_output.text = HTML(board_output)
+        self.board_output.text = HTML(self._build_output(board_output_list))
 
     def __pt_container__(self) -> Window:
         """Returns the game_view container"""
