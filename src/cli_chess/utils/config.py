@@ -128,7 +128,7 @@ class SectionBase(BaseConfig):
         """Rebuild this section using key value defaults"""
         super().add_section(self.section_name)
         for key in self.section_keys:
-            super().set_key_value(self.section_name, key.name, key.value)
+            super().set_key_value(self.section_name, key.name, key.value["default"])
 
     def get_all_values(self) -> dict:
         """Returns a dictionary of all key/values in this section"""
@@ -150,18 +150,18 @@ class SectionBase(BaseConfig):
 class BoardSection(SectionBase):
     """Creates and manages the "board" section of the config"""
     class Keys(Enum):
-        SHOW_BOARD_COORDINATES = True
-        SHOW_BOARD_HIGHLIGHTS = True
-        BLINDFOLD_CHESS = False
-        USE_UNICODE_PIECES = True
-        RANK_LABEL_COLOR = "gray"
-        FILE_LABEL_COLOR = "gray"
-        LAST_MOVE_COLOR = "yellowgreen"
-        LIGHT_SQUARE_COLOR = "cadetblue"
-        DARK_SQUARE_COLOR = "darkslateblue"
-        IN_CHECK_COLOR = "red"
-        LIGHT_PIECE_COLOR = "white"
-        DARK_PIECE_COLOR = "black"
+        SHOW_BOARD_COORDINATES = {"name": "show_board_coordinates", "default": True}
+        SHOW_BOARD_HIGHLIGHTS = {"name": "show_board_highlights", "default": True}
+        BLINDFOLD_CHESS = {"name": "blindfold_chess", "default": False}
+        USE_UNICODE_PIECES = {"name": "use_unicode_pieces", "default": True}
+        RANK_LABEL_COLOR = {"name": "rank_label_color", "default": "gray"}
+        FILE_LABEL_COLOR = {"name": "file_label_color", "default": "gray"}
+        LAST_MOVE_COLOR = {"name": "last_move_color", "default": "yellowgreen"}
+        LIGHT_SQUARE_COLOR = {"name": "light_square_color", "default": "cadetblue"}
+        DARK_SQUARE_COLOR = {"name": "dark_square_color", "default": "darkslateblue"}
+        IN_CHECK_COLOR = {"name": "in_check_color", "default": "red"}
+        LIGHT_PIECE_COLOR = {"name": "light_piece_color", "default": "white"}
+        DARK_PIECE_COLOR = {"name": "dark_piece_color", "default": "black"}
 
     def __init__(self, filename: str):
         super().__init__(filename, "board", self.Keys)
@@ -170,7 +170,7 @@ class BoardSection(SectionBase):
 class UiSection(SectionBase):
     """Creates and manages the "ui" section of the config"""
     class Keys(Enum):
-        ZEN_MODE = False
+        ZEN_MODE = {"name": "zen_mode", "default": False}
 
     def __init__(self, filename: str):
         super().__init__(filename, "ui", self.Keys)
@@ -179,7 +179,7 @@ class UiSection(SectionBase):
 class EngineSection(SectionBase):
     """Creates and manages the "engine" section of the config"""
     class Keys(Enum):
-        ENGINE_PATH = ""
+        ENGINE_PATH = {"name": "engine_path", "default": ""}
 
     def __init__(self, filename: str):
         super().__init__(filename, "engine", self.Keys)
@@ -188,7 +188,7 @@ class EngineSection(SectionBase):
 class LichessSection(SectionBase):
     """Creates and manages the "lichess" section of the config"""
     class Keys(Enum):
-        API_TOKEN = ""
+        API_TOKEN = {"name": "engine_path", "default": ""}
 
     def __init__(self, filename: str):
         super().__init__(filename, "lichess", self.Keys)
