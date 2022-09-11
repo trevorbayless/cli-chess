@@ -28,14 +28,13 @@ class GamePresenterBase:
 
         self.board_presenter = BoardPresenter(self.game_model.board_model)
         self.move_list_presenter = MoveListPresenter(self.game_model.move_list_model)
-        self.material_diff_presenter_white = MaterialDifferencePresenter(self.game_model.material_diff_model, WHITE)
-        self.material_diff_presenter_black = MaterialDifferencePresenter(self.game_model.material_diff_model, BLACK)
+        self.material_diff_presenter = MaterialDifferencePresenter(self.game_model.material_diff_model)
 
         self.game_view = GameViewBase(self,
                                       self.board_presenter.view,
                                       self.move_list_presenter.view,
-                                      self.material_diff_presenter_white.view,
-                                      self.material_diff_presenter_black.view)
+                                      self.material_diff_presenter.view_upper,
+                                      self.material_diff_presenter.view_lower)
 
     def user_input_received(self, input: str) -> None:
         self.make_move(input, human=True)

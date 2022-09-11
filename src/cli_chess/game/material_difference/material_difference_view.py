@@ -29,11 +29,13 @@ class MaterialDifferenceView:
                                           focusable=False,
                                           multiline=False,
                                           wrap_lines=False)
+        self.show = show
         self.root_container = ConditionalContainer(self.difference_output, show)
 
     def update(self, difference: str) -> None:
         """Updates the view output with the passed in text"""
-        self.difference_output.text = difference
+        if self.show:
+            self.difference_output.text = difference
 
     def __pt_container__(self) -> ConditionalContainer:
         """Returns this views container"""

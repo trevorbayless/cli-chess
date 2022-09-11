@@ -20,25 +20,26 @@ from chess import Color, PIECE_TYPES, PIECE_SYMBOLS
 
 
 class MaterialDifferencePresenter:
-    def __init__(self, material_diff_model: MaterialDifferenceModel, color: Color):
+    def __init__(self, material_diff_model: MaterialDifferenceModel):
         self.material_diff_model = material_diff_model
-        self.color = color
 
         self.is_proper_variant = self.material_diff_model.board_model.game_parameters['variant'] != "horde"
-        self.view = MaterialDifferenceView(self, self.format_diff_output(), self.is_proper_variant)
+
+        self.view_upper = MaterialDifferenceView(self, self.format_diff_output(not self.material_diff_model.board_orientation), self.is_proper_variant)
+        self.view_lower = MaterialDifferenceView(self, self.format_diff_output(self.material_diff_model.board_orientation), self.is_proper_variant)
 
         self.material_diff_model.e_material_difference_model_updated.add_listener(self.update)
 
     def update(self) -> None:
-        """Updates the material difference"""
-        if self.is_proper_variant:
-            self.view.update(self.format_diff_output())
+        """Updates the material differences for both sides"""
+        self.view_upper.update(self.format_diff_output(not self.material_diff_model.board_orientation))
+        self.view_lower.update(self.format_diff_output(self.material_diff_model.board_orientation))
 
-    def format_diff_output(self) -> str:
-        """Returns the formatted difference as a string"""
+    def format_diff_output(self, color: Color) -> str:
+        """Returns the formatted difference of the color passed in as a string"""
         output = ""
-        material_difference = self.material_diff_model.get_material_difference(self.color)
-        score = self.material_diff_model.get_score(self.color)
+        material_difference = self.material_diff_model.get_material_difference(color)
+        score = self.material_diff_model.get_score(color)
         use_unicode = board_config.get_boolean(board_config.Keys.USE_UNICODE_PIECES)
 
         for piece_type in PIECE_TYPES:

@@ -30,12 +30,12 @@ from cli_chess.utils import log
 
 class GameViewBase:
     def __init__(self, game_presenter: GamePresenterBase, board_view: BoardView, move_list_view: MoveListView,
-                 material_diff_white_view: MaterialDifferenceView, material_diff_black_view: MaterialDifferenceView) -> None:
+                 material_diff_upper_view: MaterialDifferenceView, material_diff_lower_view: MaterialDifferenceView) -> None:
         self.game_presenter = game_presenter
         self.board_output_container = board_view
         self.move_list_container = move_list_view
-        self.material_diff_white_container = material_diff_white_view
-        self.material_diff_black_container = material_diff_black_view
+        self.material_diff_upper_container = material_diff_upper_view
+        self.material_diff_lower_container = material_diff_lower_view
         self.input_field_container = self._create_input_field_container()
         self.root_container = self._create_root_container()
         self.app = self._create_application()
@@ -57,9 +57,9 @@ class GameViewBase:
                         self.board_output_container,
                         HSplit(
                             [
-                                self.material_diff_black_container,
+                                self.material_diff_upper_container,
                                 self.move_list_container,
-                                self.material_diff_white_container,
+                                self.material_diff_lower_container,
                             ]
                         )
                     ], window_too_small=self.board_output_container),

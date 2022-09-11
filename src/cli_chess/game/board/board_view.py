@@ -33,12 +33,12 @@ class BoardView:
         rank_label_color = self.board_presenter.get_rank_labels_color()
 
         for square in board_output_list:
-            # Pad piece for proper alignment
             piece_str = square['piece_str']
             piece_str += " " if square['piece_str'] else "  "
 
             board_output_str += f"<style fg='{rank_label_color}'>{square['rank_label']}</style>"
-            board_output_str += f"<style fg='{square['piece_display_color']}' bg='{square['square_display_color']}'>{piece_str}</style>"
+            board_output_str += f"<style fg='{square['piece_display_color']}'\
+                                         bg='{square['square_display_color']}'>{piece_str}</style>"
 
             if square['is_end_of_rank']:
                 board_output_str += "\n"

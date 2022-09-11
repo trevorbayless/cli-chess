@@ -38,6 +38,7 @@ class MaterialDifferenceModel:
         self.piece_count: Dict[Color, Dict[PieceType, int]] = self.empty_count()
         self.material_difference: Dict[Color, Dict[PieceType, int]] = self.empty_count()
         self.score: Dict[Color, int] = self.empty_score()
+        self.board_orientation = self.board_model.get_board_orientation()
 
         self.e_material_difference_model_updated = Event()
         self.update()
@@ -75,6 +76,7 @@ class MaterialDifferenceModel:
             self.update_material_difference(color, piece_type)
             self.update_score(color, piece_type)
 
+        self.board_orientation = self.board_model.get_board_orientation()
         self._material_difference_model_updated()
 
     def generate_pieces_fen(self, board_fen: str) -> str:
