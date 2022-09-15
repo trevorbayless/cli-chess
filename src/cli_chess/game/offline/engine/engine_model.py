@@ -18,14 +18,18 @@ from cli_chess.utils.logging import configure_logger
 from cli_chess.utils.config import engine_config
 import chess.engine
 
-configure_logger("chess.engine")
+engine_log = configure_logger("chess.engine")
 
 
 async def load_engine() -> chess.engine.UciProtocol:
     """Load the chess engine"""
     engine_path = engine_config.get_value(engine_config.Keys.ENGINE_PATH)
-    _, engine = await chess.engine.popen_uci(engine_path)
-    return engine
+    try:
+        _, engine = await chess.engine.popen_uci(engine_path)
+        return engine
+    except Exception as e:
+        engine_log.critical(f"Exception caught starting engine: {e}")
+        raise e
 
 
 class EngineModel:
