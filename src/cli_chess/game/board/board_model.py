@@ -55,6 +55,7 @@ class BoardModel:
         """
         player = "human" if human else "engine"
         try:
+            move = move.strip()
             self.board.push_san(move)
             self._board_model_updated()
             log.info(f"make_move ({player}): {move}")
