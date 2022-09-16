@@ -1,4 +1,0 @@
-chess>=1.9.2
-berserk>=0.10.0
-prompt-toolkit>=3.0.30
-questionary>=1.10.0

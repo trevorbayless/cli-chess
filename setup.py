@@ -17,5 +17,10 @@ from setuptools import setup
 
 setup(
     name="cli-chess",
-    install_requires=["chess", "berserk", "prompt-toolkit"],
+    install_requires=[
+        "chess>=1.9.3",
+        "berserk>=0.10.0",
+        "prompt-toolkit>=3.0.31",
+        "questionary>=1.10.0"
+    ],
 )
