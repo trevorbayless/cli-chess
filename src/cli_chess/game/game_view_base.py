@@ -15,12 +15,13 @@
 
 from __future__ import annotations
 from prompt_toolkit import HTML
-from prompt_toolkit.widgets import TextArea
+from prompt_toolkit.widgets import TextArea, Label
 from prompt_toolkit.layout.containers import Container, HSplit, VSplit
 from prompt_toolkit.buffer import Buffer
 from prompt_toolkit.application import Application, get_app
-from prompt_toolkit.layout.layout import Layout
+from prompt_toolkit.layout.layout import Layout, ConditionalContainer
 from prompt_toolkit.output.color_depth import ColorDepth
+from prompt_toolkit.filters import to_filter
 
 from cli_chess.game.board import BoardView
 from cli_chess.game.move_list import MoveListView
@@ -37,6 +38,8 @@ class GameViewBase:
         self.material_diff_upper_container = material_diff_upper_view
         self.material_diff_lower_container = material_diff_lower_view
         self.input_field_container = self._create_input_field_container()
+        self.error_label = Label(text="", style="bg:darkred", wrap_lines=False)
+        self.error_container = ConditionalContainer(self.error_label, False)
         self.root_container = self._create_root_container()
         self.app = self._create_application()
 
@@ -62,8 +65,9 @@ class GameViewBase:
                                 self.material_diff_lower_container,
                             ]
                         )
-                    ], window_too_small=self.board_output_container),
-                self.input_field_container
+                    ]),
+                self.input_field_container,
+                self.error_container
             ]
         )
 
@@ -80,7 +84,7 @@ class GameViewBase:
         input_field.accept_handler = self._accept_input
         return input_field
 
-    def _accept_input(self, input: Buffer):
+    def _accept_input(self, input: Buffer) -> None:
         """Accept handler for the input field"""
         if input.text == "quit":
             log.debug("User quit")
@@ -89,10 +93,20 @@ class GameViewBase:
             self.game_presenter.user_input_received(input.text)
             self.input_field_container.text = ''
 
-    def lock_input(self):
+    def lock_input(self) -> None:
         """Sets the input field to read only"""
         self.input_field_container.read_only = True
 
-    def unlock_input(self):
+    def unlock_input(self) -> None:
         """Removes the read-only flag from the input field"""
         self.input_field_container.read_only = False
+
+    def show_error(self, text: str) -> None:
+        """Displays the error label with the text passed in"""
+        self.error_label.text = text
+        self.error_container.filter = to_filter(True)
+
+    def clear_error(self) -> None:
+        """Clears the error containers"""
+        self.error_label.text = ""
+        self.error_container.filter = to_filter(False)

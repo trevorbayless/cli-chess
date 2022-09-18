@@ -40,4 +40,9 @@ class GamePresenterBase:
         self.make_move(input, human=True)
 
     def make_move(self, move: str, human=True) -> None:
-        self.board_presenter.make_move(move, human=human)
+        try:
+            self.board_presenter.make_move(move, human=human)
+            self.game_view.clear_error()
+        except Exception as e:
+            self.game_view.show_error(f"{e}")
+            raise e
