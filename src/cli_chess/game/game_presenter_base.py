@@ -36,13 +36,14 @@ class GamePresenterBase:
                                       self.material_diff_presenter.view_upper,
                                       self.material_diff_presenter.view_lower)
 
+        self.game_model.board_model.e_successful_move_made.add_listener(self.game_view.clear_error)
+
     def user_input_received(self, input: str) -> None:
         self.make_move(input, human=True)
 
     def make_move(self, move: str, human=True) -> None:
         try:
             self.board_presenter.make_move(move, human=human)
-            self.game_view.clear_error()
         except Exception as e:
             self.game_view.show_error(f"{e}")
             raise e

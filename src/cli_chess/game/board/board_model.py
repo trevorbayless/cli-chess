@@ -44,10 +44,7 @@ class BoardModel:
 
         self._log_initialization()
         self.e_board_model_updated = Event()
-
-    def _board_model_updated(self) -> None:
-        """Notifies listeners of board model updates"""
-        self.e_board_model_updated.notify()
+        self.e_successful_move_made = Event()
 
     def make_move(self, move: str, human=True) -> None:
         """Attempts to make a move on the board.
@@ -57,7 +54,8 @@ class BoardModel:
         try:
             move = move.strip()
             self.board.push_san(move)
-            self._board_model_updated()
+            self._notify_successful_move_made()
+            self._notify_board_model_updated()
             log.info(f"make_move ({player}): {move}")
         except Exception as e:
             log.info(f"make_move ({player}): {e}")
@@ -89,6 +87,7 @@ class BoardModel:
     def set_board_orientation(self, color: chess.Color) -> None:
         """Sets the board's orientation to the color passed in"""
         self.board_orientation = color
+        self._notify_board_model_updated()
         log.debug(f"board orientation set (orientation = {color}")
 
     def get_board_squares(self) -> list:
@@ -156,6 +155,14 @@ class BoardModel:
             return True
         else:
             return False
+
+    def _notify_board_model_updated(self) -> None:
+        """Notifies listeners of board model updates"""
+        self.e_board_model_updated.notify()
+
+    def _notify_successful_move_made(self) -> None:
+        """Notifies listeners that a board move has been made"""
+        self.e_successful_move_made.notify()
 
     def _log_initialization(self):
         """Logs class initialization"""
