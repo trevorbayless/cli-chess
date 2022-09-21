@@ -19,7 +19,7 @@ setup(
     name="cli-chess",
     install_requires=[
         "chess>=1.9.3",
-        "berserk>=0.10.0",
+        "berserk-downstream>=0.11.9",
         "prompt-toolkit>=3.0.31",
         "questionary>=1.10.0"
     ],
