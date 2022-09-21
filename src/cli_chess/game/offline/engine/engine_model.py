@@ -21,27 +21,38 @@ import chess.engine
 engine_log = configure_logger("chess.engine")
 
 
-async def load_engine() -> chess.engine.UciProtocol:
-    """Load the chess engine"""
-    engine_path = engine_config.get_value(engine_config.Keys.ENGINE_PATH)
-    try:
-        _, engine = await chess.engine.popen_uci(engine_path)
-        return engine
-    except Exception as e:
-        engine_log.critical(f"Exception caught starting engine: {e}")
-        raise e
+async def create_engine_model(board_model: BoardModel, game_parameters: dict):
+    """Create an instance of the engine model with the engine loaded"""
+    engine_model = EngineModel(board_model, game_parameters)
+    await engine_model._init()
+    return engine_model
 
 
 class EngineModel:
-    def __init__(self, engine: chess.engine.UciProtocol, board_model: BoardModel):
+    def __init__(self, board_model: BoardModel, game_parameters: dict):
         self.board_model = board_model
-        self.engine = engine
-        self.engine_settings = {
-            'engine_path': engine_config.get_value(engine_config.Keys.ENGINE_PATH),
-            'think_time': 0.1
-        }
+        self.game_parameters = game_parameters
+
+    async def _init(self):
+        self.engine = await self.load_engine()
+        await self.configure_engine()
+
+    @staticmethod
+    async def load_engine() -> chess.engine.UciProtocol:
+        """Load the chess engine"""
+        engine_path = engine_config.get_value(engine_config.Keys.ENGINE_PATH)
+        try:
+            _, engine = await chess.engine.popen_uci(engine_path)
+            return engine
+        except Exception as e:
+            engine_log.critical(f"Exception caught starting engine: {e}")
+            raise e
+
+    async def configure_engine(self) -> None:
+        """Configure the engine with the passed in options"""
+        await self.engine.configure({"Skill Level": self.game_parameters['engine_level']})
 
     async def get_best_move(self) -> chess.engine.PlayResult:
         """Query the engine to get the best move"""
         return await self.engine.play(self.board_model.board,
-                                      chess.engine.Limit(time=self.engine_settings['think_time']))
+                                      chess.engine.Limit(0.1))

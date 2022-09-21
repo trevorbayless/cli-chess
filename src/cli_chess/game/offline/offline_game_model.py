@@ -15,10 +15,9 @@
 
 import chess.engine
 from cli_chess.game import GameModelBase
-from cli_chess.game.offline.engine import EngineModel
+#from cli_chess.game.offline.engine import EngineModel
 
 
 class OfflineGameModel(GameModelBase):
-    def __init__(self, engine: chess.engine.UciProtocol, game_parameters: dict):
+    def __init__(self, game_parameters: dict):
         super().__init__(game_parameters)
-        self.engine_model = EngineModel(engine, self.board_model)

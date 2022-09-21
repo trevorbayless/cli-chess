@@ -39,7 +39,7 @@ class VsComputerMenuModel:
             },
             {
                 "type": "select",
-                "name": "strength",
+                "name": "engine_level",
                 "message": "Select the computers strength",
                 "instruction": " ",
                 "choices": [option for option in OfflineGameOptions.skill_level_options_dict],
