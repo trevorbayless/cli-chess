@@ -15,12 +15,14 @@
 
 from setuptools import setup
 
+requirements = [
+    "chess>=1.9.3",
+    "berserk-downstream>=0.11.9",
+    "prompt-toolkit>=3.0.31",
+]
+
 setup(
     name="cli-chess",
-    install_requires=[
-        "chess>=1.9.3",
-        "berserk-downstream>=0.11.9",
-        "prompt-toolkit>=3.0.31",
-        "questionary>=1.10.0"
-    ],
+    install_requires=requirements,
+    setup_requires=requirements,
 )
