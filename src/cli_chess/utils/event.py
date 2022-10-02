@@ -18,6 +18,10 @@ from typing import Callable
 
 
 class Event:
+    """Event notification class. Interested listeners can add a callable
+       to be notified when the event is triggered (using notify()). Generally
+       this is used for models to notify presenters of updated data.
+    """
     def __init__(self):
         self.listeners = []
 

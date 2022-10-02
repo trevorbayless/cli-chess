@@ -13,19 +13,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from enum import Enum
 from collections import ChainMap
 from typing import Dict
-
-
-class MainMenuOptions(Enum):
-    PLAY_OFFLINE = "Play Offline"
-    QUIT = "Quit"
-
-
-class PlayOfflineMenuOptions(Enum):
-    VS_COMPUTER = "Play vs Computer"
-    BOTH_SIDES = "Play both sides"
 
 
 class BaseGameOptions:

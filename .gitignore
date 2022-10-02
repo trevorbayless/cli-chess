@@ -2,8 +2,9 @@ config.ini
 *.swp
 *.~
 *.spec
-*.egg-info
 *.pyc
+*.egg-info
+*.eggs/
 .venv/
 .vscode/
 .idea/

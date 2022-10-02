@@ -13,28 +13,22 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-import os
-import berserk
 from cli_chess.utils.logging import log
-from typing import Tuple
+from cli_chess.menus.vs_computer_menu import VsComputerMenuModel
+from cli_chess.menus import MenuPresenter, MultiValueMenuView
 
 
-def is_windows_system() -> bool:
-    """Returns True if on a Windows system"""
-    return True if os.name == "nt" else False
+class VsComputerMenuPresenter(MenuPresenter):
+    """Defines the VsComputer menu"""
+    def __init__(self):
+        self.model = VsComputerMenuModel()
+        self.view = MultiValueMenuView(self, container_width=40, column_width=22)
+        super().__init__(self.model, self.view)
 
+    def select_handler(self, selected_option: int):
+        """Handles option selection"""
+        pass
 
-def is_valid_lichess_token(api_token: str) -> Tuple[bool, str]:
-    """Returns True if the api token passed in is valid"""
-    session = berserk.TokenSession(api_token)
-    client = berserk.clients.Account(session)
-
-    try:
-        if client.get():
-            msg = "Successfully authenticated with Lichess"
-            log.info(msg)
-            return True, msg
-    except Exception as e:
-        msg = f"Authentication to Lichess failed - {e.message}"
-        log.error(msg)
-        return False, msg
+    # def process_input(self, menu_selections: dict) -> None:
+    #     game_parameters = OfflineGameOptions().transpose_selection_dict(menu_selections)
+    #     start_offline_game(game_parameters)

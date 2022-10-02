@@ -13,27 +13,20 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from cli_chess.utils.logging import log
+from __future__ import annotations
+from typing import TYPE_CHECKING, List, Union
+if TYPE_CHECKING:
+    from cli_chess.menus import SingleValueMenuOption, MultiValueMenuOption, MenuCategory
 
-class MenuPresenterBase:
-    def __init__(self, model, view, menu_map):
+
+class MenuPresenter:
+    def __init__(self, model, view):
         self.model = model
         self.view = view
-        self.menu_map = menu_map
 
-    def get_menu_options(self) -> list:
-        """Returns the menu options as a list"""
+    def get_menu_category(self) -> MenuCategory:
+        return self.model.get_menu_category()
+
+    def get_menu_options(self) -> Union[List[SingleValueMenuOption], List[MultiValueMenuOption]]:
+        """Returns the menu options"""
         return self.model.get_menu_options()
-
-    def show_menu(self) -> None:
-        try:
-            selection = self.view.show()
-            log.info(f"menu_selection: {selection}")
-            self.selection_handler(selection)
-        except KeyboardInterrupt:
-            log.info("User quit - keyboard interrupt")
-            exit(0)
-
-    def selection_handler(self, selection: str) -> None:
-        """Handler for the selection made"""
-        self.menu_map[self.model.get_menu_options_type()(selection)]()

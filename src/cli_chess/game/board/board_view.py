@@ -17,6 +17,9 @@ from __future__ import annotations
 from prompt_toolkit.layout.controls import FormattedTextControl
 from prompt_toolkit.layout.containers import Window
 from prompt_toolkit import HTML
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from cli_chess.game.board import BoardPresenter
 
 
 class BoardView:

@@ -17,6 +17,9 @@ from __future__ import annotations
 from prompt_toolkit.layout.containers import ConditionalContainer
 from prompt_toolkit.layout.dimension import D
 from prompt_toolkit.widgets import TextArea
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from cli_chess.game.material_difference import MaterialDifferencePresenter
 
 
 class MaterialDifferenceView:

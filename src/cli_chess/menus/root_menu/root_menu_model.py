@@ -13,13 +13,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from __future__ import annotations
-from cli_chess.menus import MenuViewBase
-
-
-class MainMenuView(MenuViewBase):
-    def __init__(self, presenter: MainMenuPresenter):
-        super().__init__(presenter)
-
-    def show(self):
-        return super().show("Main Menu")
+class RootMenuModel:
+    def __init__(self):
+        pass

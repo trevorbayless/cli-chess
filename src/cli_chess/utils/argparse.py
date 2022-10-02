@@ -19,7 +19,14 @@ from cli_chess.utils.logging import redact_from_logs, log
 
 
 class ArgumentParser(argparse.ArgumentParser):
+    """The main ArgumentParser class (inherits argparse.ArgumentParser).
+       This allows for parsed arguments strings to be added to the log
+       redactor in order to safely log parsed arguments (e.g. redacting API keys)
+    """
     def parse_args(self, args=None, namespace=None):
+        """Override default parse_args method to allow for parsed
+           arguments to be added to the log redactor
+        """
         arguments = super().parse_args(args, namespace)
         if arguments.api_token:
             redact_from_logs(arguments.api_token)

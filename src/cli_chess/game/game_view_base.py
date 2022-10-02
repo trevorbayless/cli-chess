@@ -28,6 +28,10 @@ from cli_chess.game.move_list import MoveListView
 from cli_chess.game.material_difference import MaterialDifferenceView
 from cli_chess.utils import log
 
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from cli_chess.game import GamePresenterBase
+
 
 class GameViewBase:
     def __init__(self, game_presenter: GamePresenterBase, board_view: BoardView, move_list_view: MoveListView,

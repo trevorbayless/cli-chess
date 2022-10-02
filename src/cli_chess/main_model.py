@@ -13,14 +13,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from __future__ import annotations
-from cli_chess.menus import MenuViewBase
+from cli_chess.utils.logging import configure_logger
 
 
-class PlayOfflineMenuView(MenuViewBase):
-    def __init__(self, presenter: PlayOfflineMenuPresenter):
-        super().__init__(presenter)
-        self.presenter = presenter
-
-    def show(self):
-        return super().show("Play Offline")
+class MainModel:
+    """Model for the startup presenter"""
+    def __init__(self):
+        configure_logger("cli-chess")

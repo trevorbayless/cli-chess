@@ -13,13 +13,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from __future__ import annotations
-from questionary import unsafe_prompt
-
-class VsComputerMenuView:
-    def __init__(self, presenter: VsComputerMenuPresenter):
-        self.presenter = presenter
-
-    def show(self) -> dict[str, Any]:
-        return unsafe_prompt(self.presenter.get_questions(),
-                             true_color=True)
+default_style = {
+    "menu": "bg:",
+    "menu.category_title": "fg:black bg:limegreen underline",
+    "menu.option": "fg:white",
+    "menu.multi-value": "fg:orangered",
+    "focused-selected": "fg:black bg:mediumturquoise noinherit",
+    "unfocused-selected": "fg:black bg:white noinherit",
+    "menu.multi-value focused-selected": "fg:orangered bold noinherit",
+    "menu.multi-value unfocused-selected": "fg:orangered noinherit",
+}

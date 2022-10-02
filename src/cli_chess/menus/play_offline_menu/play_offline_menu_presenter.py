@@ -13,23 +13,33 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from cli_chess.menus import MenuPresenterBase, PlayOfflineMenuOptions
-from .play_offline_menu_model import PlayOfflineMenuModel
-from .play_offline_menu_view import PlayOfflineMenuView
-from .vs_computer_menu import show_vs_computer_menu
-
-menu_map = {
-    PlayOfflineMenuOptions.VS_COMPUTER: show_vs_computer_menu,
-    PlayOfflineMenuOptions.BOTH_SIDES: None
-}
+from cli_chess.utils.logging import log
+from cli_chess.menus.play_offline_menu import PlayOfflineMenuModel, PlayOfflineMenuOptions
+from cli_chess.menus import MenuView, MenuPresenter
 
 
-def show_play_offline_menu():
-    """Show the Play Offline menu"""
-    PlayOfflineMenuPresenter().show_menu()
-
-
-class PlayOfflineMenuPresenter(MenuPresenterBase):
-    """Define the menu"""
+class PlayOfflineMenuPresenter(MenuPresenter):
+    """Defines the Main Menu"""
     def __init__(self):
-        super().__init__(PlayOfflineMenuModel(), PlayOfflineMenuView(self), menu_map)
+        self.model = PlayOfflineMenuModel()
+        self.view = MenuView(self, container_width=18)  # Todo: Get and set to longest option length?
+        self.selection = self.model.get_menu_options()[0].option
+        super().__init__(self.model, self.view)
+
+    def select_handler(self, selected_option: int):
+        """Handles option selection"""
+        try:
+            self.selection = self.model.get_menu_options()[selected_option].option
+            log.info(f"menu_selection: {self.selection}")
+
+            if self.selection == PlayOfflineMenuOptions.VS_COMPUTER:
+                pass
+            elif self.selection == PlayOfflineMenuOptions.PLAY_BOTH_SIDES:
+                pass
+            else:
+                # Todo: Print error to view element
+                raise ValueError(f"Invalid menu option: {self.selection}")
+        except Exception as e:
+            # Todo: Print error to view element
+            log.exception(f"Exception caught: {e}")
+            raise e

@@ -13,19 +13,14 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from __future__ import annotations
-from questionary import Question, select
-from cli_chess.utils.common import clear_screen
+from cli_chess.menus.root_menu import RootMenuModel, RootMenuView
+from cli_chess.menus import MainMenuPresenter, PlayOfflineMenuPresenter, VsComputerMenuPresenter
 
 
-class MenuViewBase:
-    def __init__(self, presenter: MenuPresenterBase):
-        self.presenter = presenter
-
-    def show(self, title: str = "") -> Question:
-        clear_screen()
-        return select(title,
-                      choices=[option for option in self.presenter.get_menu_options()],
-                      qmark="*",
-                      instruction=" ",
-                      use_shortcuts=True).unsafe_ask()
+class RootMenuPresenter:
+    def __init__(self):
+        self.model = RootMenuModel()
+        self.main_menu_presenter = MainMenuPresenter()
+        self.play_offline_menu_presenter = PlayOfflineMenuPresenter()
+        self.vs_computer_menu_presenter = VsComputerMenuPresenter()
+        self.view = RootMenuView(self)
