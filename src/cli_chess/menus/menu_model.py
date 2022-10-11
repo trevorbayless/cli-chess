@@ -16,7 +16,7 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING, Union, List
 if TYPE_CHECKING:
-    from cli_chess.menus import SingleValueMenuOption, MultiValueMenuOption, MenuCategory
+    from cli_chess.menus import MenuOption, MultiValueMenuOption, MenuCategory
 
 
 class MenuModel:
@@ -27,7 +27,7 @@ class MenuModel:
     def get_menu_category(self) -> MenuCategory:
         return self.menu_category
 
-    def get_menu_options(self) -> Union[List[SingleValueMenuOption], List[MultiValueMenuOption]]:
+    def get_menu_options(self) -> Union[List[MenuOption], List[MultiValueMenuOption]]:
         """Returns a list containing the menu option objects"""
         if not self.menu_category.category_options:
             raise ValueError("Missing menu options")

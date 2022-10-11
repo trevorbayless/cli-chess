@@ -19,12 +19,12 @@ from typing import List, Union
 
 class MenuCategory:
     """Defines a menu with a list of associated options"""
-    def __init__(self, title: str, category_options: Union[List["SingleValueMenuOption"], List["MultiValueMenuOption"]]):
+    def __init__(self, title: str, category_options: Union[List["MenuOption"], List["MultiValueMenuOption"]]):
         self.title = title
         self.category_options = category_options
 
 
-class SingleValueMenuOption:
+class MenuOption:
     """A menu option that has one action on enter or click (e.g. Start game)"""
     def __init__(self, option: Enum, description: str):
         self.option = option
@@ -32,11 +32,10 @@ class SingleValueMenuOption:
         self.description = description
 
 
-class MultiValueMenuOption:
+class MultiValueMenuOption(MenuOption):
     """A menu option which has multiple values to choose from (e.g. Side to play as) """
-    def __init__(self, option_title: str, description: str, values: List[str]):
-        self.option_title = option_title
-        self.description = description
+    def __init__(self, option: Enum, description: str, values: List[str]):
+        super().__init__(option, description)
         self.values = values
         self.selected_value = {
             "index": self.values.index(self.values[0]),

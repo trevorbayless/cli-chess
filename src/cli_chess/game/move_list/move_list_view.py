@@ -14,8 +14,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from __future__ import annotations
-from prompt_toolkit.layout.containers import ConditionalContainer
-from prompt_toolkit.layout.dimension import D
+from prompt_toolkit.layout import ConditionalContainer, D
 from prompt_toolkit.widgets import TextArea
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -26,8 +25,8 @@ class MoveListView:
     def __init__(self, move_list_presenter: MoveListPresenter, initial_output: str):
         self.move_list_presenter = move_list_presenter
         self.move_list_output = TextArea(text=initial_output,
-                                         width=D(min=1, max=20),
-                                         height=D(min=1, max=4),
+                                         width=D(max=20),
+                                         height=D(max=4),
                                          line_numbers=True,
                                          multiline=True,
                                          wrap_lines=False,

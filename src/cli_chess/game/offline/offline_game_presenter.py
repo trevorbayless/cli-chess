@@ -19,10 +19,13 @@ from cli_chess.game.game_presenter_base import GamePresenterBase
 from .engine import EnginePresenter, EngineModel, create_engine_model
 from cli_chess.utils.logging import log
 
+from prompt_toolkit.application import get_app
+from prompt_toolkit.layout import Layout
+
 
 def start_offline_game(game_parameters: dict) -> None:
     """Start an offline game"""
-    asyncio.run(_play_offline(game_parameters))
+    asyncio.create_task(_play_offline(game_parameters))
 
 
 async def _play_offline(game_parameters: dict) -> None:
@@ -31,7 +34,8 @@ async def _play_offline(game_parameters: dict) -> None:
         engine_model = await create_engine_model(game_model.board_model, game_parameters)
 
         game_presenter = OfflineGamePresenter(game_model, engine_model)
-        await game_presenter.game_view.app.run_async()
+        get_app().layout = Layout(game_presenter.game_view.root_container, game_presenter.game_view.input_field_container)
+        get_app().invalidate()
     except Exception as e:
         log.error(f"Error starting engine: {e}")
         print(e)

@@ -14,7 +14,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from __future__ import annotations
-from prompt_toolkit.layout import Window, FormattedTextControl, Dimension, HSplit
+from prompt_toolkit.layout import Window, FormattedTextControl, HSplit, D
 from prompt_toolkit.formatted_text import StyleAndTextTuples
 from prompt_toolkit.mouse_events import MouseEvent, MouseEventType
 from prompt_toolkit.key_binding import KeyBindings
@@ -22,7 +22,7 @@ from prompt_toolkit.keys import Keys
 from prompt_toolkit.application import get_app
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from cli_chess.menus import SingleValueMenuOption, MultiValueMenuOption
+    from cli_chess.menus import MenuOption, MultiValueMenuOption
 
 
 class MenuView:
@@ -38,14 +38,14 @@ class MenuView:
         return HSplit([
             Window(
                 FormattedTextControl(self._get_title_text_fragments),
-                width=Dimension(max=self.container_width),
-                height=Dimension(max=1),
+                width=D(max=self.container_width),
+                height=D(max=1),
             ),
             Window(
                 FormattedTextControl(self._get_options_text_fragments, focusable=True, key_bindings=self.key_bindings),
                 always_hide_cursor=True,
-                width=Dimension(max=self.container_width),
-                height=Dimension(max=len(self.presenter.get_menu_options())),
+                width=D(max=self.container_width),
+                height=D(max=len(self.presenter.get_menu_options())),
             )
         ])
 
@@ -60,7 +60,7 @@ class MenuView:
         """Create the text fragments for the menu options"""
         tokens: StyleAndTextTuples = []
 
-        def append_option(index: int, option: SingleValueMenuOption):
+        def append_option(index: int, option: MenuOption):
             selected = self.selected_option == index
 
             def option_clicked(mouse_event: MouseEvent):
@@ -145,7 +145,7 @@ class MultiValueMenuView(MenuView):
         """Create the text fragments for the menu options"""
         tokens: StyleAndTextTuples = []
 
-        def append_option(index: int, option: MultiValueMenuOption):
+        def append_option(index: int, menu_option: MultiValueMenuOption):
             selected = self.selected_option == index
 
             def label_click(mouse_event: MouseEvent):
@@ -164,8 +164,8 @@ class MultiValueMenuView(MenuView):
             if self.has_focus() and selected:
                 sel_class = ",focused-selected"
 
-            tokens.append(("class:menu.option" + sel_class, f"{option.option_title:<{self.column_width}}", label_click))
-            tokens.append(("class:menu.multi-value" + sel_class, f"{option.values[option.selected_value['index']]:<{self.column_width}}", value_click))
+            tokens.append(("class:menu.option" + sel_class, f"{menu_option.option_name:<{self.column_width}}", label_click))
+            tokens.append(("class:menu.multi-value" + sel_class, f"{menu_option.values[menu_option.selected_value['index']]:<{self.column_width}}", value_click))
             tokens.append(("class:menu", "\n"))
 
         for i, o in enumerate(self.presenter.get_menu_options()):

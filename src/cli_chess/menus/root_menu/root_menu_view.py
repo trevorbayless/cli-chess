@@ -15,10 +15,10 @@
 
 from __future__ import annotations
 from prompt_toolkit.layout import Layout, Window, FormattedTextControl, ConditionalContainer, VSplit
-from prompt_toolkit.filters import Condition, is_done
+from prompt_toolkit.filters import Condition, is_done, has_focus
 from prompt_toolkit.widgets import Box
 from prompt_toolkit.keys import Keys
-from prompt_toolkit.key_binding import KeyBindings
+from prompt_toolkit.key_binding import KeyBindings, ConditionalKeyBindings
 from prompt_toolkit.key_binding.bindings.focus import focus_next, focus_previous
 from cli_chess.menus.main_menu import MainMenuOptions
 from cli_chess.menus.play_offline_menu import PlayOfflineMenuOptions
@@ -66,7 +66,7 @@ class RootMenuView:
             )
         ])
 
-    def _create_key_bindings(self):
+    def _create_key_bindings(self) -> ConditionalKeyBindings:
         """Creates the key bindings for the menu manager"""
         bindings = KeyBindings()
         bindings.add(Keys.Right)(focus_next)
@@ -77,7 +77,15 @@ class RootMenuView:
         bindings.add(Keys.ControlB)(focus_previous)
         bindings.add(Keys.BackTab)(focus_previous)
         bindings.add("h")(focus_previous)
-        return bindings
+
+        #TESTING ONLY
+        @bindings.add(Keys.F10)
+        def _(event):
+            # TODO: Properly implement this logic
+            """Start the game (testing only)"""
+            self.presenter.vs_computer_menu_presenter.handle_start_game()
+
+        return ConditionalKeyBindings(bindings, has_focus(self._container))
 
     def __pt_container__(self):
         return self._container

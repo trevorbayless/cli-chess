@@ -15,6 +15,14 @@
 
 from cli_chess.menus import MenuModel, MultiValueMenuOption, MenuCategory
 from cli_chess.game import OfflineGameOptions
+from enum import Enum
+
+
+class VsComputerMenuOptions(Enum):
+    VARIANT = "Variant"
+    TIME_CONTROL = "Time Control"
+    COMPUTER_STRENGTH = "Computer Strength"
+    COLOR = "Side to play as"
 
 
 class VsComputerMenuModel(MenuModel):
@@ -27,10 +35,10 @@ class VsComputerMenuModel(MenuModel):
         menu_options = [
             # Todo: Implement ELO selector
             # Todo: Implement ability to use custom or lichess fairy-stockfish defined strength levels
-            MultiValueMenuOption("Variant", "Choose the variant to play", [option for option in OfflineGameOptions.variant_options_dict]),
-            MultiValueMenuOption("Time Control", "Choose the time control", [option for option in OfflineGameOptions.time_control_options_dict]),
-            MultiValueMenuOption("Computer Strength", "Choose the strength of the computer", [option for option in OfflineGameOptions.skill_level_options_dict]),
-            MultiValueMenuOption("Side to play as", "Choose the side you would like to play as", [option for option in OfflineGameOptions.color_options_dict]),
+            MultiValueMenuOption(VsComputerMenuOptions.VARIANT, "Choose the variant to play", [option for option in OfflineGameOptions.variant_options_dict]),
+            MultiValueMenuOption(VsComputerMenuOptions.TIME_CONTROL, "Choose the time control", [option for option in OfflineGameOptions.time_control_options_dict]),
+            MultiValueMenuOption(VsComputerMenuOptions.COMPUTER_STRENGTH, "Choose the strength of the computer", [option for option in OfflineGameOptions.skill_level_options_dict]),
+            MultiValueMenuOption(VsComputerMenuOptions.COLOR, "Choose the side you would like to play as", [option for option in OfflineGameOptions.color_options_dict]),
         ]
 
         return MenuCategory("Game settings", menu_options)

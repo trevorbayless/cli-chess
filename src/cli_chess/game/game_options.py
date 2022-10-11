@@ -13,6 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+from cli_chess.utils.logging import log
 from collections import ChainMap
 from typing import Dict
 
@@ -25,10 +26,13 @@ class BaseGameOptions:
         """Lookup the key from the menu selections in the
            game options ChainMap and replace the value
         """
-        # Todo: Handle raised errors
         for key in menu_selections:
-            value = menu_selections[key]
-            menu_selections[key] = self.chain_map[value]
+            try:
+                value = menu_selections[key]
+                menu_selections[key] = self.chain_map[value]
+            except KeyError:
+                log.exception(f"Error transposing dict: key={key} value={menu_selections[key]}")
+                raise
 
         return menu_selections
 

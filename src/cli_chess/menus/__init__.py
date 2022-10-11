@@ -1,4 +1,4 @@
-from .menu_common import MenuCategory, SingleValueMenuOption, MultiValueMenuOption
+from .menu_common import MenuCategory, MenuOption, MultiValueMenuOption
 from .menu_model import MenuModel
 from .menu_view import MenuView, MultiValueMenuView
 from .menu_presenter import MenuPresenter

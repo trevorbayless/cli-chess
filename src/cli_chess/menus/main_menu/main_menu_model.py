@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from cli_chess.menus import MenuModel, SingleValueMenuOption, MenuCategory
+from cli_chess.menus import MenuModel, MenuOption, MenuCategory
 from enum import Enum
 
 
@@ -32,10 +32,10 @@ class MainMenuModel(MenuModel):
     def _create_menu(self) -> MenuCategory:
         """Create the menu category with options"""
         menu_options = [
-            SingleValueMenuOption(MainMenuOptions.PLAY_OFFLINE, "Play offline against the computer"),
-            SingleValueMenuOption(MainMenuOptions.SETTINGS, "Modify cli-chess settings"),
-            SingleValueMenuOption(MainMenuOptions.ABOUT, "Get information about cli-chess"),
-            SingleValueMenuOption(MainMenuOptions.QUIT, "Quit cli-chess")
+            MenuOption(MainMenuOptions.PLAY_OFFLINE, "Play offline against the computer"),
+            MenuOption(MainMenuOptions.SETTINGS, "Modify cli-chess settings"),
+            MenuOption(MainMenuOptions.ABOUT, "Get information about cli-chess"),
+            MenuOption(MainMenuOptions.QUIT, "Quit cli-chess")
         ]
 
         return MenuCategory("Main menu", menu_options)

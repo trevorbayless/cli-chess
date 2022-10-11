@@ -22,4 +22,6 @@ default_style = {
     "unfocused-selected": "fg:black bg:white noinherit",
     "menu.multi-value focused-selected": "fg:orangered bold noinherit",
     "menu.multi-value unfocused-selected": "fg:orangered noinherit",
+
+    "error-label": "bg:darkred"
 }

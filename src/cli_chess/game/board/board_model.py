@@ -24,9 +24,9 @@ import chess
 class BoardModel:
     def __init__(self, game_parameters: dict, fen: str = "") -> None:
         self.game_parameters = game_parameters
-        self.my_color: chess.Color = self._set_my_color(self.game_parameters['color'])
+        self.my_color: chess.Color = self._set_my_color(self.game_parameters['Side to play as'])  #TODO: Update 'Side to play as' to use options enum
         self.board_orientation = self.my_color
-        self.variant = self.game_parameters['variant']
+        self.variant = self.game_parameters['Variant']  #TODO: Update 'Variant' to use options enum
         self.is_chess960 = self.variant == "chess960"
 
         if not self.is_chess960:

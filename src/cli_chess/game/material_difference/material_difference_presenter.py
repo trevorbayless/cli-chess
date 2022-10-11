@@ -23,7 +23,7 @@ class MaterialDifferencePresenter:
     def __init__(self, material_diff_model: MaterialDifferenceModel):
         self.material_diff_model = material_diff_model
 
-        self.is_proper_variant = self.material_diff_model.board_model.game_parameters['variant'] != "horde"
+        self.is_proper_variant = self.material_diff_model.board_model.game_parameters['Variant'] != "horde"  #TODO: Update 'Variant' to use options enum
 
         self.view_upper = MaterialDifferenceView(self, self.format_diff_output(not self.material_diff_model.board_orientation), self.is_proper_variant)
         self.view_lower = MaterialDifferenceView(self, self.format_diff_output(self.material_diff_model.board_orientation), self.is_proper_variant)

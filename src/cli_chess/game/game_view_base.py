@@ -14,13 +14,11 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from __future__ import annotations
-from prompt_toolkit import HTML
-from prompt_toolkit.widgets import TextArea, Label
-from prompt_toolkit.layout.containers import Container, HSplit, VSplit
+from prompt_toolkit.formatted_text import HTML
+from prompt_toolkit.widgets import TextArea
+from prompt_toolkit.layout import Window, Container, FormattedTextControl, ConditionalContainer, HSplit, VSplit, D
 from prompt_toolkit.buffer import Buffer
-from prompt_toolkit.application import Application, get_app
-from prompt_toolkit.layout.layout import Layout, ConditionalContainer
-from prompt_toolkit.output.color_depth import ColorDepth
+from prompt_toolkit.application import get_app
 from prompt_toolkit.filters import to_filter
 
 from cli_chess.game.board import BoardView
@@ -42,19 +40,9 @@ class GameViewBase:
         self.material_diff_upper_container = material_diff_upper_view
         self.material_diff_lower_container = material_diff_lower_view
         self.input_field_container = self._create_input_field_container()
-        self.error_label = Label(text="", style="bg:darkred", wrap_lines=False)
-        self.error_container = ConditionalContainer(self.error_label, False)
+        self.error_label = FormattedTextControl(text="", style="class:error-label", show_cursor=False)
+        self.error_container = self._create_error_container()
         self.root_container = self._create_root_container()
-        self.app = self._create_application()
-
-    def _create_application(self) -> Application:
-        """Create the application instance"""
-        return Application(
-            layout=Layout(self.root_container, self.input_field_container),
-            color_depth=ColorDepth.TRUE_COLOR,
-            mouse_support=True,
-            full_screen=True
-        )
 
     def _create_root_container(self) -> Container:
         return HSplit(
@@ -78,7 +66,7 @@ class GameViewBase:
     def _create_input_field_container(self) -> TextArea:
         """Returns a TextArea to use as the input field"""
         input_type = "GAME"
-        input_field = TextArea(height=1,
+        input_field = TextArea(height=D(max=1),
                                prompt=HTML(f"<style bg='darkcyan'>[{input_type}] $ </style>"),
                                style="class:input-field",
                                multiline=False,
@@ -87,6 +75,17 @@ class GameViewBase:
 
         input_field.accept_handler = self._accept_input
         return input_field
+
+    def _create_error_container(self):
+        """Create the error container"""
+        return ConditionalContainer(
+            Window(
+                self.error_label,
+                always_hide_cursor=True,
+                height=D(max=1)
+            ),
+            filter=to_filter(False)
+        )
 
     def _accept_input(self, input: Buffer) -> None:
         """Accept handler for the input field"""

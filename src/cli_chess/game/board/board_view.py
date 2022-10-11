@@ -14,9 +14,8 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from __future__ import annotations
-from prompt_toolkit.layout.controls import FormattedTextControl
-from prompt_toolkit.layout.containers import Window
-from prompt_toolkit import HTML
+from prompt_toolkit.layout import Window, FormattedTextControl, D
+from prompt_toolkit.formatted_text import HTML
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from cli_chess.game.board import BoardPresenter
@@ -26,7 +25,16 @@ class BoardView:
     def __init__(self, board_presenter: BoardPresenter, initial_board_output: list):
         self.board_presenter = board_presenter
         self.board_output = FormattedTextControl(HTML(self._build_output(initial_board_output)))
-        self.root_container = Window(self.board_output, width=20)
+        self.root_container = self._create_container()
+
+    def _create_container(self):
+        """Create the Board container"""
+        return Window(
+            self.board_output,
+            always_hide_cursor=True,
+            width=D(max=20, preferred=20),
+            height=D(max=10, preferred=10)
+        )
 
     def _build_output(self, board_output_list: list) -> str:
         """Returns a string containing the board output to be used for

@@ -14,12 +14,15 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from __future__ import annotations
-from . import GameViewBase, GameModelBase
-from .board import BoardPresenter
-from .move_list import MoveListPresenter
-from .material_difference import MaterialDifferencePresenter
+from cli_chess.game import GameViewBase
+from cli_chess.game.board import BoardPresenter
+from cli_chess.game.move_list import MoveListPresenter
+from  cli_chess.game.material_difference import MaterialDifferencePresenter
 from cli_chess.utils import log
 from chess import WHITE, BLACK
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from cli_chess.game import GameModelBase
 
 
 class GamePresenterBase:

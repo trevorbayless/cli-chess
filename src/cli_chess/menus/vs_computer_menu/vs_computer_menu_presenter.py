@@ -13,9 +13,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from cli_chess.utils.logging import log
 from cli_chess.menus.vs_computer_menu import VsComputerMenuModel
 from cli_chess.menus import MenuPresenter, MultiValueMenuView
+from cli_chess.game.game_options import OfflineGameOptions
+from cli_chess.game.offline import start_offline_game
 
 
 class VsComputerMenuPresenter(MenuPresenter):
@@ -25,10 +26,19 @@ class VsComputerMenuPresenter(MenuPresenter):
         self.view = MultiValueMenuView(self, container_width=40, column_width=22)
         super().__init__(self.model, self.view)
 
-    def select_handler(self, selected_option: int):
-        """Handles option selection"""
-        pass
+    def handle_start_game(self) -> None:
+        """Handle starting the game"""
+        game_parameters = self._create_dict_of_selected_values()
+        start_offline_game(game_parameters)
 
-    # def process_input(self, menu_selections: dict) -> None:
-    #     game_parameters = OfflineGameOptions().transpose_selection_dict(menu_selections)
-    #     start_offline_game(game_parameters)
+    def _create_dict_of_selected_values(self) -> dict:
+        """Creates a dictionary of all selected values"""
+        try:
+            selections_dict = {}
+            for index, menu_option in enumerate(self.get_menu_options()):
+                selections_dict[f"{menu_option.option_name}"] = menu_option.selected_value['name']
+
+            return OfflineGameOptions().transpose_selection_dict(selections_dict)
+        except KeyError:
+            # TODO: Print error to screen
+            pass
