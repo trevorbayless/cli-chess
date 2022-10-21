@@ -21,8 +21,8 @@ from cli_chess.game.offline import start_offline_game
 
 class VsComputerMenuPresenter(MenuPresenter):
     """Defines the VsComputer menu"""
-    def __init__(self):
-        self.model = VsComputerMenuModel()
+    def __init__(self, model: VsComputerMenuModel):
+        self.model = model
         self.view = MultiValueMenuView(self, container_width=40, column_width=22)
         super().__init__(self.model, self.view)
 

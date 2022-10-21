@@ -14,7 +14,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from cli_chess import MainModel, MainView
-from cli_chess.menus.root_menu import RootMenuPresenter
+from cli_chess.menus.root_menu import RootMenuModel, RootMenuPresenter
 from cli_chess.utils import setup_argparse, lichess_config, is_valid_lichess_token
 
 
@@ -22,8 +22,8 @@ class MainPresenter:
     """Main entrypoint for starting the application and
        presenter logic for the startup layout
     """
-    def __init__(self):
-        self.model = MainModel()
+    def __init__(self, model: MainModel):
+        self.model = model
         self.view = MainView(self)
         self.parse_startup_args()  # Todo: Handle this in the model?
 
@@ -42,8 +42,8 @@ class MainPresenter:
 
         # EXAMPLE: Starting up with the MenuManager
         # Todo: Move this logic into a separate function
-        startup_presenter = RootMenuPresenter()
-        self.view.create_app(startup_presenter.view, startup_presenter.view.key_bindings)
+        startup_presenter = RootMenuPresenter(RootMenuModel())
+        self.view.create_app(startup_presenter.view)
 
     def run(self):
         """Starts the main application"""

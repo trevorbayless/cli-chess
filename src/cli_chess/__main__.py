@@ -13,12 +13,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from cli_chess import MainPresenter
+from cli_chess import MainModel, MainPresenter
 
 
 def run() -> None:
     """Main entry point"""
-    MainPresenter().run()
+    MainPresenter(MainModel()).run()
 
 
 if __name__ == "__main__":

@@ -14,13 +14,15 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from cli_chess.menus.root_menu import RootMenuModel, RootMenuView
-from cli_chess.menus import MainMenuPresenter, PlayOfflineMenuPresenter, VsComputerMenuPresenter
+from cli_chess.menus.main_menu import MainMenuModel, MainMenuPresenter
+from cli_chess.menus.play_offline_menu import PlayOfflineMenuModel, PlayOfflineMenuPresenter
+from cli_chess.menus.vs_computer_menu import VsComputerMenuModel, VsComputerMenuPresenter
 
 
 class RootMenuPresenter:
-    def __init__(self):
-        self.model = RootMenuModel()
-        self.main_menu_presenter = MainMenuPresenter()
-        self.play_offline_menu_presenter = PlayOfflineMenuPresenter()
-        self.vs_computer_menu_presenter = VsComputerMenuPresenter()
+    def __init__(self, model: RootMenuModel):
+        self.model = model
+        self.main_menu_presenter = MainMenuPresenter(MainMenuModel())
+        self.play_offline_menu_presenter = PlayOfflineMenuPresenter(PlayOfflineMenuModel())
+        self.vs_computer_menu_presenter = VsComputerMenuPresenter(VsComputerMenuModel())
         self.view = RootMenuView(self)

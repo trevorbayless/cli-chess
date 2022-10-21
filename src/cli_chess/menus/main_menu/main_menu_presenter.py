@@ -20,8 +20,8 @@ from cli_chess.menus import MenuView, MenuPresenter
 
 class MainMenuPresenter(MenuPresenter):
     """Defines the Main Menu"""
-    def __init__(self):
-        self.model = MainMenuModel()
+    def __init__(self, model: MainMenuModel):
+        self.model = model
         self.view = MenuView(self, container_width=15)  # Todo: Get and set to longest option length?
         self.selection = self.model.get_menu_options()[0].option
         super().__init__(self.model, self.view)
