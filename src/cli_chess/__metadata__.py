@@ -13,26 +13,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from setuptools import setup
-from re import findall
-
-metadata_file = open("src/cli_chess/__metadata__.py").read()
-metadata = dict(findall(r'__(\w*)__\s*=\s*"([^"]+)"', metadata_file))
-
-requirements = [
-    "chess>=1.9.3",
-    "berserk-downstream>=0.11.9",
-    "prompt-toolkit>=3.0.31",
-]
-
-setup(
-    name=metadata['name'],
-    version=metadata['version'],
-    description=metadata['description'],
-    author=metadata['author'],
-    author_email=metadata['author_email'],
-    url=metadata['url'],
-    license=metadata['license'],
-    install_requires=requirements,
-    setup_requires=requirements,
-)
+__name__ = "cli-chess"
+__version__ = "1.0.0"
+__description__ = "A highly customizable way to play chess in your terminal"
+__url__ = "https://github.com/trevorbayless/cli-chess"
+__author__ = "Trevor Bayless"
+__author_email__ = "trevorbayless1@gmail.com"
+__license__ = "GPL-3.0+"
