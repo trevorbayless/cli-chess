@@ -48,3 +48,4 @@ class MainMenuPresenter(MenuPresenter):
             # Todo: Print error to view element
             log.exception(f"Exception caught: {e}")
             raise e
+

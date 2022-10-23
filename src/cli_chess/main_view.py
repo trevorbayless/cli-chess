@@ -18,7 +18,6 @@ from cli_chess.utils import default_style
 from prompt_toolkit.layout import Layout, Container
 from prompt_toolkit.application import Application, DummyApplication
 from prompt_toolkit.styles import Style
-from prompt_toolkit.key_binding import KeyBindings
 from prompt_toolkit.output.color_depth import ColorDepth
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -31,17 +30,12 @@ class MainView:
         self.app = DummyApplication()
         self.presenter = presenter
 
-    def create_app(self, initial_container: Container, initial_key_bindings: KeyBindings):
-        """Create the main application"""
+    def create_app(self, initial_container: Container):
+        """Create the main application with the initial layout"""
         self.app = Application(
             layout=Layout(initial_container),
-            key_bindings=initial_key_bindings,
             color_depth=ColorDepth.TRUE_COLOR,
             mouse_support=True,
             full_screen=True,
             style=Style.from_dict(default_style)
         )
-
-    def quit(self):
-        """Quit the application"""
-        self.app.exit()

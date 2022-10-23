@@ -35,7 +35,6 @@ class MainMenuModel(MenuModel):
             MenuOption(MainMenuOptions.PLAY_OFFLINE, "Play offline against the computer"),
             MenuOption(MainMenuOptions.SETTINGS, "Modify cli-chess settings"),
             MenuOption(MainMenuOptions.ABOUT, "Get information about cli-chess"),
-            MenuOption(MainMenuOptions.QUIT, "Quit cli-chess")
         ]
 
         return MenuCategory("Main menu", menu_options)

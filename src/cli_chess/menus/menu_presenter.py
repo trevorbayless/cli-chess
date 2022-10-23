@@ -33,3 +33,7 @@ class MenuPresenter:
 
     def select_handler(self, selected_option: int):
         pass
+
+    def has_focus(self):
+        """Queries the view to determine if the menu has focus"""
+        return self.view.has_focus()

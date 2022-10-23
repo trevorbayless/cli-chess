@@ -23,5 +23,9 @@ default_style = {
     "menu.multi-value focused-selected": "fg:orangered bold noinherit",
     "menu.multi-value unfocused-selected": "fg:orangered noinherit",
 
+    "function_bar.key": "fg:white",
+    "function_bar.label": "fg:black bg:mediumturquoise",
+    "function_bar.spacer": "",
+
     "error-label": "bg:darkred"
 }

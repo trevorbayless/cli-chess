@@ -14,9 +14,9 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from __future__ import annotations
+from cli_chess.utils.ui_common import handle_mouse_click
 from prompt_toolkit.layout import Window, FormattedTextControl, HSplit, D
 from prompt_toolkit.formatted_text import StyleAndTextTuples
-from prompt_toolkit.mouse_events import MouseEvent, MouseEventType
 from prompt_toolkit.key_binding import KeyBindings
 from prompt_toolkit.keys import Keys
 from prompt_toolkit.application import get_app
@@ -30,7 +30,6 @@ class MenuView:
         self.presenter = presenter
         self.container_width = container_width
         self.selected_option = 0
-        self.key_bindings = self._create_key_bindings()
         self._container = self._create_container()
 
     def _create_container(self):
@@ -42,12 +41,12 @@ class MenuView:
                 height=D(max=1),
             ),
             Window(
-                FormattedTextControl(self._get_options_text_fragments, focusable=True, key_bindings=self.key_bindings),
+                FormattedTextControl(self._get_options_text_fragments, focusable=True),
                 always_hide_cursor=True,
                 width=D(max=self.container_width),
                 height=D(max=len(self.presenter.get_menu_options())),
             )
-        ])
+        ], key_bindings=self._create_key_bindings())
 
     def _get_title_text_fragments(self) -> StyleAndTextTuples:
         """Create the text fragments for the menu title"""
@@ -63,11 +62,9 @@ class MenuView:
         def append_option(index: int, option: MenuOption):
             selected = self.selected_option == index
 
-            def option_clicked(mouse_event: MouseEvent):
-                if mouse_event.event_type == MouseEventType.MOUSE_UP:
-                    return self.select_option(index)
-                else:
-                    return NotImplemented
+            @handle_mouse_click
+            def option_clicked():
+                self.select_option(index)
 
             sel_class = ",unfocused-selected" if selected else ""
             if self.presenter.view.has_focus() and selected:
@@ -148,17 +145,13 @@ class MultiValueMenuView(MenuView):
         def append_option(index: int, menu_option: MultiValueMenuOption):
             selected = self.selected_option == index
 
-            def label_click(mouse_event: MouseEvent):
-                if mouse_event.event_type == MouseEventType.MOUSE_UP:
-                    return self.select_option(index)
-                else:
-                    return NotImplemented
+            @handle_mouse_click
+            def label_click():
+                self.select_option(index)
 
-            def value_click(mouse_event: MouseEvent):
-                if mouse_event.event_type == MouseEventType.MOUSE_UP:
-                    return self.cycle_value(index)
-                else:
-                    return NotImplemented
+            @handle_mouse_click
+            def value_click():
+                self.cycle_value(index)
 
             sel_class = ",unfocused-selected" if selected else ""
             if self.has_focus() and selected:
