@@ -14,9 +14,17 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from prompt_toolkit.mouse_events import MouseEvent, MouseEventType
+from prompt_toolkit.application import get_app
+from prompt_toolkit.key_binding import KeyPressEvent
 from typing import TypeVar, Callable, cast
 
+E = KeyPressEvent
 T = TypeVar("T", bound=Callable[[MouseEvent], None])
+
+
+def exit_app(event: E) -> None:
+    """Exit the application"""
+    get_app().exit()
 
 
 def handle_mouse_click(handler: T) -> T:

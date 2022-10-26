@@ -19,7 +19,7 @@ from prompt_toolkit.formatted_text import StyleAndTextTuples
 from prompt_toolkit.filters import Condition, is_done
 from prompt_toolkit.application import get_app
 from prompt_toolkit.widgets import Box
-from cli_chess.utils.ui_common import handle_mouse_click
+from cli_chess.utils.ui_common import handle_mouse_click, exit_app
 from prompt_toolkit.keys import Keys
 from prompt_toolkit.key_binding import KeyBindings, ConditionalKeyBindings, merge_key_bindings
 from prompt_toolkit.key_binding.bindings.focus import focus_next, focus_previous
@@ -34,7 +34,7 @@ if TYPE_CHECKING:
 class RootMenuView:
     def __init__(self, presenter: RootMenuPresenter):
         self.presenter = presenter
-        #self._function_bar_key_bindings = self._create_function_bar_key_bindings()
+        self._function_bar_key_bindings = self._create_function_bar_key_bindings()
         self._root_key_bindings = self._create_key_bindings()
         self._function_bar = self._create_function_bar()
         self._container = self._create_container()
@@ -73,7 +73,7 @@ class RootMenuView:
                 )
             ]),
             self._function_bar
-        ], key_bindings=self._root_key_bindings)
+        ], key_bindings=merge_key_bindings([self._root_key_bindings, self._function_bar_key_bindings]))
 
     def _create_function_bar(self) -> HSplit:
         """Create the conditional function bar"""
@@ -137,26 +137,41 @@ class RootMenuView:
             ], height=D(max=1), z_index=0)
         ],  align=VerticalAlign.BOTTOM)
 
-    # def _create_function_bar_key_bindings(self) -> KeyBindings:
-    #     """Creates the key bindings for the function bar"""
-    #     ##
-    #     # PLAY OFFLINE Key Bindings
-    #     ##
-    #     @Condition
-    #     def _play_offline_selected():
-    #         return
-    #     po_kb = KeyBindings()
-    #     ConditionalKeyBindings
-    #
-    #     ##
-    #     # SETTINGS Key Bindings
-    #     ##
-    #     s_kb = KeyBindings()
-    #
-    #     ##
-    #     # ABOUT Key Bindings
-    #     ##
-    #     a_kb = KeyBindings()
+    def _create_function_bar_key_bindings(self) -> "_MergedKeyBindings":
+        """Creates the key bindings for the function bar"""
+        # Key bindings for when PLAY OFFLINE menu option has focus
+        po_fb_kb = KeyBindings()
+
+        @po_fb_kb.add(Keys.F1)
+        def _(event):
+            # TODO: Properly implement this logic
+            """Start the game (testing only)"""
+            self.presenter.vs_computer_menu_presenter.handle_start_game()
+
+        po_fb_kb = ConditionalKeyBindings(
+            po_fb_kb,
+            filter=Condition(lambda: self.presenter.main_menu_presenter.selection == MainMenuOptions.PLAY_OFFLINE)
+        )
+
+        # Key bindings for when SETTINGS menu option has focus
+        s_fb_kb = KeyBindings()
+        s_fb_kb = ConditionalKeyBindings(
+            s_fb_kb,
+            filter=Condition(lambda: self.presenter.main_menu_presenter.selection == MainMenuOptions.SETTINGS)
+        )
+
+        # Key bindings for when ABOUT menu option has focus
+        a_fb_kb = KeyBindings()
+        a_fb_kb = ConditionalKeyBindings(
+            a_fb_kb,
+            filter=Condition(lambda: self.presenter.main_menu_presenter.selection == MainMenuOptions.ABOUT)
+        )
+
+        # Always included key bindings
+        ai_fb_kb = KeyBindings()
+        ai_fb_kb.add(Keys.F10)(exit_app)
+
+        return merge_key_bindings([po_fb_kb, s_fb_kb, a_fb_kb, ai_fb_kb])
 
     def _create_key_bindings(self) -> KeyBindings:
         """Creates the key bindings for the menu manager"""
@@ -169,18 +184,6 @@ class RootMenuView:
         bindings.add(Keys.ControlB)(focus_previous)
         bindings.add(Keys.BackTab)(focus_previous)
         bindings.add("h")(focus_previous)
-
-        # @bindings.add(Keys.F1)
-        # def _(event):
-        #     """Quit the application"""
-        #     get_app().exit()
-        #
-        # #TESTING ONLY
-        # @bindings.add(Keys.F10)
-        # def _(event):
-        #     # TODO: Properly implement this logic
-        #     """Start the game (testing only)"""
-        #     self.presenter.vs_computer_menu_presenter.handle_start_game()
 
         return bindings
 
