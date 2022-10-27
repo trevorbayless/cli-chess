@@ -14,7 +14,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 import argparse
-from importlib import metadata
+from cli_chess.__metadata__ import __version__
 from cli_chess.utils.logging import redact_from_logs, log
 
 
@@ -46,6 +46,6 @@ def setup_argparse() -> ArgumentParser:
         "-v",
         "--version",
         action="version",
-        version=metadata.version("cli-chess"),
+        version=f"cli-chess v{__version__}",
     )
     return parser

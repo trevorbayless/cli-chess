@@ -14,9 +14,21 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from cli_chess.utils.logging import configure_logger
+from cli_chess.utils import setup_argparse
+from cli_chess.__metadata__ import __version__
 
 
 class MainModel:
     """Model for the startup presenter"""
     def __init__(self):
-        configure_logger("cli-chess")
+        self._setup_logger()
+        self.startup_args = self._parse_args()
+
+    def _setup_logger(self):
+        """Set up the root logger"""
+        log = configure_logger("cli-chess")
+        log.info(f"cli-chess v{__version__}")
+
+    def _parse_args(self):
+        """Parse the args passed in at startup"""
+        return setup_argparse().parse_args()

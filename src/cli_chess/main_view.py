@@ -16,7 +16,8 @@
 from __future__ import annotations
 from cli_chess.utils import default_style
 from prompt_toolkit.layout import Layout, Container
-from prompt_toolkit.application import Application, DummyApplication
+from prompt_toolkit.application import Application, DummyApplication, get_app
+from prompt_toolkit import print_formatted_text as pt_print, HTML
 from prompt_toolkit.styles import Style
 from prompt_toolkit.output.color_depth import ColorDepth
 from typing import TYPE_CHECKING
@@ -39,3 +40,11 @@ class MainView:
             full_screen=True,
             style=Style.from_dict(default_style)
         )
+
+    def in_terminal_error(self, msg: str, title: str = "Error"):
+        """Print an in terminal error. This is only to be used
+           when the main application is not running yet
+        """
+        pt_print(HTML(f"<red>{title}:</red> {msg}"))
+        # if not get_app().is_running:
+        #     pt_print(HTML(f"<red>{title}:</red> {msg}"))

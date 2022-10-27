@@ -15,7 +15,7 @@
 
 from cli_chess import MainModel, MainView
 from cli_chess.menus.root_menu import RootMenuModel, RootMenuPresenter
-from cli_chess.utils import setup_argparse, lichess_config, is_valid_lichess_token
+from cli_chess.utils import lichess_config, is_valid_lichess_token, log
 
 
 class MainPresenter:
@@ -25,23 +25,21 @@ class MainPresenter:
     def __init__(self, model: MainModel):
         self.model = model
         self.view = MainView(self)
-        self.parse_startup_args()  # Todo: Handle this in the model?
+        self._handle_startup_args()
 
-    def parse_startup_args(self):
-        """Parse the arguments passed in at startup to determine entrypoint"""
-        # Todo: Parse passed in arguments
-        args = setup_argparse().parse_args()
+    def _handle_startup_args(self):
+        """Handles the arguments passed in at startup to determine entrypoint"""
+        args = self.model.startup_args
 
         if args.api_token:
             valid_token, msg = is_valid_lichess_token(args.api_token)
             if valid_token:
                 lichess_config.set_value(lichess_config.Keys.API_TOKEN, args.api_token)
             else:
-                print(msg)  # Todo: Pass this to the view for formatting text
+                self.view.in_terminal_error(msg)
                 exit(1)
 
         # EXAMPLE: Starting up with the MenuManager
-        # Todo: Move this logic into a separate function
         startup_presenter = RootMenuPresenter(RootMenuModel())
         self.view.create_app(startup_presenter.view)
 
