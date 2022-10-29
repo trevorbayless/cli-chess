@@ -13,18 +13,28 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from cli_chess.menus.vs_computer_menu import VsComputerMenuModel
-from cli_chess.menus import MenuPresenter, MultiValueMenuView
+from cli_chess.menus.vs_computer_menu import VsComputerMenuModel, VsComputerMenuOptions
+from cli_chess.menus import MultiValueMenuPresenter, MultiValueMenuView
 from cli_chess.game.game_options import OfflineGameOptions
 from cli_chess.game.offline import start_offline_game
 
 
-class VsComputerMenuPresenter(MenuPresenter):
+class VsComputerMenuPresenter(MultiValueMenuPresenter):
     """Defines the VsComputer menu"""
     def __init__(self, model: VsComputerMenuModel):
         self.model = model
         self.view = MultiValueMenuView(self, container_width=40, column_width=22)
         super().__init__(self.model, self.view)
+
+    def value_cycled_handler(self, selected_option: int):
+        """A handler that's called when the value of the selected option changed"""
+        menu_item = self.model.get_menu_options()[selected_option]
+        selected_option = menu_item.option
+        selected_value = menu_item.selected_value['name']
+
+        if selected_option == VsComputerMenuOptions.SPECIFY_ELO:
+            self.model.show_elo_selection_option(selected_value == "Yes")
+
 
     def handle_start_game(self) -> None:
         """Handle starting the game"""

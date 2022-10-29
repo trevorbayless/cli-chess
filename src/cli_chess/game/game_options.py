@@ -36,6 +36,26 @@ class BaseGameOptions:
 
         return menu_selections
 
+    variant_options_dict = {
+        "Standard": "chess",
+        "Crazyhouse": "crazyhouse",
+        "Chess960": "chess960",
+        "King of the Hill": "kingofthehill",
+        "Three-check": "3check",
+        "Antichess": "antichess",
+        "Atomic": "atomic",
+        "Horde": "horde",
+        "Racing Kings": "racingkings",
+    }
+
+    time_control_options_dict = {
+        "30+20 (Classical)": "30+20",
+        "30+0 (Classical)": "30+0",
+        "15+10 (Rapid)": "15+10",
+        "10+5 (Rapid)": "10+5",
+        "10+0 (Rapid)": "10+0"
+    }
+
     color_options_dict = {
         "Random": "random",
         "White": "white",
@@ -49,34 +69,18 @@ class OfflineGameOptions(BaseGameOptions):
                          self.time_control_options_dict,
                          self.skill_level_options_dict)
 
-    variant_options_dict = {
-        "Standard": "chess",
-        "Crazyhouse": "crazyhouse",
-        "Chess960": "chess960",
-        "King of the Hill": "kingofthehill",
-        "Three-check": "3check",
-        "Antichess": "antichess",
-        "Atomic": "atomic",
-        "Horde": "horde",
-        "Racing Kings": "racingkings",
-        "From Position": "setup"
-    }
-
-    time_control_options_dict = {
-        "Custom Time": "custom",
-        "Unlimited": "unlimited",
-        "30+20 (Classical)": "30+20",
-        "30+0 (Classical)": "30+0",
-        "15+10 (Rapid)": "15+10",
-        "10+5 (Rapid)": "10+5",
-        "10+0 (Rapid)": "10+0",
+    time_control_options_dict = BaseGameOptions.time_control_options_dict
+    additional_time_controls = {
         "5+3 (Blitz)": "5+3",
         "5+0 (Blitz)": "5+0",
         "3+2 (Blitz)": "3+2",
         "3+0 (Blitz)": "3+0",
         "2+1 (Bullet)": "2+1",
-        "1+0 (Bullet)": "1+0"
+        "1+0 (Bullet)": "1+0",
+        "Custom Time": "custom",
+        "Unlimited": "unlimited"
     }
+    time_control_options_dict.update(additional_time_controls)
 
     skill_level_options_dict = {
         # These defaults are for the Fairy Stockfish engine
@@ -89,7 +93,8 @@ class OfflineGameOptions(BaseGameOptions):
         "Level 6": 11,
         "Level 7": 16,
         "Level 8": 20,
-        "Custom Level": "custom"
+        "Custom Level": "custom",
+        "Specify Elo": "elo"
     }
 
 
@@ -99,29 +104,11 @@ class OnlineGameOptions(BaseGameOptions):
                          self.time_control_options_dict,
                          self.mode_options_dict)
 
-    variant_options_dict = {
-        "Standard": "standard",
-        "Crazyhouse": "zh",
-        "Chess960": "chess960",
-        "King of the Hill": "koth",
-        "Three-check": "3check",
-        "Antichess": "anti",
-        "Atomic": "atomic",
-        "Horde": "horde",
-        "Racing Kings": "race",
-    }
-
-    time_control_options_dict = {
-        "30+20 (Classical)": "30+20",
-        "30+0 (Classical)": "30+0",
-        "15+10 (Rapid)": "15+10",
-        "10+5 (Rapid)": "10+5",
-        "10+0 (Rapid)": "10+0",
-        "Correspondence": "correspondence",
-        "Custom": "custom",
-    }
+    time_control_options_dict = BaseGameOptions.time_control_options_dict
+    time_control_options_dict["Custom Time"] = "custom"
+    time_control_options_dict["Correspondence"] = "correspondence"
 
     mode_options_dict = {
-        "Casual": "casual",
-        "Rated": "rated"
+        "Rated": "rated",
+        "Casual": "casual"
     }

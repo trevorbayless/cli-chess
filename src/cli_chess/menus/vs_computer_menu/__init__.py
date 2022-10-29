@@ -1,2 +1,2 @@
-from .vs_computer_menu_model import VsComputerMenuModel
+from .vs_computer_menu_model import VsComputerMenuModel, VsComputerMenuOptions
 from .vs_computer_menu_presenter import VsComputerMenuPresenter

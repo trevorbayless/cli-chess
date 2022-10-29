@@ -16,24 +16,47 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING, List, Union
 if TYPE_CHECKING:
-    from cli_chess.menus import MenuOption, MultiValueMenuOption, MenuCategory
+    from cli_chess.menus import MenuOption, MultiValueMenuOption, MenuCategory, MenuModel, MultiValueMenuModel, MenuView, MultiValueMenuView
 
 
 class MenuPresenter:
-    def __init__(self, model, view):
+    def __init__(self, model: MenuModel, view: MenuView):
         self.model = model
         self.view = view
 
     def get_menu_category(self) -> MenuCategory:
+        """Get the menu category"""
         return self.model.get_menu_category()
 
-    def get_menu_options(self) -> Union[List[MenuOption], List[MultiValueMenuOption]]:
+    def get_menu_options(self) -> List[MenuOption]:
         """Returns the menu options"""
         return self.model.get_menu_options()
 
     def select_handler(self, selected_option: int):
+        """Called on menu item selection. Classes that inherit from
+           this class should override this method if they need to
+           be alerted when the selected option changes
+        """
         pass
 
     def has_focus(self):
         """Queries the view to determine if the menu has focus"""
         return self.view.has_focus()
+
+
+class MultiValueMenuPresenter(MenuPresenter):
+    def __init__(self, model: MultiValueMenuModel, view: MultiValueMenuView):
+        self.model = model
+        self.view = view
+        super().__init__(self.model, self.view)
+
+    def get_menu_options(self) -> List[MultiValueMenuOption]:
+        """Returns the menu options"""
+        return self.model.get_menu_options()
+
+    def value_cycled_handler(self, selected_option: int):
+        """Called when the selected options value is cycled. Classes that inherit from
+           this class should override this method if they need to
+           be alerted when the selected option changes
+        """
+        pass

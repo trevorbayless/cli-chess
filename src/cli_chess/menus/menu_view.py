@@ -22,11 +22,11 @@ from prompt_toolkit.keys import Keys
 from prompt_toolkit.application import get_app
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from cli_chess.menus import MenuOption, MultiValueMenuOption
+    from cli_chess.menus import MenuOption, MultiValueMenuOption, MenuPresenter, MultiValueMenuPresenter
 
 
 class MenuView:
-    def __init__(self, presenter, container_width: int):
+    def __init__(self, presenter: MenuPresenter, container_width: int):
         self.presenter = presenter
         self.container_width = container_width
         self.selected_option = 0
@@ -74,8 +74,9 @@ class MenuView:
             tokens.append(("class:menu.option" + sel_class, f"{option.option_name:<{self.container_width}}", option_clicked))
             tokens.append(("class:menu", "\n"))
 
-        for i, o in enumerate(self.presenter.get_menu_options()):
-            append_option(i, o)
+        for i, opt in enumerate(self.presenter.get_menu_options()):
+            if opt.visible:
+                append_option(i, opt)
 
         tokens.pop()
         return tokens
@@ -125,18 +126,15 @@ class MenuView:
         """Focus on this container"""
         get_app().layout.focus(self._container)
 
-    def quit(self) -> None:
-        """Quit the application"""
-        get_app().exit()
-
     def __pt_container__(self) -> HSplit:
         return self._container
 
 
 class MultiValueMenuView(MenuView):
-    def __init__(self, presenter, container_width: int, column_width: int):
-        super().__init__(presenter, container_width)
+    def __init__(self, presenter: MultiValueMenuPresenter, container_width: int, column_width: int):
+        self.presenter = presenter
         self.column_width = column_width
+        super().__init__(self.presenter, container_width)
 
     def _get_options_text_fragments(self) -> StyleAndTextTuples:
         """Create the text fragments for the menu options"""
@@ -151,6 +149,7 @@ class MultiValueMenuView(MenuView):
 
             @handle_mouse_click
             def value_click():
+                self.select_option(index)
                 self.cycle_value(index)
 
             sel_class = ",unfocused-selected" if selected else ""
@@ -161,8 +160,9 @@ class MultiValueMenuView(MenuView):
             tokens.append(("class:menu.multi-value" + sel_class, f"{menu_option.values[menu_option.selected_value['index']]:<{self.column_width}}", value_click))
             tokens.append(("class:menu", "\n"))
 
-        for i, o in enumerate(self.presenter.get_menu_options()):
-            append_option(i, o)
+        for i, opt in enumerate(self.presenter.get_menu_options()):
+            if opt.visible:
+                append_option(i, opt)
 
         tokens.pop()
         return tokens
@@ -173,12 +173,13 @@ class MultiValueMenuView(MenuView):
         @bindings.add(Keys.Enter, eager=True)
         @bindings.add(" ", eager=True)
         def _(event):
-            """Go to the next menu option"""
-            self.presenter.get_menu_options()[self.selected_option].next_value()
+            """Handle Enter/Space key press"""
+            self.cycle_value(self.selected_option)
 
         return bindings
 
     def cycle_value(self, index: int) -> None:
-        """Cycle to the options next value"""
+        """Cycle to the next value of the selected option"""
+        self.presenter.get_menu_options()[index].next_value()
         super().select_option(index)
-        self.presenter.get_menu_options()[self.selected_option].next_value()
+        self.presenter.value_cycled_handler(self.selected_option)

@@ -26,16 +26,18 @@ class MenuCategory:
 
 class MenuOption:
     """A menu option that has one action on enter or click (e.g. Start game)"""
-    def __init__(self, option: Enum, description: str):
+    def __init__(self, option: Enum, description: str, enabled: bool = True, visible: bool = True):
         self.option = option
         self.option_name = self.option.value
         self.description = description
+        self.enabled = enabled
+        self.visible = visible
 
 
 class MultiValueMenuOption(MenuOption):
     """A menu option which has multiple values to choose from (e.g. Side to play as) """
-    def __init__(self, option: Enum, description: str, values: List[str]):
-        super().__init__(option, description)
+    def __init__(self, option: Enum, description: str, values: List[str], enabled: bool = True, visible: bool = True):
+        super().__init__(option, description, enabled, visible)
         self.values = values
         self.selected_value = {
             "index": self.values.index(self.values[0]),
@@ -44,18 +46,20 @@ class MultiValueMenuOption(MenuOption):
 
     def next_value(self):
         """Set the next value as selected"""
-        try:
-            self.selected_value["index"] = self.selected_value["index"] + 1
-            self.selected_value["name"] = self.values[self.selected_value["index"]]
-        except IndexError:
-            self.selected_value["index"] = self.values.index(self.values[0])
-            self.selected_value["name"] = self.values[self.selected_value["index"]]
+        if self.enabled and self.visible:
+            try:
+                self.selected_value["index"] = self.selected_value["index"] + 1
+                self.selected_value["name"] = self.values[self.selected_value["index"]]
+            except IndexError:
+                self.selected_value["index"] = self.values.index(self.values[0])
+                self.selected_value["name"] = self.values[self.selected_value["index"]]
 
     def previous_value(self):
         """Set the previous value as selected"""
-        try:
-            self.selected_value["index"] = self.selected_value["index"] - 1
-            self.selected_value["name"] = self.values[self.selected_value["index"]]
-        except IndexError:
-            self.selected_value["index"] = self.values.index(self.values[-1])
-            self.selected_value["name"] = self.values[self.selected_value["index"]]
+        if self.enabled and self.visible:
+            try:
+                self.selected_value["index"] = self.selected_value["index"] - 1
+                self.selected_value["name"] = self.values[self.selected_value["index"]]
+            except IndexError:
+                self.selected_value["index"] = self.values.index(self.values[-1])
+                self.selected_value["name"] = self.values[self.selected_value["index"]]

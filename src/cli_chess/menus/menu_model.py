@@ -27,9 +27,18 @@ class MenuModel:
     def get_menu_category(self) -> MenuCategory:
         return self.menu_category
 
-    def get_menu_options(self) -> Union[List[MenuOption], List[MultiValueMenuOption]]:
+    def get_menu_options(self) -> List[MenuOption]:
         """Returns a list containing the menu option objects"""
         if not self.menu_category.category_options:
             raise ValueError("Missing menu options")
         else:
             return self.menu_category.category_options
+
+
+class MultiValueMenuModel(MenuModel):
+    def __init__(self, menu_category: MenuCategory):
+        super().__init__(menu_category)
+
+    def get_menu_options(self) -> List[MultiValueMenuOption]:
+        """Returns a list containing the menu option objects"""
+        return super().get_menu_options()
