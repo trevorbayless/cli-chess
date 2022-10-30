@@ -23,16 +23,17 @@ class BaseGameOptions:
         self.chain_map = ChainMap(self.color_options_dict, *options)
 
     def transpose_selection_dict(self, menu_selections: dict) -> Dict:
-        """Lookup the key from the menu selections in the
-           game options ChainMap and replace the value
+        """Lookup the key from the menu selections in the game options ChainMap
+           and replace the value. Raises 'Exception' on failure.
         """
         for key in menu_selections:
             try:
                 value = menu_selections[key]
                 menu_selections[key] = self.chain_map[value]
-            except KeyError:
-                log.exception(f"Error transposing dict: key={key} value={menu_selections[key]}")
-                raise
+            except Exception as e:
+                msg = f"Error parsing game setting selections: '{key}':'{menu_selections[key]}'"
+                log.exception(msg)
+                raise Exception(msg) from e
 
         return menu_selections
 

@@ -16,7 +16,7 @@
 from __future__ import annotations
 from prompt_toolkit.layout import Window, FormattedTextControl, ConditionalContainer, VSplit, HSplit, VerticalAlign, WindowAlign, D
 from prompt_toolkit.formatted_text import StyleAndTextTuples
-from prompt_toolkit.filters import Condition, is_done
+from prompt_toolkit.filters import Condition, is_done, to_filter
 from prompt_toolkit.application import get_app
 from prompt_toolkit.widgets import Box
 from cli_chess.utils.ui_common import handle_mouse_click, exit_app
@@ -36,7 +36,9 @@ class RootMenuView:
         self.presenter = presenter
         self._function_bar_key_bindings = self._create_function_bar_key_bindings()
         self._root_key_bindings = self._create_key_bindings()
-        self._function_bar = self._create_function_bar()
+        self._error_label = FormattedTextControl(text="", style="class:error-label", show_cursor=False)
+        self._error_container = self._create_error_container()
+        self._function_bar_container = self._create_function_bar()
         self._container = self._create_container()
 
     def _create_container(self):
@@ -72,10 +74,20 @@ class RootMenuView:
                     & Condition(lambda: self.presenter.main_menu_presenter.selection == MainMenuOptions.ABOUT)
                 )
             ]),
-            self._function_bar
+            HSplit([
+                self._error_container,
+                self._function_bar_container
+            ], align=VerticalAlign.BOTTOM)
         ], key_bindings=merge_key_bindings([self._root_key_bindings, self._function_bar_key_bindings]))
 
-    def _create_function_bar(self) -> HSplit:
+    def _create_error_container(self) -> ConditionalContainer:
+        """Create the container used to display errors"""
+        return ConditionalContainer(
+            Window(self._error_label, always_hide_cursor=True, height=D(max=1)),
+            filter=to_filter(self._error_label.text == "")
+        )
+
+    def _create_function_bar(self) -> VSplit:
         """Create the conditional function bar"""
         def _get_function_bar_fragments() -> StyleAndTextTuples:
             fragments: StyleAndTextTuples = []
@@ -83,10 +95,14 @@ class RootMenuView:
             ###
             # Function bar fragments for PLAY OFFLINE
             ###
+            self._error_label.text = ""
             if self.presenter.main_menu_presenter.selection == MainMenuOptions.PLAY_OFFLINE:
                 @handle_mouse_click
                 def handle_start_game() -> None:
-                    self.presenter.vs_computer_menu_presenter.handle_start_game()
+                    try:
+                        self.presenter.vs_computer_menu_presenter.handle_start_game()
+                    except Exception as e:
+                        self._error_label.text = str(e)
 
                 fragments.extend([
                     ("class:function_bar.key", "F1", handle_start_game),
@@ -130,12 +146,10 @@ class RootMenuView:
 
             return fragments
 
-        return HSplit([
-            VSplit([
-                Window(FormattedTextControl(_get_function_bar_fragments)),
-                Window(FormattedTextControl(f"cli-chess {__version__}"), align=WindowAlign.RIGHT)
-            ], height=D(max=1), z_index=0)
-        ],  align=VerticalAlign.BOTTOM)
+        return VSplit([
+            Window(FormattedTextControl(_get_function_bar_fragments)),
+            Window(FormattedTextControl(f"cli-chess {__version__}"), align=WindowAlign.RIGHT)
+        ], height=D(max=1))
 
     def _create_function_bar_key_bindings(self) -> "_MergedKeyBindings":
         """Creates the key bindings for the function bar"""
@@ -146,7 +160,10 @@ class RootMenuView:
         def _(event):
             # TODO: Properly implement this logic
             """Start the game (testing only)"""
-            self.presenter.vs_computer_menu_presenter.handle_start_game()
+            try:
+                self.presenter.vs_computer_menu_presenter.handle_start_game()
+            except Exception as e:
+                self._error_label.text = e
 
         po_fb_kb = ConditionalKeyBindings(
             po_fb_kb,

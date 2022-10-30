@@ -76,7 +76,7 @@ class GameViewBase:
         input_field.accept_handler = self._accept_input
         return input_field
 
-    def _create_error_container(self):
+    def _create_error_container(self) -> ConditionalContainer:
         """Create the error container"""
         return ConditionalContainer(
             Window(
