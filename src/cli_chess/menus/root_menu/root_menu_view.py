@@ -163,7 +163,7 @@ class RootMenuView:
             try:
                 self.presenter.vs_computer_menu_presenter.handle_start_game()
             except Exception as e:
-                self._error_label.text = e
+                self._error_label.text = str(e)
 
         po_fb_kb = ConditionalKeyBindings(
             po_fb_kb,
