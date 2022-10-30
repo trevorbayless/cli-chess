@@ -42,13 +42,12 @@ class VsComputerMenuPresenter(MultiValueMenuPresenter):
         start_offline_game(game_parameters)
 
     def _create_dict_of_selected_values(self) -> dict:
-        """Creates a dictionary of all selected values"""
+        """Creates a dictionary of all selected values. Raises an Exception on failure."""
         try:
             selections_dict = {}
-            for index, menu_option in enumerate(self.get_menu_options()):
+            for index, menu_option in enumerate(self.get_visible_menu_options()):
                 selections_dict[f"{menu_option.option_name}"] = menu_option.selected_value['name']
 
             return OfflineGameOptions().transpose_selection_dict(selections_dict)
-        except KeyError:
-            # TODO: Print error to screen
-            pass
+        except Exception as e:
+            raise e

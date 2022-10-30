@@ -29,8 +29,18 @@ class MenuPresenter:
         return self.model.get_menu_category()
 
     def get_menu_options(self) -> List[MenuOption]:
-        """Returns the menu options"""
+        """Returns all menu options regardless of their enabled/visibility state"""
         return self.model.get_menu_options()
+
+    def get_visible_menu_options(self) -> List[MenuOption]:
+        """Returns all menu options which are visible"""
+        visbile_options = []
+        for opt in self.get_menu_options():
+            if not opt.visible:
+                continue
+            else:
+                visbile_options.append(opt)
+        return visbile_options
 
     def select_handler(self, selected_option: int):
         """Called on menu item selection. Classes that inherit from
@@ -39,7 +49,7 @@ class MenuPresenter:
         """
         pass
 
-    def has_focus(self):
+    def has_focus(self) -> bool:
         """Queries the view to determine if the menu has focus"""
         return self.view.has_focus()
 
@@ -50,13 +60,17 @@ class MultiValueMenuPresenter(MenuPresenter):
         self.view = view
         super().__init__(self.model, self.view)
 
-    def get_menu_options(self) -> List[MultiValueMenuOption]:
-        """Returns the menu options"""
-        return self.model.get_menu_options()
-
-    def value_cycled_handler(self, selected_option: int):
+    def value_cycled_handler(self, selected_option: int) -> None:
         """Called when the selected options value is cycled. Classes that inherit from
            this class should override this method if they need to
            be alerted when the selected option changes
         """
         pass
+
+    def get_menu_options(self) -> List[MultiValueMenuOption]:
+        """Returns all menu options regardless of their enabled/visibility state"""
+        return super().get_menu_options()
+
+    def get_visible_menu_options(self) -> List[MultiValueMenuOption]:
+        """Returns all menu options which are visible"""
+        return super().get_visible_menu_options()

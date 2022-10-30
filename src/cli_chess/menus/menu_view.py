@@ -74,9 +74,8 @@ class MenuView:
             tokens.append(("class:menu.option" + sel_class, f"{option.option_name:<{self.container_width}}", option_clicked))
             tokens.append(("class:menu", "\n"))
 
-        for i, opt in enumerate(self.presenter.get_menu_options()):
-            if opt.visible:
-                append_option(i, opt)
+        for i, opt in enumerate(self.presenter.get_visible_menu_options()):
+            append_option(i, opt)
 
         tokens.pop()
         return tokens
@@ -102,13 +101,13 @@ class MenuView:
 
     def select_next_option(self) -> None:
         """Select the next option"""
-        count = len(self.presenter.get_menu_options())
+        count = len(self.presenter.get_visible_menu_options())
         self.selected_option = (self.selected_option + 1) % count
         self.presenter.select_handler(self.selected_option)
 
     def select_previous_option(self) -> None:
         """Select the previous option"""
-        count = len(self.presenter.get_menu_options())
+        count = len(self.presenter.get_visible_menu_options())
         self.selected_option = (self.selected_option - 1) % count
         self.presenter.select_handler(self.selected_option)
 
@@ -160,9 +159,8 @@ class MultiValueMenuView(MenuView):
             tokens.append(("class:menu.multi-value" + sel_class, f"{menu_option.values[menu_option.selected_value['index']]:<{self.column_width}}", value_click))
             tokens.append(("class:menu", "\n"))
 
-        for i, opt in enumerate(self.presenter.get_menu_options()):
-            if opt.visible:
-                append_option(i, opt)
+        for i, opt in enumerate(self.presenter.get_visible_menu_options()):
+            append_option(i, opt)
 
         tokens.pop()
         return tokens
