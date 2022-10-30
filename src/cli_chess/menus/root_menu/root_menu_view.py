@@ -102,7 +102,7 @@ class RootMenuView:
                     try:
                         self.presenter.vs_computer_menu_presenter.handle_start_game()
                     except Exception as e:
-                        self._error_label.text = str(e)
+                        self.print_error(str(e))
 
                 fragments.extend([
                     ("class:function_bar.key", "F1", handle_start_game),
@@ -163,7 +163,7 @@ class RootMenuView:
             try:
                 self.presenter.vs_computer_menu_presenter.handle_start_game()
             except Exception as e:
-                self._error_label.text = str(e)
+                self.print_error(str(e))
 
         po_fb_kb = ConditionalKeyBindings(
             po_fb_kb,
@@ -203,6 +203,14 @@ class RootMenuView:
         bindings.add("h")(focus_previous)
 
         return bindings
+
+    def print_error(self, err: str) -> None:
+        """Print the passed in error to the error container"""
+        self._error_label.text = err
+
+    def clear_error(self) -> None:
+        """Clear any errors displayed in the error container"""
+        self._error_label.text = ""
 
     def __pt_container__(self):
         return self._container

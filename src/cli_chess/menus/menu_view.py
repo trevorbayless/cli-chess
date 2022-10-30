@@ -178,6 +178,6 @@ class MultiValueMenuView(MenuView):
 
     def cycle_value(self, index: int) -> None:
         """Cycle to the next value of the selected option"""
-        self.presenter.get_menu_options()[index].next_value()
+        self.presenter.get_visible_menu_options()[index].next_value()
         super().select_option(index)
         self.presenter.value_cycled_handler(self.selected_option)
