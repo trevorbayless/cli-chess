@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from cli_chess.game.common import *
+from cli_chess.game_components.common import *
 from string import ascii_lowercase
 import unittest
 

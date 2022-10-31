@@ -13,13 +13,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from cli_chess.core.startup import StartupModel, StartupPresenter
-
-
-def run() -> None:
-    """Main entry point"""
-    StartupPresenter(StartupModel()).run()
-
-
-if __name__ == "__main__":
-    run()
+class MainModel:
+    def __init__(self):
+        pass
