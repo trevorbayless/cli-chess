@@ -13,13 +13,22 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from cli_chess.core.startup import StartupModel, StartupPresenter
+from cli_chess.utils.logging import configure_logger
+from cli_chess.utils import setup_argparse
+from cli_chess.__metadata__ import __version__
 
 
-def run() -> None:
-    """Main entry point"""
-    StartupPresenter(StartupModel()).run()
+class StartupModel:
+    """Model for the startup presenter"""
+    def __init__(self):
+        self._setup_logger()
+        self.startup_args = self._parse_args()
 
+    def _setup_logger(self):
+        """Set up the root logger"""
+        log = configure_logger("cli-chess")
+        log.info(f"cli-chess v{__version__}")
 
-if __name__ == "__main__":
-    run()
+    def _parse_args(self):
+        """Parse the args passed in at startup"""
+        return setup_argparse().parse_args()

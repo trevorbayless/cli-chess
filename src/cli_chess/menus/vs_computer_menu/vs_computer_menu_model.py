@@ -14,7 +14,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from cli_chess.menus import MultiValueMenuModel, MultiValueMenuOption, MenuCategory
-from cli_chess.game import OfflineGameOptions
+from cli_chess.game_components import OfflineGameOptions
 from enum import Enum
 
 
@@ -45,7 +45,7 @@ class VsComputerMenuModel(MultiValueMenuModel):
             MultiValueMenuOption(VsComputerMenuOptions.COLOR, "Choose the side you would like to play as", [option for option in OfflineGameOptions.color_options_dict]),
         ]
 
-        return MenuCategory("Game settings", menu_options)
+        return MenuCategory("Game Options", menu_options)
 
     def show_elo_selection_option(self, show: bool):
         """Show/hide the Computer Elo option. Enabling the 'Specify Elo' selection

@@ -34,4 +34,4 @@ class PlayOfflineMenuModel(MenuModel):
             MenuOption(PlayOfflineMenuOptions.PLAY_BOTH_SIDES, "You play both sides"),
         ]
 
-        return MenuCategory("Offline games", menu_options)
+        return MenuCategory("Offline Games", menu_options)

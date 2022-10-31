@@ -13,13 +13,14 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from cli_chess.core.startup import StartupModel, StartupPresenter
+from cli_chess.menus.settings_menu import SettingsMenuModel
+from cli_chess.menus import MenuView, MenuPresenter
 
 
-def run() -> None:
-    """Main entry point"""
-    StartupPresenter(StartupModel()).run()
-
-
-if __name__ == "__main__":
-    run()
+class SettingsMenuPresenter(MenuPresenter):
+    """Defines the Main Menu"""
+    def __init__(self, model: SettingsMenuModel):
+        self.model = model
+        self.view = MenuView(self, container_width=30)
+        self.selection = self.model.get_menu_options()[0].option
+        super().__init__(self.model, self.view)

@@ -17,24 +17,25 @@ from cli_chess.menus import MenuModel, MenuOption, MenuCategory
 from enum import Enum
 
 
-class MainMenuOptions(Enum):
-    PLAY_OFFLINE = "Play Offline"
-    SETTINGS = "Settings"
-    ABOUT = "About"
-    QUIT = "Quit"
+class SettingsMenuOptions(Enum):
+    API_TOKEN_UPDATE = "Update API token"
+    ADD_ENGINE = "Add a chess engine"
+    GAME_SETTINGS = "Game settings"
+    PROGRAM_SETTINGS = "Program settings"
 
 
-class MainMenuModel(MenuModel):
+class SettingsMenuModel(MenuModel):
     def __init__(self):
         self.menu = self._create_menu()
         super().__init__(self.menu)
 
     def _create_menu(self) -> MenuCategory:
-        """Create the menu category with options"""
+        """Create the menu options"""
         menu_options = [
-            MenuOption(MainMenuOptions.PLAY_OFFLINE, "Play offline against the computer"),
-            MenuOption(MainMenuOptions.SETTINGS, "Modify cli-chess settings"),
-            MenuOption(MainMenuOptions.ABOUT, "Get information about cli-chess"),
+            MenuOption(SettingsMenuOptions.API_TOKEN_UPDATE, "Add/update your Lichess API token (required for playing online)"),
+            MenuOption(SettingsMenuOptions.ADD_ENGINE, "Add/update a chess engine (required for playing offline)"),
+            MenuOption(SettingsMenuOptions.GAME_SETTINGS, "Customize the look and feel when playing games"),
+            MenuOption(SettingsMenuOptions.PROGRAM_SETTINGS, "Customize the look and feel of cli-chess"),
         ]
 
-        return MenuCategory("Main Menu", menu_options)
+        return MenuCategory("General Settings", menu_options)
