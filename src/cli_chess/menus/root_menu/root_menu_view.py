@@ -64,7 +64,7 @@ class RootMenuView:
                     & Condition(lambda: self.presenter.play_offline_menu_presenter.selection == PlayOfflineMenuOptions.PLAY_BOTH_SIDES)
                 ),
                 ConditionalContainer(
-                    Box(Window(FormattedTextControl("Settings container placeholder")), padding=0, padding_right=1),
+                    Box(self.presenter.settings_menu_presenter.view, padding=0, padding_right=1),
                     filter=~is_done
                     & Condition(lambda: self.presenter.main_menu_presenter.selection == MainMenuOptions.SETTINGS)
                 ),
