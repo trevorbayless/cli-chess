@@ -14,7 +14,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 import asyncio
-from . import EngineModel
+from cli_chess.modules.engine import EngineModel
 from chess.engine import PlayResult
 
 

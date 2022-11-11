@@ -19,7 +19,7 @@ from prompt_toolkit.layout.dimension import D
 from prompt_toolkit.widgets import TextArea
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from . import MaterialDifferencePresenter
+    from cli_chess.modules.material_difference import MaterialDifferencePresenter
 
 
 class MaterialDifferenceView:

@@ -28,7 +28,7 @@ from cli_chess.utils import log
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from . import GamePresenterBase
+    from cli_chess.core import GamePresenterBase
 
 
 class GameViewBase:

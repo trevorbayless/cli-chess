@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from . import BoardModel, BoardView
+from cli_chess.modules.board import BoardModel, BoardView
 from cli_chess.modules.common import get_piece_unicode_symbol
 from cli_chess.utils.config import board_config
 from chess import Piece, Square
