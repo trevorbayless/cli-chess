@@ -18,7 +18,7 @@ from prompt_toolkit.layout import ConditionalContainer, D
 from prompt_toolkit.widgets import TextArea
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from cli_chess.game_components.move_list import MoveListPresenter
+    from cli_chess.modules.move_list import MoveListPresenter
 
 
 class MoveListView:

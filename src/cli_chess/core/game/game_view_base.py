@@ -21,9 +21,9 @@ from prompt_toolkit.buffer import Buffer
 from prompt_toolkit.application import get_app
 from prompt_toolkit.filters import to_filter
 
-from cli_chess.game_components.board import BoardView
-from cli_chess.game_components.move_list import MoveListView
-from cli_chess.game_components.material_difference import MaterialDifferenceView
+from cli_chess.modules.board import BoardView
+from cli_chess.modules.move_list import MoveListView
+from cli_chess.modules.material_difference import MaterialDifferenceView
 from cli_chess.utils import log
 
 from typing import TYPE_CHECKING

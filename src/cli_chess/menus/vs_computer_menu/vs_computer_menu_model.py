@@ -14,7 +14,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from cli_chess.menus import MultiValueMenuModel, MultiValueMenuOption, MenuCategory
-from cli_chess.game_components import OfflineGameOptions
+from cli_chess.modules import OfflineGameOptions
 from enum import Enum
 
 

@@ -13,8 +13,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from cli_chess.game_components.board import BoardModel, BoardPresenter
-from cli_chess.game_components.common import get_piece_unicode_symbol
+from cli_chess.modules.board import BoardModel, BoardPresenter
+from cli_chess.modules.common import get_piece_unicode_symbol
 from cli_chess.utils.config import board_config
 import unittest
 import chess

@@ -15,7 +15,7 @@
 
 import threading
 from pprint import pprint
-from cli_chess.game_components import Board
+from cli_chess.modules import Board
 from prompt_toolkit import prompt
 
 

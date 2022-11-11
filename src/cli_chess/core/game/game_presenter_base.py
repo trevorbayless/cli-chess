@@ -15,9 +15,9 @@
 
 from __future__ import annotations
 from cli_chess.core.game import GameViewBase
-from cli_chess.game_components.board import BoardPresenter
-from cli_chess.game_components.move_list import MoveListPresenter
-from cli_chess.game_components.material_difference import MaterialDifferencePresenter
+from cli_chess.modules.board import BoardPresenter
+from cli_chess.modules.move_list import MoveListPresenter
+from cli_chess.modules.material_difference import MaterialDifferencePresenter
 from cli_chess.utils import log
 from chess import WHITE, BLACK
 from typing import TYPE_CHECKING

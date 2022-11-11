@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from cli_chess.game_components.board import BoardModel
+from cli_chess.modules.board import BoardModel
 from cli_chess.utils import Event
 from typing import Dict
 from chess import (PIECE_SYMBOLS, PIECE_TYPES, PieceType, Color, WHITE, BLACK,

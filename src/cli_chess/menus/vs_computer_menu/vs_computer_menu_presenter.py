@@ -15,7 +15,7 @@
 
 from cli_chess.menus.vs_computer_menu import VsComputerMenuModel, VsComputerMenuOptions
 from cli_chess.menus import MultiValueMenuPresenter, MultiValueMenuView
-from cli_chess.game_components.game_options import OfflineGameOptions
+from cli_chess.modules.game_options import OfflineGameOptions
 from cli_chess.core.game.offline_game import start_offline_game
 
 

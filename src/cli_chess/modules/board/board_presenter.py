@@ -14,7 +14,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from . import BoardModel, BoardView
-from cli_chess.game_components.common import get_piece_unicode_symbol
+from cli_chess.modules.common import get_piece_unicode_symbol
 from cli_chess.utils.config import board_config
 from chess import Piece, Square
 from typing import List, Dict
