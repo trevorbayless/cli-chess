@@ -18,7 +18,9 @@ from cli_chess.modules.common import get_piece_unicode_symbol
 from cli_chess.utils.config import board_config
 from chess import Piece, Square
 from typing import List, Dict
-
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from cli_chess.modules.board import BoardModel
 
 class BoardPresenter:
     def __init__(self, board_model: BoardModel) -> None:

@@ -18,7 +18,6 @@ from cli_chess.core.game.offline_game import OfflineGameModel
 from cli_chess.core.game import GamePresenterBase
 from cli_chess.modules.engine import EnginePresenter, EngineModel, create_engine_model
 from cli_chess.utils.logging import log
-
 from prompt_toolkit.application import get_app
 from prompt_toolkit.layout import Layout
 

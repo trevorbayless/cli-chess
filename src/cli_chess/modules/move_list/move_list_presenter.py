@@ -13,10 +13,14 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from cli_chess.modules.move_list import MoveListModel, MoveListView
+from __future__ import annotations
+from cli_chess.modules.move_list import MoveListView
 from cli_chess.modules.common import get_piece_unicode_symbol
 from cli_chess.utils.config import board_config
 from chess import WHITE, PAWN
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from cli_chess.modules.move_list import MoveListModel
 
 
 class MoveListPresenter:

@@ -13,9 +13,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import annotations
 import asyncio
-from cli_chess.modules.engine import EngineModel
 from chess.engine import PlayResult
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from cli_chess.modules.engine import EngineModel
 
 
 class EnginePresenter:

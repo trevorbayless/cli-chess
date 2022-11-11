@@ -13,8 +13,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from cli_chess.menus.settings_menu import SettingsMenuModel
+from __future__ import annotations
 from cli_chess.menus import MenuView, MenuPresenter
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from cli_chess.menus.settings_menu import SettingsMenuModel
 
 
 class SettingsMenuPresenter(MenuPresenter):
