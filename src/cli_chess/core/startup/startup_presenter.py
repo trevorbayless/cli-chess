@@ -33,11 +33,10 @@ class StartupPresenter:
         args = self.model.startup_args
 
         if args.api_token:
-            valid_token, msg = is_valid_lichess_token(args.api_token)
-            if valid_token:
+            if is_valid_lichess_token(args.api_token):
                 lichess_config.set_value(lichess_config.Keys.API_TOKEN, args.api_token)
             else:
-                self.view.in_terminal_error(msg)
+                self.view.in_terminal_error("Authentication to Lichess failed")
                 exit(1)
 
         # EXAMPLE: Starting up with the Main layout
