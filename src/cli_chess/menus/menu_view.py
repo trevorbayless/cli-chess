@@ -86,14 +86,12 @@ class MenuView:
 
         @bindings.add(Keys.Up)
         @bindings.add(Keys.ControlP)
-        @bindings.add("k")
         def _(event):
             """Go to the previous menu option"""
             self.select_previous_option()
 
         @bindings.add(Keys.Down)
         @bindings.add(Keys.ControlN)
-        @bindings.add("j")
         def _(event):
             self.select_next_option()
 

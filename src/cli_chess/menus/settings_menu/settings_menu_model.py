@@ -18,7 +18,7 @@ from enum import Enum
 
 
 class SettingsMenuOptions(Enum):
-    API_TOKEN_UPDATE = "Update API token"
+    API_TOKEN_UPDATE = "Manage API access token"
     ADD_ENGINE = "Add a chess engine"
     GAME_SETTINGS = "Game settings"
     PROGRAM_SETTINGS = "Program settings"

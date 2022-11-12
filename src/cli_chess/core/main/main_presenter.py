@@ -18,6 +18,7 @@ from cli_chess.menus.main_menu import MainMenuModel, MainMenuPresenter
 from cli_chess.menus.play_offline_menu import PlayOfflineMenuModel, PlayOfflineMenuPresenter
 from cli_chess.menus.vs_computer_menu import VsComputerMenuModel, VsComputerMenuPresenter
 from cli_chess.menus.settings_menu import SettingsMenuModel, SettingsMenuPresenter
+from cli_chess.modules.token_manager import TokenManagerModel, TokenManagerPresenter
 
 
 class MainPresenter:
@@ -27,4 +28,5 @@ class MainPresenter:
         self.play_offline_menu_presenter = PlayOfflineMenuPresenter(PlayOfflineMenuModel())
         self.vs_computer_menu_presenter = VsComputerMenuPresenter(VsComputerMenuModel())
         self.settings_menu_presenter = SettingsMenuPresenter(SettingsMenuModel())
+        self.token_manger_presenter = TokenManagerPresenter(TokenManagerModel())
         self.view = MainView(self)

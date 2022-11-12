@@ -14,18 +14,19 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from __future__ import annotations
+from cli_chess.__metadata__ import __version__
+from cli_chess.utils.ui_common import handle_mouse_click, exit_app
+from cli_chess.menus.main_menu import MainMenuOptions
+from cli_chess.menus.play_offline_menu import PlayOfflineMenuOptions
+from cli_chess.menus.settings_menu import SettingsMenuOptions
 from prompt_toolkit.layout import Window, FormattedTextControl, ConditionalContainer, VSplit, HSplit, VerticalAlign, WindowAlign, D
 from prompt_toolkit.formatted_text import StyleAndTextTuples
+from prompt_toolkit.key_binding import KeyBindings, ConditionalKeyBindings, merge_key_bindings
+from prompt_toolkit.key_binding.bindings.focus import focus_next, focus_previous
+from prompt_toolkit.keys import Keys
 from prompt_toolkit.filters import Condition, is_done, to_filter
 from prompt_toolkit.application import get_app
 from prompt_toolkit.widgets import Box
-from cli_chess.utils.ui_common import handle_mouse_click, exit_app
-from prompt_toolkit.keys import Keys
-from prompt_toolkit.key_binding import KeyBindings, ConditionalKeyBindings, merge_key_bindings
-from prompt_toolkit.key_binding.bindings.focus import focus_next, focus_previous
-from cli_chess.menus.main_menu import MainMenuOptions
-from cli_chess.menus.play_offline_menu import PlayOfflineMenuOptions
-from cli_chess.__metadata__ import __version__
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from cli_chess.core.main import MainPresenter
@@ -67,6 +68,12 @@ class MainView:
                     Box(self.presenter.settings_menu_presenter.view, padding=0, padding_right=1),
                     filter=~is_done
                     & Condition(lambda: self.presenter.main_menu_presenter.selection == MainMenuOptions.SETTINGS)
+                ),
+                ConditionalContainer(
+                    Box(self.presenter.token_manger_presenter.view, padding=0, padding_right=1),
+                    filter=~is_done
+                    & Condition(lambda: self.presenter.main_menu_presenter.selection == MainMenuOptions.SETTINGS)
+                    & Condition(lambda: self.presenter.settings_menu_presenter.selection == SettingsMenuOptions.API_TOKEN_UPDATE)
                 ),
                 ConditionalContainer(
                     Box(Window(FormattedTextControl("About container placeholder")), padding=0, padding_right=1),
@@ -112,22 +119,24 @@ class MainView:
             ##
             # Function bar fragments for SETTINGS
             ##
-            if self.presenter.main_menu_presenter.selection == MainMenuOptions.SETTINGS:
-                @handle_mouse_click
-                def handle_apply_settings() -> None:
-                    pass
+            # if self.presenter.main_menu_presenter.selection == MainMenuOptions.SETTINGS:
+            #     @handle_mouse_click
+            #     def handle_apply_settings() -> None:
+            #         pass
+            #
+            #     @handle_mouse_click
+            #     def handle_reset_settings() -> None:
+            #         pass
+            #
+            #     fragments.extend([
+            #         ("class:function_bar.key", "F1", handle_apply_settings),
+            #         ("class:function_bar.label", "Apply settings", handle_apply_settings),
+            #         ("class:function_bar.spacer", " "),
+            #         ("class:function_bar.key", "F9", handle_reset_settings),
+            #         ("class:function_bar.label", "Reset settings", handle_reset_settings),
+            #     ])
 
-                @handle_mouse_click
-                def handle_reset_settings() -> None:
-                    pass
-
-                fragments.extend([
-                    ("class:function_bar.key", "F1", handle_apply_settings),
-                    ("class:function_bar.label", "Apply settings", handle_apply_settings),
-                    ("class:function_bar.spacer", " "),
-                    ("class:function_bar.key", "F9", handle_reset_settings),
-                    ("class:function_bar.label", "Reset settings", handle_reset_settings),
-                ])
+            fragments.extend(self.presenter.token_manger_presenter.view.get_function_bar_fragments())
 
             ##
             # Always included fragments
@@ -153,6 +162,7 @@ class MainView:
 
     def _create_function_bar_key_bindings(self) -> "_MergedKeyBindings":
         """Creates the key bindings for the function bar"""
+        # TODO: Have each view implement this and then combine here?
         # Key bindings for when PLAY OFFLINE menu option has focus
         po_fb_kb = KeyBindings()
 
@@ -170,25 +180,27 @@ class MainView:
             filter=Condition(lambda: self.presenter.main_menu_presenter.selection == MainMenuOptions.PLAY_OFFLINE)
         )
 
-        # Key bindings for when SETTINGS menu option has focus
-        s_fb_kb = KeyBindings()
-        s_fb_kb = ConditionalKeyBindings(
-            s_fb_kb,
-            filter=Condition(lambda: self.presenter.main_menu_presenter.selection == MainMenuOptions.SETTINGS)
-        )
+        # # Key bindings for when SETTINGS menu option has focus
+        # s_fb_kb = KeyBindings()
+        # s_fb_kb = ConditionalKeyBindings(
+        #     s_fb_kb,
+        #     filter=Condition(lambda: self.presenter.main_menu_presenter.selection == MainMenuOptions.SETTINGS)
+        # )
+        #
+        # # Key bindings for when ABOUT menu option has focus
+        # a_fb_kb = KeyBindings()
+        # a_fb_kb = ConditionalKeyBindings(
+        #     a_fb_kb,
+        #     filter=Condition(lambda: self.presenter.main_menu_presenter.selection == MainMenuOptions.ABOUT)
+        # )
 
-        # Key bindings for when ABOUT menu option has focus
-        a_fb_kb = KeyBindings()
-        a_fb_kb = ConditionalKeyBindings(
-            a_fb_kb,
-            filter=Condition(lambda: self.presenter.main_menu_presenter.selection == MainMenuOptions.ABOUT)
-        )
+        token_manager_kb = self.presenter.token_manger_presenter.view.get_function_bar_key_bindings()
 
         # Always included key bindings
         ai_fb_kb = KeyBindings()
         ai_fb_kb.add(Keys.F10)(exit_app)
 
-        return merge_key_bindings([po_fb_kb, s_fb_kb, a_fb_kb, ai_fb_kb])
+        return merge_key_bindings([po_fb_kb, token_manager_kb, ai_fb_kb])
 
     def _create_key_bindings(self) -> KeyBindings:
         """Creates the key bindings for the menu manager"""
@@ -196,11 +208,9 @@ class MainView:
         bindings.add(Keys.Right)(focus_next)
         bindings.add(Keys.ControlF)(focus_next)
         bindings.add(Keys.Tab)(focus_next)
-        bindings.add("l")(focus_next)
         bindings.add(Keys.Left)(focus_previous)
         bindings.add(Keys.ControlB)(focus_previous)
         bindings.add(Keys.BackTab)(focus_previous)
-        bindings.add("h")(focus_previous)
 
         return bindings
 

@@ -13,21 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-default_style = {
-    "menu": "bg:",
-    "menu.category_title": "fg:black bg:limegreen underline",
-    "menu.option": "fg:white",
-    "menu.multi-value": "fg:orangered",
-    "focused-selected": "fg:black bg:mediumturquoise noinherit",
-    "unfocused-selected": "fg:black bg:white noinherit",
-    "menu.multi-value focused-selected": "fg:orangered bold noinherit",
-    "menu.multi-value unfocused-selected": "fg:orangered noinherit",
 
-    "function_bar.key": "fg:white",
-    "function_bar.label": "fg:black bg:mediumturquoise",
-    "function_bar.spacer": "",
-
-    "error-label": "bg:darkred",
-
-    "text-area.prompt": "fg:white bold"
-}
+class TokenManagerModel:
+    def __init__(self):
+        pass
