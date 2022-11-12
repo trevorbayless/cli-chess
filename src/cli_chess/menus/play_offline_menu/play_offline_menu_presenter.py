@@ -14,8 +14,6 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from __future__ import annotations
-from cli_chess.utils.logging import log
-from cli_chess.menus.play_offline_menu import PlayOfflineMenuOptions
 from cli_chess.menus import MenuView, MenuPresenter
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -27,23 +25,4 @@ class PlayOfflineMenuPresenter(MenuPresenter):
     def __init__(self, model: PlayOfflineMenuModel):
         self.model = model
         self.view = MenuView(self, container_width=18)  # Todo: Get and set to longest option length?
-        self.selection = self.model.get_menu_options()[0].option
         super().__init__(self.model, self.view)
-
-    def select_handler(self, selected_option: int):
-        """Handles option selection"""
-        try:
-            self.selection = self.model.get_menu_options()[selected_option].option
-            log.info(f"menu_selection: {self.selection}")
-
-            if self.selection == PlayOfflineMenuOptions.VS_COMPUTER:
-                pass
-            elif self.selection == PlayOfflineMenuOptions.PLAY_BOTH_SIDES:
-                pass
-            else:
-                # Todo: Print error to view element
-                raise ValueError(f"Invalid menu option: {self.selection}")
-        except Exception as e:
-            # Todo: Print error to view element
-            log.exception(f"Exception caught: {e}")
-            raise e

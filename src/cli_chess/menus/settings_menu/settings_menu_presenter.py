@@ -25,5 +25,4 @@ class SettingsMenuPresenter(MenuPresenter):
     def __init__(self, model: SettingsMenuModel):
         self.model = model
         self.view = MenuView(self, container_width=30)
-        self.selection = self.model.get_menu_options()[0].option
         super().__init__(self.model, self.view)

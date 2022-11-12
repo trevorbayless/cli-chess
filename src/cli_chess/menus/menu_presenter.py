@@ -14,6 +14,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from __future__ import annotations
+from cli_chess.utils.logging import log
 from typing import TYPE_CHECKING, List, Union
 if TYPE_CHECKING:
     from cli_chess.menus import MenuOption, MultiValueMenuOption, MenuCategory, MenuModel, MultiValueMenuModel, MenuView, MultiValueMenuView
@@ -23,6 +24,7 @@ class MenuPresenter:
     def __init__(self, model: MenuModel, view: MenuView):
         self.model = model
         self.view = view
+        self.selection = self.model.get_menu_options()[0].option
 
     def get_menu_category(self) -> MenuCategory:
         """Get the menu category"""
@@ -44,10 +46,17 @@ class MenuPresenter:
 
     def select_handler(self, selected_option: int):
         """Called on menu item selection. Classes that inherit from
-           this class should override this method if they need to
-           be alerted when the selected option changes
+           this class should override this method if specific tasks
+           need to execute when the selected option changes
         """
-        pass
+        try:
+            self.selection = self.model.get_menu_options()[selected_option].option
+            log.info(f"menu_selection: {self.selection}")
+
+        except Exception as e:
+            # Todo: Print error to view element
+            log.exception(f"Exception caught: {e}")
+            raise e
 
     def has_focus(self) -> bool:
         """Queries the view to determine if the menu has focus"""

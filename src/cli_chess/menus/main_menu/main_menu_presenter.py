@@ -29,27 +29,3 @@ class MainMenuPresenter(MenuPresenter):
         self.view = MenuView(self, container_width=15)  # Todo: Get and set to longest option length?
         self.selection = self.model.get_menu_options()[0].option
         super().__init__(self.model, self.view)
-
-    def select_handler(self, selected_option: int):
-        """Handles option selection"""
-        try:
-            self.selection = self.model.get_menu_options()[selected_option].option
-            log.info(f"menu_selection: {self.selection}")
-
-            if self.selection == MainMenuOptions.PLAY_OFFLINE:
-                pass
-            elif self.selection == MainMenuOptions.SETTINGS:
-                pass
-            elif self.selection == MainMenuOptions.ABOUT:
-                pass
-            elif self.selection == MainMenuOptions.QUIT:
-                log.info("User quit")
-                self.view.quit()
-            else:
-                # Todo: Print error to view element
-                raise ValueError(f"Invalid menu option: {self.selection}")
-        except Exception as e:
-            # Todo: Print error to view element
-            log.exception(f"Exception caught: {e}")
-            raise e
-
