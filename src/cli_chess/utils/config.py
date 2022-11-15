@@ -65,7 +65,7 @@ class BaseConfig:
     def set_key_value(self, section: str, key: str, value: str) -> None:
         """Set (or add) a key/value to a section in the configuration file"""
         # TODO: Raise error if section does not exist
-        self.parser[section][key] = str(value)
+        self.parser[section][key] = str(value.strip())
         self.write_config()
 
     def get_config_filename(self) -> str:
@@ -188,7 +188,7 @@ class EngineSection(SectionBase):
 class LichessSection(SectionBase):
     """Creates and manages the "lichess" section of the config"""
     class Keys(Enum):
-        API_TOKEN = {"name": "engine_path", "default": ""}
+        API_TOKEN = {"name": "api_token", "default": ""}
 
     def __init__(self, filename: str):
         super().__init__(filename, "lichess", self.Keys)
