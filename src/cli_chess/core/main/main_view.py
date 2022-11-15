@@ -37,7 +37,7 @@ class MainView:
         self.presenter = presenter
         self._function_bar_key_bindings = self._create_function_bar_key_bindings()
         self._root_key_bindings = self._create_key_bindings()
-        self._error_label = FormattedTextControl(text="", style="class:error-label", show_cursor=False)
+        self._error_label = FormattedTextControl(text="", style="class:label.error.banner", show_cursor=False)
         self._error_container = self._create_error_container()
         self._function_bar_container = self._create_function_bar()
         self._container = self._create_container()
@@ -73,7 +73,7 @@ class MainView:
                     Box(self.presenter.token_manger_presenter.view, padding=0, padding_right=1),
                     filter=~is_done
                     & Condition(lambda: self.presenter.main_menu_presenter.selection == MainMenuOptions.SETTINGS)
-                    & Condition(lambda: self.presenter.settings_menu_presenter.selection == SettingsMenuOptions.API_TOKEN_UPDATE)
+                    & Condition(lambda: self.presenter.settings_menu_presenter.selection == SettingsMenuOptions.LICHESS_AUTHENTICATION)
                 ),
                 ConditionalContainer(
                     Box(Window(FormattedTextControl("About container placeholder")), padding=0, padding_right=1),

@@ -14,13 +14,10 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from __future__ import annotations
-from cli_chess.utils import is_valid_lichess_token
-from cli_chess.utils.ui_common import handle_mouse_click
-from prompt_toolkit.layout import Window, FormattedTextControl, ConditionalContainer, VSplit, HSplit, VerticalAlign, WindowAlign, D
+from prompt_toolkit.layout import Window, ConditionalContainer, VSplit, HSplit, D
 from prompt_toolkit.key_binding import KeyBindings, ConditionalKeyBindings
-from prompt_toolkit.keys import Keys
 from prompt_toolkit.formatted_text import StyleAndTextTuples
-from prompt_toolkit.widgets import TextArea, ValidationToolbar, Frame
+from prompt_toolkit.widgets import Label, Box, TextArea, ValidationToolbar
 from prompt_toolkit.validation import Validator
 from prompt_toolkit.filters import Condition
 from prompt_toolkit.application import get_app
@@ -28,53 +25,60 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from cli_chess.modules.token_manager import TokenManagerPresenter
 
-api_token_validator = Validator.from_callable(
-    is_valid_lichess_token,
-    error_message="Invalid Lichess API token",
-    move_cursor_to_end=True,
-)
-
 
 class TokenManagerView:
     def __init__(self, presenter: TokenManagerPresenter):
         self.presenter = presenter
         self.container_width = 40
+        self.account_name = self.presenter.get_account_name()
         self._text_input = self._create_text_input_area()
         self._container = self._create_container()
 
     def _create_text_input_area(self):
         """Creates and returns the TextArea used for token input"""
+        validator = Validator.from_callable(
+            self.presenter.is_valid_lichess_token,
+            error_message="Invalid Lichess API token",
+            move_cursor_to_end=True,
+        )
+
         return TextArea(
-            prompt="Token: ",
-            validator=api_token_validator,
+            validator=validator,
             accept_handler=self._accept_handler,
             focus_on_click=True,
-            wrap_lines=False,
+            wrap_lines=True,
             multiline=False,
-            height=D(max=1)
+            width=D(max=self.container_width),
+            height=D(max=1),
         )
 
     def _create_container(self) -> HSplit:
         """Creates the container for the token manager view"""
         return HSplit([
-            Window(
-                FormattedTextControl(
-                    text=f"{'Manage API Access Token':<{self.container_width}}",
-                    style="class:menu.category_title"
+            Label(f"{'Authenticate with Lichess':<{self.container_width}}", style="class:menu.category_title", wrap_lines=False),
+            VSplit([
+                Label("API Token: ", style="bold", dont_extend_width=True),
+                ConditionalContainer(
+                    TextArea("Input token and press enter", style="class:text-area-placeholder", focus_on_click=True),
+                    filter=Condition(lambda: not self.has_focus()) & Condition(lambda: len(self._text_input.text) == 0)
                 ),
-                width=D(max=self.container_width),
-                height=D(max=1),
-            ),
-            Window(FormattedTextControl("Enter your API token"), height=D(max=1)),
-            self._text_input,
+                ConditionalContainer(self._text_input, Condition(lambda: self.has_focus()) | Condition(lambda: len(self._text_input.text) > 0)),
+            ], height=D(max=1)),
             ValidationToolbar(),
-        ])
+            Box(Window(), height=D(max=1)),
+            VSplit([
+                Label("Linked account: ", dont_extend_width=True),
+                ConditionalContainer(Label("None", style="class:label.error bold italic"), Condition(lambda: self.account_name == "None")),
+                ConditionalContainer(Label(text=lambda: self.account_name, style="class:label.success bold"), Condition(lambda: self.account_name != "None")),
+            ], height=D(max=1)),
+        ], width=D(max=self.container_width), height=D(preferred=8))
 
     def _accept_handler(self, buf) -> bool:
         """Called on ENTER after successful token validation.
            Saves the valid token to the configuration file.
         """
         self.presenter.save_api_token(self._text_input.text)
+        self.account_name = self.presenter.get_account_name()
         return True
 
     def get_function_bar_fragments(self) -> StyleAndTextTuples:
@@ -82,27 +86,13 @@ class TokenManagerView:
            this module is hooked up with a function bar
         """
         fragments: StyleAndTextTuples = []
-        if self.has_focus():
-            @handle_mouse_click
-            def handle_browser_open() -> None:
-                self.presenter.open_token_creation_url()
-
-            fragments.extend([
-                ("class:function_bar.key", "F1", handle_browser_open),
-                ("class:function_bar.label", f"{'Open browser':<14}", handle_browser_open),
-            ])
         return fragments
 
-    def get_function_bar_key_bindings(self):
+    def get_function_bar_key_bindings(self) -> ConditionalKeyBindings:
         """Returns a set of key bindings to use if this
            module is hooked up with a function bar
         """
         kb = KeyBindings()
-
-        @kb.add(Keys.F1)
-        def _(event):
-            self.presenter.open_token_creation_url()
-
         kb = ConditionalKeyBindings(
             kb,
             filter=Condition(lambda: self.has_focus())
@@ -111,7 +101,10 @@ class TokenManagerView:
 
     def has_focus(self):
         """Returns true if this container has focus"""
-        return get_app().layout.has_focus(self._container)
+        has_focus = get_app().layout.has_focus(self._container)
+        if has_focus:
+            get_app().layout.focus(self._text_input)
+        return has_focus
 
     def __pt_container__(self) -> HSplit:
         return self._container

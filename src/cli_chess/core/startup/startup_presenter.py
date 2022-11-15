@@ -16,7 +16,8 @@
 from __future__ import annotations
 from cli_chess.core.startup import StartupView
 from cli_chess.core.main import MainModel, MainPresenter
-from cli_chess.utils import lichess_config, is_valid_lichess_token, log
+from cli_chess.modules.token_manager import TokenManagerModel
+from cli_chess.utils import log
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from cli_chess.core.startup import StartupModel
@@ -33,9 +34,7 @@ class StartupPresenter:
         args = self.model.startup_args
 
         if args.api_token:
-            if is_valid_lichess_token(args.api_token):
-                lichess_config.set_value(lichess_config.Keys.API_TOKEN, args.api_token)
-            else:
+            if not TokenManagerModel().is_lichess_token_valid(args.api_token, save=True):
                 self.view.in_terminal_error("Authentication to Lichess failed")
                 exit(1)
 

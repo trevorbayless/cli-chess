@@ -14,7 +14,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from __future__ import annotations
-from cli_chess.utils import default_style
+from cli_chess.utils import default, twilight
 from prompt_toolkit.layout import Layout, Container
 from prompt_toolkit.application import Application, DummyApplication, get_app
 from prompt_toolkit import print_formatted_text as pt_print, HTML
@@ -38,7 +38,7 @@ class StartupView:
             color_depth=ColorDepth.TRUE_COLOR,
             mouse_support=True,
             full_screen=True,
-            style=Style.from_dict(default_style)
+            style=Style.from_dict(default)
         )
 
     def in_terminal_error(self, msg: str, title: str = "Error"):

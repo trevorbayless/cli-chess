@@ -38,7 +38,7 @@ class GameViewBase:
         self.material_diff_upper_container = material_diff_upper_view
         self.material_diff_lower_container = material_diff_lower_view
         self.input_field_container = self._create_input_field_container()
-        self.error_label = FormattedTextControl(text="", style="class:error-label", show_cursor=False)
+        self.error_label = FormattedTextControl(text="", style="class:label.error.banner", show_cursor=False)
         self.error_container = self._create_error_container()
         self.root_container = self._create_root_container()
 

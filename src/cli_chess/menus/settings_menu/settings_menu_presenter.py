@@ -24,5 +24,5 @@ class SettingsMenuPresenter(MenuPresenter):
     """Defines the Main Menu"""
     def __init__(self, model: SettingsMenuModel):
         self.model = model
-        self.view = MenuView(self, container_width=30)
+        self.view = MenuView(self, container_width=27)
         super().__init__(self.model, self.view)

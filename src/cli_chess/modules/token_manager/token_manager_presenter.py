@@ -16,8 +16,6 @@
 from __future__ import annotations
 from cli_chess.modules.token_manager import TokenManagerView
 from cli_chess.utils.config import lichess_config
-from cli_chess.utils.logging import log
-import webbrowser
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from cli_chess.modules.token_manager import TokenManagerModel
@@ -38,10 +36,10 @@ class TokenManagerPresenter:
         """Save the valid API access token to the configuration"""
         lichess_config.set_value(lichess_config.Keys.API_TOKEN, api_token)
 
-    def open_token_creation_url(self):
-        """Open the web browser to the token creation url"""
-        try:
-            webbrowser.get()
-            webbrowser.open_new(API_TOKEN_CREATION_URL)
-        except Exception as e:
-            log.error(f"Web browser: {e}")
+    def is_valid_lichess_token(self, api_token: str) -> bool:
+        """Calls the model to test api token validity"""
+        return self.model.is_lichess_token_valid(api_token, save=True)
+
+    def get_account_name(self) -> str:
+        """Calls the model to get the name of the linked lichess account"""
+        return self.model.get_account_name()

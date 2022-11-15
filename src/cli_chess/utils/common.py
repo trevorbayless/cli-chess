@@ -13,26 +13,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from cli_chess.utils.logging import log
 from os import name as os_name
-from berserk import TokenSession, clients
-from berserk.exceptions import BerserkError
 
 
 def is_windows_system() -> bool:
     """Returns True if on a Windows system"""
     return True if os_name == "nt" else False
 
-
-def is_valid_lichess_token(api_token: str) -> bool:
-    """Returns True if the api token passed in is valid"""
-    session = TokenSession(api_token)
-    account = clients.Account(session)
-
-    try:
-        if account.get():
-            log.info("Successfully authenticated with Lichess")
-            return True
-    except BerserkError as e:
-        log.error(f"Authentication to Lichess failed - {e.message}")
-        return False

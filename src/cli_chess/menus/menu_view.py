@@ -37,16 +37,14 @@ class MenuView:
         return HSplit([
             Window(
                 FormattedTextControl(self._get_title_text_fragments),
-                width=D(max=self.container_width),
                 height=D(max=1),
             ),
             Window(
                 FormattedTextControl(self._get_options_text_fragments, focusable=True),
                 always_hide_cursor=True,
-                width=D(max=self.container_width),
                 height=D(max=len(self.presenter.get_menu_options())),
             )
-        ], key_bindings=self._create_key_bindings())
+        ], width=D(max=self.container_width), key_bindings=self._create_key_bindings())
 
     def _get_title_text_fragments(self) -> StyleAndTextTuples:
         """Create the text fragments for the menu title"""
