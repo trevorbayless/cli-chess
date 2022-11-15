@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-default_style = {
+default = {
     "menu": "bg:",
     "menu.category_title": "fg:black bg:limegreen underline",
     "menu.option": "fg:white",
@@ -27,7 +27,42 @@ default_style = {
     "function_bar.label": "fg:black bg:mediumturquoise",
     "function_bar.spacer": "",
 
-    "error-label": "bg:darkred",
+    "label": "fg:white",
+    "label.success": "fg:darkgreen",
+    "label.error": "fg:darkred",
+    "label.success.banner": "bg:darkgreen",
+    "label.error.banner": "bg:darkred",
 
-    "text-area.prompt": "fg:white bold"
+    "text-area": "fg:orangered bold",
+    "text-area-placeholder": "fg:orangered italic",
+    "text-area.prompt": "fg:white bold noinherit",
+
+    "validation-toolbar": "fg:white bg:darkred"
+}
+
+twilight = {
+    "menu": "bg:",
+    "menu.category_title": "fg:black bg:darkseagreen underline",
+    "menu.option": "fg:white",
+    "menu.multi-value": "fg:tomato",
+    "focused-selected": "fg:black bg:plum noinherit",
+    "unfocused-selected": "fg:black bg:white noinherit",
+    "menu.multi-value focused-selected": "fg:tomato bold noinherit",
+    "menu.multi-value unfocused-selected": "fg:tomato noinherit",
+
+    "function_bar.key": "fg:white",
+    "function_bar.label": "fg:black bg:plum",
+    "function_bar.spacer": "",
+
+    "label": "fg:white",
+    "label.success": "fg:skyblue",
+    "label.error": "fg:crimson",
+    "label.success.banner": "bg:skyblue",
+    "label.error.banner": "fg:crimson",
+
+    "text-area": "fg:tomato bold",
+    "text-area-placeholder": "fg:tomato italic",
+    "text-area.prompt": "fg:white bold noinherit",
+
+    "validation-toolbar": "fg:white bg:crimson"
 }
