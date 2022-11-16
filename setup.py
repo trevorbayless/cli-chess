@@ -25,6 +25,13 @@ requirements = [
     "prompt-toolkit>=3.0.31",
 ]
 
+dev_requirements = {
+    'dev': [
+        'pytest>=7.2.0',
+        'pytest-flake8>=1.1.1'
+    ]
+}
+
 setup(
     name=metadata['name'],
     version=metadata['version'],
@@ -35,4 +42,5 @@ setup(
     license=metadata['license'],
     install_requires=requirements,
     setup_requires=requirements,
+    extras_require=dev_requirements
 )
