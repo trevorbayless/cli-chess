@@ -21,6 +21,8 @@ import chess.variant
 import chess
 
 
+# TODO: This will need to be refactored
+#       Instead of board model taking in a dict, pass individual params instead?
 class BoardModel:
     def __init__(self, game_parameters: dict, fen: str = "") -> None:
         self.game_parameters = game_parameters
