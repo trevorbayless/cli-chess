@@ -22,13 +22,14 @@ metadata = dict(findall(r'__(\w*)__\s*=\s*"([^"]+)"', metadata_file))
 requirements = [
     "chess>=1.9.3",
     "berserk-downstream>=0.11.9",
-    "prompt-toolkit>=3.0.31",
+    "prompt-toolkit>=3.0.31"
 ]
 
 dev_requirements = {
     'dev': [
         'pytest>=7.2.0',
-        'pytest-flake8>=1.1.1'
+        'pytest-flake8>=1.1.1',
+        'pytest-cov>=4.0.0'
     ]
 }
 

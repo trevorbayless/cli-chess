@@ -5,6 +5,7 @@ config.ini
 *.pyc
 *.egg-info
 *.eggs/
+.coverage
 .venv/
 .vscode/
 .idea/
