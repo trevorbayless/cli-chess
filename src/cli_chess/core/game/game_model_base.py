@@ -16,10 +16,24 @@
 from cli_chess.modules.board import BoardModel
 from cli_chess.modules.move_list import MoveListModel
 from cli_chess.modules.material_difference import MaterialDifferenceModel
+from random import getrandbits
+import chess
+
+
+def get_player_color(color: str) -> chess.Color:
+    """Returns a chess.Color based on the color string passed in. If the color string
+       is unmatched, a random value of chess.WHITE or chess.BLACK will be returned
+    """
+    if color.lower() in chess.COLOR_NAMES:
+        return chess.Color(chess.COLOR_NAMES.index(color))
+    else:  # Get random color to play as
+        return chess.Color(getrandbits(1))
 
 
 class GameModelBase:
     def __init__(self, game_parameters: dict):
-        self.board_model = BoardModel(game_parameters)
+        # TODO: Update to use enumeration
+        self.board_model = BoardModel(my_color=get_player_color(game_parameters['Side to play as']),
+                                      variant=game_parameters['Variant'])
         self.move_list_model = MoveListModel(self.board_model)
         self.material_diff_model = MaterialDifferenceModel(self.board_model)

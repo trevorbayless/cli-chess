@@ -15,7 +15,7 @@
 
 from cli_chess.utils.event import Event
 from cli_chess.utils.logging import log
-from random import getrandbits, randint
+from random import randint
 from typing import List
 import chess.variant
 import chess
@@ -24,11 +24,10 @@ import chess
 # TODO: This will need to be refactored
 #       Instead of board model taking in a dict, pass individual params instead?
 class BoardModel:
-    def __init__(self, game_parameters: dict, fen: str = "") -> None:
-        self.game_parameters = game_parameters
-        self.my_color: chess.Color = self._set_my_color(self.game_parameters['Side to play as'])  #TODO: Update 'Side to play as' to use options enum
+    def __init__(self, my_color: chess.Color = chess.WHITE, variant: str = "standard", fen: str = "") -> None:
+        self.my_color = my_color
         self.board_orientation = self.my_color
-        self.variant = self.game_parameters['Variant']  #TODO: Update 'Variant' to use options enum
+        self.variant = variant
         self.is_chess960 = self.variant == "chess960"
 
         if not self.is_chess960:
@@ -70,13 +69,6 @@ class BoardModel:
     def get_variant_name(self) -> str:
         """Returns a string holding the board variant name"""
         return self.board.uci_variant
-
-    def _set_my_color(self, color: str) -> chess.Color:
-        """Sets the color to play as based on the color string passed in"""
-        if color.lower() in chess.COLOR_NAMES:
-            return chess.Color(chess.COLOR_NAMES.index(color))
-        else:  # Get random color to play as
-            return chess.Color(getrandbits(1))
 
     def get_turn(self) -> chess.Color:
         """Returns the color of which turn it is"""
@@ -153,10 +145,7 @@ class BoardModel:
 
     def is_white_orientation(self) -> bool:
         """Returns True if the board orientation is set as white"""
-        if self.board_orientation is chess.WHITE:
-            return True
-        else:
-            return False
+        return self.board_orientation is chess.WHITE
 
     def _notify_board_model_updated(self) -> None:
         """Notifies listeners of board model updates"""
@@ -169,8 +158,7 @@ class BoardModel:
     def _log_initialization(self):
         """Logs class initialization"""
         log.debug("=============== BOARD INITIALIZATION ===============")
-        log.debug(f"Game parameters: {self.game_parameters}")
-        log.debug(f"Color: {chess.COLOR_NAMES[self.my_color]}")
-        log.debug(f"Starting FEN: {self.board.fen()}")
+        log.debug(f"My color: {chess.COLOR_NAMES[self.my_color]}")
         log.debug(f"Variant: {self.variant}")
+        log.debug(f"Starting FEN: {self.board.fen()}")
         log.debug("====================================================")

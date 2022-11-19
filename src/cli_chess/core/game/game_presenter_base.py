@@ -18,8 +18,6 @@ from cli_chess.core.game import GameViewBase
 from cli_chess.modules.board import BoardPresenter
 from cli_chess.modules.move_list import MoveListPresenter
 from cli_chess.modules.material_difference import MaterialDifferencePresenter
-from cli_chess.utils import log
-from chess import WHITE, BLACK
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from cli_chess.core.game import GameModelBase
@@ -28,11 +26,9 @@ if TYPE_CHECKING:
 class GamePresenterBase:
     def __init__(self, game_model: GameModelBase):
         self.game_model = game_model
-
         self.board_presenter = BoardPresenter(self.game_model.board_model)
         self.move_list_presenter = MoveListPresenter(self.game_model.move_list_model)
         self.material_diff_presenter = MaterialDifferencePresenter(self.game_model.material_diff_model)
-
         self.game_view = GameViewBase(self,
                                       self.board_presenter.view,
                                       self.move_list_presenter.view,

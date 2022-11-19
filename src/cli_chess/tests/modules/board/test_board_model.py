@@ -17,19 +17,9 @@ import pytest
 import chess
 from cli_chess.modules.board import BoardModel
 
-# TODO: This will need to be refactored
-#       Instead of board model taking in a dict, pass individual params instead?
-game_parameters_white = {
-    "Variant": "standard",
-    "Side to play as": "white",
-}
-
-game_parameters_black = game_parameters_white.copy()
-game_parameters_black["Side to play as"] = "black"
-
 
 def test_make_move():
-    model = BoardModel(game_parameters_white)
+    model = BoardModel()
 
     # Test valid move
     try:
@@ -55,7 +45,7 @@ def test_random_orientation():
 
 
 def test_set_board_orientation():
-    model = BoardModel(game_parameters_white)
+    model = BoardModel()
     assert model.get_board_orientation() == chess.WHITE
 
     model.set_board_orientation(chess.BLACK)
@@ -63,10 +53,10 @@ def test_set_board_orientation():
 
 
 def test_get_board_orientation():
-    model = BoardModel(game_parameters_black)
+    model = BoardModel(my_color=chess.BLACK)
     assert model.get_board_orientation() == chess.BLACK
 
-    model = BoardModel(game_parameters_white)
+    model = BoardModel()
     assert model.get_board_orientation() == chess.WHITE
 
     model.set_board_orientation(chess.BLACK)
@@ -74,7 +64,7 @@ def test_get_board_orientation():
 
 
 def test_get_board_squares():
-    model = BoardModel(game_parameters_white)
+    model = BoardModel()
     square_numbers = [56, 57, 58, 59, 60, 61, 62, 63,
                       48, 49, 50, 51, 52, 53, 54, 55,
                       40, 41, 42, 43, 44, 45, 46, 47,
@@ -93,7 +83,7 @@ def test_get_board_squares():
 
 
 def test_get_square_file_index():
-    model = BoardModel(game_parameters_white)
+    model = BoardModel()
     file_index = model.get_square_file_index(chess.E4)
     assert file_index == 4
 
@@ -102,7 +92,7 @@ def test_get_square_file_index():
 
 
 def test_get_file_labels():
-    model = BoardModel(game_parameters_white)
+    model = BoardModel()
     file_labels = model.get_file_labels()
     assert file_labels == "a b c d e f g h "
 
@@ -112,7 +102,7 @@ def test_get_file_labels():
 
 
 def test_get_square_rank_index():
-    model = BoardModel(game_parameters_white)
+    model = BoardModel()
     rank_index = model.get_square_rank_index(chess.E4)
     assert rank_index == 3
 
@@ -121,7 +111,7 @@ def test_get_square_rank_index():
 
 
 def test_get_rank_label():
-    model = BoardModel(game_parameters_white)
+    model = BoardModel()
     rank_index = model.get_square_rank_index(chess.A1)
     rank_label = model.get_rank_label(rank_index)
     assert rank_label == "1"
@@ -133,7 +123,7 @@ def test_get_rank_label():
 
 def test_is_square_in_check():
     in_check_fen = "8/8/8/8/6K1/8/8/4Q1k1 b - - 21 61"
-    model = BoardModel(game_parameters_white, fen=in_check_fen)
+    model = BoardModel(fen=in_check_fen)
     assert model.is_square_in_check(model.board.king(model.board.turn))
 
     not_in_check_fen = "8/8/8/3Q4/8/6K1/8/6k1 w - - 21 61"
@@ -142,7 +132,7 @@ def test_is_square_in_check():
 
 
 def test_is_light_square():
-    model = BoardModel(game_parameters_white)
+    model = BoardModel()
     assert not model.is_light_square(chess.H8)
     assert model.is_light_square(chess.A2)
     with pytest.raises(ValueError):
@@ -150,12 +140,12 @@ def test_is_light_square():
 
 
 def test_is_white_orientation():
-    model = BoardModel(game_parameters_white)
+    model = BoardModel()
     assert model.is_white_orientation()
     model.set_board_orientation(chess.BLACK)
     assert not model.is_white_orientation()
 
-    model = BoardModel(game_parameters_black)
+    model = BoardModel(my_color=chess.BLACK)
     assert not model.is_white_orientation()
     model.set_board_orientation(chess.WHITE)
     assert model.is_white_orientation()
