@@ -14,8 +14,8 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from __future__ import annotations
-from prompt_toolkit.layout.containers import ConditionalContainer
-from prompt_toolkit.layout.dimension import D
+from prompt_toolkit.layout import ConditionalContainer, D
+from prompt_toolkit.filters import Condition
 from prompt_toolkit.widgets import TextArea
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -23,23 +23,20 @@ if TYPE_CHECKING:
 
 
 class MaterialDifferenceView:
-    def __init__(self, material_diff_presenter: MaterialDifferencePresenter, initial_diff: str, show: bool = True):
+    def __init__(self, material_diff_presenter: MaterialDifferencePresenter, initial_diff: str):
         self.material_diff_presenter = material_diff_presenter
-        self.difference_output = TextArea(text=initial_diff,
-                                          width=D(min=1, max=20),
-                                          height=D(min=1, max=1),
-                                          read_only=True,
-                                          focusable=False,
-                                          multiline=False,
-                                          wrap_lines=False)
-        self.show = show
-        self.root_container = ConditionalContainer(self.difference_output, show)
+        self._diff_text_area = TextArea(text=initial_diff,
+                                        width=D(min=1, max=20),
+                                        height=D(min=1, max=1),
+                                        read_only=True,
+                                        focusable=False,
+                                        multiline=False,
+                                        wrap_lines=False)
 
     def update(self, difference: str) -> None:
         """Updates the view output with the passed in text"""
-        if self.show:
-            self.difference_output.text = difference
+        self._diff_text_area.text = difference
 
     def __pt_container__(self) -> ConditionalContainer:
         """Returns this views container"""
-        return self.root_container
+        return ConditionalContainer(self._diff_text_area, Condition(lambda: self.material_diff_presenter.show_diff))

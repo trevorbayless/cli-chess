@@ -33,7 +33,7 @@ async def _play_offline(game_parameters: dict) -> None:
         engine_model = await create_engine_model(game_model.board_model, game_parameters)
 
         game_presenter = OfflineGamePresenter(game_model, engine_model)
-        get_app().layout = Layout(game_presenter.game_view.root_container, game_presenter.game_view.input_field_container)
+        get_app().layout = Layout(game_presenter.game_view, game_presenter.game_view.input_field_container)
         get_app().invalidate()
     except Exception as e:
         log.error(f"Error starting engine: {e}")

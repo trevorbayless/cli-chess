@@ -35,8 +35,8 @@ class VsComputerMenuPresenter(MultiValueMenuPresenter):
         if selected_option == VsComputerMenuOptions.SPECIFY_ELO:
             self.model.show_elo_selection_option(selected_value == "Yes")
 
-
     def handle_start_game(self) -> None:
+        # Todo: I don't like this being hidden away in the menu presenter
         """Handle starting the game"""
         game_parameters = self._create_dict_of_selected_values()
         start_offline_game(game_parameters)

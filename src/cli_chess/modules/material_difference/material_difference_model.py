@@ -16,8 +16,7 @@
 from cli_chess.modules.board import BoardModel
 from cli_chess.utils import Event
 from typing import Dict
-from chess import (PIECE_SYMBOLS, PIECE_TYPES, PieceType, Color, WHITE, BLACK,
-                   PAWN, KNIGHT, BISHOP, ROOK, QUEEN, KING)
+from chess import PIECE_SYMBOLS, PIECE_TYPES, PieceType, Color, WHITE, BLACK, PAWN, KNIGHT, BISHOP, ROOK, QUEEN, KING
 import re
 
 PIECE_VALUE: Dict[PieceType, int] = {

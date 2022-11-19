@@ -43,23 +43,18 @@ class GameViewBase:
         self.root_container = self._create_root_container()
 
     def _create_root_container(self) -> Container:
-        return HSplit(
-            [
-                VSplit(
-                    [
-                        self.board_output_container,
-                        HSplit(
-                            [
-                                self.material_diff_upper_container,
-                                self.move_list_container,
-                                self.material_diff_lower_container,
-                            ]
-                        )
-                    ]),
-                self.input_field_container,
-                self.error_container
-            ]
-        )
+        return HSplit([
+            VSplit([
+                self.board_output_container,
+                HSplit([
+                    self.material_diff_upper_container,
+                    self.move_list_container,
+                    self.material_diff_lower_container,
+                ])
+            ]),
+            self.input_field_container,
+            self.error_container
+        ])
 
     def _create_input_field_container(self) -> TextArea:
         """Returns a TextArea to use as the input field"""
@@ -111,3 +106,7 @@ class GameViewBase:
         """Clears the error containers"""
         self.error_label.text = ""
         self.error_container.filter = to_filter(False)
+
+    def __pt_container__(self) -> Container:
+        """Return the game view container"""
+        return self.root_container
