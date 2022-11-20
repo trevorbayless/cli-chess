@@ -60,12 +60,13 @@ class BaseConfig:
         self.write_config()
 
     def has_section(self, section: str) -> bool:
+        """Returns true if the section passed in exists in the configuration file"""
         return self.parser.has_section(section)
 
     def set_key_value(self, section: str, key: str, value: str) -> None:
         """Set (or add) a key/value to a section in the configuration file"""
         # TODO: Raise error if section does not exist
-        self.parser[section][key] = str(value.strip())
+        self.parser[section][key] = str(value.strip() if isinstance(value, str) else value)
         self.write_config()
 
     def get_config_filename(self) -> str:
