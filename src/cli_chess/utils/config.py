@@ -15,6 +15,7 @@
 
 from cli_chess.utils.common import is_windows_system
 from cli_chess.utils.logging import log, redact_from_logs
+from cli_chess.utils.event import Event
 from os import path, makedirs
 from enum import Enum
 import configparser
@@ -42,6 +43,9 @@ class BaseConfig:
         self.parser = configparser.ConfigParser()
         self.parser.read(self.full_filename)
 
+        # Event called on any configuration write event
+        self.e_config_updated = Event()
+
     def write_config(self) -> None:
         """Writes to the configuration file"""
         if not path.exists(self.file_path):
@@ -49,6 +53,7 @@ class BaseConfig:
 
         with open(self.full_filename, 'w') as config_file:
             self.parser.write(config_file)
+            self.e_config_updated.notify()
 
     def config_exists(self) -> bool:
         """Returns True if the configuration file exists"""
@@ -165,7 +170,13 @@ class BoardSection(SectionBase):
         DARK_PIECE_COLOR = {"name": "dark_piece_color", "default": "black"}
 
     def __init__(self, filename: str):
+        self.e_board_config_updated = Event()
         super().__init__(filename, "board", self.Keys)
+
+    def write_config(self) -> None:
+        """Writes to the configuration file"""
+        super().write_config()
+        self.e_board_config_updated.notify()
 
 
 class UiSection(SectionBase):
@@ -174,7 +185,13 @@ class UiSection(SectionBase):
         ZEN_MODE = {"name": "zen_mode", "default": False}
 
     def __init__(self, filename: str):
+        self.e_ui_config_updated = Event()
         super().__init__(filename, "ui", self.Keys)
+
+    def write_config(self) -> None:
+        """Writes to the configuration file"""
+        super().write_config()
+        self.e_ui_config_updated.notify()
 
 
 class EngineSection(SectionBase):
@@ -183,7 +200,13 @@ class EngineSection(SectionBase):
         ENGINE_PATH = {"name": "engine_path", "default": ""}
 
     def __init__(self, filename: str):
+        self.e_engine_config_updated = Event()
         super().__init__(filename, "engine", self.Keys)
+
+    def write_config(self) -> None:
+        """Writes to the configuration file"""
+        super().write_config()
+        self.e_engine_config_updated.notify()
 
 
 class LichessSection(SectionBase):
@@ -192,8 +215,14 @@ class LichessSection(SectionBase):
         API_TOKEN = {"name": "api_token", "default": ""}
 
     def __init__(self, filename: str):
+        self.e_lichess_config_updated = Event()
         super().__init__(filename, "lichess", self.Keys)
         redact_from_logs(self.get_value(self.Keys.API_TOKEN))
+
+    def write_config(self) -> None:
+        """Writes to the configuration file"""
+        super().write_config()
+        self.e_lichess_config_updated.notify()
 
 
 CONFIG_FILENAME = "config.ini"
