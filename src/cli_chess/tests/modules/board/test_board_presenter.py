@@ -40,8 +40,37 @@ def presenter(model, board_config, monkeypatch):
     return BoardPresenter(model)
 
 
-def test_update(model, presenter):
+def test_update(model, presenter, board_config):
+    # Todo: Still trying to determine best way to test.
+    #       see comment in board_presenter.py for options
     pass
+
+
+def test_update_cached_config_values(model, presenter, board_config):
+    # Test initial assignment
+    assert presenter.board_config_values == board_config.get_all_values()
+    assert not presenter.board_config_values[board_config.Keys.BLINDFOLD_CHESS.value["name"]]
+    assert presenter.board_config_values[board_config.Keys.USE_UNICODE_PIECES.value["name"]]
+
+    # Test board_config listener notification is working
+    # (manual calls to _update_cached_config_values shouldn't be required)
+    board_config.set_value(board_config.Keys.BLINDFOLD_CHESS, "yes")
+    board_config.set_value(board_config.Keys.USE_UNICODE_PIECES, "no")
+    assert presenter.board_config_values == board_config.get_all_values()
+    assert presenter.board_config_values[board_config.Keys.BLINDFOLD_CHESS.value["name"]]
+    assert not presenter.board_config_values[board_config.Keys.USE_UNICODE_PIECES.value["name"]]
+
+    # Remove board config notification listener and verify updates don't come through
+    board_config.e_board_config_updated.remove_listener(presenter._update_cached_config_values)
+    assert presenter.board_config_values == board_config.get_all_values()
+    board_config.set_value(board_config.Keys.USE_UNICODE_PIECES, "yes")
+    assert presenter.board_config_values != board_config.get_all_values()
+
+    # With listener removed, manually call the function and verify it works by itself
+    board_config.set_value(board_config.Keys.BLINDFOLD_CHESS, "no")
+    assert presenter.board_config_values != board_config.get_all_values()
+    presenter._update_cached_config_values()
+    assert presenter.board_config_values == board_config.get_all_values()
 
 
 def test_make_move(model, presenter):
@@ -56,7 +85,51 @@ def test_make_move(model, presenter):
 
 
 def test_get_board_display(model, presenter, board_config):
-    pass
+    board_config.set_value(board_config.Keys.BLINDFOLD_CHESS, "no")
+    board_config.set_value(board_config.Keys.USE_UNICODE_PIECES, "no")
+    board_config.set_value(board_config.Keys.SHOW_BOARD_COORDINATES, "yes")
+    board_config.set_value(board_config.Keys.IN_CHECK_COLOR, "purple")
+    board_config.set_value(board_config.Keys.LIGHT_SQUARE_COLOR, "teal")
+    board_config.set_value(board_config.Keys.DARK_SQUARE_COLOR, "orange")
+    board_config.set_value(board_config.Keys.LIGHT_PIECE_COLOR, "white")
+    board_config.set_value(board_config.Keys.DARK_PIECE_COLOR, "black")
+
+    model.board.set_fen("8/P2R2B1/4p3/5ppQ/1q1nP3/1P1P4/3K1kB1/b7 w - - 0 1")  # white in check
+    board_output = presenter.get_board_display()
+
+    for square_data in board_output:
+        # Test square in check
+        if square_data['square_number'] == chess.D2:
+            assert square_data == {
+                'square_number': chess.D2,
+                'piece_str': 'K',
+                'piece_display_color': 'white',
+                'square_display_color': 'purple',
+                'rank_label': '',
+                'is_end_of_rank': False
+            }
+
+        # Test start of rank with rank label
+        if square_data['square_number'] == chess.A1:
+            assert square_data == {
+                'square_number': chess.A1,
+                'piece_str': 'b',
+                'piece_display_color': 'black',
+                'square_display_color': 'orange',
+                'rank_label': '1',
+                'is_end_of_rank': False
+            }
+
+        # Test end of rank without piece
+        if square_data['square_number'] == chess.H7:
+            assert square_data == {
+                'square_number': chess.H7,
+                'piece_str': '',
+                'piece_display_color': '',
+                'square_display_color': 'teal',
+                'rank_label': '',
+                'is_end_of_rank': True
+            }
 
 
 def test_get_file_labels(model, presenter, board_config):
@@ -81,8 +154,7 @@ def test_get_rank_label(model, presenter, board_config):
     # Test white orientation with board coordinates
     board_config.set_value(board_config.Keys.SHOW_BOARD_COORDINATES, "yes")
     for square in chess.SQUARES:
-        bb = chess.BB_SQUARES[square]
-        if bb & chess.BB_FILE_A:
+        if chess.BB_SQUARES[square] & chess.BB_FILE_A:
             assert presenter.get_rank_label(square) == model.get_rank_label(chess.square_rank(square))
         else:
             assert presenter.get_rank_label(square) == ""
@@ -90,8 +162,7 @@ def test_get_rank_label(model, presenter, board_config):
     # Test black orientation with board coordinates
     model.set_board_orientation(chess.BLACK)
     for square in chess.SQUARES:
-        bb = chess.BB_SQUARES[square]
-        if bb & chess.BB_FILE_H:
+        if chess.BB_SQUARES[square] & chess.BB_FILE_H:
             assert presenter.get_rank_label(square) == model.get_rank_label(chess.square_rank(square))
         else:
             assert presenter.get_rank_label(square) == ""
@@ -99,15 +170,44 @@ def test_get_rank_label(model, presenter, board_config):
     # Test with board coordinates disabled
     board_config.set_value(board_config.Keys.SHOW_BOARD_COORDINATES, "no")
     for square in chess.SQUARES:
-        bb = chess.BB_SQUARES[square]
-        if bb & chess.BB_FILE_H:
+        if chess.BB_SQUARES[square] & chess.BB_FILE_H:
             assert presenter.get_rank_label(square) == ""
         else:
             assert presenter.get_rank_label(square) == ""
 
 
+def test_is_square_start_of_rank(model, presenter, board_config):
+    # Test start of rank white orientation
+    for square in chess.SQUARES:
+        if chess.BB_SQUARES[square] & chess.BB_FILE_A:
+            assert presenter.is_square_start_of_rank(square)
+        else:
+            assert not presenter.is_square_start_of_rank(square)
+
+    # Test end of rank black orientation
+    model.set_board_orientation(chess.BLACK)
+    for square in chess.SQUARES:
+        if chess.BB_SQUARES[square] & chess.BB_FILE_H:
+            assert presenter.is_square_start_of_rank(square)
+        else:
+            assert not presenter.is_square_start_of_rank(square)
+
+
 def test_is_square_end_of_rank(model, presenter, board_config):
-    pass
+    # Test end of rank white orientation
+    for square in chess.SQUARES:
+        if chess.BB_SQUARES[square] & chess.BB_FILE_H:
+            assert presenter.is_square_end_of_rank(square)
+        else:
+            assert not presenter.is_square_end_of_rank(square)
+
+    # Test end of rank black orientation
+    model.set_board_orientation(chess.BLACK)
+    for square in chess.SQUARES:
+        if chess.BB_SQUARES[square] & chess.BB_FILE_A:
+            assert presenter.is_square_end_of_rank(square)
+        else:
+            assert not presenter.is_square_end_of_rank(square)
 
 
 def test_get_piece_str(model, presenter, board_config):
@@ -143,10 +243,16 @@ def test_get_piece_display_color(model, presenter, board_config):
     for square in chess.SQUARES:
         piece = model.board.piece_at(square)
         bb = chess.BB_SQUARES[square]
+
+        # Test light piece color
         if bb & chess.BB_RANK_1 or bb & chess.BB_RANK_2:
             assert presenter.get_piece_display_color(piece) == "gray"
+
+        # Test dark piece color
         elif bb & chess.BB_RANK_7 or bb & chess.BB_RANK_8:
             assert presenter.get_piece_display_color(piece) == "navy"
+
+        # Test no piece
         else:
             assert presenter.get_piece_display_color(piece) == ""
 
@@ -163,15 +269,23 @@ def test_get_square_display_color(model, presenter, board_config):
     last_move = model.board.peek()
 
     for square in chess.SQUARES:
+        # Test in check square
         if model.is_square_in_check(square):
             assert presenter.get_square_display_color(square) == "red"
+
+        # Test last move squares
         elif square == last_move.to_square or square == last_move.from_square:
             assert presenter.get_square_display_color(square) == "yellow"
+
+        # Test light square
         elif model.is_light_square(square):
             assert presenter.get_square_display_color(square) == "white"
+
+        # Test dark square
         elif not model.is_light_square(square):
             assert presenter.get_square_display_color(square) == "blue"
 
+    # Test board highlights disabled (no last move color)
     board_config.set_value(board_config.Keys.SHOW_BOARD_HIGHLIGHTS, "no")
     presenter.make_move("g6")
     last_move = model.board.peek()

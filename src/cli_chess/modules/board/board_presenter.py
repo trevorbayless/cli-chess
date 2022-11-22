@@ -12,11 +12,10 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
-
 from cli_chess.modules.board import BoardModel, BoardView
 from cli_chess.modules.common import get_piece_unicode_symbol
 from cli_chess.utils.config import board_config
-from chess import Piece, Square
+import chess
 from typing import List, Dict
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -30,12 +29,22 @@ class BoardPresenter:
         self.view = BoardView(self, self.get_board_display())
 
         self.board_model.e_board_model_updated.add_listener(self.update)
-        board_config.e_board_config_updated.add_listener(self.update)
+        board_config.e_board_config_updated.add_listener(self._update_cached_config_values)
 
     def update(self) -> None:
         """Updates the board output"""
-        self.board_config_values = board_config.get_all_values()
+        # TODO: Update this so the view utilizes a lambda pointing to the presenter?
+        #       This would allow for this update function to be removed
         self.view.update(self.get_board_display())
+
+    def _update_cached_config_values(self):
+        """Updates the 'board_config_values' variable with the
+           latest configuration values from the board_config. Additionally,
+           this will notify the board_view to update as there has been a change.
+           This function is called automatically on board config updates
+        """
+        self.board_config_values = board_config.get_all_values()
+        self.update()
 
     def make_move(self, move: str, human=True) -> None:
         """Sends a move to the board model to attempt to make.
@@ -56,6 +65,8 @@ class BoardPresenter:
         board_output = []
         board_squares = self.board_model.get_board_squares()
 
+        # TODO: Update this implementation to use a dictionary so
+        #       the following syntax can be used: board_output[chess.D2]?
         for square in board_squares:
             data = {'square_number': square,
                     'piece_str': self.get_piece_str(square),
@@ -88,40 +99,42 @@ class BoardPresenter:
         """Returns the color to use for the rank labels"""
         return self.board_config_values[board_config.Keys.RANK_LABEL_COLOR.value["name"]]
 
-    def get_rank_label(self, square: Square) -> str:
+    def get_rank_label(self, square: chess.Square) -> str:
         """Returns a label string if at the start of a rank
            otherwise an empty string will be returned
         """
         rank_label = ""
-        starting_index = False
-        file_index = self.board_model.get_square_file_index(square)
         rank_index = self.board_model.get_square_rank_index(square)
-
-        if self.board_model.is_white_orientation() and file_index == 0:
-            starting_index = True
-        elif not self.board_model.is_white_orientation() and file_index == 7:
-            starting_index = True
-
         show_board_coordinates = self.board_config_values[board_config.Keys.SHOW_BOARD_COORDINATES.value["name"]]
 
-        if starting_index and show_board_coordinates:
+        if self.is_square_start_of_rank(square) and show_board_coordinates:
             rank_label = self.board_model.get_rank_label(rank_index)
 
         return rank_label
 
-    def is_square_end_of_rank(self, square: Square) -> bool:
+    def is_square_start_of_rank(self, square: chess.Square) -> bool:
+        """Returns True if the square passed in is the start of a rank"""
+        is_start_of_rank = False
+
+        if self.board_model.is_white_orientation() and chess.BB_SQUARES[square] & chess.BB_FILE_A:
+            is_start_of_rank = True
+        elif not self.board_model.is_white_orientation() and chess.BB_SQUARES[square] & chess.BB_FILE_H:
+            is_start_of_rank = True
+
+        return is_start_of_rank
+
+    def is_square_end_of_rank(self, square: chess.Square) -> bool:
         """Returns True if the square passed in is the last on the rank"""
-        is_last = False
-        file_index = self.board_model.get_square_file_index(square)
+        is_end_of_rank = False
 
-        if self.board_model.is_white_orientation() and file_index == 7:
-            is_last = True
-        elif not self.board_model.is_white_orientation() and file_index == 0:
-            is_last = True
+        if self.board_model.is_white_orientation() and chess.BB_SQUARES[square] & chess.BB_FILE_H:
+            is_end_of_rank = True
+        elif not self.board_model.is_white_orientation() and chess.BB_SQUARES[square] & chess.BB_FILE_A:
+            is_end_of_rank = True
 
-        return is_last
+        return is_end_of_rank
 
-    def get_piece_str(self, square: Square):
+    def get_piece_str(self, square: chess.Square):
         """Returns the piece at the square as a string. Depending on configuration
            settings, this could be a unicode character, a letter, or an empty
            string if blindfold chess is enabled in the configuration, or there is
@@ -138,7 +151,7 @@ class BoardPresenter:
 
         return piece_str
 
-    def get_piece_display_color(self, piece: Piece) -> str:
+    def get_piece_display_color(self, piece: chess.Piece) -> str:
         """Returns a string with the color to display the
            piece based on configuration settings
         """
@@ -153,7 +166,7 @@ class BoardPresenter:
 
         return piece_color
 
-    def get_square_display_color(self, square) -> str:
+    def get_square_display_color(self, square: chess.Square) -> str:
         """Returns a string with the color to display the
            square based on configuration settings, last move, and check.
         """
