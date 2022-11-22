@@ -31,7 +31,7 @@ class Event:
 
     def remove_listener(self, listener: Callable) -> None:
         """Removes the passed in listener from the notification list"""
-        if listener is self.listeners:
+        if listener in self.listeners:
             self.listeners.remove(listener)
 
     def __iadd__(self, listener: Callable) -> Event:
