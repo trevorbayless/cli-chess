@@ -40,8 +40,8 @@ class BoardView:
         """Returns a string containing the board output to be used for
            display. The string returned will contain HTML elements"""
         board_output_str = ""
-        file_label_color = self.board_presenter.get_file_labels_color()
-        rank_label_color = self.board_presenter.get_rank_labels_color()
+        file_label_color = self.board_presenter.get_file_label_color()
+        rank_label_color = self.board_presenter.get_rank_label_color()
 
         for square in board_output_list:
             piece_str = square['piece_str']

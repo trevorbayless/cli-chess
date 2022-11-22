@@ -22,12 +22,15 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from cli_chess.modules.board import BoardModel
 
+
 class BoardPresenter:
     def __init__(self, board_model: BoardModel) -> None:
         self.board_model = board_model
         self.board_config_values = board_config.get_all_values()
         self.view = BoardView(self, self.get_board_display())
+
         self.board_model.e_board_model_updated.add_listener(self.update)
+        board_config.e_board_config_updated.add_listener(self.update)
 
     def update(self) -> None:
         """Updates the board output"""
@@ -77,11 +80,11 @@ class BoardPresenter:
 
         return file_labels
 
-    def get_file_labels_color(self) -> str:
+    def get_file_label_color(self) -> str:
         """Returns the color to use for the file labels"""
         return self.board_config_values[board_config.Keys.FILE_LABEL_COLOR.value["name"]]
 
-    def get_rank_labels_color(self) -> str:
+    def get_rank_label_color(self) -> str:
         """Returns the color to use for the rank labels"""
         return self.board_config_values[board_config.Keys.RANK_LABEL_COLOR.value["name"]]
 

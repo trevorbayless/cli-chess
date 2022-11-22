@@ -15,251 +15,203 @@
 
 from cli_chess.modules.board import BoardModel, BoardPresenter
 from cli_chess.modules.common import get_piece_unicode_symbol
-from cli_chess.utils.config import board_config
-import unittest
+from cli_chess.utils.config import BoardSection
+from os import remove
 import chess
+import pytest
 
-class BoardPresenterTestCase(unittest.TestCase):
-    def test_make_move(self):
-        model = BoardModel()
-        presenter = BoardPresenter(model)
 
-        # Test a valid move
-        try:
-            presenter.make_move("e4")
-        except Exception as e:
-            self.fail(f"test_make_move raised {e}")
+@pytest.fixture
+def model():
+    return BoardModel()
 
-        # Illegal move
-        with self.assertRaises(ValueError):
-            presenter.make_move("O-O-O")
 
-    def test_apply_file_labels(self):
-        model = BoardModel()
-        presenter = BoardPresenter(model)
+@pytest.fixture
+def board_config():
+    board_config = BoardSection("unit_test_config.ini")
+    yield board_config
+    remove(board_config.full_filename)
 
-        # Test with board coordinates disabled
-        board_config.set_value(board_config.Keys.SHOW_BOARD_COORDINATES, "no")
-        self.assertEqual(presenter.apply_file_labels(), "")
 
-        # Enable board coordinates
-        board_config.set_value(board_config.Keys.SHOW_BOARD_COORDINATES, "yes")
-        board_config.set_value(board_config.Keys.FILE_LABEL_COLOR, "gray")
+@pytest.fixture
+def presenter(model, board_config, monkeypatch):
+    monkeypatch.setattr('cli_chess.modules.board.board_presenter.board_config', board_config)
+    board_config.set_value(board_config.Keys.FILE_LABEL_COLOR, "yellow")
+    return BoardPresenter(model)
 
-        # Test white board orientation
-        model.set_board_orientation("white")
-        expected_output = "<style fg='gray'>  a b c d e f g h </style>"
-        self.assertEqual(presenter.apply_file_labels(), expected_output)
 
-        # Test black board orientation
-        model.set_board_orientation("black")
-        expected_output = "<style fg='gray'>  h g f e d c b a </style>"
-        self.assertEqual(presenter.apply_file_labels(), expected_output)
+def test_update(model, presenter):
+    pass
 
-    def test_apply_rank_label(self):
-        model = BoardModel()
-        presenter = BoardPresenter(model)
 
-        white_orientation_starting_squares = [chess.A1, chess.A2, chess.A3, chess.A4,
-                                              chess.A5, chess.A6, chess.A7, chess.A8]
-        black_orientation_starting_squares = [chess.H8, chess.H7, chess.H6, chess.H5,
-                                              chess.H4, chess.H3, chess.H2, chess.H1]
+def test_make_move(model, presenter):
+    try:
+        presenter.make_move("e4")
+        assert model.board.board_fen() == "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR"
+    except Exception as e:
+        pytest.fail(f"test_make_move raised {e}")
 
-        # Test with board coordinates disabled
-        board_config.set_value(board_config.Keys.SHOW_BOARD_COORDINATES, "no")
-        for square in range(chess.A1, len(chess.SQUARES)):
-            self.assertEqual(presenter.apply_rank_label(square), "")
+    with pytest.raises(ValueError):
+        presenter.make_move("O-O-O")
 
-        # Enable board coordinates
-        board_config.set_value(board_config.Keys.SHOW_BOARD_COORDINATES, "yes")
-        board_config.set_value(board_config.Keys.FILE_LABEL_COLOR, "gray")
 
-        # Test white and black board orientations
-        for square in range(chess.A1, len(chess.SQUARES)):
-            square_rank_index = model.get_square_rank_index(square)
-            rank_label = model.get_rank_label(square_rank_index)
+def test_get_board_display(model, presenter, board_config):
+    pass
 
-            # Test white orientation
-            model.set_board_orientation("white")
 
-            if square in white_orientation_starting_squares:
-                expected_output = f"<style fg='gray'> {rank_label}</style>"
-                self.assertEqual(presenter.apply_rank_label(square), expected_output)
-            else:
-                self.assertEqual(presenter.apply_rank_label(square), "")
+def test_get_file_labels(model, presenter, board_config):
+    board_config.set_value(board_config.Keys.SHOW_BOARD_COORDINATES, "yes")
+    assert presenter.get_file_labels() == model.get_file_labels()
 
-            # Test black orientation
-            model.set_board_orientation("black")
-            if square in black_orientation_starting_squares:
-                expected_output = f"<style fg='gray'> {rank_label}</style>"
-                self.assertEqual(expected_output, presenter.apply_rank_label(square))
-            else:
-                self.assertEqual(presenter.apply_rank_label(square), "")
+    board_config.set_value(board_config.Keys.SHOW_BOARD_COORDINATES, "no")
+    assert presenter.get_file_labels() == ""
 
-    def test_get_square_final_display(self):
-        model = BoardModel()
-        presenter = BoardPresenter(model)
 
-        # Set and obtain colors
-        board_config.set_value(board_config.Keys.LIGHT_SQUARE_COLOR, "cadetblue")
-        board_config.set_value(board_config.Keys.DARK_SQUARE_COLOR, "darkslateblue")
-        board_config.set_value(board_config.Keys.LIGHT_PIECE_COLOR, "white")
-        board_config.set_value(board_config.Keys.DARK_PIECE_COLOR, "black")
-        light_square_color = board_config.get_value(board_config.Keys.LIGHT_SQUARE_COLOR)
-        dark_square_color = board_config.get_value(board_config.Keys.DARK_SQUARE_COLOR)
-        light_piece_color = board_config.get_value(board_config.Keys.LIGHT_PIECE_COLOR)
-        dark_piece_color = board_config.get_value(board_config.Keys.DARK_PIECE_COLOR)
+def test_get_file_label_color(model, presenter, board_config):
+    board_config.set_value(board_config.Keys.FILE_LABEL_COLOR, "yellow")
+    assert presenter.get_file_label_color() == "yellow"
 
-        for square in range(chess.A1, len(chess.SQUARES)):
-            piece = model.board.piece_at(square)
-            square_color = ""
-            piece_color = ""
 
-            if model.is_light_square(square):
-                square_color = light_square_color
-            elif not model.is_light_square(square):
-                square_color = dark_square_color
+def test_get_rank_label_color(model, presenter, board_config):
+    board_config.set_value(board_config.Keys.RANK_LABEL_COLOR, "purple")
+    assert presenter.get_rank_label_color() == "purple"
 
-            if piece:
-                if piece.color == chess.WHITE:
-                    piece_color = light_piece_color
-                elif piece.color == chess.BLACK:
-                    piece_color = dark_piece_color
 
-                # Test blindfold mode
-                board_config.set_value(board_config.Keys.BLINDFOLD_CHESS, "yes")
-                expected_output = f"<style bg='{square_color}'>  </style>"
-                self.assertEqual(presenter.get_square_final_display(square), expected_output)
-                board_config.set_value(board_config.Keys.BLINDFOLD_CHESS, "no")
+def test_get_rank_label(model, presenter, board_config):
+    # Test white orientation with board coordinates
+    board_config.set_value(board_config.Keys.SHOW_BOARD_COORDINATES, "yes")
+    for square in chess.SQUARES:
+        bb = chess.BB_SQUARES[square]
+        if bb & chess.BB_FILE_A:
+            assert presenter.get_rank_label(square) == model.get_rank_label(chess.square_rank(square))
+        else:
+            assert presenter.get_rank_label(square) == ""
 
-                # Test letter piece
-                board_config.set_value(board_config.Keys.USE_UNICODE_PIECES, "no")
-                piece_character = piece.symbol()
-                expected_output = f"<style fg='{piece_color}' bg='{square_color}'><b>{piece_character} </b></style>"
-                self.assertEqual(presenter.get_square_final_display(square), expected_output)
+    # Test black orientation with board coordinates
+    model.set_board_orientation(chess.BLACK)
+    for square in chess.SQUARES:
+        bb = chess.BB_SQUARES[square]
+        if bb & chess.BB_FILE_H:
+            assert presenter.get_rank_label(square) == model.get_rank_label(chess.square_rank(square))
+        else:
+            assert presenter.get_rank_label(square) == ""
 
-                # Test unicode piece
-                board_config.set_value(board_config.Keys.USE_UNICODE_PIECES, "yes")
-                piece_character = get_piece_unicode_symbol(piece.symbol())
-                expected_output = f"<style fg='{piece_color}' bg='{square_color}'><b>{piece_character} </b></style>"
-                self.assertEqual(presenter.get_square_final_display(square), expected_output)
-            else:
-                # Test square that doesn't have a piece on it
-                expected_output = f"<style bg='{square_color}'>  </style>"
-                self.assertEqual(presenter.get_square_final_display(square), expected_output)
+    # Test with board coordinates disabled
+    board_config.set_value(board_config.Keys.SHOW_BOARD_COORDINATES, "no")
+    for square in chess.SQUARES:
+        bb = chess.BB_SQUARES[square]
+        if bb & chess.BB_FILE_H:
+            assert presenter.get_rank_label(square) == ""
+        else:
+            assert presenter.get_rank_label(square) == ""
 
-    def test_start_new_line(self):
-        model = BoardModel()
-        presenter = BoardPresenter(model)
 
-        white_orientation_newline_squares = [chess.H1, chess.H2, chess.H3, chess.H4,
-                                             chess.H5, chess.H6, chess.H7, chess.H8]
-        black_orientation_newline_squares = [chess.A1, chess.A2, chess.A3, chess.A4,
-                                             chess.A5, chess.A6, chess.A7, chess.A8]
+def test_is_square_end_of_rank(model, presenter, board_config):
+    pass
 
-        for square in range(chess.A1, len(chess.SQUARES)):
-            # Test white orientation newline
-            model.set_board_orientation("white")
-            output = presenter.start_new_line(square)
 
-            if square in white_orientation_newline_squares:
-                self.assertEqual(output, "\n")
-            else:
-                self.assertEqual(output, "")
+def test_get_piece_str(model, presenter, board_config):
+    # Test unicode pieces
+    board_config.set_value(board_config.Keys.BLINDFOLD_CHESS, "no")
+    board_config.set_value(board_config.Keys.USE_UNICODE_PIECES, "yes")
+    for square in chess.SQUARES:
+        piece = model.board.piece_at(square)
+        if piece:
+            assert presenter.get_piece_str(square) == get_piece_unicode_symbol(piece.symbol())
+        else:
+            assert presenter.get_piece_str(square) == ""
 
-            # Test black orientation newline
-            model.set_board_orientation("black")
-            output = presenter.start_new_line(square)
+    # Test letter pieces
+    board_config.set_value(board_config.Keys.USE_UNICODE_PIECES, "no")
+    for square in chess.SQUARES:
+        piece = model.board.piece_at(square)
+        if piece:
+            assert presenter.get_piece_str(square) == piece.symbol()
+        else:
+            assert presenter.get_piece_str(square) == ""
 
-            if square in black_orientation_newline_squares:
-                self.assertEqual(output, "\n")
-            else:
-                self.assertEqual(output, "")
+    # Test blindfold chess
+    board_config.set_value(board_config.Keys.BLINDFOLD_CHESS, "yes")
+    for square in chess.SQUARES:
+        assert presenter.get_piece_str(square) == ""
 
-    def test_get_piece_color(self):
-        model = BoardModel()
-        presenter = BoardPresenter(model)
 
-        defined_light_piece_color = board_config.get_value(board_config.Keys.LIGHT_PIECE_COLOR)
-        defined_dark_piece_color = board_config.get_value(board_config.Keys.DARK_PIECE_COLOR)
+def test_get_piece_display_color(model, presenter, board_config):
+    board_config.set_value(board_config.Keys.LIGHT_PIECE_COLOR, "gray")
+    board_config.set_value(board_config.Keys.DARK_PIECE_COLOR, "navy")
 
-        # Test light pieces
-        for square in range(chess.A1, chess.H2):
-            piece = model.board.piece_at(square)
-            self.assertEqual(presenter.get_piece_color(piece), defined_light_piece_color)
+    for square in chess.SQUARES:
+        piece = model.board.piece_at(square)
+        bb = chess.BB_SQUARES[square]
+        if bb & chess.BB_RANK_1 or bb & chess.BB_RANK_2:
+            assert presenter.get_piece_display_color(piece) == "gray"
+        elif bb & chess.BB_RANK_7 or bb & chess.BB_RANK_8:
+            assert presenter.get_piece_display_color(piece) == "navy"
+        else:
+            assert presenter.get_piece_display_color(piece) == ""
 
-        # Test dark pieces
-        for square in range(chess.A7, chess.H8):
-            piece = model.board.piece_at(square)
-            self.assertEqual(presenter.get_piece_color(piece), defined_dark_piece_color)
 
-        # Test empty squares
-        for square in range(chess.A3, chess.H6):
-            piece = model.board.piece_at(square)
-            self.assertEqual(presenter.get_piece_color(piece), "")
+def test_get_square_display_color(model, presenter, board_config):
+    board_config.set_value(board_config.Keys.LIGHT_SQUARE_COLOR, "white")
+    board_config.set_value(board_config.Keys.DARK_SQUARE_COLOR, "blue")
+    board_config.set_value(board_config.Keys.SHOW_BOARD_HIGHLIGHTS, "yes")
+    board_config.set_value(board_config.Keys.LAST_MOVE_COLOR, "yellow")
+    board_config.set_value(board_config.Keys.IN_CHECK_COLOR, "red")
 
-    def test_get_square_display_color(self):
-        model = BoardModel()
-        presenter = BoardPresenter(model)
+    model.board.set_fen("rnbqkbnr/ppppp1pp/8/5p2/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 1")
+    presenter.make_move("Qh5")  # black in check
+    last_move = model.board.peek()
 
-        # Set and obtain colors
-        board_config.set_value(board_config.Keys.LIGHT_SQUARE_COLOR, "cadetblue")
-        board_config.set_value(board_config.Keys.DARK_SQUARE_COLOR, "darkslateblue")
-        board_config.set_value(board_config.Keys.IN_CHECK_COLOR, "red")
-        board_config.set_value(board_config.Keys.LAST_MOVE_COLOR, "yellowgreen")
-        light_square_color = board_config.get_value(board_config.Keys.LIGHT_SQUARE_COLOR)
-        dark_square_color = board_config.get_value(board_config.Keys.DARK_SQUARE_COLOR)
-        in_check_color = board_config.get_value(board_config.Keys.IN_CHECK_COLOR)
-        last_move_color = board_config.get_value(board_config.Keys.LAST_MOVE_COLOR)
+    for square in chess.SQUARES:
+        if model.is_square_in_check(square):
+            assert presenter.get_square_display_color(square) == "red"
+        elif square == last_move.to_square or square == last_move.from_square:
+            assert presenter.get_square_display_color(square) == "yellow"
+        elif model.is_light_square(square):
+            assert presenter.get_square_display_color(square) == "white"
+        elif not model.is_light_square(square):
+            assert presenter.get_square_display_color(square) == "blue"
 
-        model.board.set_fen("rnbqkbnr/ppppp1pp/8/5p2/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 1")
-        model.make_move("Qh5")  # black in check
-        last_move = model.board.peek()
+    board_config.set_value(board_config.Keys.SHOW_BOARD_HIGHLIGHTS, "no")
+    presenter.make_move("g6")
+    last_move = model.board.peek()
 
-        for square in range(chess.A1, len(chess.SQUARES)):
-            if model.is_square_in_check(square):
-                self.assertEqual(presenter.get_square_display_color(square), in_check_color)
-            elif square == last_move.to_square or square == last_move.from_square:
-                self.assertEqual(presenter.get_square_display_color(square), last_move_color)
-            elif model.is_light_square(square):
-                self.assertEqual(presenter.get_square_display_color(square), light_square_color)
-            elif not model.is_light_square(square):
-                self.assertEqual(presenter.get_square_display_color(square), dark_square_color)
-            else:
-                self.fail("Unexpected case caught")
+    if chess.BB_SQUARES[last_move.to_square] & chess.BB_LIGHT_SQUARES:
+        assert presenter.get_square_display_color(last_move.to_square) == "white"
 
-    def test_game_result(self):
-        model = BoardModel()
-        presenter = BoardPresenter(model)
+    if chess.BB_SQUARES[last_move.from_square] & chess.BB_DARK_SQUARES:
+        assert presenter.get_square_display_color(last_move.from_square) == "blue"
 
-        white_checkmate_fen = "7k/7R/5N2/3K4/8/8/8/8 b - - 0 1"
-        black_checkmate_fen = "8/8/8/8/8/7k/6q1/7K w - - 0 1"
-        stalemate_fen = "7k/5K2/6Q1/8/8/8/8/8 b - - 0 1"
-        draw_fen = "8/8/8/3k4/8/3K4/8/8 w - - 0 1"
-        ongoing_game_fen = "8/3k4/3B1K2/4P3/1Pb5/8/8/8 b - - 0 1"
 
-        # Test white checkmate result
-        model.board.set_fen(white_checkmate_fen)
-        result = presenter.game_result()
-        self.assertEqual(result, "Checkmate - White is victorious")
+def test_game_result(model, presenter):
+    white_checkmate_fen = "7k/7R/5N2/3K4/8/8/8/8 b - - 0 1"
+    black_checkmate_fen = "8/8/8/8/8/7k/6q1/7K w - - 0 1"
+    stalemate_fen = "7k/5K2/6Q1/8/8/8/8/8 b - - 0 1"
+    draw_fen = "8/8/8/3k4/8/3K4/8/8 w - - 0 1"
+    ongoing_game_fen = "8/3k4/3B1K2/4P3/1Pb5/8/8/8 b - - 0 1"
 
-        # Test black checkmate result
-        model.board.set_fen(black_checkmate_fen)
-        result = presenter.game_result()
-        self.assertEqual(result, "Checkmate - Black is victorious")
+    # Test white checkmate result
+    model.board.set_fen(white_checkmate_fen)
+    result = presenter.game_result()
+    assert result == "Checkmate - White is victorious"
 
-        # Test stalemate result
-        model.board.set_fen(stalemate_fen)
-        result = presenter.game_result()
-        self.assertEqual(result, "Stalemate")
+    # Test black checkmate result
+    model.board.set_fen(black_checkmate_fen)
+    result = presenter.game_result()
+    assert result == "Checkmate - Black is victorious"
 
-        # Test draw result
-        model.board.set_fen(draw_fen)
-        result = presenter.game_result()
-        self.assertEqual(result, "Draw")
+    # Test stalemate result
+    model.board.set_fen(stalemate_fen)
+    result = presenter.game_result()
+    assert result == "Stalemate"
 
-        # Test claim draw result
-        model.board.set_fen(ongoing_game_fen)
-        model.board.result(claim_draw=True)
-        result = presenter.game_result()
-        self.assertEqual(result, "Draw")
+    # Test draw result
+    model.board.set_fen(draw_fen)
+    result = presenter.game_result()
+    assert result == "Draw"
+
+    # Test claim draw result
+    model.board.set_fen(ongoing_game_fen)
+    model.board.result(claim_draw=True)
+    result = presenter.game_result()
+    assert result == "Draw"
