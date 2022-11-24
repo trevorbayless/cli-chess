@@ -16,34 +16,29 @@
 from cli_chess.utils.event import Event
 from cli_chess.utils.logging import log
 from random import randint
-from typing import List
+from typing import List, Type
 import chess.variant
 import chess
 
 
 class BoardModel:
     def __init__(self, my_color: chess.Color = chess.WHITE, variant: str = "standard", fen: str = "") -> None:
+        self.board = self._initialize_board(variant, fen)
         self.my_color = my_color
         self.board_orientation = self.my_color
-        self.variant = variant
-        self.is_chess960 = self.variant == "chess960"
 
-        if not self.is_chess960:
-            if fen:
-                self.board = chess.variant.find_variant(self.variant)(fen)
-            else:
-                self.board = chess.variant.find_variant(self.variant)()
-
-        else:
-            if fen:
-                self.board = chess.Board(fen, chess960=True)
-            else:
-                # Todo: allow setting custom chess960 position by supplying a custom starting pos int
-                self.board = chess.Board.from_chess960_pos(randint(0, 959))
-
-        self._log_initialization()
+        self._log_init_info()
         self.e_board_model_updated = Event()
         self.e_successful_move_made = Event()
+
+    def _initialize_board(self, variant, fen) -> Type[chess.Board]:
+        """Initializes and returns the main board object"""
+        if variant == "chess960":
+            return chess.Board.from_chess960_pos(randint(0, 959))
+        else:
+            if fen:
+                return chess.variant.find_variant(variant)(fen)
+            return chess.variant.find_variant(variant)()
 
     def make_move(self, move: str, human=True) -> None:
         """Attempts to make a move on the board.
@@ -153,10 +148,10 @@ class BoardModel:
         """Notifies listeners that a board move has been made"""
         self.e_successful_move_made.notify()
 
-    def _log_initialization(self):
+    def _log_init_info(self):
         """Logs class initialization"""
         log.debug("=============== BOARD INITIALIZATION ===============")
         log.debug(f"My color: {chess.COLOR_NAMES[self.my_color]}")
-        log.debug(f"Variant: {self.variant}")
+        log.debug(f"Variant: {self.get_variant_name()}")
         log.debug(f"Starting FEN: {self.board.fen()}")
         log.debug("====================================================")
