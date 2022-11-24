@@ -18,9 +18,16 @@ import chess
 from cli_chess.modules.board import BoardModel
 
 
-def test_make_move():
-    model = BoardModel()
+@pytest.fixture
+def model():
+    return BoardModel()
 
+
+def test_initialize_board():
+    pass
+
+
+def test_make_move(model):
     # Test valid move
     try:
         model.make_move("Nf3")
@@ -28,6 +35,7 @@ def test_make_move():
         pytest.fail(f"test_make_move raised {e}")
 
     # Test illegal move
+    # Todo: Test custom exceptions once python-chess updates (IllegalMove, AmbiguousMove, etc)
     with pytest.raises(ValueError):
         model.make_move("Qe6")
 
@@ -40,12 +48,7 @@ def test_get_variant_name():
     pass
 
 
-def test_random_orientation():
-    pass
-
-
-def test_set_board_orientation():
-    model = BoardModel()
+def test_set_board_orientation(model):
     assert model.get_board_orientation() == chess.WHITE
 
     model.set_board_orientation(chess.BLACK)
@@ -63,8 +66,7 @@ def test_get_board_orientation():
     assert model.get_board_orientation() == chess.BLACK
 
 
-def test_get_board_squares():
-    model = BoardModel()
+def test_get_board_squares(model):
     square_numbers = [56, 57, 58, 59, 60, 61, 62, 63,
                       48, 49, 50, 51, 52, 53, 54, 55,
                       40, 41, 42, 43, 44, 45, 46, 47,
@@ -82,13 +84,9 @@ def test_get_board_squares():
     assert model.get_board_squares() == square_numbers[::-1]
 
 
-def test_get_square_file_index():
-    model = BoardModel()
-    file_index = model.get_square_file_index(chess.E4)
-    assert file_index == 4
-
-    file_index = model.get_square_file_index(chess.G6)
-    assert file_index == 6
+def test_get_square_file_index(model):
+    for square in chess.SQUARES:
+        assert model.get_square_file_index(square) == chess.square_file(square)
 
 
 def test_get_file_labels():
@@ -101,24 +99,15 @@ def test_get_file_labels():
     assert file_labels == "h g f e d c b a "
 
 
-def test_get_square_rank_index():
-    model = BoardModel()
-    rank_index = model.get_square_rank_index(chess.E4)
-    assert rank_index == 3
-
-    rank_index = model.get_square_rank_index(chess.G6)
-    assert rank_index == 5
+def test_get_square_rank_index(model):
+    for square in chess.SQUARES:
+        assert model.get_square_rank_index(square) == chess.square_rank(square)
 
 
-def test_get_rank_label():
-    model = BoardModel()
-    rank_index = model.get_square_rank_index(chess.A1)
-    rank_label = model.get_rank_label(rank_index)
-    assert rank_label == "1"
-
-    rank_index = model.get_square_rank_index(chess.H8)
-    rank_label = model.get_rank_label(rank_index)
-    assert rank_label == "8"
+def test_get_rank_label(model):
+    for square in chess.SQUARES:
+        rank = chess.square_rank(square)
+        assert model.get_rank_label(rank) == chess.RANK_NAMES[rank]
 
 
 def test_is_square_in_check():
@@ -149,3 +138,7 @@ def test_is_white_orientation():
     assert not model.is_white_orientation()
     model.set_board_orientation(chess.WHITE)
     assert model.is_white_orientation()
+
+
+def test_notify_successful_move_made():
+    pass
