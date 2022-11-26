@@ -14,45 +14,130 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 import pytest
+from unittest.mock import Mock
 import chess
+from chess import variant
 from cli_chess.modules.board import BoardModel
 
 
 @pytest.fixture
-def model():
-    return BoardModel()
+def board_updated_listener():
+    return Mock()
+
+
+@pytest.fixture
+def successful_move_listener():
+    return Mock()
+
+
+@pytest.fixture
+def model(board_updated_listener, successful_move_listener):
+    model = BoardModel()
+    model.e_board_model_updated.add_listener(board_updated_listener)
+    model.e_successful_move_made.add_listener(successful_move_listener)
+    return model
 
 
 def test_initialize_board():
-    pass
+    # Test standard chess
+    model = BoardModel()
+    assert type(model.board) == chess.Board
+    assert model.get_board_orientation() == chess.WHITE
+    assert model.board.fen() == chess.STARTING_FEN
+
+    # Test chess960 initialization
+    model = BoardModel(my_color=chess.BLACK, variant="chess960")
+    assert model.board.chess960
+    assert type(model.board) == chess.Board
+    assert model.get_board_orientation() == chess.BLACK
+
+    # Test a valid variant
+    model = BoardModel(variant="crazyhouse", fen="r1b3Bk/p1p4P/2p2p2/3p1p2/3P4/5N2/PPP2PPP/R1BQK2R/QRnbpnpn w KQ - 0 21")
+    assert type(model.board) == chess.variant.CrazyhouseBoard
+    assert model.board.fen() != model.board.starting_fen
+    assert model.get_turn() == chess.WHITE
+
+    # Test an invalid variant
+    with pytest.raises(ValueError):
+        model = BoardModel(variant="shogi")
 
 
-def test_make_move(model):
+def test_make_move(model, board_updated_listener, successful_move_listener):
     # Test valid move
     try:
         model.make_move("Nf3")
+        board_updated_listener.assert_called()
+        successful_move_listener.assert_called()
     except Exception as e:
         pytest.fail(f"test_make_move raised {e}")
 
     # Test illegal move
     # Todo: Test custom exceptions once python-chess updates (IllegalMove, AmbiguousMove, etc)
+    board_updated_listener.reset_mock()
+    successful_move_listener.reset_mock()
     with pytest.raises(ValueError):
         model.make_move("Qe6")
 
+    board_updated_listener.assert_not_called()
+    successful_move_listener.assert_not_called()
 
-def test_get_move_stack():
-    pass
+
+def test_get_move_stack(model):
+    model.make_move("e4")
+    model.make_move("d6")
+    model.make_move("d4")
+    model.make_move("Nf6")
+    with pytest.raises(ValueError):
+        model.make_move("Nb3")
+    model.make_move("Nc3")
+    model.make_move("g6")
+    assert model.get_move_stack() == model.board.move_stack
+
+    # Take back the last move
+    model.board.pop()
+    assert model.get_move_stack() == model.board.move_stack
 
 
 def test_get_variant_name():
-    pass
+    # Test chess960
+    model = BoardModel(variant="chess960")
+    assert model.get_variant_name() == "chess960"
+
+    # Test horde
+    model = BoardModel(variant="horde")
+    assert model.get_variant_name() == "horde"
+
+    # Test racing kings
+    model = BoardModel(variant="racingkings")
+    assert model.get_variant_name() == "racingkings"
+
+    # Test standard
+    model = BoardModel()
+    assert model.get_variant_name() == model.board.uci_variant
 
 
-def test_set_board_orientation(model):
-    assert model.get_board_orientation() == chess.WHITE
+def test_get_turn():
+    # Test model initialized with black board orientation
+    model = BoardModel(chess.BLACK)
+    assert model.get_turn() == chess.WHITE
 
-    model.set_board_orientation(chess.BLACK)
-    assert model.get_board_orientation() == chess.BLACK
+    # Test making an invalid move doesn't change the turn
+    with pytest.raises(ValueError):
+        model.make_move("Ke2")
+        assert model.get_turn() == chess.WHITE
+
+    # Test a valid move changes turns
+    model.make_move("e4")
+    assert model.get_turn() == chess.BLACK
+
+    # Test board initialization with black to play FEN
+    model = BoardModel(fen="r1bq1rk1/2p1bppp/p1n2n2/1p1pp3/4P3/1BP2N2/PP1P1PPP/RNBQR1K1 b - - 0 9")
+    assert model.get_turn() == chess.BLACK
+
+    # Test taking back a move
+    model.make_move("d4")
+    model.board.pop()
+    assert model.get_turn() == chess.BLACK
 
 
 def test_get_board_orientation():
@@ -64,6 +149,17 @@ def test_get_board_orientation():
 
     model.set_board_orientation(chess.BLACK)
     assert model.get_board_orientation() == chess.BLACK
+
+
+def test_set_board_orientation(model, board_updated_listener):
+    assert model.get_board_orientation() == chess.WHITE
+
+    model.set_board_orientation(chess.BLACK)
+    assert model.get_board_orientation() == chess.BLACK
+
+    # Test update handler is called on board orientation change
+    model.set_board_orientation(chess.BLACK)
+    board_updated_listener.assert_called()
 
 
 def test_get_board_squares(model):
@@ -140,5 +236,25 @@ def test_is_white_orientation():
     assert model.is_white_orientation()
 
 
-def test_notify_successful_move_made():
-    pass
+def test_notify_board_model_updated(model, board_updated_listener):
+    # Test registered board update listener is called
+    model._notify_board_model_updated()
+    board_updated_listener.assert_called()
+
+    # Unregister listener and test it's not called
+    board_updated_listener.reset_mock()
+    model.e_board_model_updated.remove_listener(board_updated_listener)
+    model._notify_board_model_updated()
+    board_updated_listener.assert_not_called()
+
+
+def test_notify_successful_move_made(model, successful_move_listener):
+    # Test registered successful move listener is called
+    model._notify_successful_move_made()
+    successful_move_listener.assert_called()
+
+    # Unregister listener and test it's not called
+    successful_move_listener.reset_mock()
+    model.e_successful_move_made.remove_listener(successful_move_listener)
+    model._notify_successful_move_made()
+    successful_move_listener.assert_not_called()

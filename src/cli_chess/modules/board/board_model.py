@@ -61,7 +61,10 @@ class BoardModel:
 
     def get_variant_name(self) -> str:
         """Returns a string holding the board variant name"""
-        return self.board.uci_variant
+        if self.board.uci_variant == "chess" and self.board.chess960:
+            return "chess960"
+        else:
+            return self.board.uci_variant
 
     def get_turn(self) -> chess.Color:
         """Returns the color of which turn it is"""

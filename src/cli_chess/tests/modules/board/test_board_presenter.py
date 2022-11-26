@@ -80,6 +80,7 @@ def test_make_move(model, presenter):
     except Exception as e:
         pytest.fail(f"test_make_move raised {e}")
 
+    # Todo: Test custom exceptions once python-chess updates (IllegalMove, AmbiguousMove, etc)
     with pytest.raises(ValueError):
         presenter.make_move("O-O-O")
 
