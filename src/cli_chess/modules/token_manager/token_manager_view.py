@@ -81,7 +81,8 @@ class TokenManagerView:
         self.account_name = self.presenter.get_account_name()
         return True
 
-    def get_function_bar_fragments(self) -> StyleAndTextTuples:
+    @staticmethod
+    def get_function_bar_fragments() -> StyleAndTextTuples:
         """Returns a set of function bar fragments to use if
            this module is hooked up with a function bar
         """

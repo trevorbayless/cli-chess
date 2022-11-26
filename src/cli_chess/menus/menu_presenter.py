@@ -15,7 +15,7 @@
 
 from __future__ import annotations
 from cli_chess.utils.logging import log
-from typing import TYPE_CHECKING, List, Union
+from typing import TYPE_CHECKING, List
 if TYPE_CHECKING:
     from cli_chess.menus import MenuOption, MultiValueMenuOption, MenuCategory, MenuModel, MultiValueMenuModel, MenuView, MultiValueMenuView
 
@@ -36,13 +36,13 @@ class MenuPresenter:
 
     def get_visible_menu_options(self) -> List[MenuOption]:
         """Returns all menu options which are visible"""
-        visbile_options = []
+        visible_options = []
         for opt in self.get_menu_options():
             if not opt.visible:
                 continue
             else:
-                visbile_options.append(opt)
-        return visbile_options
+                visible_options.append(opt)
+        return visible_options
 
     def select_handler(self, selected_option: int):
         """Called on menu item selection. Classes that inherit from

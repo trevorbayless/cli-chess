@@ -14,8 +14,6 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from __future__ import annotations
-from cli_chess.utils.logging import log
-from cli_chess.menus.main_menu import MainMenuOptions
 from cli_chess.menus import MenuView, MenuPresenter
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:

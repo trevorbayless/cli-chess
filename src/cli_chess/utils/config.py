@@ -111,7 +111,8 @@ class BaseConfig:
         except Exception as e:
             self.handle_exception(e)
 
-    def handle_exception(self, e: Exception) -> None:
+    @staticmethod
+    def handle_exception(e: Exception) -> None:
         """Handles exceptions that occur while parsing the configuration file"""
         log.error(f"Exception caught while parsing the configuration file: {e}")
 

@@ -58,7 +58,8 @@ class MoveListPresenter:
                 output += "\n"
         return output if output else "No moves..."
 
-    def get_move_as_unicode(self, move_data: dict) -> str:
+    @staticmethod
+    def get_move_as_unicode(move_data: dict) -> str:
         """Returns the passed in SAN move to unicode display"""
         output = ""
         move = move_data['move']

@@ -32,7 +32,8 @@ class VsComputerMenuModel(MultiValueMenuModel):
         self.menu = self._create_menu()
         super().__init__(self.menu)
 
-    def _create_menu(self) -> MenuCategory:
+    @staticmethod
+    def _create_menu() -> MenuCategory:
         """Create the menu options"""
         menu_options = [
             # Todo: Implement ELO selector

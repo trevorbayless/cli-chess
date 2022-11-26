@@ -29,7 +29,8 @@ class SettingsMenuModel(MenuModel):
         self.menu = self._create_menu()
         super().__init__(self.menu)
 
-    def _create_menu(self) -> MenuCategory:
+    @staticmethod
+    def _create_menu() -> MenuCategory:
         """Create the menu options"""
         menu_options = [
             MenuOption(SettingsMenuOptions.LICHESS_AUTHENTICATION, "Authenticate with Lichess by adding your API access token (required for playing online)"),

@@ -42,18 +42,16 @@ class MaterialDifferenceModel:
         self.e_material_difference_model_updated = Event()
         self.update()
 
-    def _material_difference_model_updated(self) -> None:
-        """Notifies listeners of material difference model updates"""
-        self.e_material_difference_model_updated.notify()
-
-    def empty_count(self) -> Dict[Color, Dict[PieceType, int]]:
+    @staticmethod
+    def empty_count() -> Dict[Color, Dict[PieceType, int]]:
         """Returns an empty piece count dictionary"""
         return {
             WHITE: {KING: 0, QUEEN: 0, ROOK: 0, BISHOP: 0, KNIGHT: 0, PAWN: 0},
             BLACK: {KING: 0, QUEEN: 0, ROOK: 0, BISHOP: 0, KNIGHT: 0, PAWN: 0}
         }
 
-    def empty_score(self) -> Dict[Color, int]:
+    @staticmethod
+    def empty_score() -> Dict[Color, int]:
         """Returns an empty score dictionary"""
         return {WHITE: 0, BLACK: 0}
 
@@ -76,9 +74,10 @@ class MaterialDifferenceModel:
             self.update_score(color, piece_type)
 
         self.board_orientation = self.board_model.get_board_orientation()
-        self._material_difference_model_updated()
+        self._notify_material_difference_model_updated()
 
-    def generate_pieces_fen(self, board_fen: str) -> str:
+    @staticmethod
+    def generate_pieces_fen(board_fen: str) -> str:
         """Generates a fen containing pieces only by
            parsing the passed in board fen
            Example: rnbqkbnrppppppppPPPPPPPPRNBQKBNR"""
@@ -123,3 +122,7 @@ class MaterialDifferenceModel:
         """Returns the material difference
            score for the passed in color"""
         return self.score[color]
+
+    def _notify_material_difference_model_updated(self) -> None:
+        """Notifies listeners of material difference model updates"""
+        self.e_material_difference_model_updated.notify()

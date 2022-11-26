@@ -19,4 +19,3 @@ from os import name as os_name
 def is_windows_system() -> bool:
     """Returns True if on a Windows system"""
     return True if os_name == "nt" else False
-

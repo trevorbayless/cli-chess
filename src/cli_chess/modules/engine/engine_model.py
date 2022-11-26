@@ -50,7 +50,7 @@ class EngineModel:
 
     async def configure_engine(self) -> None:
         """Configure the engine with the passed in options"""
-        await self.engine.configure({"Skill Level": self.game_parameters['Computer Level']})  #TODO: Update 'Computer Strength' to use options enum
+        await self.engine.configure({"Skill Level": self.game_parameters['Computer Level']})  # TODO: Update 'Computer Strength' to use options enum
 
     async def get_best_move(self) -> chess.engine.PlayResult:
         """Query the engine to get the best move"""

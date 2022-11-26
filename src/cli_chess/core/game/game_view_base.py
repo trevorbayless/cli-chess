@@ -26,7 +26,7 @@ from prompt_toolkit.application import get_app
 from prompt_toolkit.filters import to_filter
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from cli_chess.core import GamePresenterBase
+    from cli_chess.core.game import GamePresenterBase
 
 
 class GameViewBase:

@@ -17,7 +17,6 @@ from __future__ import annotations
 from cli_chess.core.startup import StartupView
 from cli_chess.core.main import MainModel, MainPresenter
 from cli_chess.modules.token_manager import TokenManagerModel
-from cli_chess.utils import log
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from cli_chess.core.startup import StartupModel

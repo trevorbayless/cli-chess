@@ -56,7 +56,8 @@ class TokenManagerModel:
                 log.error(f"Authentication to Lichess failed - {e.message}")
         return False
 
-    def save_lichess_token(self, api_token) -> None:
+    @staticmethod
+    def save_lichess_token(api_token) -> None:
         """Save the passed in lichess api token to the configuration. It is assumed
            that the passed in token has already been verified
         """

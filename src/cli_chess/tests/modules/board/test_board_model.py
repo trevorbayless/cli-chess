@@ -59,7 +59,7 @@ def test_initialize_board():
 
     # Test an invalid variant
     with pytest.raises(ValueError):
-        model = BoardModel(variant="shogi")
+        BoardModel(variant="shogi")
 
 
 def test_make_move(model, board_updated_listener, successful_move_listener):

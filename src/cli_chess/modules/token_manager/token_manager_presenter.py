@@ -32,7 +32,8 @@ class TokenManagerPresenter:
         self.model = model
         self.view = TokenManagerView(self)
 
-    def save_api_token(self, api_token: str):
+    @staticmethod
+    def save_api_token(api_token: str):
         """Save the valid API access token to the configuration"""
         lichess_config.set_value(lichess_config.Keys.API_TOKEN, api_token)
 

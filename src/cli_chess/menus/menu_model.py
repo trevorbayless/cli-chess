@@ -14,7 +14,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from __future__ import annotations
-from typing import TYPE_CHECKING, Union, List
+from typing import TYPE_CHECKING, List
 if TYPE_CHECKING:
     from cli_chess.menus import MenuOption, MultiValueMenuOption, MenuCategory
 

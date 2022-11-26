@@ -14,7 +14,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from __future__ import annotations
-from cli_chess.utils import default, twilight
+from cli_chess.utils import default
 from prompt_toolkit.layout import Layout, Container
 from prompt_toolkit.application import Application, DummyApplication, get_app
 from prompt_toolkit import print_formatted_text as pt_print, HTML
@@ -22,7 +22,7 @@ from prompt_toolkit.styles import Style
 from prompt_toolkit.output.color_depth import ColorDepth
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from cli_chess.core.startup import StartupPresenter
+    from cli_chess.core.main import MainPresenter
 
 
 class StartupView:
@@ -41,7 +41,8 @@ class StartupView:
             style=Style.from_dict(default)
         )
 
-    def in_terminal_error(self, msg: str, title: str = "Error"):
+    @staticmethod
+    def in_terminal_error(msg: str, title: str = "Error"):
         """Print an in terminal error. This is only to be used
            when the main application is not running yet
         """

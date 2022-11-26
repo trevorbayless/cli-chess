@@ -202,7 +202,8 @@ class MainView:
 
         return merge_key_bindings([po_fb_kb, token_manager_kb, ai_fb_kb])
 
-    def _create_key_bindings(self) -> KeyBindings:
+    @staticmethod
+    def _create_key_bindings() -> KeyBindings:
         """Creates the key bindings for the menu manager"""
         bindings = KeyBindings()
         bindings.add(Keys.Right)(focus_next)

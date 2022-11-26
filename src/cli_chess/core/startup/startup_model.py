@@ -24,11 +24,13 @@ class StartupModel:
         self._setup_logger()
         self.startup_args = self._parse_args()
 
-    def _setup_logger(self):
+    @staticmethod
+    def _setup_logger():
         """Set up the root logger"""
         log = configure_logger("cli-chess")
         log.info(f"cli-chess v{__version__}")
 
-    def _parse_args(self):
+    @staticmethod
+    def _parse_args():
         """Parse the args passed in at startup"""
         return setup_argparse().parse_args()

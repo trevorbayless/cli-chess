@@ -16,7 +16,7 @@
 from cli_chess.utils.event import Event
 from cli_chess.utils.logging import log
 from random import randint
-from typing import List, Type
+from typing import List
 import chess.variant
 import chess
 
@@ -31,7 +31,8 @@ class BoardModel:
         self.e_board_model_updated = Event()
         self.e_successful_move_made = Event()
 
-    def _initialize_board(self, variant, fen) -> Type[chess.Board]:
+    @staticmethod
+    def _initialize_board(variant, fen) -> chess.Board:
         """Initializes and returns the main board object"""
         if variant == "chess960":
             return chess.Board.from_chess960_pos(randint(0, 959))
@@ -97,7 +98,8 @@ class BoardModel:
 
         return square_numbers
 
-    def get_square_file_index(self, square: chess.Square) -> int:
+    @staticmethod
+    def get_square_file_index(square: chess.Square) -> int:
         """Returns the file index of the passed in square"""
         return chess.square_file(square)
 
@@ -115,11 +117,13 @@ class BoardModel:
 
         return file_labels
 
-    def get_square_rank_index(self, square: chess.Square) -> int:
+    @staticmethod
+    def get_square_rank_index(square: chess.Square) -> int:
         """Returns the rank index of the passed in square"""
         return chess.square_rank(square)
 
-    def get_rank_label(self, rank_index: int) -> str:
+    @staticmethod
+    def get_rank_label(rank_index: int) -> str:
         """Returns the rank label at the index passed in"""
         return chess.RANK_NAMES[rank_index]
 
@@ -132,7 +136,8 @@ class BoardModel:
             return True
         return False
 
-    def is_light_square(self, square: chess.Square) -> bool:
+    @staticmethod
+    def is_light_square(square: chess.Square) -> bool:
         """Returns True if the square passed in is a light square"""
         if square in chess.SQUARES:
             return chess.BB_LIGHT_SQUARES & chess.BB_SQUARES[square]
