@@ -36,7 +36,6 @@ def board_config():
 @pytest.fixture
 def presenter(model, board_config, monkeypatch):
     monkeypatch.setattr('cli_chess.modules.board.board_presenter.board_config', board_config)
-    board_config.set_value(board_config.Keys.FILE_LABEL_COLOR, "yellow")
     return BoardPresenter(model)
 
 

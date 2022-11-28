@@ -12,7 +12,6 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
-
 from cli_chess.modules.board import BoardModel
 from cli_chess.utils import Event
 from typing import Dict
@@ -32,49 +31,27 @@ PIECE_VALUE: Dict[PieceType, int] = {
 class MaterialDifferenceModel:
     def __init__(self, board_model: BoardModel):
         self.board_model = board_model
-        self.board_model.e_board_model_updated.add_listener(self.update)
+        self.board_model.e_board_model_updated.add_listener(self.update)  # Todo: Update this to use e_successful_move_made? What about board orientation change?
 
-        self.piece_count: Dict[Color, Dict[PieceType, int]] = self.empty_count()
-        self.material_difference: Dict[Color, Dict[PieceType, int]] = self.empty_count()
-        self.score: Dict[Color, int] = self.empty_score()
+        self.material_difference: Dict[Color, Dict[PieceType, int]] = self.default_material_difference()
+        self.score: Dict[Color, int] = self.default_score()
         self.board_orientation = self.board_model.get_board_orientation()
 
         self.e_material_difference_model_updated = Event()
         self.update()
 
     @staticmethod
-    def empty_count() -> Dict[Color, Dict[PieceType, int]]:
-        """Returns an empty piece count dictionary"""
+    def default_material_difference() -> Dict[Color, Dict[PieceType, int]]:
+        """Returns a default material difference dictionary"""
         return {
             WHITE: {KING: 0, QUEEN: 0, ROOK: 0, BISHOP: 0, KNIGHT: 0, PAWN: 0},
             BLACK: {KING: 0, QUEEN: 0, ROOK: 0, BISHOP: 0, KNIGHT: 0, PAWN: 0}
         }
 
     @staticmethod
-    def empty_score() -> Dict[Color, int]:
-        """Returns an empty score dictionary"""
+    def default_score() -> Dict[Color, int]:
+        """Returns a default score dictionary"""
         return {WHITE: 0, BLACK: 0}
-
-    def reset_all(self) -> None:
-        """Reset variables to default state"""
-        self.piece_count = self.empty_count()
-        self.material_difference = self.empty_count()
-        self.score = self.empty_score()
-
-    def update(self) -> None:
-        """Update the material difference using the latest board FEN"""
-        self.reset_all()
-        pieces_fen = self.generate_pieces_fen(self.board_model.board.board_fen())
-
-        for piece in pieces_fen:
-            color = WHITE if piece.isupper() else BLACK
-            piece_type = PIECE_SYMBOLS.index(piece.lower())
-            self.tally_piece(color, piece_type)
-            self.update_material_difference(color, piece_type)
-            self.update_score(color, piece_type)
-
-        self.board_orientation = self.board_model.get_board_orientation()
-        self._notify_material_difference_model_updated()
 
     @staticmethod
     def generate_pieces_fen(board_fen: str) -> str:
@@ -87,35 +64,48 @@ class MaterialDifferenceModel:
             pieces_fen = regex.sub('', board_fen)
         return pieces_fen
 
-    def tally_piece(self, color: Color, piece_type: PieceType) -> None:
-        """Tallies and updates the piece count
-           based on the passed in piece"""
-        if piece_type in PIECE_TYPES:
-            self.piece_count[color][piece_type] += 1
+    def _reset_all(self) -> None:
+        """Reset variables to default state"""
+        self.material_difference = self.default_material_difference()
+        self.score = self.default_score()
 
-    def update_material_difference(self, color: Color, piece_type: PieceType) -> None:
+    def update(self) -> None:
+        """Update the material difference using the latest board FEN"""
+        self._reset_all()
+        pieces_fen = self.generate_pieces_fen(self.board_model.board.board_fen())
+
+        # Todo: Update to use chess.Piece()?
+        for piece in pieces_fen:
+            color = WHITE if piece.isupper() else BLACK
+            piece_type = PIECE_SYMBOLS.index(piece.lower())
+            self._update_material_difference(color, piece_type)
+            self._update_score(color, piece_type)
+
+        self.board_orientation = self.board_model.get_board_orientation()
+        self._notify_material_difference_model_updated()
+
+    def _update_material_difference(self, color: Color, piece_type: PieceType) -> None:
         """Updates the material difference based on the passed in piece"""
         if piece_type in PIECE_TYPES:
-            piece_type_count = self.material_difference[not color][piece_type]
-            if piece_type_count > 0:
+            opponent_piece_type_count = self.material_difference[not color][piece_type]
+            if opponent_piece_type_count > 0:
                 self.material_difference[not color][piece_type] -= 1
             else:
                 self.material_difference[color][piece_type] += 1
 
-    def update_score(self, color: Color, piece_type: PieceType) -> None:
+    def _update_score(self, color: Color, piece_type: PieceType) -> None:
         """Uses the material difference to
            calculate the score for each side"""
         if piece_type in PIECE_TYPES:
-            piece_value = PIECE_VALUE[piece_type]
-            self.score[color] += piece_value
+            self.score[color] += PIECE_VALUE[piece_type]
 
-            color_ahead = WHITE if self.score[WHITE] > self.score[BLACK] else BLACK
+            advantage_color = WHITE if self.score[WHITE] > self.score[BLACK] else BLACK
             difference = abs(self.score[WHITE] - self.score[BLACK])
-            self.score[color_ahead] = difference
-            self.score[not color_ahead] = 0
+            self.score[advantage_color] = difference
+            self.score[not advantage_color] = 0
 
     def get_material_difference(self, color: Color) -> Dict[PieceType, int]:
-        """Returns the material difference dictionary for passed in color"""
+        """Returns the material difference dictionary associated to the passed in color"""
         return self.material_difference[color]
 
     def get_score(self, color: Color) -> int:
