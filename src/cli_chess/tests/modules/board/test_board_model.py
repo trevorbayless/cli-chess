@@ -212,7 +212,7 @@ def test_is_square_in_check():
     assert model.is_square_in_check(model.board.king(model.board.turn))
 
     not_in_check_fen = "8/8/8/3Q4/8/6K1/8/6k1 w - - 21 61"
-    model.board.set_fen(not_in_check_fen)
+    model.set_fen(not_in_check_fen)
     assert not model.is_square_in_check(model.board.king(model.board.turn))
 
 

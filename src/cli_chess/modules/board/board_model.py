@@ -81,6 +81,15 @@ class BoardModel:
         self._notify_board_model_updated()
         log.debug(f"board orientation set (orientation = {color}")
 
+    def set_fen(self, fen: str) -> None:
+        """Sets the board FEN. Raises ValueError if syntactically invalid"""
+        try:
+            self.board.set_fen(fen)
+            self._notify_board_model_updated()
+        except Exception as e:
+            log.error(f"Error setting FEN: {e}")
+            raise e
+
     def get_board_squares(self) -> list:
         """Returns the boards square numbers as a list based current board orientation"""
         # Square numbers from white perspective

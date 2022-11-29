@@ -94,7 +94,7 @@ def test_get_board_display(model, presenter, board_config):
     board_config.set_value(board_config.Keys.LIGHT_PIECE_COLOR, "white")
     board_config.set_value(board_config.Keys.DARK_PIECE_COLOR, "black")
 
-    model.board.set_fen("8/P2R2B1/4p3/5ppQ/1q1nP3/1P1P4/3K1kB1/b7 w - - 0 1")  # white in check
+    model.set_fen("8/P2R2B1/4p3/5ppQ/1q1nP3/1P1P4/3K1kB1/b7 w - - 0 1")  # white in check
     board_output = presenter.get_board_display()
 
     for square_data in board_output:
@@ -264,7 +264,7 @@ def test_get_square_display_color(model, presenter, board_config):
     board_config.set_value(board_config.Keys.LAST_MOVE_COLOR, "yellow")
     board_config.set_value(board_config.Keys.IN_CHECK_COLOR, "red")
 
-    model.board.set_fen("rnbqkbnr/ppppp1pp/8/5p2/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 1")
+    model.set_fen("rnbqkbnr/ppppp1pp/8/5p2/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 1")
     presenter.make_move("Qh5")  # black in check
     last_move = model.board.peek()
 
@@ -305,27 +305,27 @@ def test_game_result(model, presenter):
     ongoing_game_fen = "8/3k4/3B1K2/4P3/1Pb5/8/8/8 b - - 0 1"
 
     # Test white checkmate result
-    model.board.set_fen(white_checkmate_fen)
+    model.set_fen(white_checkmate_fen)
     result = presenter.game_result()
     assert result == "Checkmate - White is victorious"
 
     # Test black checkmate result
-    model.board.set_fen(black_checkmate_fen)
+    model.set_fen(black_checkmate_fen)
     result = presenter.game_result()
     assert result == "Checkmate - Black is victorious"
 
     # Test stalemate result
-    model.board.set_fen(stalemate_fen)
+    model.set_fen(stalemate_fen)
     result = presenter.game_result()
     assert result == "Stalemate"
 
     # Test draw result
-    model.board.set_fen(draw_fen)
+    model.set_fen(draw_fen)
     result = presenter.game_result()
     assert result == "Draw"
 
     # Test claim draw result
-    model.board.set_fen(ongoing_game_fen)
+    model.set_fen(ongoing_game_fen)
     model.board.result(claim_draw=True)
     result = presenter.game_result()
     assert result == "Draw"

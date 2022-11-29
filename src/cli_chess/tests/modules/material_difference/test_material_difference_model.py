@@ -51,8 +51,7 @@ def test_default_score(model):
 
 def test_generate_pieces_fen(model):
     assert model.generate_pieces_fen(model.board_model.board.board_fen()) == "rkPKRR"
-    model.board_model.board.set_fen("8/3P1k2/3K4/8/8/8/8/8 w - - 0 1")
-    model.update()
+    model.board_model.set_fen("8/3P1k2/3K4/8/8/8/8/8 w - - 0 1")
     assert model.generate_pieces_fen(model.board_model.board.board_fen()) == "PkK"
     model.board_model.make_move("d8=Q")
     assert model.generate_pieces_fen(model.board_model.board.board_fen()) == "QkK"
@@ -73,19 +72,19 @@ def test_update(model, model_listener):
     }
     assert model.score == {WHITE: 6, BLACK: 0}
 
-    model.board_model.board.set_fen("2q5/8/3q4/2Bk4/1P3Pb1/4K3/8/8 w - - 0 1")
+    # Verify listener was called on material difference model update
     model.update()
-
-    # Verify listener was called on the update
     model_listener.assert_called()
 
+    # Verify material difference update method is listening to general board_model update events
+    model.board_model.set_fen("2q5/8/3q4/2Bk4/1P3Pb1/4K3/8/8 w - - 0 1")
     assert model.material_difference == {
         WHITE: {KING: 0, QUEEN: 0, ROOK: 0, BISHOP: 0, KNIGHT: 0, PAWN: 2},
         BLACK: {KING: 0, QUEEN: 2, ROOK: 0, BISHOP: 0, KNIGHT: 0, PAWN: 0}
     }
     assert model.score == {WHITE: 0, BLACK: 16}
 
-    # Verify material difference update method is listening to board_model update events
+    # Verify material difference update method is listening to successful move board_model update events
     model.board_model.make_move("Bxd6")
     assert model.material_difference == {
         WHITE: {KING: 0, QUEEN: 0, ROOK: 0, BISHOP: 0, KNIGHT: 0, PAWN: 2},
