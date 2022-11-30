@@ -30,7 +30,7 @@ def successful_move_listener():
     return Mock()
 
 
-@pytest.fixture
+@pytest.fixture()
 def model(board_updated_listener, successful_move_listener):
     model = BoardModel()
     model.e_board_model_updated.add_listener(board_updated_listener)
@@ -62,7 +62,7 @@ def test_initialize_board():
         BoardModel(variant="shogi")
 
 
-def test_make_move(model, board_updated_listener, successful_move_listener):
+def test_make_move(model: BoardModel, board_updated_listener: Mock, successful_move_listener: Mock):
     # Test valid move
     try:
         model.make_move("Nf3")
@@ -82,7 +82,7 @@ def test_make_move(model, board_updated_listener, successful_move_listener):
     successful_move_listener.assert_not_called()
 
 
-def test_get_move_stack(model):
+def test_get_move_stack(model: BoardModel):
     model.make_move("e4")
     model.make_move("d6")
     model.make_move("d4")
@@ -151,7 +151,7 @@ def test_get_board_orientation():
     assert model.get_board_orientation() == chess.BLACK
 
 
-def test_set_board_orientation(model, board_updated_listener):
+def test_set_board_orientation(model: BoardModel, board_updated_listener: Mock):
     assert model.get_board_orientation() == chess.WHITE
 
     model.set_board_orientation(chess.BLACK)
@@ -162,7 +162,22 @@ def test_set_board_orientation(model, board_updated_listener):
     board_updated_listener.assert_called()
 
 
-def test_get_board_squares(model):
+def test_set_fen(model: BoardModel, board_updated_listener: Mock):
+    model.set_fen("8/4p3/pP2p2K/1N1qnp2/4k1P1/7P/5PR1/3BB3 w - - 0 1")
+    assert model.board.fen() == "8/4p3/pP2p2K/1N1qnp2/4k1P1/7P/5PR1/3BB3 w - - 0 1"
+    board_updated_listener.assert_called()
+
+    # Test invalid FENs
+    board_updated_listener.reset_mock()
+    with pytest.raises(ValueError):
+        model.set_fen("")
+
+    with pytest.raises(ValueError):
+        model.set_fen("8/4p3/pP2p2K/1N1qnp2/4k1P1/7P/5PR1/3BB3 - 0 1")
+    board_updated_listener.assert_not_called()
+
+
+def test_get_board_squares(model: BoardModel):
     square_numbers = [56, 57, 58, 59, 60, 61, 62, 63,
                       48, 49, 50, 51, 52, 53, 54, 55,
                       40, 41, 42, 43, 44, 45, 46, 47,
@@ -180,7 +195,7 @@ def test_get_board_squares(model):
     assert model.get_board_squares() == square_numbers[::-1]
 
 
-def test_get_square_file_index(model):
+def test_get_square_file_index(model: BoardModel):
     for square in chess.SQUARES:
         assert model.get_square_file_index(square) == chess.square_file(square)
 
@@ -195,12 +210,12 @@ def test_get_file_labels():
     assert file_labels == "h g f e d c b a "
 
 
-def test_get_square_rank_index(model):
+def test_get_square_rank_index(model: BoardModel):
     for square in chess.SQUARES:
         assert model.get_square_rank_index(square) == chess.square_rank(square)
 
 
-def test_get_rank_label(model):
+def test_get_rank_label(model: BoardModel):
     for square in chess.SQUARES:
         rank = chess.square_rank(square)
         assert model.get_rank_label(rank) == chess.RANK_NAMES[rank]
@@ -236,7 +251,7 @@ def test_is_white_orientation():
     assert model.is_white_orientation()
 
 
-def test_notify_board_model_updated(model, board_updated_listener):
+def test_notify_board_model_updated(model: BoardModel, board_updated_listener: Mock):
     # Test registered board update listener is called
     model._notify_board_model_updated()
     board_updated_listener.assert_called()
@@ -248,7 +263,7 @@ def test_notify_board_model_updated(model, board_updated_listener):
     board_updated_listener.assert_not_called()
 
 
-def test_notify_successful_move_made(model, successful_move_listener):
+def test_notify_successful_move_made(model: BoardModel, successful_move_listener: Mock):
     # Test registered successful move listener is called
     model._notify_successful_move_made()
     successful_move_listener.assert_called()
