@@ -29,6 +29,7 @@ class MoveListPresenter:
         self.view = MoveListView(self, self.format_move_list())
 
         self.move_list_model.e_move_list_model_updated.add_listener(self.update)
+        board_config.e_board_config_updated.add_listener(self.update)
 
     def update(self) -> None:
         """Update the move list output"""

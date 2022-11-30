@@ -31,6 +31,7 @@ class MaterialDifferencePresenter:
         self.view_lower = MaterialDifferenceView(self, self.format_diff_output(self.material_diff_model.board_orientation), self.show_diff)
 
         self.material_diff_model.e_material_difference_model_updated.add_listener(self.update)
+        board_config.e_board_config_updated.add_listener(self.update)
 
     def update(self) -> None:
         """Updates the material differences for both sides"""

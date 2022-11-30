@@ -42,7 +42,7 @@ def presenter(model: BoardModel, board_config: BoardSection, monkeypatch):
 def test_update(model: BoardModel, presenter: BoardPresenter, board_config: BoardSection):
     # Todo: Still trying to determine best way to test. Just mock view calls?
     #       see comment in board_presenter.py for options
-    # Verify that update method is listening to model updates
+    # Verify the update method is listening to model updates
     assert presenter.update in model.e_board_model_updated.listeners
 
 
@@ -51,6 +51,9 @@ def test_update_cached_config_values(model: BoardModel, presenter: BoardPresente
     assert presenter.board_config_values == board_config.get_all_values()
     assert not presenter.board_config_values[board_config.Keys.BLINDFOLD_CHESS.value["name"]]
     assert presenter.board_config_values[board_config.Keys.USE_UNICODE_PIECES.value["name"]]
+
+    # Verify the method is listening to board configuration updates
+    assert presenter._update_cached_config_values in board_config.e_board_config_updated.listeners
 
     # Test board_config listener notification is working
     # (manual calls to _update_cached_config_values shouldn't be required)

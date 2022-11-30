@@ -39,10 +39,13 @@ def presenter(model: MaterialDifferenceModel, board_config: BoardSection, monkey
     return MaterialDifferencePresenter(model)
 
 
-def test_update(model, presenter):
+def test_update(model: MaterialDifferenceModel, presenter: MaterialDifferencePresenter, board_config: BoardSection):
     # Todo: Still trying to determine best way to test. Just mock view calls?
-    # Verify that update method is listening to model updates
+    # Verify the update method is listening to model updates
     assert presenter.update in model.e_material_difference_model_updated.listeners
+
+    # Verify the update method is listening to board configuration updates
+    assert presenter.update in board_config.e_board_config_updated.listeners
 
 
 def test_format_diff_output(model: MaterialDifferenceModel, presenter: MaterialDifferencePresenter, board_config: BoardSection):
