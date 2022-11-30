@@ -34,10 +34,6 @@ class MoveListModel:
         self.e_move_list_model_updated = Event()
         self.update()
 
-    def _move_list_model_updated(self) -> None:
-        """Notifies listeners of move list model updates"""
-        self.e_move_list_model_updated.notify()
-
     def update(self) -> None:
         """Updates the move list data using the latest move stack"""
         self.move_list_data.clear()
@@ -70,8 +66,12 @@ class MoveListModel:
 
             self.move_list_data.append(move_data)
 
-        self._move_list_model_updated()
+        self._notify_move_list_model_updated()
 
     def get_move_list_data(self) -> List[dict]:
         """Returns the move list data"""
         return self.move_list_data
+
+    def _notify_move_list_model_updated(self) -> None:
+        """Notifies listeners of move list model updates"""
+        self.e_move_list_model_updated.notify()
