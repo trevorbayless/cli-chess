@@ -40,9 +40,10 @@ def presenter(model: BoardModel, board_config: BoardSection, monkeypatch):
 
 
 def test_update(model: BoardModel, presenter: BoardPresenter, board_config: BoardSection):
-    # Todo: Still trying to determine best way to test.
+    # Todo: Still trying to determine best way to test. Just mock view calls?
     #       see comment in board_presenter.py for options
-    pass
+    # Verify that update method is listening to model updates
+    assert presenter.update in model.e_board_model_updated.listeners
 
 
 def test_update_cached_config_values(model: BoardModel, presenter: BoardPresenter, board_config: BoardSection):
