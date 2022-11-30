@@ -34,18 +34,18 @@ def board_config():
 
 
 @pytest.fixture
-def presenter(model, board_config, monkeypatch):
+def presenter(model: BoardModel, board_config: BoardSection, monkeypatch):
     monkeypatch.setattr('cli_chess.modules.board.board_presenter.board_config', board_config)
     return BoardPresenter(model)
 
 
-def test_update(model, presenter, board_config):
+def test_update(model: BoardModel, presenter: BoardPresenter, board_config: BoardSection):
     # Todo: Still trying to determine best way to test.
     #       see comment in board_presenter.py for options
     pass
 
 
-def test_update_cached_config_values(model, presenter, board_config):
+def test_update_cached_config_values(model: BoardModel, presenter: BoardPresenter, board_config: BoardSection):
     # Test initial assignment
     assert presenter.board_config_values == board_config.get_all_values()
     assert not presenter.board_config_values[board_config.Keys.BLINDFOLD_CHESS.value["name"]]
@@ -72,7 +72,7 @@ def test_update_cached_config_values(model, presenter, board_config):
     assert presenter.board_config_values == board_config.get_all_values()
 
 
-def test_make_move(model, presenter):
+def test_make_move(model: BoardModel, presenter: BoardPresenter):
     try:
         presenter.make_move("e4")
         assert model.board.board_fen() == "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR"
@@ -84,7 +84,7 @@ def test_make_move(model, presenter):
         presenter.make_move("O-O-O")
 
 
-def test_get_board_display(model, presenter, board_config):
+def test_get_board_display(model: BoardModel, presenter: BoardPresenter, board_config: BoardSection):
     board_config.set_value(board_config.Keys.BLINDFOLD_CHESS, "no")
     board_config.set_value(board_config.Keys.USE_UNICODE_PIECES, "no")
     board_config.set_value(board_config.Keys.SHOW_BOARD_COORDINATES, "yes")
@@ -132,7 +132,7 @@ def test_get_board_display(model, presenter, board_config):
             }
 
 
-def test_get_file_labels(model, presenter, board_config):
+def test_get_file_labels(model: BoardModel, presenter: BoardPresenter, board_config: BoardSection):
     board_config.set_value(board_config.Keys.SHOW_BOARD_COORDINATES, "yes")
     assert presenter.get_file_labels() == model.get_file_labels()
 
@@ -140,17 +140,17 @@ def test_get_file_labels(model, presenter, board_config):
     assert presenter.get_file_labels() == ""
 
 
-def test_get_file_label_color(model, presenter, board_config):
+def test_get_file_label_color(model: BoardModel, presenter: BoardPresenter, board_config: BoardSection):
     board_config.set_value(board_config.Keys.FILE_LABEL_COLOR, "yellow")
     assert presenter.get_file_label_color() == "yellow"
 
 
-def test_get_rank_label_color(model, presenter, board_config):
+def test_get_rank_label_color(model: BoardModel, presenter: BoardPresenter, board_config: BoardSection):
     board_config.set_value(board_config.Keys.RANK_LABEL_COLOR, "purple")
     assert presenter.get_rank_label_color() == "purple"
 
 
-def test_get_rank_label(model, presenter, board_config):
+def test_get_rank_label(model: BoardModel, presenter: BoardPresenter, board_config: BoardSection):
     # Test white orientation with board coordinates
     board_config.set_value(board_config.Keys.SHOW_BOARD_COORDINATES, "yes")
     for square in chess.SQUARES:
@@ -176,7 +176,7 @@ def test_get_rank_label(model, presenter, board_config):
             assert presenter.get_rank_label(square) == ""
 
 
-def test_is_square_start_of_rank(model, presenter, board_config):
+def test_is_square_start_of_rank(model: BoardModel, presenter: BoardPresenter, board_config: BoardSection):
     # Test start of rank white orientation
     for square in chess.SQUARES:
         if chess.BB_SQUARES[square] & chess.BB_FILE_A:
@@ -193,7 +193,7 @@ def test_is_square_start_of_rank(model, presenter, board_config):
             assert not presenter.is_square_start_of_rank(square)
 
 
-def test_is_square_end_of_rank(model, presenter, board_config):
+def test_is_square_end_of_rank(model: BoardModel, presenter: BoardPresenter, board_config: BoardSection):
     # Test end of rank white orientation
     for square in chess.SQUARES:
         if chess.BB_SQUARES[square] & chess.BB_FILE_H:
@@ -210,7 +210,7 @@ def test_is_square_end_of_rank(model, presenter, board_config):
             assert not presenter.is_square_end_of_rank(square)
 
 
-def test_get_piece_str(model, presenter, board_config):
+def test_get_piece_str(model: BoardModel, presenter: BoardPresenter, board_config: BoardSection):
     # Test unicode pieces
     board_config.set_value(board_config.Keys.BLINDFOLD_CHESS, "no")
     board_config.set_value(board_config.Keys.USE_UNICODE_PIECES, "yes")
@@ -236,7 +236,7 @@ def test_get_piece_str(model, presenter, board_config):
         assert presenter.get_piece_str(square) == ""
 
 
-def test_get_piece_display_color(model, presenter, board_config):
+def test_get_piece_display_color(model: BoardModel, presenter: BoardPresenter, board_config: BoardSection):
     board_config.set_value(board_config.Keys.LIGHT_PIECE_COLOR, "gray")
     board_config.set_value(board_config.Keys.DARK_PIECE_COLOR, "navy")
 
@@ -257,7 +257,7 @@ def test_get_piece_display_color(model, presenter, board_config):
             assert presenter.get_piece_display_color(piece) == ""
 
 
-def test_get_square_display_color(model, presenter, board_config):
+def test_get_square_display_color(model: BoardModel, presenter: BoardPresenter, board_config: BoardSection):
     board_config.set_value(board_config.Keys.LIGHT_SQUARE_COLOR, "white")
     board_config.set_value(board_config.Keys.DARK_SQUARE_COLOR, "blue")
     board_config.set_value(board_config.Keys.SHOW_BOARD_HIGHLIGHTS, "yes")
@@ -297,7 +297,7 @@ def test_get_square_display_color(model, presenter, board_config):
         assert presenter.get_square_display_color(last_move.from_square) == "blue"
 
 
-def test_game_result(model, presenter):
+def test_game_result(model: BoardModel, presenter: BoardPresenter):
     white_checkmate_fen = "7k/7R/5N2/3K4/8/8/8/8 b - - 0 1"
     black_checkmate_fen = "8/8/8/8/8/7k/6q1/7K w - - 0 1"
     stalemate_fen = "7k/5K2/6Q1/8/8/8/8/8 b - - 0 1"

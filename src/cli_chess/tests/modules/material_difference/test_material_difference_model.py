@@ -26,13 +26,13 @@ def model_listener():
 
 
 @pytest.fixture
-def model(model_listener):
+def model(model_listener: Mock):
     model = MaterialDifferenceModel(BoardModel(fen="7r/8/4k3/8/2P5/2K5/8/3RR3 b - - 0 1"))
     model.e_material_difference_model_updated.add_listener(model_listener)
     return model
 
 
-def test_default_material_difference(model):
+def test_default_material_difference(model: MaterialDifferenceModel):
     existing_material_difference = model.material_difference
     default_difference = {
         WHITE: {KING: 0, QUEEN: 0, ROOK: 0, BISHOP: 0, KNIGHT: 0, PAWN: 0},
@@ -42,14 +42,14 @@ def test_default_material_difference(model):
     assert model.material_difference == existing_material_difference  # Ensure existing difference wasn't changed
 
 
-def test_default_score(model):
+def test_default_score(model: MaterialDifferenceModel):
     existing_score = model.score
     default_score = {WHITE: 0, BLACK: 0}
     assert model.default_score() == default_score
     assert model.score == existing_score  # Ensure score wasn't changed
 
 
-def test_generate_pieces_fen(model):
+def test_generate_pieces_fen(model: MaterialDifferenceModel):
     assert model.generate_pieces_fen(model.board_model.board.board_fen()) == "rkPKRR"
     model.board_model.set_fen("8/3P1k2/3K4/8/8/8/8/8 w - - 0 1")
     assert model.generate_pieces_fen(model.board_model.board.board_fen()) == "PkK"
@@ -57,7 +57,7 @@ def test_generate_pieces_fen(model):
     assert model.generate_pieces_fen(model.board_model.board.board_fen()) == "QkK"
 
 
-def test_reset_all(model):
+def test_reset_all(model: MaterialDifferenceModel):
     assert model.material_difference != model.default_material_difference()
     assert model.score != model.default_score()
     model._reset_all()
@@ -65,7 +65,7 @@ def test_reset_all(model):
     assert model.score == model.default_score()
 
 
-def test_update(model, model_listener):
+def test_update(model: MaterialDifferenceModel, model_listener: Mock):
     assert model.material_difference == {
         WHITE: {KING: 0, QUEEN: 0, ROOK: 1, BISHOP: 0, KNIGHT: 0, PAWN: 1},
         BLACK: {KING: 0, QUEEN: 0, ROOK: 0, BISHOP: 0, KNIGHT: 0, PAWN: 0}
@@ -93,7 +93,7 @@ def test_update(model, model_listener):
     assert model.score == {WHITE: 0, BLACK: 7}
 
 
-def test_update_material_difference(model):
+def test_update_material_difference(model: MaterialDifferenceModel):
     assert model.material_difference == {
         WHITE: {KING: 0, QUEEN: 0, ROOK: 1, BISHOP: 0, KNIGHT: 0, PAWN: 1},
         BLACK: {KING: 0, QUEEN: 0, ROOK: 0, BISHOP: 0, KNIGHT: 0, PAWN: 0}
@@ -109,7 +109,7 @@ def test_update_material_difference(model):
     }
 
 
-def test_update_score(model):
+def test_update_score(model: MaterialDifferenceModel):
     # Verify piece values are correct
     assert PIECE_VALUE == {
         KING: 0,
@@ -130,12 +130,12 @@ def test_update_score(model):
     assert model.score == {WHITE: 0, BLACK: 0}
 
 
-def test_get_material_difference(model):
+def test_get_material_difference(model: MaterialDifferenceModel):
     assert model.get_material_difference(WHITE) == {KING: 0, QUEEN: 0, ROOK: 1, BISHOP: 0, KNIGHT: 0, PAWN: 1}
     assert model.get_material_difference(BLACK) == {KING: 0, QUEEN: 0, ROOK: 0, BISHOP: 0, KNIGHT: 0, PAWN: 0}
 
 
-def test_get_score(model):
+def test_get_score(model: MaterialDifferenceModel):
     assert model.score == {WHITE: 6, BLACK: 0}
     assert model.get_score(WHITE) == 6
     assert model.get_score(BLACK) == 0
@@ -145,7 +145,7 @@ def test_get_score(model):
     assert model.get_score(BLACK) == 2
 
 
-def test_notify_material_difference_model_updated(model, model_listener):
+def test_notify_material_difference_model_updated(model: MaterialDifferenceModel, model_listener: Mock):
     # Test registered successful move listener is called
     model._notify_material_difference_model_updated()
     model_listener.assert_called()

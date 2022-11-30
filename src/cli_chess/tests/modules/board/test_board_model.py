@@ -31,7 +31,7 @@ def successful_move_listener():
 
 
 @pytest.fixture()
-def model(board_updated_listener, successful_move_listener):
+def model(board_updated_listener: Mock, successful_move_listener: Mock):
     model = BoardModel()
     model.e_board_model_updated.add_listener(board_updated_listener)
     model.e_successful_move_made.add_listener(successful_move_listener)

@@ -35,7 +35,7 @@ def event(listener1):
     return event
 
 
-def test_add_listener(event, listener1, listener2):
+def test_add_listener(event: Event, listener1: Mock, listener2: Mock):
     event.add_listener(listener2)
     assert listener2 in event.listeners
 
@@ -43,7 +43,7 @@ def test_add_listener(event, listener1, listener2):
     assert event.listeners.count(listener1) == 1
 
 
-def test_remove_listener(event, listener1, listener2):
+def test_remove_listener(event: Event, listener1: Mock, listener2: Mock):
     assert listener2 not in event.listeners
     event.remove_listener(listener2)
     assert listener1 in event.listeners
@@ -54,7 +54,7 @@ def test_remove_listener(event, listener1, listener2):
     assert listener2 in event.listeners
 
 
-def test_notify(event, listener1, listener2):
+def test_notify(event: Event, listener1: Mock, listener2: Mock):
     listener1.assert_not_called()
     listener2.assert_not_called()
 
