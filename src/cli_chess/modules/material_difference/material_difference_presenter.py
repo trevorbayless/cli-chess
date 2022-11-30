@@ -27,8 +27,8 @@ class MaterialDifferencePresenter:
     def __init__(self, material_diff_model: MaterialDifferenceModel):
         self.material_diff_model = material_diff_model
         self.show_diff = self.material_diff_model.board_model.get_variant_name() != "horde"
-        self.view_upper = MaterialDifferenceView(self, self.format_diff_output(not self.material_diff_model.board_orientation))
-        self.view_lower = MaterialDifferenceView(self, self.format_diff_output(self.material_diff_model.board_orientation))
+        self.view_upper = MaterialDifferenceView(self, self.format_diff_output(not self.material_diff_model.board_orientation), self.show_diff)
+        self.view_lower = MaterialDifferenceView(self, self.format_diff_output(self.material_diff_model.board_orientation), self.show_diff)
 
         self.material_diff_model.e_material_difference_model_updated.add_listener(self.update)
 
@@ -44,7 +44,7 @@ class MaterialDifferencePresenter:
         score = self.material_diff_model.get_score(color)
         use_unicode = board_config.get_boolean(board_config.Keys.USE_UNICODE_PIECES)
 
-        for piece_type in PIECE_TYPES:
+        for piece_type in PIECE_TYPES[::-1]:  # Reverse PIECE_TYPES so the order is KQRBNP
             for count in range(material_difference[piece_type]):
                 if use_unicode:
                     output += get_piece_unicode_symbol(PIECE_SYMBOLS[piece_type])
