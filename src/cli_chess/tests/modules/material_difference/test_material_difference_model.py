@@ -77,6 +77,7 @@ def test_update(model: MaterialDifferenceModel, model_listener: Mock):
     model_listener.assert_called()
 
     # Verify material difference update method is listening to general board_model update events
+    assert model.update in model.board_model.e_board_model_updated.listeners
     model.board_model.set_fen("2q5/8/3q4/2Bk4/1P3Pb1/4K3/8/8 w - - 0 1")
     assert model.material_difference == {
         WHITE: {KING: 0, QUEEN: 0, ROOK: 0, BISHOP: 0, KNIGHT: 0, PAWN: 2},
@@ -84,7 +85,6 @@ def test_update(model: MaterialDifferenceModel, model_listener: Mock):
     }
     assert model.score == {WHITE: 0, BLACK: 16}
 
-    # Verify material difference update method is listening to successful move board_model update events
     model.board_model.make_move("Bxd6")
     assert model.material_difference == {
         WHITE: {KING: 0, QUEEN: 0, ROOK: 0, BISHOP: 0, KNIGHT: 0, PAWN: 2},
