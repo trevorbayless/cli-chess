@@ -82,19 +82,42 @@ def test_make_move(model: BoardModel, board_updated_listener: Mock, successful_m
     successful_move_listener.assert_not_called()
 
 
-def test_get_move_stack(model: BoardModel):
+def test_takeback(model: BoardModel, board_updated_listener: Mock, successful_move_listener: Mock):
     model.make_move("e4")
-    model.make_move("d6")
-    model.make_move("d4")
-    model.make_move("Nf6")
+    assert model.get_turn() == chess.BLACK
+    assert len(model.get_move_stack()) == 1
+
+    # Test a valid takeback
+    model.takeback()
+    assert len(model.get_move_stack()) == 0
+    assert model.get_turn() == chess.WHITE
+    board_updated_listener.assert_called()
+    successful_move_listener.assert_called()
+
+    # Test empty move stack
+    board_updated_listener.reset_mock()
+    successful_move_listener.reset_mock()
+    model.board.reset()
+    with pytest.raises(IndexError):
+        model.takeback()
+
+    assert model.get_turn() == chess.WHITE
+    board_updated_listener.assert_not_called()
+    successful_move_listener.assert_not_called()
+
+
+def test_get_move_stack(model: BoardModel):
+    moves = ["e4", "d6", "d4", "Nf6", "Nc3", "g6"]
+    for move in moves:
+        model.make_move(move)
+
     with pytest.raises(ValueError):
         model.make_move("Nb3")
-    model.make_move("Nc3")
-    model.make_move("g6")
+
     assert model.get_move_stack() == model.board.move_stack
 
     # Take back the last move
-    model.board.pop()
+    model.takeback()
     assert model.get_move_stack() == model.board.move_stack
 
 
@@ -136,7 +159,7 @@ def test_get_turn():
 
     # Test taking back a move
     model.make_move("d4")
-    model.board.pop()
+    model.takeback()
     assert model.get_turn() == chess.BLACK
 
 

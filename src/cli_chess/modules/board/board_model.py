@@ -21,6 +21,7 @@ import chess.variant
 import chess
 
 
+# Todo: Inherit from chess.Board?
 class BoardModel:
     def __init__(self, my_color: chess.Color = chess.WHITE, variant: str = "standard", fen: str = "") -> None:
         self.board = self._initialize_board(variant, fen)
@@ -53,7 +54,19 @@ class BoardModel:
             self._notify_board_model_updated()
             log.info(f"make_move ({player}): {move}")
         except Exception as e:
-            log.info(f"make_move ({player}): {e}")
+            log.error(f"make_move ({player}): {e}")
+            raise e
+
+    def takeback(self):
+        """Takes back the last played move. Raises
+           IndexError if the move stack is empty
+        """
+        try:
+            self.board.pop()
+            self._notify_board_model_updated()
+            self._notify_successful_move_made()
+        except IndexError as e:
+            log.error(f"Error attempting takeback: {e}")
             raise e
 
     def get_move_stack(self) -> List[chess.Move]:
