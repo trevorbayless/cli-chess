@@ -28,8 +28,8 @@ requirements = [
 dev_requirements = {
     'dev': [
         'pytest>=7.2.0',
-        'pytest-flake8>=1.1.1',
-        'pytest-cov>=4.0.0'
+        'pytest-cov>=4.0.0',
+        'flake8>=6.0.0'
     ]
 }
 
