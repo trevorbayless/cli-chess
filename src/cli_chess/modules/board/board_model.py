@@ -25,6 +25,7 @@ import chess
 class BoardModel:
     def __init__(self, my_color: chess.Color = chess.WHITE, variant: str = "standard", fen: str = "") -> None:
         self.board = self._initialize_board(variant, fen)
+        self.initial_fen = self.board.fen()
         self.my_color = my_color
         self.board_orientation = self.my_color
 
@@ -98,6 +99,7 @@ class BoardModel:
         """Sets the board FEN. Raises ValueError if syntactically invalid"""
         try:
             self.board.set_fen(fen)
+            self.initial_fen = fen
             self._notify_board_model_updated()
         except Exception as e:
             log.error(f"Error setting FEN: {e}")
