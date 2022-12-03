@@ -16,15 +16,15 @@
 from __future__ import annotations
 from prompt_toolkit.layout import D
 from prompt_toolkit.widgets import TextArea
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, List
 if TYPE_CHECKING:
     from cli_chess.modules.move_list import MoveListPresenter
 
 
 class MoveListView:
-    def __init__(self, move_list_presenter: MoveListPresenter, initial_output: str):
+    def __init__(self, move_list_presenter: MoveListPresenter):
         self.move_list_presenter = move_list_presenter
-        self.move_list_output = TextArea(text=initial_output,
+        self.move_list_output = TextArea(text="No moves...",
                                          width=D(max=20, preferred=20),
                                          height=D(max=4, preferred=4),
                                          line_numbers=True,
@@ -34,9 +34,18 @@ class MoveListView:
                                          scrollbar=True,
                                          read_only=True)
 
-    def update(self, output: str):
-        """Updates the move list output with the passed in text"""
-        self.move_list_output.text = output
+    def update(self, formatted_move_list: List[str]):
+        """Loops through the passed in move list
+           and updates the move list display
+        """
+        output = ""
+        for i, move in enumerate(formatted_move_list):
+            if i % 2 == 0 and i != 0:
+                output += "\n"
+            output += move.ljust(8)
+
+        if output:
+            self.move_list_output.text = output
 
     def __pt_container__(self) -> TextArea:
         """Returns the move_list container"""

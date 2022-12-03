@@ -17,8 +17,8 @@ from __future__ import annotations
 from cli_chess.modules.move_list import MoveListView
 from cli_chess.modules.common import get_piece_unicode_symbol
 from cli_chess.utils.config import board_config
-from chess import WHITE, PAWN
-from typing import TYPE_CHECKING
+from chess import BLACK, PAWN
+from typing import TYPE_CHECKING, List
 if TYPE_CHECKING:
     from cli_chess.modules.move_list import MoveListModel
 
@@ -26,42 +26,34 @@ if TYPE_CHECKING:
 class MoveListPresenter:
     def __init__(self, move_list_model: MoveListModel):
         self.move_list_model = move_list_model
-        self.view = MoveListView(self, self.format_move_list())
+        self.view = MoveListView(self)
 
         self.move_list_model.e_move_list_model_updated.add_listener(self.update)
         board_config.e_board_config_updated.add_listener(self.update)
 
     def update(self) -> None:
         """Update the move list output"""
-        self.view.update(self.format_move_list())
+        self.view.update(self.get_formatted_move_list())
 
-    def format_move_list(self) -> str:
-        """Returns the formatted move list as a string"""
-        output = ""
+    def get_formatted_move_list(self) -> List[str]:
+        """Returns a list containing the formatted moves"""
+        formatted_move_list = []
         move_list_data = self.move_list_model.get_move_list_data()
         use_unicode = board_config.get_boolean(board_config.Keys.USE_UNICODE_PIECES)
 
         for entry in move_list_data:
-            turn = entry['turn']
-            move = str(entry['move'])
+            move = self.get_move_as_unicode(entry) if use_unicode else (entry['move'])
 
-            if use_unicode:
-                move = self.get_move_as_unicode(entry)
+            if entry['turn'] == BLACK:
+                if not formatted_move_list:  # The list starts with a move from black
+                    formatted_move_list.append("...")
 
-            if turn == WHITE:
-                output += move.ljust(8)
-            elif not output:  # The list starts with a move from black
-                output += "...".ljust(8)
-                output += move
-                output += "\n"
-            else:
-                output += move
-                output += "\n"
-        return output if output else "No moves..."
+            formatted_move_list.append(move)
+        return formatted_move_list
 
     @staticmethod
     def get_move_as_unicode(move_data: dict) -> str:
-        """Returns the passed in SAN move to unicode display"""
+        """Returns the passed in move data in unicode representation"""
         output = ""
         move = move_data['move']
         if move:
