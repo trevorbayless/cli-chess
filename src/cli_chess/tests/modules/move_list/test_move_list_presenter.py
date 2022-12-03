@@ -48,8 +48,9 @@ def test_update(model: MoveListModel, presenter: MoveListPresenter, board_config
 
     # Verify the presenter update function is calling the move list view
     # update function and passing in the formatted move data
-    presenter.view.update = Mock()
     model.board_model.make_move("e4")
+    presenter.view.update = Mock()
+    presenter.update()
     move_data = presenter.get_formatted_move_list()
     presenter.view.update.assert_called_with(move_data)
 

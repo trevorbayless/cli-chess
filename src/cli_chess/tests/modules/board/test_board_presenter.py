@@ -18,6 +18,7 @@ from cli_chess.modules.common import get_piece_unicode_symbol
 from cli_chess.utils.config import BoardSection
 from os import remove
 import chess
+from unittest.mock import Mock
 import pytest
 
 
@@ -40,20 +41,26 @@ def presenter(model: BoardModel, board_config: BoardSection, monkeypatch):
 
 
 def test_update(model: BoardModel, presenter: BoardPresenter, board_config: BoardSection):
-    # Todo: Still trying to determine best way to test. Just mock view calls?
-    #       see comment in board_presenter.py for options
     # Verify the update method is listening to model updates
     assert presenter.update in model.e_board_model_updated.listeners
 
+    # Verify the board presenter update function is calling the board view
+    # update function and passing in the board output data
+    model.make_move("Nf3")
+    presenter.view.update = Mock()
+    presenter.update()
+    board_output_data = presenter.get_board_display()
+    presenter.view.update.assert_called_with(board_output_data)
+
 
 def test_update_cached_config_values(model: BoardModel, presenter: BoardPresenter, board_config: BoardSection):
+    # Verify the method is listening to board configuration updates
+    assert presenter._update_cached_config_values in board_config.e_board_config_updated.listeners
+
     # Test initial assignment
     assert presenter.board_config_values == board_config.get_all_values()
     assert not presenter.board_config_values[board_config.Keys.BLINDFOLD_CHESS.value["name"]]
     assert presenter.board_config_values[board_config.Keys.USE_UNICODE_PIECES.value["name"]]
-
-    # Verify the method is listening to board configuration updates
-    assert presenter._update_cached_config_values in board_config.e_board_config_updated.listeners
 
     # Test board_config listener notification is working
     # (manual calls to _update_cached_config_values shouldn't be required)

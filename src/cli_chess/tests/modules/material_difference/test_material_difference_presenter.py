@@ -15,9 +15,10 @@
 
 from cli_chess.modules.material_difference import MaterialDifferenceModel, MaterialDifferencePresenter
 from cli_chess.modules.board import BoardModel
-from chess import WHITE, BLACK
 from cli_chess.utils.config import BoardSection
+from chess import WHITE, BLACK
 from os import remove
+from unittest.mock import Mock
 import pytest
 
 
@@ -40,12 +41,22 @@ def presenter(model: MaterialDifferenceModel, board_config: BoardSection, monkey
 
 
 def test_update(model: MaterialDifferenceModel, presenter: MaterialDifferencePresenter, board_config: BoardSection):
-    # Todo: Still trying to determine best way to test. Just mock view calls?
     # Verify the update method is listening to model updates
     assert presenter.update in model.e_material_difference_model_updated.listeners
 
     # Verify the update method is listening to board configuration updates
     assert presenter.update in board_config.e_board_config_updated.listeners
+
+    # Verify the presenter update function is calling the material difference
+    # views (white/black) and with the proper data
+    model.board_model.set_fen("6Q1/1P2P3/4n1B1/2b3n1/KNP3p1/5k2/2pq3P/1N6 w - - 0 1")
+    presenter.view_upper.update = Mock()
+    presenter.view_lower.update = Mock()
+    view_upper_data = presenter.format_diff_output(BLACK)
+    view_lower_data = presenter.format_diff_output(WHITE)
+    presenter.update()
+    presenter.view_upper.update.assert_called_with(view_upper_data)
+    presenter.view_lower.update.assert_called_with(view_lower_data)
 
 
 def test_format_diff_output(model: MaterialDifferenceModel, presenter: MaterialDifferencePresenter, board_config: BoardSection):
