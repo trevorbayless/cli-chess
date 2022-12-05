@@ -30,14 +30,14 @@ class TokenManagerView:
     def __init__(self, presenter: TokenManagerPresenter):
         self.presenter = presenter
         self.container_width = 40
-        self.account_name = self.presenter.get_account_name()
+        self.lichess_username = self.presenter.get_lichess_username()
         self._text_input = self._create_text_input_area()
         self._container = self._create_container()
 
     def _create_text_input_area(self):
         """Creates and returns the TextArea used for token input"""
         validator = Validator.from_callable(
-            self.presenter.is_valid_lichess_token,
+            self.presenter.is_lichess_token_valid,
             error_message="Invalid Lichess API token",
             move_cursor_to_end=True,
         )
@@ -68,8 +68,8 @@ class TokenManagerView:
             Box(Window(), height=D(max=1)),
             VSplit([
                 Label("Linked account: ", dont_extend_width=True),
-                ConditionalContainer(Label("None", style="class:label.error bold italic"), Condition(lambda: self.account_name == "None")),
-                ConditionalContainer(Label(text=lambda: self.account_name, style="class:label.success bold"), Condition(lambda: self.account_name != "None")),
+                ConditionalContainer(Label("None", style="class:label.error bold italic"), Condition(lambda: not self.lichess_username)),
+                ConditionalContainer(Label(text=lambda: self.lichess_username, style="class:label.success bold"), Condition(lambda: self.lichess_username != "")),
             ], height=D(max=1)),
         ], width=D(max=self.container_width), height=D(preferred=8))
 
@@ -77,8 +77,7 @@ class TokenManagerView:
         """Called on ENTER after successful token validation.
            Saves the valid token to the configuration file.
         """
-        self.presenter.save_api_token(self._text_input.text)
-        self.account_name = self.presenter.get_account_name()
+        self.lichess_username = self.presenter.get_lichess_username()
         return True
 
     @staticmethod

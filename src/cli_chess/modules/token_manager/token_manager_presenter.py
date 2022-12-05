@@ -15,7 +15,6 @@
 
 from __future__ import annotations
 from cli_chess.modules.token_manager import TokenManagerView
-from cli_chess.utils.config import lichess_config
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from cli_chess.modules.token_manager import TokenManagerModel
@@ -32,15 +31,12 @@ class TokenManagerPresenter:
         self.model = model
         self.view = TokenManagerView(self)
 
-    @staticmethod
-    def save_api_token(api_token: str):
-        """Save the valid API access token to the configuration"""
-        lichess_config.set_value(lichess_config.Keys.API_TOKEN, api_token)
-
-    def is_valid_lichess_token(self, api_token: str) -> bool:
-        """Calls the model to test api token validity"""
+    def is_lichess_token_valid(self, api_token: str) -> bool:
+        """Calls the model to test api token validity. If the token is
+           deemed valid, it is saved to the configuration file
+        """
         return self.model.is_lichess_token_valid(api_token, save=True)
 
-    def get_account_name(self) -> str:
-        """Calls the model to get the name of the linked lichess account"""
-        return self.model.get_account_name()
+    def get_lichess_username(self) -> str:
+        """Calls the model to get the username of the linked lichess account"""
+        return self.model.get_lichess_username()

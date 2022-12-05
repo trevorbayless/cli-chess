@@ -20,45 +20,34 @@ from berserk.exceptions import BerserkError
 
 
 class TokenManagerModel:
-    def __init__(self):
-        self.account_name: str = "None"
-
-    def get_account_name(self) -> str:
-        """Returns the account name linked to the saved API token"""
-        api_token = lichess_config.get_value(lichess_config.Keys.API_TOKEN)
-        if api_token:
-            session = TokenSession(api_token)
-            account = clients.Account(session)
-
-            try:
-                self.account_name = account.get()['id']
-            except BerserkError:
-                self.account_name = "None"
-
-        return self.account_name
-
-    def is_lichess_token_valid(self, api_token: str, save=False) -> bool:
-        """Returns True if the api token passed in is valid. Passing in the 'save'
-           parameter with 'True' will save the api token to the configuration file
-           if it is valid
+    def is_lichess_token_valid(self, api_token: str, save=True) -> bool:
+        """Returns True if the api token passed in is valid. By default, this method
+           will save valid credentials to the configuration file.
         """
         if api_token:
             session = TokenSession(api_token)
             account = clients.Account(session)
 
             try:
-                if account.get():
+                account_data = account.get()
+                if account_data:
                     log.info("Successfully authenticated with Lichess")
                     if save:
-                        self.save_lichess_token(api_token)
+                        self.save_lichess_user(api_token, account_data['username'])
                     return True
             except BerserkError as e:
                 log.error(f"Authentication to Lichess failed - {e.message}")
         return False
 
     @staticmethod
-    def save_lichess_token(api_token) -> None:
-        """Save the passed in lichess api token to the configuration. It is assumed
-           that the passed in token has already been verified
+    def save_lichess_user(api_token: str, username: str) -> None:
+        """Saves the passed in lichess api token and username to the configuration.
+           It is assumed the passed in token has already been verified
         """
         lichess_config.set_value(lichess_config.Keys.API_TOKEN, api_token)
+        lichess_config.set_value(lichess_config.Keys.USERNAME, username)
+
+    @staticmethod
+    def get_lichess_username() -> str:
+        """Queries the lichess configuration to get the linked username"""
+        return lichess_config.get_value(lichess_config.Keys.USERNAME)
