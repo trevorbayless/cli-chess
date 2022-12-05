@@ -214,6 +214,7 @@ class LichessSection(SectionBase):
     """Creates and manages the "lichess" section of the config"""
     class Keys(Enum):
         API_TOKEN = {"name": "api_token", "default": ""}
+        USERNAME = {"name": "username", "default": ""}
 
     def __init__(self, filename: str):
         self.e_lichess_config_updated = Event()
