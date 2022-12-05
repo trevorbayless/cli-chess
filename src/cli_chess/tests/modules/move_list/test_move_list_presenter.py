@@ -27,16 +27,16 @@ def model():
 
 
 @pytest.fixture
+def presenter(model: MoveListModel, board_config: BoardSection, monkeypatch):
+    monkeypatch.setattr('cli_chess.modules.move_list.move_list_presenter.board_config', board_config)
+    return MoveListPresenter(model)
+
+
+@pytest.fixture
 def board_config():
     board_config = BoardSection("unit_test_config.ini")
     yield board_config
     remove(board_config.full_filename)
-
-
-@pytest.fixture
-def presenter(model: MoveListModel, board_config: BoardSection, monkeypatch):
-    monkeypatch.setattr('cli_chess.modules.move_list.move_list_presenter.board_config', board_config)
-    return MoveListPresenter(model)
 
 
 def test_update(model: MoveListModel, presenter: MoveListPresenter, board_config: BoardSection):

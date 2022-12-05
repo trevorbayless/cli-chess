@@ -28,16 +28,16 @@ def model():
 
 
 @pytest.fixture
+def presenter(model: BoardModel, board_config: BoardSection, monkeypatch):
+    monkeypatch.setattr('cli_chess.modules.board.board_presenter.board_config', board_config)
+    return BoardPresenter(model)
+
+
+@pytest.fixture
 def board_config():
     board_config = BoardSection("unit_test_config.ini")
     yield board_config
     remove(board_config.full_filename)
-
-
-@pytest.fixture
-def presenter(model: BoardModel, board_config: BoardSection, monkeypatch):
-    monkeypatch.setattr('cli_chess.modules.board.board_presenter.board_config', board_config)
-    return BoardPresenter(model)
 
 
 def test_update(model: BoardModel, presenter: BoardPresenter, board_config: BoardSection):

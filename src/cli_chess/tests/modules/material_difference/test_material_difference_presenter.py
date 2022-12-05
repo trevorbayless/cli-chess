@@ -28,16 +28,16 @@ def model():
 
 
 @pytest.fixture
+def presenter(model: MaterialDifferenceModel, board_config: BoardSection, monkeypatch):
+    monkeypatch.setattr('cli_chess.modules.material_difference.material_difference_presenter.board_config', board_config)
+    return MaterialDifferencePresenter(model)
+
+
+@pytest.fixture
 def board_config():
     board_config = BoardSection("unit_test_config.ini")
     yield board_config
     remove(board_config.full_filename)
-
-
-@pytest.fixture
-def presenter(model: MaterialDifferenceModel, board_config: BoardSection, monkeypatch):
-    monkeypatch.setattr('cli_chess.modules.material_difference.material_difference_presenter.board_config', board_config)
-    return MaterialDifferencePresenter(model)
 
 
 def test_update(model: MaterialDifferenceModel, presenter: MaterialDifferencePresenter, board_config: BoardSection):

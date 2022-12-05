@@ -13,11 +13,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-import pytest
-from unittest.mock import Mock
+from cli_chess.modules.board import BoardModel
 import chess
 from chess import variant
-from cli_chess.modules.board import BoardModel
+from unittest.mock import Mock
+import pytest
 
 
 @pytest.fixture
