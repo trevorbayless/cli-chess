@@ -18,13 +18,21 @@ from cli_chess.utils.config import LichessSection
 from berserk.exceptions import BerserkError
 from berserk import clients
 from os import remove
+from unittest.mock import Mock
 import pytest
 
 
 @pytest.fixture
-def model(monkeypatch, lichess_config):
+def model_listener():
+    return Mock()
+
+
+@pytest.fixture
+def model(model_listener: Mock, lichess_config: LichessSection, monkeypatch):
     monkeypatch.setattr('cli_chess.modules.token_manager.token_manager_model.lichess_config', lichess_config)
-    return TokenManagerModel()
+    model = TokenManagerModel()
+    model.e_token_manager_model_updated.add_listener(model_listener)
+    return model
 
 
 @pytest.fixture
@@ -59,16 +67,32 @@ def test_is_lichess_token_valid(model: TokenManagerModel, lichess_config: Liches
     assert lichess_config.get_value(LichessSection.Keys.USERNAME) == "mockuser"
 
 
-def test_save_lichess_user(lichess_config: LichessSection):
+def test_save_lichess_user(model: TokenManagerModel, lichess_config: LichessSection, model_listener: Mock):
     assert lichess_config.get_value(LichessSection.Keys.API_TOKEN) == ""
     assert lichess_config.get_value(LichessSection.Keys.USERNAME) == ""
-    lichess_config.set_value(LichessSection.Keys.API_TOKEN, "  AbC123  ")
-    lichess_config.set_value(LichessSection.Keys.USERNAME, "TestUser")
+    model_listener.assert_not_called()
+
+    model.save_lichess_user(api_token="  AbC123  ", username="TestUser")
     assert lichess_config.get_value(LichessSection.Keys.API_TOKEN) == "AbC123"
     assert lichess_config.get_value(LichessSection.Keys.USERNAME) == "TestUser"
+    model_listener.assert_called()
 
 
-def test_get_lichess_username(lichess_config: LichessSection):
+def test_get_lichess_username(model: TokenManagerModel, lichess_config: LichessSection):
     assert lichess_config.get_value(LichessSection.Keys.USERNAME) == ""
+    assert model.get_lichess_username() == ""
+
     lichess_config.set_value(LichessSection.Keys.USERNAME, "testuser  ")
-    assert lichess_config.get_value(LichessSection.Keys.USERNAME) == "testuser"
+    assert model.get_lichess_username() == "testuser"
+
+
+def test_notify_token_manager_model_updated(model: TokenManagerModel, model_listener: Mock):
+    # Test registered successful move listener is called
+    model._notify_token_manager_model_updated()
+    model_listener.assert_called()
+
+    # Unregister listener and test it's not called
+    model_listener.reset_mock()
+    model.e_token_manager_model_updated.remove_listener(model_listener)
+    model._notify_token_manager_model_updated()
+    model_listener.assert_not_called()

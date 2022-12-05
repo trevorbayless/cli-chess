@@ -30,6 +30,11 @@ class TokenManagerPresenter:
     def __init__(self, model: TokenManagerModel):
         self.model = model
         self.view = TokenManagerView(self)
+        self.model.e_token_manager_model_updated.add_listener(self.update)
+
+    def update(self):
+        """Updates the token manager view"""
+        self.view.update(self.get_lichess_username())
 
     def is_lichess_token_valid(self, api_token: str) -> bool:
         """Calls the model to test api token validity. If the token is

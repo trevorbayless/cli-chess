@@ -15,11 +15,15 @@
 
 from cli_chess.utils.logging import log
 from cli_chess.utils.config import lichess_config
+from cli_chess.utils.event import Event
 from berserk import TokenSession, clients
 from berserk.exceptions import BerserkError
 
 
 class TokenManagerModel:
+    def __init__(self):
+        self.e_token_manager_model_updated = Event()
+
     def is_lichess_token_valid(self, api_token: str, save=True) -> bool:
         """Returns True if the api token passed in is valid. By default, this method
            will save valid credentials to the configuration file.
@@ -39,15 +43,19 @@ class TokenManagerModel:
                 log.error(f"Authentication to Lichess failed - {e.message}")
         return False
 
-    @staticmethod
-    def save_lichess_user(api_token: str, username: str) -> None:
+    def save_lichess_user(self, api_token: str, username: str) -> None:
         """Saves the passed in lichess api token and username to the configuration.
            It is assumed the passed in token has already been verified
         """
         lichess_config.set_value(lichess_config.Keys.API_TOKEN, api_token)
         lichess_config.set_value(lichess_config.Keys.USERNAME, username)
+        self._notify_token_manager_model_updated()
 
     @staticmethod
     def get_lichess_username() -> str:
         """Queries the lichess configuration to get the linked username"""
         return lichess_config.get_value(lichess_config.Keys.USERNAME)
+
+    def _notify_token_manager_model_updated(self) -> None:
+        """Notifies listeners of token manager model updates"""
+        self.e_token_manager_model_updated.notify()
