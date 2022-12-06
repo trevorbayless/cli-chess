@@ -21,8 +21,8 @@ metadata = dict(findall(r'__(\w*)__\s*=\s*"([^"]+)"', metadata_file))
 
 requirements = [
     "chess>=1.9.3",
-    "berserk-downstream>=0.11.9",
-    "prompt-toolkit>=3.0.31"
+    "berserk-downstream>=0.11.10",
+    "prompt-toolkit>=3.0.33"
 ]
 
 dev_requirements = {
