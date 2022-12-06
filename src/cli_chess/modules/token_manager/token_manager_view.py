@@ -30,21 +30,21 @@ class TokenManagerView:
     def __init__(self, presenter: TokenManagerPresenter):
         self.presenter = presenter
         self.container_width = 40
-        self.lichess_username = self.presenter.get_lichess_username()
+        self.lichess_username = ""
         self._text_input = self._create_text_input_area()
         self._container = self._create_container()
 
     def _create_text_input_area(self):
         """Creates and returns the TextArea used for token input"""
         validator = Validator.from_callable(
-            self.presenter.is_lichess_token_valid,
+            self.presenter.update_linked_account,
             error_message="Invalid Lichess API token",
             move_cursor_to_end=True,
         )
 
         return TextArea(
             validator=validator,
-            accept_handler=self._accept_handler,
+            accept_handler=lambda x: True,
             focus_on_click=True,
             wrap_lines=True,
             multiline=False,
@@ -72,13 +72,6 @@ class TokenManagerView:
                 ConditionalContainer(Label(text=lambda: self.lichess_username, style="class:label.success bold"), Condition(lambda: self.lichess_username != "")),
             ], height=D(max=1)),
         ], width=D(max=self.container_width), height=D(preferred=8))
-
-    def _accept_handler(self, buf) -> bool:
-        """Called on ENTER after successful token validation.
-           Saves the valid token to the configuration file.
-        """
-        self.lichess_username = self.presenter.get_lichess_username()
-        return True
 
     @staticmethod
     def get_function_bar_fragments() -> StyleAndTextTuples:

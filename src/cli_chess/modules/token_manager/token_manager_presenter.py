@@ -31,17 +31,14 @@ class TokenManagerPresenter:
         self.model = model
         self.view = TokenManagerView(self)
         self.model.e_token_manager_model_updated.add_listener(self.update)
+        self.model.validate_existing_account_data()
 
     def update(self):
         """Updates the token manager view"""
-        self.view.update(self.get_lichess_username())
+        self.view.lichess_username = self.model.get_linked_account_name()
 
-    def is_lichess_token_valid(self, api_token: str) -> bool:
+    def update_linked_account(self, api_token: str) -> bool:
         """Calls the model to test api token validity. If the token is
            deemed valid, it is saved to the configuration file
         """
-        return self.model.is_lichess_token_valid(api_token, save=True)
-
-    def get_lichess_username(self) -> str:
-        """Calls the model to get the username of the linked lichess account"""
-        return self.model.get_lichess_username()
+        return self.model.update_linked_account(api_token)

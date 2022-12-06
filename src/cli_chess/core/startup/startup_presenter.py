@@ -33,7 +33,7 @@ class StartupPresenter:
         args = self.model.startup_args
 
         if args.api_token:
-            if not TokenManagerModel().is_lichess_token_valid(args.api_token, save=True):
+            if not TokenManagerModel().update_linked_account(args.api_token):
                 self.view.in_terminal_error("Authentication to Lichess failed")
                 exit(1)
 
