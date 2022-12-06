@@ -15,7 +15,7 @@
 
 from cli_chess.modules.board import BoardModel, BoardPresenter
 from cli_chess.modules.common import get_piece_unicode_symbol
-from cli_chess.utils.config import BoardSection
+from cli_chess.utils.config import BoardConfig
 from os import remove
 import chess
 from unittest.mock import Mock
@@ -28,19 +28,19 @@ def model():
 
 
 @pytest.fixture
-def presenter(model: BoardModel, board_config: BoardSection, monkeypatch):
+def presenter(model: BoardModel, board_config: BoardConfig, monkeypatch):
     monkeypatch.setattr('cli_chess.modules.board.board_presenter.board_config', board_config)
     return BoardPresenter(model)
 
 
 @pytest.fixture
 def board_config():
-    board_config = BoardSection("unit_test_config.ini")
+    board_config = BoardConfig("unit_test_config.ini")
     yield board_config
     remove(board_config.full_filename)
 
 
-def test_update(model: BoardModel, presenter: BoardPresenter, board_config: BoardSection):
+def test_update(model: BoardModel, presenter: BoardPresenter, board_config: BoardConfig):
     # Verify the update method is listening to model updates
     assert presenter.update in model.e_board_model_updated.listeners
 
@@ -53,7 +53,7 @@ def test_update(model: BoardModel, presenter: BoardPresenter, board_config: Boar
     presenter.view.update.assert_called_with(board_output_data)
 
 
-def test_update_cached_config_values(model: BoardModel, presenter: BoardPresenter, board_config: BoardSection):
+def test_update_cached_config_values(model: BoardModel, presenter: BoardPresenter, board_config: BoardConfig):
     # Verify the method is listening to board configuration updates
     assert presenter._update_cached_config_values in board_config.e_board_config_updated.listeners
 
@@ -95,7 +95,7 @@ def test_make_move(model: BoardModel, presenter: BoardPresenter):
         presenter.make_move("O-O-O")
 
 
-def test_get_board_display(model: BoardModel, presenter: BoardPresenter, board_config: BoardSection):
+def test_get_board_display(model: BoardModel, presenter: BoardPresenter, board_config: BoardConfig):
     board_config.set_value(board_config.Keys.BLINDFOLD_CHESS, "no")
     board_config.set_value(board_config.Keys.USE_UNICODE_PIECES, "no")
     board_config.set_value(board_config.Keys.SHOW_BOARD_COORDINATES, "yes")
@@ -143,7 +143,7 @@ def test_get_board_display(model: BoardModel, presenter: BoardPresenter, board_c
             }
 
 
-def test_get_file_labels(model: BoardModel, presenter: BoardPresenter, board_config: BoardSection):
+def test_get_file_labels(model: BoardModel, presenter: BoardPresenter, board_config: BoardConfig):
     board_config.set_value(board_config.Keys.SHOW_BOARD_COORDINATES, "yes")
     assert presenter.get_file_labels() == model.get_file_labels()
 
@@ -151,17 +151,17 @@ def test_get_file_labels(model: BoardModel, presenter: BoardPresenter, board_con
     assert presenter.get_file_labels() == ""
 
 
-def test_get_file_label_color(model: BoardModel, presenter: BoardPresenter, board_config: BoardSection):
+def test_get_file_label_color(model: BoardModel, presenter: BoardPresenter, board_config: BoardConfig):
     board_config.set_value(board_config.Keys.FILE_LABEL_COLOR, "yellow")
     assert presenter.get_file_label_color() == "yellow"
 
 
-def test_get_rank_label_color(model: BoardModel, presenter: BoardPresenter, board_config: BoardSection):
+def test_get_rank_label_color(model: BoardModel, presenter: BoardPresenter, board_config: BoardConfig):
     board_config.set_value(board_config.Keys.RANK_LABEL_COLOR, "purple")
     assert presenter.get_rank_label_color() == "purple"
 
 
-def test_get_rank_label(model: BoardModel, presenter: BoardPresenter, board_config: BoardSection):
+def test_get_rank_label(model: BoardModel, presenter: BoardPresenter, board_config: BoardConfig):
     # Test white orientation with board coordinates
     board_config.set_value(board_config.Keys.SHOW_BOARD_COORDINATES, "yes")
     for square in chess.SQUARES:
@@ -187,7 +187,7 @@ def test_get_rank_label(model: BoardModel, presenter: BoardPresenter, board_conf
             assert presenter.get_rank_label(square) == ""
 
 
-def test_is_square_start_of_rank(model: BoardModel, presenter: BoardPresenter, board_config: BoardSection):
+def test_is_square_start_of_rank(model: BoardModel, presenter: BoardPresenter, board_config: BoardConfig):
     # Test start of rank white orientation
     for square in chess.SQUARES:
         if chess.BB_SQUARES[square] & chess.BB_FILE_A:
@@ -204,7 +204,7 @@ def test_is_square_start_of_rank(model: BoardModel, presenter: BoardPresenter, b
             assert not presenter.is_square_start_of_rank(square)
 
 
-def test_is_square_end_of_rank(model: BoardModel, presenter: BoardPresenter, board_config: BoardSection):
+def test_is_square_end_of_rank(model: BoardModel, presenter: BoardPresenter, board_config: BoardConfig):
     # Test end of rank white orientation
     for square in chess.SQUARES:
         if chess.BB_SQUARES[square] & chess.BB_FILE_H:
@@ -221,7 +221,7 @@ def test_is_square_end_of_rank(model: BoardModel, presenter: BoardPresenter, boa
             assert not presenter.is_square_end_of_rank(square)
 
 
-def test_get_piece_str(model: BoardModel, presenter: BoardPresenter, board_config: BoardSection):
+def test_get_piece_str(model: BoardModel, presenter: BoardPresenter, board_config: BoardConfig):
     # Test unicode pieces
     board_config.set_value(board_config.Keys.BLINDFOLD_CHESS, "no")
     board_config.set_value(board_config.Keys.USE_UNICODE_PIECES, "yes")
@@ -247,7 +247,7 @@ def test_get_piece_str(model: BoardModel, presenter: BoardPresenter, board_confi
         assert presenter.get_piece_str(square) == ""
 
 
-def test_get_piece_display_color(model: BoardModel, presenter: BoardPresenter, board_config: BoardSection):
+def test_get_piece_display_color(model: BoardModel, presenter: BoardPresenter, board_config: BoardConfig):
     board_config.set_value(board_config.Keys.LIGHT_PIECE_COLOR, "gray")
     board_config.set_value(board_config.Keys.DARK_PIECE_COLOR, "navy")
 
@@ -268,7 +268,7 @@ def test_get_piece_display_color(model: BoardModel, presenter: BoardPresenter, b
             assert presenter.get_piece_display_color(piece) == ""
 
 
-def test_get_square_display_color(model: BoardModel, presenter: BoardPresenter, board_config: BoardSection):
+def test_get_square_display_color(model: BoardModel, presenter: BoardPresenter, board_config: BoardConfig):
     board_config.set_value(board_config.Keys.LIGHT_SQUARE_COLOR, "white")
     board_config.set_value(board_config.Keys.DARK_SQUARE_COLOR, "blue")
     board_config.set_value(board_config.Keys.SHOW_BOARD_HIGHLIGHTS, "yes")

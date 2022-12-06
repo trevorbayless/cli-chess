@@ -15,7 +15,7 @@
 
 from cli_chess.modules.material_difference import MaterialDifferenceModel, MaterialDifferencePresenter
 from cli_chess.modules.board import BoardModel
-from cli_chess.utils.config import BoardSection
+from cli_chess.utils.config import BoardConfig
 from chess import WHITE, BLACK
 from os import remove
 from unittest.mock import Mock
@@ -28,19 +28,19 @@ def model():
 
 
 @pytest.fixture
-def presenter(model: MaterialDifferenceModel, board_config: BoardSection, monkeypatch):
+def presenter(model: MaterialDifferenceModel, board_config: BoardConfig, monkeypatch):
     monkeypatch.setattr('cli_chess.modules.material_difference.material_difference_presenter.board_config', board_config)
     return MaterialDifferencePresenter(model)
 
 
 @pytest.fixture
 def board_config():
-    board_config = BoardSection("unit_test_config.ini")
+    board_config = BoardConfig("unit_test_config.ini")
     yield board_config
     remove(board_config.full_filename)
 
 
-def test_update(model: MaterialDifferenceModel, presenter: MaterialDifferencePresenter, board_config: BoardSection):
+def test_update(model: MaterialDifferenceModel, presenter: MaterialDifferencePresenter, board_config: BoardConfig):
     # Verify the update method is listening to model updates
     assert presenter.update in model.e_material_difference_model_updated.listeners
 
@@ -59,7 +59,7 @@ def test_update(model: MaterialDifferenceModel, presenter: MaterialDifferencePre
     presenter.view_lower.update.assert_called_with(view_lower_data)
 
 
-def test_format_diff_output(model: MaterialDifferenceModel, presenter: MaterialDifferencePresenter, board_config: BoardSection):
+def test_format_diff_output(model: MaterialDifferenceModel, presenter: MaterialDifferencePresenter, board_config: BoardConfig):
     assert presenter.format_diff_output(WHITE) == ""
     assert presenter.format_diff_output(BLACK) == ""
 

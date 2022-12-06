@@ -23,6 +23,7 @@ import configparser
 # TODO: Handle exceptions
 # TODO: Handle new config options on updates (do not overwrite full config)
 # TODO: Add a "force_update" to pull new values if they have been changed during runtime
+DEFAULT_CONFIG_FILENAME = "config.ini"
 
 
 def get_config_path() -> str:
@@ -36,7 +37,7 @@ def get_config_path() -> str:
 
 
 class BaseConfig:
-    def __init__(self, filename: str) -> None:
+    def __init__(self, filename: str = DEFAULT_CONFIG_FILENAME) -> None:
         """Default base class constructor"""
         self.file_path = get_config_path()
         self.full_filename = self.file_path + filename
@@ -118,7 +119,7 @@ class BaseConfig:
 
 
 class SectionBase(BaseConfig):
-    def __init__(self, filename: str, section_name: str, section_keys):
+    def __init__(self, section_name: str, section_keys, filename: str = DEFAULT_CONFIG_FILENAME):
         super().__init__(filename)
         self.section_name = section_name
         self.section_keys = section_keys
@@ -154,8 +155,12 @@ class SectionBase(BaseConfig):
         return super().get_key_boolean_value(self.section_name, key.name)
 
 
-class BoardSection(SectionBase):
-    """Creates and manages the "board" section of the config"""
+class BoardConfig(SectionBase):
+    """Creates and manages the "board" configuration. This configuration can
+       either live in its own file, or be appended as a section by using a
+       configuration filename that already exists (such as DEFAULT_CONFIG_FILENAME).
+       By default, this will be appended to the default configuration.
+    """
     class Keys(Enum):
         SHOW_BOARD_COORDINATES = {"name": "show_board_coordinates", "default": True}
         SHOW_BOARD_HIGHLIGHTS = {"name": "show_board_highlights", "default": True}
@@ -170,9 +175,9 @@ class BoardSection(SectionBase):
         LIGHT_PIECE_COLOR = {"name": "light_piece_color", "default": "white"}
         DARK_PIECE_COLOR = {"name": "dark_piece_color", "default": "black"}
 
-    def __init__(self, filename: str):
+    def __init__(self, filename: str = DEFAULT_CONFIG_FILENAME):
         self.e_board_config_updated = Event()
-        super().__init__(filename, "board", self.Keys)
+        super().__init__(section_name="board", section_keys=self.Keys, filename=filename)
 
     def write_config(self) -> None:
         """Writes to the configuration file"""
@@ -180,14 +185,18 @@ class BoardSection(SectionBase):
         self.e_board_config_updated.notify()
 
 
-class UiSection(SectionBase):
-    """Creates and manages the "ui" section of the config"""
+class UiConfig(SectionBase):
+    """Creates and manages the "ui" configuration. This configuration can
+       either live in its own file, or be appended as a section by using a
+       configuration filename that already exists (such as DEFAULT_CONFIG_FILENAME).
+       By default, this will be appended to the default configuration.
+    """
     class Keys(Enum):
         ZEN_MODE = {"name": "zen_mode", "default": False}
 
-    def __init__(self, filename: str):
+    def __init__(self, filename: str = DEFAULT_CONFIG_FILENAME):
         self.e_ui_config_updated = Event()
-        super().__init__(filename, "ui", self.Keys)
+        super().__init__(section_name="ui", section_keys=self.Keys, filename=filename)
 
     def write_config(self) -> None:
         """Writes to the configuration file"""
@@ -195,14 +204,18 @@ class UiSection(SectionBase):
         self.e_ui_config_updated.notify()
 
 
-class EngineSection(SectionBase):
-    """Creates and manages the "engine" section of the config"""
+class EngineConfig(SectionBase):
+    """Creates and manages the "engine" configuration. This configuration can
+       either live in its own file, or be appended as a section by using a
+       configuration filename that already exists (such as DEFAULT_CONFIG_FILENAME).
+       By default, this will be appended to the default configuration.
+    """
     class Keys(Enum):
         ENGINE_PATH = {"name": "engine_path", "default": ""}
 
-    def __init__(self, filename: str):
+    def __init__(self, filename: str = DEFAULT_CONFIG_FILENAME):
         self.e_engine_config_updated = Event()
-        super().__init__(filename, "engine", self.Keys)
+        super().__init__(section_name="engine", section_keys=self.Keys, filename=filename)
 
     def write_config(self) -> None:
         """Writes to the configuration file"""
@@ -210,15 +223,19 @@ class EngineSection(SectionBase):
         self.e_engine_config_updated.notify()
 
 
-class LichessSection(SectionBase):
-    """Creates and manages the "lichess" section of the config"""
+class LichessConfig(SectionBase):
+    """Creates and manages the "lichess" configuration. This configuration can
+       either live in its own file, or be appended as a section by using a
+       configuration filename that already exists (such as DEFAULT_CONFIG_FILENAME).
+       By default, this will be appended to the default configuration.
+    """
     class Keys(Enum):
         API_TOKEN = {"name": "api_token", "default": ""}
         USERNAME = {"name": "username", "default": ""}
 
-    def __init__(self, filename: str):
+    def __init__(self, filename: str = DEFAULT_CONFIG_FILENAME):
         self.e_lichess_config_updated = Event()
-        super().__init__(filename, "lichess", self.Keys)
+        super().__init__(section_name="lichess", section_keys=self.Keys, filename=filename)
         redact_from_logs(self.get_value(self.Keys.API_TOKEN))
 
     def write_config(self) -> None:
@@ -227,8 +244,7 @@ class LichessSection(SectionBase):
         self.e_lichess_config_updated.notify()
 
 
-CONFIG_FILENAME = "config.ini"
-board_config = BoardSection(CONFIG_FILENAME)
-ui_config = UiSection(CONFIG_FILENAME)
-engine_config = EngineSection(CONFIG_FILENAME)
-lichess_config = LichessSection(CONFIG_FILENAME)
+board_config = BoardConfig()
+ui_config = UiConfig()
+engine_config = EngineConfig()
+lichess_config = LichessConfig()
