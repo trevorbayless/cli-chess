@@ -243,6 +243,15 @@ class LichessConfig(SectionBase):
         super().write_config()
         self.e_lichess_config_updated.notify()
 
+    def set_value(self, key, value: str) -> None:
+        """Set a keys value in the configuration file. Overrides the base
+           method to allow for API token log redaction if the value being
+           set is an API token.
+        """
+        if key == self.Keys.API_TOKEN and value:
+            redact_from_logs(value)
+        super().set_key_value(self.section_name, key.name, value)
+
 
 board_config = BoardConfig()
 ui_config = UiConfig()
