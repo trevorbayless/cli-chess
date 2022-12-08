@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from cli_chess.utils.logging import log, redact_from_logs
+from cli_chess.utils.logging import log
 from cli_chess.utils.config import lichess_config
 from cli_chess.utils.event import Event
 from berserk import TokenSession, clients
