@@ -14,7 +14,11 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from __future__ import annotations
-from cli_chess.menus import MenuView, MenuPresenter
+from cli_chess.menus import MenuPresenter
+from cli_chess.menus.main_menu import MainMenuView
+from cli_chess.menus.play_online_menu import PlayOnlineMenuModel, PlayOnlineMenuPresenter
+from cli_chess.menus.play_offline_menu import PlayOfflineMenuModel, PlayOfflineMenuPresenter
+from cli_chess.menus.settings_menu import SettingsMenuModel, SettingsMenuPresenter
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from cli_chess.menus.main_menu import MainMenuModel
@@ -24,6 +28,10 @@ class MainMenuPresenter(MenuPresenter):
     """Defines the Main Menu"""
     def __init__(self, model: MainMenuModel):
         self.model = model
-        self.view = MenuView(self, container_width=15)  # Todo: Get and set to longest option length?
+        self.play_online_menu_presenter = PlayOnlineMenuPresenter(PlayOnlineMenuModel())
+        self.play_offline_menu_presenter = PlayOfflineMenuPresenter(PlayOfflineMenuModel())
+        self.settings_menu_presenter = SettingsMenuPresenter(SettingsMenuModel())
+        self.view = MainMenuView(self)
         self.selection = self.model.get_menu_options()[0].option
+
         super().__init__(self.model, self.view)

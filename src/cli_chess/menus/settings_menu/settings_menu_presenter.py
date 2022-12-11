@@ -14,7 +14,9 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from __future__ import annotations
-from cli_chess.menus import MenuView, MenuPresenter
+from cli_chess.menus import MenuPresenter
+from cli_chess.menus.settings_menu import SettingsMenuView
+from cli_chess.modules.token_manager import TokenManagerModel, TokenManagerPresenter
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from cli_chess.menus.settings_menu import SettingsMenuModel
@@ -24,5 +26,7 @@ class SettingsMenuPresenter(MenuPresenter):
     """Defines the Main Menu"""
     def __init__(self, model: SettingsMenuModel):
         self.model = model
-        self.view = MenuView(self, container_width=27)
+        self.token_manger_presenter = TokenManagerPresenter(TokenManagerModel())
+        self.view = SettingsMenuView(self)
+
         super().__init__(self.model, self.view)

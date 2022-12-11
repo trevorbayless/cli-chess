@@ -14,7 +14,9 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from __future__ import annotations
-from cli_chess.menus import MenuView, MenuPresenter
+from cli_chess.menus.play_offline_menu import PlayOfflineMenuView
+from cli_chess.menus.vs_computer_menu import VsComputerMenuModel, VsComputerMenuPresenter
+from cli_chess.menus import MenuPresenter
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from cli_chess.menus.play_offline_menu import PlayOfflineMenuModel
@@ -24,5 +26,7 @@ class PlayOfflineMenuPresenter(MenuPresenter):
     """Defines the Main Menu"""
     def __init__(self, model: PlayOfflineMenuModel):
         self.model = model
-        self.view = MenuView(self, container_width=18)  # Todo: Get and set to longest option length?
+        self.vs_computer_menu_presenter = VsComputerMenuPresenter(VsComputerMenuModel())
+        self.view = PlayOfflineMenuView(self)
+
         super().__init__(self.model, self.view)

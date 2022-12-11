@@ -22,12 +22,12 @@ from prompt_toolkit.styles import Style
 from prompt_toolkit.output.color_depth import ColorDepth
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from cli_chess.core.main import MainPresenter
+    from cli_chess.core.startup import StartupPresenter
 
 
 class StartupView:
     """Starts the application with the initial layout"""
-    def __init__(self, presenter: MainPresenter):
+    def __init__(self, presenter: StartupPresenter):
         self.app = DummyApplication()
         self.presenter = presenter
 
