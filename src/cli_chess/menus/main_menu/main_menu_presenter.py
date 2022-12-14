@@ -15,7 +15,7 @@
 
 from __future__ import annotations
 from cli_chess.menus import MenuPresenter
-from cli_chess.menus.main_menu import MainMenuView
+from cli_chess.menus.main_menu import MainMenuView, MainMenuOptions
 from cli_chess.menus.play_online_menu import PlayOnlineMenuModel, PlayOnlineMenuPresenter
 from cli_chess.menus.play_offline_menu import PlayOfflineMenuModel, PlayOfflineMenuPresenter
 from cli_chess.menus.settings_menu import SettingsMenuModel, SettingsMenuPresenter

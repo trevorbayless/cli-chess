@@ -19,6 +19,8 @@ from cli_chess.menus.play_offline_menu import PlayOfflineMenuOptions
 from prompt_toolkit.layout import Container, Window, FormattedTextControl, ConditionalContainer, VSplit, HSplit
 from prompt_toolkit.filters import Condition, is_done
 from prompt_toolkit.widgets import Box
+from prompt_toolkit.formatted_text import StyleAndTextTuples
+from prompt_toolkit.key_binding import KeyBindings, ConditionalKeyBindings
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from cli_chess.menus.play_offline_menu import PlayOfflineMenuPresenter
@@ -45,8 +47,22 @@ class PlayOfflineMenuView(MenuView):
                     filter=~is_done
                     & Condition(lambda: self.presenter.selection == PlayOfflineMenuOptions.PLAY_BOTH_SIDES)
                 ),
-            ]),
+            ])
         ])
+
+    def get_function_bar_fragments(self) -> StyleAndTextTuples:
+        """Returns the appropriate function bar fragments based on menu item selection"""
+        fragments: StyleAndTextTuples = []
+        if self.presenter.selection == PlayOfflineMenuOptions.VS_COMPUTER:
+            fragments = self.presenter.vs_computer_menu_presenter.view.get_function_bar_fragments()
+        return fragments
+
+    def get_function_bar_key_bindings(self) -> ConditionalKeyBindings:
+        """Returns the appropriate function bar key bindings based on menu item selection"""
+        return ConditionalKeyBindings(
+            self.presenter.vs_computer_menu_presenter.view.get_function_bar_key_bindings(),
+            filter=Condition(lambda: self.presenter.selection == PlayOfflineMenuOptions.VS_COMPUTER)
+        )
 
     def __pt_container__(self) -> Container:
         return self._play_offline_menu_container

@@ -14,7 +14,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from __future__ import annotations
-from cli_chess.menus.play_offline_menu import PlayOfflineMenuView
+from cli_chess.menus.play_offline_menu import PlayOfflineMenuView, PlayOfflineMenuOptions
 from cli_chess.menus.vs_computer_menu import VsComputerMenuModel, VsComputerMenuPresenter
 from cli_chess.menus import MenuPresenter
 from typing import TYPE_CHECKING
@@ -28,5 +28,6 @@ class PlayOfflineMenuPresenter(MenuPresenter):
         self.model = model
         self.vs_computer_menu_presenter = VsComputerMenuPresenter(VsComputerMenuModel())
         self.view = PlayOfflineMenuView(self)
+        self.selection = self.model.get_menu_options()[0].option
 
         super().__init__(self.model, self.view)

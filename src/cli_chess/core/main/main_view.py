@@ -16,12 +16,12 @@
 from __future__ import annotations
 from cli_chess.__metadata__ import __version__
 from cli_chess.utils.ui_common import handle_mouse_click, exit_app
-from prompt_toolkit.layout import Window, FormattedTextControl, VSplit, HSplit, VerticalAlign, WindowAlign, D
+from prompt_toolkit.layout import Window, FormattedTextControl, ConditionalContainer, VSplit, HSplit, VerticalAlign, WindowAlign, D
 from prompt_toolkit.formatted_text import StyleAndTextTuples
 from prompt_toolkit.key_binding import KeyBindings, merge_key_bindings
 from prompt_toolkit.key_binding.bindings.focus import focus_next, focus_previous
 from prompt_toolkit.keys import Keys
-from prompt_toolkit.application import get_app
+from prompt_toolkit.filters import to_filter
 from prompt_toolkit.widgets import Box
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -31,39 +31,42 @@ if TYPE_CHECKING:
 class MainView:
     def __init__(self, presenter: MainPresenter):
         self.presenter = presenter
+        self._error_label = FormattedTextControl(text="", style="class:label.error.banner", show_cursor=False)
+        self._error_container = self._create_error_container()
         self._function_bar_container = self._create_function_bar()
         self._container = self._create_container()
 
     def _create_container(self):
-        """Creates the container for the menu"""
+        """Creates the container for the main view"""
         return HSplit([
             VSplit([
                 Box(self.presenter.main_menu_presenter.view, padding=0, padding_right=1),
             ]),
             HSplit([
+                self._error_container,
                 self._function_bar_container
             ], align=VerticalAlign.BOTTOM)
         ], key_bindings=merge_key_bindings([self._container_key_bindings(), self._create_function_bar_key_bindings()]))
 
-    @staticmethod
-    def _create_function_bar() -> VSplit:
+    def _create_error_container(self) -> ConditionalContainer:
+        """Create the container used to display errors"""
+        return ConditionalContainer(
+            Window(self._error_label, always_hide_cursor=True, height=D(max=1)),
+            filter=to_filter(self._error_label.text == "")
+        )
+
+    def _create_function_bar(self) -> VSplit:
         """Create the conditional function bar"""
         def _get_function_bar_fragments() -> StyleAndTextTuples:
-            fragments: StyleAndTextTuples = []
-
-            ##
-            # Always included fragments
-            ##
-            @handle_mouse_click
-            def handle_quit() -> None:
-                get_app().exit()
+            fragments = self.presenter.main_menu_presenter.view.get_function_bar_fragments()
+            self._error_label.text = ""
 
             if fragments:
                 fragments.append(("class:function_bar.spacer", " "))
 
             fragments.extend([
-                ("class:function_bar.key", "F10", handle_quit),
-                ("class:function_bar.label", f"{'Quit':<14}", handle_quit)
+                ("class:function_bar.key", "F10", handle_mouse_click(exit_app)),
+                ("class:function_bar.label", f"{'Quit':<14}", handle_mouse_click(exit_app))
             ])
 
             return fragments
@@ -73,12 +76,15 @@ class MainView:
             Window(FormattedTextControl(f"cli-chess {__version__}"), align=WindowAlign.RIGHT)
         ], height=D(max=1))
 
-    @staticmethod
-    def _create_function_bar_key_bindings() -> KeyBindings:
+    def _create_function_bar_key_bindings(self) -> "_MergedKeyBindings":
         """Creates the key bindings for the function bar"""
-        kb = KeyBindings()
-        kb.add(Keys.F10)(exit_app)
-        return kb
+        main_menu_key_bindings = self.presenter.main_menu_presenter.view.get_function_bar_key_bindings()
+
+        # Always included key bindings
+        always_included_bindings = KeyBindings()
+        always_included_bindings.add(Keys.F10)(exit_app)
+
+        return merge_key_bindings([main_menu_key_bindings, always_included_bindings])
 
     @staticmethod
     def _container_key_bindings() -> KeyBindings:
@@ -90,8 +96,15 @@ class MainView:
         bindings.add(Keys.Left)(focus_previous)
         bindings.add(Keys.ControlB)(focus_previous)
         bindings.add(Keys.BackTab)(focus_previous)
-
         return bindings
+
+    def print_error(self, err: str) -> None:
+        """Print the passed in error to the error container"""
+        self._error_label.text = err
+
+    def clear_error(self) -> None:
+        """Clear any errors displayed in the error container"""
+        self._error_label.text = ""
 
     def __pt_container__(self):
         return self._container

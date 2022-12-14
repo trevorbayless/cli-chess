@@ -17,6 +17,10 @@ from __future__ import annotations
 from cli_chess.menus import MenuView
 from cli_chess.menus.main_menu import MainMenuOptions
 from prompt_toolkit.layout import Container, Window, FormattedTextControl, ConditionalContainer, VSplit, HSplit
+from prompt_toolkit.key_binding import KeyBindings, ConditionalKeyBindings
+from prompt_toolkit.keys import Keys
+from prompt_toolkit.formatted_text import StyleAndTextTuples
+from prompt_toolkit.key_binding.bindings.focus import focus_next, focus_previous
 from prompt_toolkit.filters import Condition, is_done
 from prompt_toolkit.widgets import Box
 from typing import TYPE_CHECKING
@@ -56,7 +60,34 @@ class MainMenuView(MenuView):
                     & Condition(lambda: self.presenter.selection == MainMenuOptions.ABOUT)
                 )
             ]),
-        ])
+        ], key_bindings=self._container_key_bindings())
+
+    @staticmethod
+    def _container_key_bindings() -> KeyBindings:
+        """Creates the key bindings for this container"""
+        bindings = KeyBindings()
+        bindings.add(Keys.Right)(focus_next)
+        bindings.add(Keys.ControlF)(focus_next)
+        bindings.add(Keys.Tab)(focus_next)
+        bindings.add(Keys.Left)(focus_previous)
+        bindings.add(Keys.ControlB)(focus_previous)
+        bindings.add(Keys.BackTab)(focus_previous)
+        return bindings
+
+    def get_function_bar_fragments(self) -> StyleAndTextTuples:
+        """Returns the appropriate function bar fragments based on menu item selection"""
+        fragments: StyleAndTextTuples = []
+        if self.presenter.selection == MainMenuOptions.PLAY_OFFLINE:
+            fragments = self.presenter.play_offline_menu_presenter.view.get_function_bar_fragments()
+        return fragments
+
+    def get_function_bar_key_bindings(self) -> ConditionalKeyBindings:
+        """Returns the appropriate function bar key bindings based on menu item selection"""
+        kb = ConditionalKeyBindings(
+            self.presenter.play_offline_menu_presenter.view.get_function_bar_key_bindings(),
+            filter=Condition(lambda: self.presenter.selection == MainMenuOptions.PLAY_OFFLINE)
+        )
+        return kb
 
     def __pt_container__(self) -> Container:
         return self.main_menu_container

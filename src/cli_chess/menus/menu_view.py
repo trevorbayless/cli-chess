@@ -84,13 +84,13 @@ class MenuView:
 
         @bindings.add(Keys.Up)
         @bindings.add(Keys.ControlP)
-        def _(event):
+        def _(event): # noqa
             """Go to the previous menu option"""
             self.select_previous_option()
 
         @bindings.add(Keys.Down)
         @bindings.add(Keys.ControlN)
-        def _(event):
+        def _(event): # noqa
             self.select_next_option()
 
         return bindings
@@ -166,7 +166,7 @@ class MultiValueMenuView(MenuView):
 
         @bindings.add(Keys.Enter, eager=True)
         @bindings.add(" ", eager=True)
-        def _(event):
+        def _(event): # noqa
             """Handle Enter/Space key press"""
             self.cycle_value(self.selected_option)
 

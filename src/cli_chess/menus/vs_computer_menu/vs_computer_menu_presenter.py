@@ -13,8 +13,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from cli_chess.menus.vs_computer_menu import VsComputerMenuModel, VsComputerMenuOptions
-from cli_chess.menus import MultiValueMenuPresenter, MultiValueMenuView
+from cli_chess.menus.vs_computer_menu import VsComputerMenuModel, VsComputerMenuView, VsComputerMenuOptions
+from cli_chess.menus import MultiValueMenuPresenter
 from cli_chess.modules.game_options import OfflineGameOptions
 from cli_chess.core.game.offline_game import start_offline_game
 
@@ -23,7 +23,7 @@ class VsComputerMenuPresenter(MultiValueMenuPresenter):
     """Defines the VsComputer menu"""
     def __init__(self, model: VsComputerMenuModel):
         self.model = model
-        self.view = MultiValueMenuView(self, container_width=40, column_width=22)
+        self.view = VsComputerMenuView(self)
         super().__init__(self.model, self.view)
 
     def value_cycled_handler(self, selected_option: int):
