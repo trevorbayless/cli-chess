@@ -15,6 +15,7 @@
 
 from __future__ import annotations
 from cli_chess.utils import default
+from prompt_toolkit.patch_stdout import patch_stdout
 from prompt_toolkit.layout import Layout, Container
 from prompt_toolkit.application import Application, DummyApplication, get_app
 from prompt_toolkit import print_formatted_text as pt_print, HTML
@@ -48,3 +49,8 @@ class StartupView:
         """
         if not get_app().is_running:
             pt_print(HTML(f"<red>{title}:</red> {msg}"))
+
+    def run(self) -> None:
+        """Runs the main application"""
+        with patch_stdout():
+            self.app.run()

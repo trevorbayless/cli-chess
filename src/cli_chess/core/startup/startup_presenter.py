@@ -43,4 +43,4 @@ class StartupPresenter:
 
     def run(self):
         """Starts the main application"""
-        self.view.app.run()
+        self.view.run()
