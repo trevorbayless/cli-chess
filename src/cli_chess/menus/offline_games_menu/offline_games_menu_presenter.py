@@ -14,12 +14,12 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from __future__ import annotations
-from cli_chess.menus.play_offline_menu import PlayOfflineMenuView, PlayOfflineMenuOptions
+from cli_chess.menus.offline_games_menu import PlayOfflineMenuView
 from cli_chess.menus.vs_computer_menu import VsComputerMenuModel, VsComputerMenuPresenter
 from cli_chess.menus import MenuPresenter
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from cli_chess.menus.play_offline_menu import PlayOfflineMenuModel
+    from cli_chess.menus.offline_games_menu import PlayOfflineMenuModel
 
 
 class PlayOfflineMenuPresenter(MenuPresenter):

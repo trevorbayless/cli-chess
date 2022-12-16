@@ -15,15 +15,15 @@
 
 from __future__ import annotations
 from cli_chess.menus import MenuView
-from cli_chess.menus.play_offline_menu import PlayOfflineMenuOptions
+from cli_chess.menus.offline_games_menu import PlayOfflineMenuOptions
 from prompt_toolkit.layout import Container, Window, FormattedTextControl, ConditionalContainer, VSplit, HSplit
 from prompt_toolkit.filters import Condition, is_done
 from prompt_toolkit.widgets import Box
 from prompt_toolkit.formatted_text import StyleAndTextTuples
-from prompt_toolkit.key_binding import KeyBindings, ConditionalKeyBindings
+from prompt_toolkit.key_binding import ConditionalKeyBindings
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from cli_chess.menus.play_offline_menu import PlayOfflineMenuPresenter
+    from cli_chess.menus.offline_games_menu import PlayOfflineMenuPresenter
 
 
 class PlayOfflineMenuView(MenuView):
