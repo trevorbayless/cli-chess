@@ -3,5 +3,5 @@ from .menu_model import MenuModel, MultiValueMenuModel
 from .menu_view import MenuView, MultiValueMenuView
 from .menu_presenter import MenuPresenter, MultiValueMenuPresenter
 from .main_menu import MainMenuPresenter
-from .play_offline_menu import PlayOfflineMenuPresenter
+from .offline_games_menu import OfflineGamesMenuPresenter
 from .vs_computer_menu import VsComputerMenuPresenter

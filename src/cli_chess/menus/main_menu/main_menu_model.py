@@ -18,8 +18,8 @@ from enum import Enum
 
 
 class MainMenuOptions(Enum):
-    PLAY_ONLINE = "Play Online"
-    PLAY_OFFLINE = "Play Offline"
+    ONLINE_GAMES = "Online Games"
+    OFFLINE_GAMES = "Offline Games"
     SETTINGS = "Settings"
     ABOUT = "About"
     QUIT = "Quit"
@@ -34,10 +34,10 @@ class MainMenuModel(MenuModel):
     def _create_menu() -> MenuCategory:
         """Create the menu category with options"""
         menu_options = [
-            MenuOption(MainMenuOptions.PLAY_ONLINE, "Play online using Lichess.org"),
-            MenuOption(MainMenuOptions.PLAY_OFFLINE, "Play offline against the computer"),
+            MenuOption(MainMenuOptions.ONLINE_GAMES, "Play games online using Lichess.org"),
+            MenuOption(MainMenuOptions.OFFLINE_GAMES, "Play games offline"),
             MenuOption(MainMenuOptions.SETTINGS, "Modify cli-chess settings"),
-            MenuOption(MainMenuOptions.ABOUT, "Get information about cli-chess"),
+            MenuOption(MainMenuOptions.ABOUT, ""),
         ]
 
         return MenuCategory("Main Menu", menu_options)

@@ -14,20 +14,20 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from __future__ import annotations
-from cli_chess.menus.offline_games_menu import PlayOfflineMenuView
+from cli_chess.menus.offline_games_menu import OfflineGamesMenuView
 from cli_chess.menus.vs_computer_menu import VsComputerMenuModel, VsComputerMenuPresenter
 from cli_chess.menus import MenuPresenter
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from cli_chess.menus.offline_games_menu import PlayOfflineMenuModel
+    from cli_chess.menus.offline_games_menu import OfflineGamesMenuModel
 
 
-class PlayOfflineMenuPresenter(MenuPresenter):
+class OfflineGamesMenuPresenter(MenuPresenter):
     """Defines the Main Menu"""
-    def __init__(self, model: PlayOfflineMenuModel):
+    def __init__(self, model: OfflineGamesMenuModel):
         self.model = model
         self.vs_computer_menu_presenter = VsComputerMenuPresenter(VsComputerMenuModel())
-        self.view = PlayOfflineMenuView(self)
+        self.view = OfflineGamesMenuView(self)
         self.selection = self.model.get_menu_options()[0].option
 
         super().__init__(self.model, self.view)

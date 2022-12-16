@@ -40,14 +40,14 @@ class MainMenuView(MenuView):
             VSplit([
                 Box(self._container, padding=0, padding_right=1),
                 ConditionalContainer(
-                    Box(self.presenter.play_online_menu_presenter.view, padding=0, padding_right=1),
+                    Box(self.presenter.online_games_menu_presenter.view, padding=0, padding_right=1),
                     filter=~is_done
-                    & Condition(lambda: self.presenter.selection == MainMenuOptions.PLAY_ONLINE)
+                    & Condition(lambda: self.presenter.selection == MainMenuOptions.ONLINE_GAMES)
                 ),
                 ConditionalContainer(
-                    Box(self.presenter.play_offline_menu_presenter.view, padding=0, padding_right=1),
+                    Box(self.presenter.offline_games_menu_presenter.view, padding=0, padding_right=1),
                     filter=~is_done
-                    & Condition(lambda: self.presenter.selection == MainMenuOptions.PLAY_OFFLINE)
+                    & Condition(lambda: self.presenter.selection == MainMenuOptions.OFFLINE_GAMES)
                 ),
                 ConditionalContainer(
                     Box(self.presenter.settings_menu_presenter.view, padding=0, padding_right=1),
@@ -77,15 +77,15 @@ class MainMenuView(MenuView):
     def get_function_bar_fragments(self) -> StyleAndTextTuples:
         """Returns the appropriate function bar fragments based on menu item selection"""
         fragments: StyleAndTextTuples = []
-        if self.presenter.selection == MainMenuOptions.PLAY_OFFLINE:
-            fragments = self.presenter.play_offline_menu_presenter.view.get_function_bar_fragments()
+        if self.presenter.selection == MainMenuOptions.OFFLINE_GAMES:
+            fragments = self.presenter.offline_games_menu_presenter.view.get_function_bar_fragments()
         return fragments
 
     def get_function_bar_key_bindings(self) -> ConditionalKeyBindings:
         """Returns the appropriate function bar key bindings based on menu item selection"""
         kb = ConditionalKeyBindings(
-            self.presenter.play_offline_menu_presenter.view.get_function_bar_key_bindings(),
-            filter=Condition(lambda: self.presenter.selection == MainMenuOptions.PLAY_OFFLINE)
+            self.presenter.offline_games_menu_presenter.view.get_function_bar_key_bindings(),
+            filter=Condition(lambda: self.presenter.selection == MainMenuOptions.OFFLINE_GAMES)
         )
         return kb
 

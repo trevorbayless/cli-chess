@@ -17,21 +17,22 @@ from cli_chess.menus import MenuModel, MenuOption, MenuCategory
 from enum import Enum
 
 
-class PlayOfflineMenuOptions(Enum):
+class OfflineGamesMenuOptions(Enum):
     VS_COMPUTER = "Play vs Computer"
     PLAY_BOTH_SIDES = "Play both sides"
 
 
-class PlayOfflineMenuModel(MenuModel):
+class OfflineGamesMenuModel(MenuModel):
     def __init__(self):
         self.menu = self._create_menu()
         super().__init__(self.menu)
 
-    def _create_menu(self) -> MenuCategory:
+    @staticmethod
+    def _create_menu() -> MenuCategory:
         """Create the menu options"""
         menu_options = [
-            MenuOption(PlayOfflineMenuOptions.VS_COMPUTER, "Play offline against the computer"),
-            MenuOption(PlayOfflineMenuOptions.PLAY_BOTH_SIDES, "You play both sides"),
+            MenuOption(OfflineGamesMenuOptions.VS_COMPUTER, "Play offline against the computer"),
+            MenuOption(OfflineGamesMenuOptions.PLAY_BOTH_SIDES, "You play both sides"),
         ]
 
         return MenuCategory("Offline Games", menu_options)
