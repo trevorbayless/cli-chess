@@ -14,9 +14,6 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from __future__ import annotations
-from cli_chess.modules.board import BoardView
-from cli_chess.modules.move_list import MoveListView
-from cli_chess.modules.material_difference import MaterialDifferenceView
 from cli_chess.utils import log
 from prompt_toolkit.formatted_text import HTML
 from prompt_toolkit.widgets import TextArea
@@ -27,6 +24,9 @@ from prompt_toolkit.filters import to_filter
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from cli_chess.core.game import GamePresenterBase
+    from cli_chess.modules.board import BoardView
+    from cli_chess.modules.move_list import MoveListView
+    from cli_chess.modules.material_difference import MaterialDifferenceView
 
 
 class GameViewBase:

@@ -13,10 +13,14 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from cli_chess.menus.vs_computer_menu import VsComputerMenuModel, VsComputerMenuView, VsComputerMenuOptions
+from __future__ import annotations
+from cli_chess.menus.vs_computer_menu import VsComputerMenuView, VsComputerMenuOptions
 from cli_chess.menus import MultiValueMenuPresenter
 from cli_chess.modules.game_options import OfflineGameOptions
 from cli_chess.core.game.offline_game import start_offline_game
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from cli_chess.menus.vs_computer_menu import VsComputerMenuModel
 
 
 class VsComputerMenuPresenter(MultiValueMenuPresenter):
@@ -36,8 +40,7 @@ class VsComputerMenuPresenter(MultiValueMenuPresenter):
             self.model.show_elo_selection_option(selected_value == "Yes")
 
     def handle_start_game(self) -> None:
-        # Todo: I don't like this being hidden away in the menu presenter
-        """Handle starting the game"""
+        """Starts the game using the currently selected menu values"""
         game_parameters = self._create_dict_of_selected_values()
         start_offline_game(game_parameters)
 
