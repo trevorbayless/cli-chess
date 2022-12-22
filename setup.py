@@ -20,9 +20,9 @@ metadata_file = open("src/cli_chess/__metadata__.py").read()
 metadata = dict(findall(r'__(\w*)__\s*=\s*"([^"]+)"', metadata_file))
 
 requirements = [
-    "chess>=1.9.3",
+    "chess>=1.9.4",
     "berserk-downstream>=0.11.10",
-    "prompt-toolkit>=3.0.33"
+    "prompt-toolkit>=3.0.36"
 ]
 
 dev_requirements = {
