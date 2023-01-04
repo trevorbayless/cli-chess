@@ -1,4 +1,4 @@
-# Copyright (C) 2021-2022 Trevor Bayless <trevorbayless1@gmail.com>
+# Copyright (C) 2021-2023 Trevor Bayless <trevorbayless1@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -17,7 +17,7 @@ from __future__ import annotations
 from cli_chess.menus import MenuView
 from cli_chess.menus.main_menu import MainMenuOptions
 from prompt_toolkit.layout import Container, Window, FormattedTextControl, ConditionalContainer, VSplit, HSplit
-from prompt_toolkit.key_binding import KeyBindings, ConditionalKeyBindings
+from prompt_toolkit.key_binding import KeyBindings, ConditionalKeyBindings, merge_key_bindings
 from prompt_toolkit.keys import Keys
 from prompt_toolkit.formatted_text import StyleAndTextTuples
 from prompt_toolkit.key_binding.bindings.focus import focus_next, focus_previous
@@ -77,17 +77,24 @@ class MainMenuView(MenuView):
     def get_function_bar_fragments(self) -> StyleAndTextTuples:
         """Returns the appropriate function bar fragments based on menu item selection"""
         fragments: StyleAndTextTuples = []
-        if self.presenter.selection == MainMenuOptions.OFFLINE_GAMES:
+        if self.presenter.selection == MainMenuOptions.ONLINE_GAMES:
+            fragments = self.presenter.online_games_menu_presenter.view.get_function_bar_fragments()
+        elif self.presenter.selection == MainMenuOptions.OFFLINE_GAMES:
             fragments = self.presenter.offline_games_menu_presenter.view.get_function_bar_fragments()
         return fragments
 
-    def get_function_bar_key_bindings(self) -> ConditionalKeyBindings:
+    def get_function_bar_key_bindings(self) -> "_MergedKeyBindings":
         """Returns the appropriate function bar key bindings based on menu item selection"""
-        kb = ConditionalKeyBindings(
+        online_games_kb = ConditionalKeyBindings(
+            self.presenter.online_games_menu_presenter.view.get_function_bar_key_bindings(),
+            filter=Condition(lambda: self.presenter.selection == MainMenuOptions.ONLINE_GAMES)
+        )
+
+        offline_games_kb = ConditionalKeyBindings(
             self.presenter.offline_games_menu_presenter.view.get_function_bar_key_bindings(),
             filter=Condition(lambda: self.presenter.selection == MainMenuOptions.OFFLINE_GAMES)
         )
-        return kb
+        return merge_key_bindings([online_games_kb, offline_games_kb])
 
     def __pt_container__(self) -> Container:
         return self.main_menu_container

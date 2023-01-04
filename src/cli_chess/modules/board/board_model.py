@@ -1,4 +1,4 @@
-# Copyright (C) 2021-2022 Trevor Bayless <trevorbayless1@gmail.com>
+# Copyright (C) 2021-2023 Trevor Bayless <trevorbayless1@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -34,14 +34,26 @@ class BoardModel:
         self.e_successful_move_made = Event()
 
     @staticmethod
-    def _initialize_board(variant, fen) -> chess.Board:
-        """Initializes and returns the main board object"""
+    def _initialize_board(variant: str, fen: str):
+        """Initializes the main board object"""
         if variant == "chess960":
-            return chess.Board.from_chess960_pos(randint(0, 959))
+            if fen:
+                return chess.Board(fen, chess960=True)
+            else:
+                return chess.Board.from_chess960_pos(randint(0, 959))
         else:
             if fen:
                 return chess.variant.find_variant(variant)(fen)
             return chess.variant.find_variant(variant)()
+
+    def reinitialize_board(self, variant: str, fen: str = ""):
+        """Reinitialized the existing board object to the new variant/fen"""
+        try:
+            self.board = self._initialize_board(variant, fen)
+            self.e_board_model_updated.notify()
+        except ValueError as e:
+            log.error(f"Error while trying to reinitialize the board: {e}")
+            raise
 
     def make_move(self, move: str, human=True) -> None:
         """Attempts to make a move on the board.
@@ -96,7 +108,7 @@ class BoardModel:
         log.debug(f"board orientation set (orientation = {color}")
 
     def set_fen(self, fen: str) -> None:
-        """Sets the board FEN. Raises ValueError if syntactically invalid"""
+        """Sets the board FEN. Raises ValueError if syntactically invalid."""
         try:
             self.board.set_fen(fen)
             self.initial_fen = fen

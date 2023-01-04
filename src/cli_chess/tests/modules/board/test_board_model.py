@@ -1,4 +1,4 @@
-# Copyright (C) 2021-2022 Trevor Bayless <trevorbayless1@gmail.com>
+# Copyright (C) 2021-2023 Trevor Bayless <trevorbayless1@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -60,6 +60,23 @@ def test_initialize_board():
     # Test an invalid variant
     with pytest.raises(ValueError):
         BoardModel(variant="shogi")
+
+
+def test_reinitialize_board(model: BoardModel, board_updated_listener: Mock):
+    assert model.board.uci_variant == "chess"
+    board_updated_listener.assert_not_called()
+
+    # Test invalid initialization
+    with pytest.raises(ValueError):
+        model.reinitialize_board("checkers")
+
+    assert model.board.uci_variant == "chess"
+    board_updated_listener.assert_not_called()
+
+    # Test valid initialization
+    model.reinitialize_board("Crazyhouse")
+    assert model.board.uci_variant == "crazyhouse"
+    board_updated_listener.assert_called()
 
 
 def test_make_move(model: BoardModel, board_updated_listener: Mock, successful_move_listener: Mock):

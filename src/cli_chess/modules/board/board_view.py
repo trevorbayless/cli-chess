@@ -1,4 +1,4 @@
-# Copyright (C) 2021-2022 Trevor Bayless <trevorbayless1@gmail.com>
+# Copyright (C) 2021-2023 Trevor Bayless <trevorbayless1@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,6 +16,7 @@
 from __future__ import annotations
 from prompt_toolkit.layout import Window, FormattedTextControl, D
 from prompt_toolkit.formatted_text import HTML
+from prompt_toolkit.application import get_app
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from cli_chess.modules.board import BoardPresenter
@@ -62,6 +63,7 @@ class BoardView:
     def update(self, board_output_list: list):
         """Updates the board output with the passed in text"""
         self.board_output.text = HTML(self._build_output(board_output_list))
+        get_app().invalidate()
 
     def __pt_container__(self) -> Window:
         """Returns the game_view container"""
