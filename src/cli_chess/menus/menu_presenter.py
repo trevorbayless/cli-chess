@@ -1,4 +1,4 @@
-# Copyright (C) 2021-2022 Trevor Bayless <trevorbayless1@gmail.com>
+# Copyright (C) 2021-2023 Trevor Bayless <trevorbayless1@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,6 +15,8 @@
 
 from __future__ import annotations
 from cli_chess.utils.logging import log
+from cli_chess.utils.event import Event
+from enum import Enum
 from typing import TYPE_CHECKING, List
 if TYPE_CHECKING:
     from cli_chess.menus import MenuOption, MultiValueMenuOption, MenuCategory, MenuModel, MultiValueMenuModel, MenuView, MultiValueMenuView
@@ -25,6 +27,7 @@ class MenuPresenter:
         self.model = model
         self.view = view
         self.selection = self.model.get_menu_options()[0].option
+        self.e_selection_updated = Event()
 
     def get_menu_category(self) -> MenuCategory:
         """Get the menu category"""
@@ -52,6 +55,7 @@ class MenuPresenter:
         try:
             self.selection = self.model.get_menu_options()[selected_option].option
             log.info(f"menu_selection: {self.selection}")
+            self._notify_selection_updated(self.selection)
 
         except Exception as e:
             # Todo: Print error to view element
@@ -62,6 +66,10 @@ class MenuPresenter:
         """Queries the view to determine if the menu has focus"""
         return self.view.has_focus()
 
+    def _notify_selection_updated(self, selected_option: int) -> None:
+        """Notifies listeners that the selection has been updated"""
+        self.e_selection_updated.notify(selected_option)
+
 
 class MultiValueMenuPresenter(MenuPresenter):
     def __init__(self, model: MultiValueMenuModel, view: MultiValueMenuView):
@@ -69,7 +77,7 @@ class MultiValueMenuPresenter(MenuPresenter):
         self.view = view
         super().__init__(self.model, self.view)
 
-    def value_cycled_handler(self, selected_option: int) -> None:
+    def value_cycled_handler(self, selected_option: Enum) -> None:
         """Called when the selected options value is cycled. Classes that inherit from
            this class should override this method if they need to
            be alerted when the selected option changes

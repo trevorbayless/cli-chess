@@ -1,4 +1,4 @@
-# Copyright (C) 2021-2022 Trevor Bayless <trevorbayless1@gmail.com>
+# Copyright (C) 2021-2023 Trevor Bayless <trevorbayless1@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -74,7 +74,7 @@ class MainView:
         return VSplit([
             Window(FormattedTextControl(_get_function_bar_fragments)),
             Window(FormattedTextControl(f"cli-chess {__version__}"), align=WindowAlign.RIGHT)
-        ], height=D(max=1))
+        ], height=D(max=1, preferred=1))
 
     def _create_function_bar_key_bindings(self) -> "_MergedKeyBindings":
         """Creates the key bindings for the function bar"""

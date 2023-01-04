@@ -1,4 +1,4 @@
-# Copyright (C) 2021-2022 Trevor Bayless <trevorbayless1@gmail.com>
+# Copyright (C) 2021-2023 Trevor Bayless <trevorbayless1@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -35,7 +35,7 @@ class Event:
         if listener in self.listeners:
             self.listeners.remove(listener)
 
-    def notify(self, *args: str, **kwargs: int) -> None:
+    def notify(self, *args, **kwargs) -> None:
         """Notifies all listeners of the event"""
         for listener in self.listeners:
             listener(*args, **kwargs)
