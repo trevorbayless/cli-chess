@@ -1,4 +1,4 @@
-# Copyright (C) 2021-2022 Trevor Bayless <trevorbayless1@gmail.com>
+# Copyright (C) 2021-2023 Trevor Bayless <trevorbayless1@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -50,7 +50,17 @@ class EngineModel:
 
     async def configure_engine(self) -> None:
         """Configure the engine with the passed in options"""
-        await self.engine.configure({"Skill Level": self.game_parameters['Computer Level']})  # TODO: Update 'Computer Strength' to use options enum
+        skill_level = self.game_parameters.get('Computer Level')
+        limit_strength = self.game_parameters.get('Specify Elo')
+        uci_elo = self.game_parameters.get('Computer Elo')
+
+        engine_cfg = {
+            'Skill Level': skill_level if skill_level else -20,
+            'UCI_LimitStrength': True if limit_strength else False,
+            'UCI_Elo': uci_elo if uci_elo else 500
+        }
+
+        await self.engine.configure(engine_cfg)
 
     async def get_best_move(self) -> chess.engine.PlayResult:
         """Query the engine to get the best move"""
