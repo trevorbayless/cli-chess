@@ -1,4 +1,4 @@
-# Copyright (C) 2021-2022 Trevor Bayless <trevorbayless1@gmail.com>
+# Copyright (C) 2021-2023 Trevor Bayless <trevorbayless1@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -13,7 +13,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from cli_chess.utils.logging import log
 from collections import ChainMap
 from typing import Dict
 
@@ -30,23 +29,20 @@ class BaseGameOptions:
             try:
                 value = menu_selections[key]
                 menu_selections[key] = self.chain_map[value]
-            except Exception as e:
-                msg = f"Error parsing game setting selections: '{key}':'{menu_selections[key]}'"
-                log.exception(msg)
-                raise Exception(msg) from e
-
+            except KeyError:
+                pass
         return menu_selections
 
     variant_options_dict = {
-        "Standard": "chess",
+        "Standard": "standard",
         "Crazyhouse": "crazyhouse",
         "Chess960": "chess960",
-        "King of the Hill": "kingofthehill",
-        "Three-check": "3check",
+        "King of the Hill": "kingOfTheHill",
+        "Three-check": "threeCheck",
         "Antichess": "antichess",
         "Atomic": "atomic",
         "Horde": "horde",
-        "Racing Kings": "racingkings",
+        "Racing Kings": "racingKings",
     }
 
     time_control_options_dict = {
@@ -70,7 +66,7 @@ class OfflineGameOptions(BaseGameOptions):
                          self.time_control_options_dict,
                          self.skill_level_options_dict)
 
-    time_control_options_dict = BaseGameOptions.time_control_options_dict
+    time_control_options_dict = dict(BaseGameOptions.time_control_options_dict)
     additional_time_controls = {
         "5+3 (Blitz)": "5+3",
         "5+0 (Blitz)": "5+0",
@@ -105,11 +101,21 @@ class OnlineGameOptions(BaseGameOptions):
                          self.time_control_options_dict,
                          self.mode_options_dict)
 
-    time_control_options_dict = BaseGameOptions.time_control_options_dict
-    time_control_options_dict["Custom Time"] = "custom"
+    time_control_options_dict = dict(BaseGameOptions.time_control_options_dict)
     time_control_options_dict["Correspondence"] = "correspondence"
 
     mode_options_dict = {
         "Rated": "rated",
         "Casual": "casual"
+    }
+
+    skill_level_options_dict = {
+        "Level 1": 1,
+        "Level 2": 2,
+        "Level 3": 3,
+        "Level 4": 4,
+        "Level 5": 5,
+        "Level 6": 6,
+        "Level 7": 7,
+        "Level 8": 8
     }
