@@ -15,7 +15,7 @@
 
 from __future__ import annotations
 from cli_chess.menus.offline_games_menu import OfflineGamesMenuView
-from cli_chess.menus.vs_computer_menu import VsComputerMenuModel, VsComputerMenuPresenter
+from cli_chess.menus.vs_computer_menu import OfflineVsComputerMenuModel, OfflineVsComputerMenuPresenter
 from cli_chess.menus import MenuPresenter
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -26,7 +26,7 @@ class OfflineGamesMenuPresenter(MenuPresenter):
     """Defines the Main Menu"""
     def __init__(self, model: OfflineGamesMenuModel):
         self.model = model
-        self.vs_computer_menu_presenter = VsComputerMenuPresenter(VsComputerMenuModel())
+        self.vs_computer_menu_presenter = OfflineVsComputerMenuPresenter(OfflineVsComputerMenuModel())
         self.view = OfflineGamesMenuView(self)
         self.selection = self.model.get_menu_options()[0].option
 

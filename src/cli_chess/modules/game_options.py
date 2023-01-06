@@ -99,15 +99,11 @@ class OnlineGameOptions(BaseGameOptions):
     def __init__(self):
         super().__init__(self.variant_options_dict,
                          self.time_control_options_dict,
+                         self.skill_level_options_dict,
                          self.mode_options_dict)
 
     time_control_options_dict = dict(BaseGameOptions.time_control_options_dict)
     time_control_options_dict["Correspondence"] = "correspondence"
-
-    mode_options_dict = {
-        "Rated": "rated",
-        "Casual": "casual"
-    }
 
     skill_level_options_dict = {
         "Level 1": 1,
@@ -118,4 +114,9 @@ class OnlineGameOptions(BaseGameOptions):
         "Level 6": 6,
         "Level 7": 7,
         "Level 8": 8
+    }
+
+    mode_options_dict = {
+        "Rated": "rated",
+        "Casual": "casual"
     }

@@ -1,4 +1,4 @@
-# Copyright (C) 2021-2022 Trevor Bayless <trevorbayless1@gmail.com>
+# Copyright (C) 2021-2023 Trevor Bayless <trevorbayless1@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@ from prompt_toolkit.keys import Keys
 from prompt_toolkit.formatted_text import StyleAndTextTuples
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from cli_chess.menus.vs_computer_menu import VsComputerMenuPresenter
+    from cli_chess.menus.vs_computer_menu.vs_computer_menu_presenter import VsComputerMenuPresenter
 
 
 class VsComputerMenuView(MultiValueMenuView):
