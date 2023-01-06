@@ -41,7 +41,7 @@ class TVChannelMenuOptions(Enum):
         """Return the chess variant related to the enum"""
         variant = OnlineGameOptions.variant_options_dict.get(self.value)
         if not variant:
-            variant = "chess"
+            variant = "standard"
         return variant
 
 
