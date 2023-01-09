@@ -21,13 +21,12 @@ import chess.variant
 import chess
 
 
-# Todo: Inherit from chess.Board?
 class BoardModel:
-    def __init__(self, my_color: chess.Color = chess.WHITE, variant: str = "standard", fen: str = "") -> None:
+    def __init__(self, orientation: chess.Color = chess.WHITE, variant="standard", fen="") -> None:
         self.board = self._initialize_board(variant, fen)
         self.initial_fen = self.board.fen()
-        self.my_color = my_color
-        self.board_orientation = self.my_color
+        self.my_color = orientation
+        self.orientation = orientation
 
         self._log_init_info()
         self.e_board_model_updated = Event()
@@ -36,6 +35,9 @@ class BoardModel:
     @staticmethod
     def _initialize_board(variant: str, fen: str):
         """Initializes the main board object"""
+        if fen == "startpos":
+            fen = ""
+
         if variant == "chess960":
             if fen:
                 return chess.Board(fen, chess960=True)
@@ -46,10 +48,12 @@ class BoardModel:
                 return chess.variant.find_variant(variant)(fen)
             return chess.variant.find_variant(variant)()
 
-    def reinitialize_board(self, variant: str, fen: str = ""):
-        """Reinitialized the existing board object to the new variant/fen"""
+    def reinitialize_board(self, variant: str, orientation: chess.Color, fen: str = ""):
+        """Reinitializes the existing board object to the new variant/fen"""
         try:
             self.board = self._initialize_board(variant, fen)
+            self.my_color = orientation
+            self.orientation = orientation
             self.e_board_model_updated.notify()
         except ValueError as e:
             log.error(f"Error while trying to reinitialize the board: {e}")
@@ -69,6 +73,18 @@ class BoardModel:
         except Exception as e:
             log.error(f"make_move ({player}): {e}")
             raise e
+
+    def make_moves_from_list(self, move_list: list) -> None:
+        """Attempts to make all moves in the provided move list.
+           Raises a ValueError on an illegal move.
+        """
+        for move in move_list:
+            try:
+                self.board.push_san(move)
+            except ValueError as e:
+                log.error(f"Invalid move while making moves from list: {e}")
+
+        self._notify_board_model_updated()
 
     def takeback(self):
         """Takes back the last played move. Raises
@@ -99,11 +115,11 @@ class BoardModel:
 
     def get_board_orientation(self) -> chess.Color:
         """Returns the board orientation"""
-        return self.board_orientation
+        return self.orientation
 
     def set_board_orientation(self, color: chess.Color) -> None:
         """Sets the board's orientation to the color passed in"""
-        self.board_orientation = color
+        self.orientation = color
         self._notify_board_model_updated()
         log.debug(f"board orientation set (orientation = {color}")
 
@@ -129,7 +145,7 @@ class BoardModel:
                           8, 9, 10, 11, 12, 13, 14, 15,
                           0, 1, 2, 3, 4, 5, 6, 7]
 
-        if self.board_orientation is chess.BLACK:
+        if self.orientation is chess.BLACK:
             return square_numbers[::-1]
 
         return square_numbers
@@ -144,7 +160,7 @@ class BoardModel:
            labels based on the board orientation'
         """
         file_labels = ""
-        if self.board_orientation is chess.BLACK:
+        if self.orientation is chess.BLACK:
             for name in chess.FILE_NAMES[::-1]:
                 file_labels += name + " "
         else:
@@ -182,7 +198,7 @@ class BoardModel:
 
     def is_white_orientation(self) -> bool:
         """Returns True if the board orientation is set as white"""
-        return self.board_orientation is chess.WHITE
+        return self.orientation is chess.WHITE
 
     def _notify_board_model_updated(self) -> None:
         """Notifies listeners of board model updates"""

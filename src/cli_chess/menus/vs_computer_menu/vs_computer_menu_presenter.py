@@ -17,7 +17,7 @@ from __future__ import annotations
 from cli_chess.menus.vs_computer_menu import VsComputerMenuView, OfflineVsComputerMenuOptions
 from cli_chess.menus import MultiValueMenuPresenter
 from cli_chess.modules.game_options import BaseGameOptions, OnlineGameOptions, OfflineGameOptions
-from cli_chess.core.game.offline_game import start_offline_game
+from cli_chess.core.game import start_online_game_vs_ai, start_offline_game
 from typing import TYPE_CHECKING, Type
 if TYPE_CHECKING:
     from cli_chess.menus.vs_computer_menu import VsComputerMenuModel, OnlineVsComputerMenuModel, OfflineVsComputerMenuModel
@@ -32,11 +32,11 @@ class VsComputerMenuPresenter(MultiValueMenuPresenter):
 
     def value_cycled_handler(self, selected_option: int):
         """A handler that's called when the value of the selected option changed"""
-        raise NotImplementedError("Child class should implement this function")
+        pass
 
     def handle_start_game(self) -> None:
         """Starts the game using the currently selected menu values"""
-        raise NotImplementedError("Child class should implement this function")
+        pass
 
     def _create_dict_of_selected_values(self, game_options_enum: Type[BaseGameOptions]) -> dict:
         """Creates a dictionary of all selected values. Raises an Exception on failure."""
@@ -63,7 +63,7 @@ class OnlineVsComputerMenuPresenter(VsComputerMenuPresenter):
     def handle_start_game(self) -> None:
         """Starts the game using the currently selected menu values"""
         game_parameters = super()._create_dict_of_selected_values(OnlineGameOptions)
-        #start_online_game(game_parameters)
+        start_online_game_vs_ai(game_parameters)
 
 
 class OfflineVsComputerMenuPresenter(VsComputerMenuPresenter):

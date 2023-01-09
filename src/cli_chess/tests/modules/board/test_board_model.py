@@ -45,8 +45,12 @@ def test_initialize_board():
     assert model.get_board_orientation() == chess.WHITE
     assert model.board.fen() == chess.STARTING_FEN
 
+    # Test "startpos" as starting fen
+    model = BoardModel(variant="racingKings", fen="startpos")
+    assert model.board.fen() == model.board.starting_fen
+
     # Test chess960 initialization
-    model = BoardModel(my_color=chess.BLACK, variant="chess960")
+    model = BoardModel(orientation=chess.BLACK, variant="chess960")
     assert model.board.chess960
     assert type(model.board) == chess.Board
     assert model.get_board_orientation() == chess.BLACK
@@ -181,7 +185,7 @@ def test_get_turn():
 
 
 def test_get_board_orientation():
-    model = BoardModel(my_color=chess.BLACK)
+    model = BoardModel(orientation=chess.BLACK)
     assert model.get_board_orientation() == chess.BLACK
 
     model = BoardModel()
@@ -285,7 +289,7 @@ def test_is_white_orientation():
     model.set_board_orientation(chess.BLACK)
     assert not model.is_white_orientation()
 
-    model = BoardModel(my_color=chess.BLACK)
+    model = BoardModel(orientation=chess.BLACK)
     assert not model.is_white_orientation()
     model.set_board_orientation(chess.WHITE)
     assert model.is_white_orientation()

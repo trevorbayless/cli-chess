@@ -16,13 +16,20 @@
 from cli_chess.utils.logging import log
 from cli_chess.utils.config import lichess_config
 from cli_chess.utils.event import Event
-from berserk import TokenSession, clients
+from berserk import Client, TokenSession
 from berserk.exceptions import BerserkError
 
 
 class TokenManagerModel:
     def __init__(self):
         self.e_token_manager_model_updated = Event()
+
+    def get_validated_client(self) -> Client:
+        """Returns a validated client to make API calls against"""
+        token = lichess_config.get_value(lichess_config.Keys.API_TOKEN)
+        if self.get_account_data(token):
+            session = TokenSession(token)
+            return Client(session)
 
     def validate_existing_account_data(self) -> None:
         """Queries the Lichess config file for an existing token. If a token
@@ -56,7 +63,7 @@ class TokenManagerModel:
         account_data = {}
         if api_token:
             session = TokenSession(api_token)
-            account = clients.Account(session)
+            account = Client(session).account
             try:
                 account_data = account.get()
                 log.info("Successfully authenticated with Lichess")

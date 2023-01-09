@@ -1,4 +1,4 @@
-# Copyright (C) 2021-2022 Trevor Bayless <trevorbayless1@gmail.com>
+# Copyright (C) 2021-2023 Trevor Bayless <trevorbayless1@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -14,8 +14,22 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from cli_chess.core.game import GameModelBase
+from random import getrandbits
+import chess
+
+
+def get_player_color(color: str) -> chess.Color:
+    """Returns a chess.Color based on the color string passed in. If the color string
+       is unmatched, a random value of chess.WHITE or chess.BLACK will be returned
+    """
+    if color.lower() in chess.COLOR_NAMES:
+        return chess.Color(chess.COLOR_NAMES.index(color))
+    else:  # Get random color to play as
+        return chess.Color(getrandbits(1))
 
 
 class OfflineGameModel(GameModelBase):
     def __init__(self, game_parameters: dict):
-        super().__init__(game_parameters)
+        super().__init__(orientation=get_player_color(game_parameters['Side to play as']),
+                         variant=game_parameters['Variant'],
+                         fen="")

@@ -13,14 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from cli_chess.modules.board import BoardModel
-from cli_chess.modules.move_list import MoveListModel
-from cli_chess.modules.material_difference import MaterialDifferenceModel
-from chess import Color, WHITE
 
-
-class GameModelBase:
-    def __init__(self, orientation: Color = WHITE, variant="standard", fen=""):
-        self.board_model = BoardModel(orientation, variant, fen)
-        self.move_list_model = MoveListModel(self.board_model)
-        self.material_diff_model = MaterialDifferenceModel(self.board_model)
+class OnlineGameView:
+    def __init__(self):
+        pass
