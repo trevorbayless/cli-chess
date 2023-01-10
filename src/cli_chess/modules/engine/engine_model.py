@@ -14,6 +14,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from cli_chess.modules.board import BoardModel
+from cli_chess.modules.game_options import GameOption
 from cli_chess.utils.logging import configure_logger
 from cli_chess.utils.config import engine_config
 import chess.engine
@@ -50,9 +51,9 @@ class EngineModel:
 
     async def configure_engine(self) -> None:
         """Configure the engine with the passed in options"""
-        skill_level = self.game_parameters.get('Computer Level')
-        limit_strength = self.game_parameters.get('Specify Elo')
-        uci_elo = self.game_parameters.get('Computer Elo')
+        skill_level = self.game_parameters.get(GameOption.COMPUTER_SKILL_LEVEL)
+        limit_strength = self.game_parameters.get(GameOption.SPECIFY_ELO)
+        uci_elo = self.game_parameters.get(GameOption.COMPUTER_ELO)
 
         engine_cfg = {
             'Skill Level': skill_level if skill_level else -20,

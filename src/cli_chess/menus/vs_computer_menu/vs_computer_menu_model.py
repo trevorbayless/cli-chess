@@ -14,24 +14,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from cli_chess.menus import MultiValueMenuModel, MultiValueMenuOption, MenuCategory
-from cli_chess.modules.game_options import OnlineGameOptions, OfflineGameOptions
-from enum import Enum
-
-
-class OnlineVsComputerMenuOptions(Enum):
-    VARIANT = "Variant"
-    TIME_CONTROL = "Time Control"
-    COMPUTER_SKILL_LEVEL = "Computer Level"
-    COLOR = "Side to play as"
-
-
-class OfflineVsComputerMenuOptions(Enum):
-    VARIANT = "Variant"
-    TIME_CONTROL = "Time Control"
-    COMPUTER_SKILL_LEVEL = "Computer Level"
-    SPECIFY_ELO = "Specify Elo"
-    COMPUTER_ELO = "Computer Elo"
-    COLOR = "Side to play as"
+from cli_chess.modules.game_options import GameOption, OnlineGameOptions, OfflineGameOptions
 
 
 class VsComputerMenuModel(MultiValueMenuModel):
@@ -49,10 +32,10 @@ class OnlineVsComputerMenuModel(VsComputerMenuModel):
     def _create_menu() -> MenuCategory:
         """Create the online menu options"""
         menu_options = [
-            MultiValueMenuOption(OnlineVsComputerMenuOptions.VARIANT, "Choose the variant to play", [option for option in OnlineGameOptions.variant_options_dict]),
-            MultiValueMenuOption(OnlineVsComputerMenuOptions.TIME_CONTROL, "Choose the time control", [option for option in OnlineGameOptions.time_control_options_dict]),
-            MultiValueMenuOption(OnlineVsComputerMenuOptions.COMPUTER_SKILL_LEVEL, "Choose the skill level of the computer", [option for option in OnlineGameOptions.skill_level_options_dict]),
-            MultiValueMenuOption(OnlineVsComputerMenuOptions.COLOR, "Choose the side you would like to play as", [option for option in OnlineGameOptions.color_options_dict]),
+            MultiValueMenuOption(GameOption.VARIANT, "Choose the variant to play", [option for option in OnlineGameOptions.variant_options_dict]),
+            MultiValueMenuOption(GameOption.TIME_CONTROL, "Choose the time control", [option for option in OnlineGameOptions.time_control_options_dict]),
+            MultiValueMenuOption(GameOption.COMPUTER_SKILL_LEVEL, "Choose the skill level of the computer", [option for option in OnlineGameOptions.skill_level_options_dict]),
+            MultiValueMenuOption(GameOption.COLOR, "Choose the side you would like to play as", [option for option in OnlineGameOptions.color_options]),
         ]
         return MenuCategory("Play Online vs Computer", menu_options)
 
@@ -67,12 +50,12 @@ class OfflineVsComputerMenuModel(VsComputerMenuModel):
         """Create the offline menu options"""
         menu_options = [
             # Todo: Implement ability to use custom or lichess fairy-stockfish defined strength levels
-            MultiValueMenuOption(OfflineVsComputerMenuOptions.VARIANT, "Choose the variant to play", [option for option in OfflineGameOptions.variant_options_dict]),
-            MultiValueMenuOption(OfflineVsComputerMenuOptions.TIME_CONTROL, "Choose the time control", [option for option in OfflineGameOptions.time_control_options_dict]),
-            MultiValueMenuOption(OfflineVsComputerMenuOptions.SPECIFY_ELO, "Would you like the computer to play as a specific Elo?", ["No", "Yes"]),
-            MultiValueMenuOption(OfflineVsComputerMenuOptions.COMPUTER_SKILL_LEVEL, "Choose the skill level of the computer", [option for option in OfflineGameOptions.skill_level_options_dict]),
-            MultiValueMenuOption(OfflineVsComputerMenuOptions.COMPUTER_ELO, "Choose the Elo of the computer", list(range(500, 2850)), visible=False),
-            MultiValueMenuOption(OfflineVsComputerMenuOptions.COLOR, "Choose the side you would like to play as", [option for option in OfflineGameOptions.color_options_dict]),
+            MultiValueMenuOption(GameOption.VARIANT, "Choose the variant to play", [option for option in OfflineGameOptions.variant_options_dict]),
+            MultiValueMenuOption(GameOption.TIME_CONTROL, "Choose the time control", [option for option in OfflineGameOptions.time_control_options_dict]),
+            MultiValueMenuOption(GameOption.SPECIFY_ELO, "Would you like the computer to play as a specific Elo?", ["No", "Yes"]),
+            MultiValueMenuOption(GameOption.COMPUTER_SKILL_LEVEL, "Choose the skill level of the computer", [option for option in OfflineGameOptions.skill_level_options_dict]),
+            MultiValueMenuOption(GameOption.COMPUTER_ELO, "Choose the Elo of the computer", list(range(500, 2850)), visible=False),
+            MultiValueMenuOption(GameOption.COLOR, "Choose the side you would like to play as", [option for option in OfflineGameOptions.color_options]),
         ]
         return MenuCategory("Play Offline vs Computer", menu_options)
 
@@ -82,7 +65,7 @@ class OfflineVsComputerMenuModel(VsComputerMenuModel):
         """
         # Todo: Figure out a cleaner way so a loop isn't required
         for i, opt in enumerate(self.menu.category_options):
-            if opt.option == OfflineVsComputerMenuOptions.COMPUTER_ELO:
+            if opt.option == GameOption.COMPUTER_ELO:
                 opt.visible = show
-            if opt.option == OfflineVsComputerMenuOptions.COMPUTER_SKILL_LEVEL:
+            if opt.option == GameOption.COMPUTER_SKILL_LEVEL:
                 opt.visible = not show

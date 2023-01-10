@@ -14,6 +14,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from cli_chess.core.game import GameModelBase
+from cli_chess.modules.game_options import GameOption
 from random import getrandbits
 import chess
 
@@ -30,6 +31,6 @@ def get_player_color(color: str) -> chess.Color:
 
 class OfflineGameModel(GameModelBase):
     def __init__(self, game_parameters: dict):
-        super().__init__(orientation=get_player_color(game_parameters['Side to play as']),
-                         variant=game_parameters['Variant'],
+        super().__init__(orientation=get_player_color(game_parameters[GameOption.COLOR]),
+                         variant=game_parameters[GameOption.VARIANT],
                          fen="")

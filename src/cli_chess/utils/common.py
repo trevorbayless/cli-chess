@@ -1,4 +1,4 @@
-# Copyright (C) 2021-2022 Trevor Bayless <trevorbayless1@gmail.com>
+# Copyright (C) 2021-2023 Trevor Bayless <trevorbayless1@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,3 +19,8 @@ from os import name as os_name
 def is_windows_system() -> bool:
     """Returns True if on a Windows system"""
     return True if os_name == "nt" else False
+
+
+def str_to_bool(s: str) -> bool:
+    """Returns a boolean based on the passed in string"""
+    return s.lower() in ("true", "yes", "1")

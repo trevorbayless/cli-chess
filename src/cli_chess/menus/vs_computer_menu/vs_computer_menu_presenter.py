@@ -14,9 +14,9 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from __future__ import annotations
-from cli_chess.menus.vs_computer_menu import VsComputerMenuView, OfflineVsComputerMenuOptions
+from cli_chess.menus.vs_computer_menu import VsComputerMenuView
 from cli_chess.menus import MultiValueMenuPresenter
-from cli_chess.modules.game_options import BaseGameOptions, OnlineGameOptions, OfflineGameOptions
+from cli_chess.modules.game_options import BaseGameOptions, OnlineGameOptions, OfflineGameOptions, GameOption
 from cli_chess.core.game import start_online_game_vs_ai, start_offline_game
 from typing import TYPE_CHECKING, Type
 if TYPE_CHECKING:
@@ -38,14 +38,14 @@ class VsComputerMenuPresenter(MultiValueMenuPresenter):
         """Starts the game using the currently selected menu values"""
         pass
 
-    def _create_dict_of_selected_values(self, game_options_enum: Type[BaseGameOptions]) -> dict:
+    def _create_dict_of_selected_values(self, game_options_cls: Type[BaseGameOptions]) -> dict:
         """Creates a dictionary of all selected values. Raises an Exception on failure."""
         try:
             selections_dict = {}
             for index, menu_option in enumerate(self.get_visible_menu_options()):
-                selections_dict[f"{menu_option.option_name}"] = menu_option.selected_value['name']
+                selections_dict[menu_option.option] = menu_option.selected_value['name']
 
-            return game_options_enum().transpose_selection_dict(selections_dict)
+            return game_options_cls().create_game_parameters_dict(selections_dict)
         except Exception as e:
             raise e
 
@@ -78,7 +78,7 @@ class OfflineVsComputerMenuPresenter(VsComputerMenuPresenter):
         selected_option = menu_item.option
         selected_value = menu_item.selected_value['name']
 
-        if selected_option == OfflineVsComputerMenuOptions.SPECIFY_ELO:
+        if selected_option == GameOption.SPECIFY_ELO:
             self.model.show_elo_selection_option(selected_value == "Yes")
 
     def handle_start_game(self) -> None:
