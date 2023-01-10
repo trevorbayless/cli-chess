@@ -72,14 +72,17 @@ def test_reinitialize_board(model: BoardModel, board_updated_listener: Mock):
 
     # Test invalid initialization
     with pytest.raises(ValueError):
-        model.reinitialize_board("checkers")
+        model.reinitialize_board("checkers", chess.WHITE)
 
     assert model.board.uci_variant == "chess"
     board_updated_listener.assert_not_called()
 
     # Test valid initialization
-    model.reinitialize_board("Crazyhouse")
-    assert model.board.uci_variant == "crazyhouse"
+    model.reinitialize_board("Horde", chess.BLACK)
+    assert model.board.uci_variant == "horde"
+    assert model.my_color == chess.BLACK
+    assert model.orientation == chess.BLACK
+    assert model.initial_fen == model.board.starting_fen
     board_updated_listener.assert_called()
 
 

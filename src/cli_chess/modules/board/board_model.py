@@ -52,6 +52,7 @@ class BoardModel:
         """Reinitializes the existing board object to the new variant/fen"""
         try:
             self.board = self._initialize_board(variant, fen)
+            self.initial_fen = self.board.fen()
             self.my_color = orientation
             self.orientation = orientation
             self.e_board_model_updated.notify()
