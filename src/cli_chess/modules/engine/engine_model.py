@@ -15,11 +15,9 @@
 
 from cli_chess.modules.board import BoardModel
 from cli_chess.modules.game_options import GameOption
-from cli_chess.utils.logging import configure_logger
 from cli_chess.utils.config import engine_config
+from cli_chess.utils.logging import log
 import chess.engine
-
-engine_log = configure_logger("chess.engine")
 
 
 async def create_engine_model(board_model: BoardModel, game_parameters: dict):
@@ -46,7 +44,7 @@ class EngineModel:
             _, engine = await chess.engine.popen_uci(engine_path)
             return engine
         except Exception as e:
-            engine_log.critical(f"Exception caught starting engine: {e}")
+            log.critical(f"Exception caught starting engine: {e}")
             raise e
 
     async def configure_engine(self) -> None:

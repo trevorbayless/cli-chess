@@ -1,4 +1,4 @@
-# Copyright (C) 2021-2022 Trevor Bayless <trevorbayless1@gmail.com>
+# Copyright (C) 2021-2023 Trevor Bayless <trevorbayless1@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -21,14 +21,17 @@ from cli_chess.__metadata__ import __version__
 class StartupModel:
     """Model for the startup presenter"""
     def __init__(self):
-        self._setup_logger()
+        self._start_loggers()
         self.startup_args = self._parse_args()
 
     @staticmethod
-    def _setup_logger():
-        """Set up the root logger"""
+    def _start_loggers():
+        """Start the loggers"""
         log = configure_logger("cli-chess")
         log.info(f"cli-chess v{__version__}")
+
+        configure_logger("chess.engine")
+        configure_logger("berserk")
 
     @staticmethod
     def _parse_args():
