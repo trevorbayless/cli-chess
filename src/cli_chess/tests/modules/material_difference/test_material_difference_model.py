@@ -1,4 +1,4 @@
-# Copyright (C) 2021-2022 Trevor Bayless <trevorbayless1@gmail.com>
+# Copyright (C) 2021-2023 Trevor Bayless <trevorbayless1@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -91,6 +91,19 @@ def test_update(model: MaterialDifferenceModel, model_listener: Mock):
         BLACK: {KING: 0, QUEEN: 1, ROOK: 0, BISHOP: 0, KNIGHT: 0, PAWN: 0}
     }
     assert model.score == {WHITE: 0, BLACK: 7}
+
+    # Test material difference with horde board
+    model = MaterialDifferenceModel(BoardModel(variant="horde"))
+    assert model.material_difference == model.default_material_difference()
+    assert model.score == model.default_score()
+
+    # Test material difference with 3check board
+    model = MaterialDifferenceModel(BoardModel(fen="1B4n1/4k1p1/8/3Bq1p1/p7/P2KN1Pb/3n2pP/8 b - - 0 1", variant="3check"))
+    model.board_model.make_moves_from_list(["Qf5", "Nf5", "Bf5"])
+    assert model.material_difference == {
+        WHITE: {KING: 1, QUEEN: 0, ROOK: 0, BISHOP: 1, KNIGHT: 0, PAWN: 0},
+        BLACK: {KING: 2, QUEEN: 0, ROOK: 0, BISHOP: 0, KNIGHT: 2, PAWN: 1}
+    }
 
 
 def test_update_material_difference(model: MaterialDifferenceModel):

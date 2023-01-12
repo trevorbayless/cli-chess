@@ -1,4 +1,4 @@
-# Copyright (C) 2021-2022 Trevor Bayless <trevorbayless1@gmail.com>
+# Copyright (C) 2021-2023 Trevor Bayless <trevorbayless1@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -92,3 +92,18 @@ def test_format_diff_output(model: MaterialDifferenceModel, presenter: MaterialD
     board_config.set_value(board_config.Keys.USE_UNICODE_PIECES, "no")
     assert presenter.format_diff_output(WHITE) == "N"
     assert presenter.format_diff_output(BLACK) == "B"
+
+    # Test 3check output
+    model = MaterialDifferenceModel(BoardModel(fen="8/1P2N2P/1P5N/5p2/bB1k4/K1n4P/4B1pr/6R1 b - - 0 1", variant="3check"))
+    presenter = MaterialDifferencePresenter(model)
+    board_config.set_value(board_config.Keys.USE_UNICODE_PIECES, "yes")
+    assert presenter.format_diff_output(WHITE) == "♝♞♙♙+8"
+    assert presenter.format_diff_output(BLACK) == ""
+    model.board_model.make_move("Nb5")
+
+    assert presenter.format_diff_output(WHITE) == "♝♞♙♙+8"
+    assert presenter.format_diff_output(BLACK) == "♚"
+
+    board_config.set_value(board_config.Keys.USE_UNICODE_PIECES, "no")
+    assert presenter.format_diff_output(WHITE) == "BNPP+8"
+    assert presenter.format_diff_output(BLACK) == "K"

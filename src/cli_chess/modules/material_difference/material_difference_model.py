@@ -1,4 +1,4 @@
-# Copyright (C) 2021-2022 Trevor Bayless <trevorbayless1@gmail.com>
+# Copyright (C) 2021-2023 Trevor Bayless <trevorbayless1@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -31,11 +31,10 @@ PIECE_VALUE: Dict[PieceType, int] = {
 class MaterialDifferenceModel:
     def __init__(self, board_model: BoardModel):
         self.board_model = board_model
-        self.board_model.e_board_model_updated.add_listener(self.update)  # Todo: Update this to use e_successful_move_made? What about board orientation change?
+        self.board_model.e_board_model_updated.add_listener(self.update)
 
         self.material_difference: Dict[Color, Dict[PieceType, int]] = self.default_material_difference()
         self.score: Dict[Color, int] = self.default_score()
-        self.board_orientation = self.board_model.get_board_orientation()
 
         self.e_material_difference_model_updated = Event()
         self.update()
@@ -71,23 +70,31 @@ class MaterialDifferenceModel:
 
     def update(self) -> None:
         """Update the material difference using the latest board FEN"""
-        self._reset_all()
-        pieces_fen = self.generate_pieces_fen(self.board_model.board.board_fen())
+        variant = self.board_model.get_variant_name()
 
-        # Todo: Update to use chess.Piece()?
-        for piece in pieces_fen:
-            color = WHITE if piece.isupper() else BLACK
-            piece_type = PIECE_SYMBOLS.index(piece.lower())
-            self._update_material_difference(color, piece_type)
-            self._update_score(color, piece_type)
+        if variant != "horde":
+            self._reset_all()
+            pieces_fen = self.generate_pieces_fen(self.board_model.board.board_fen())
 
-        self.board_orientation = self.board_model.get_board_orientation()
-        self._notify_material_difference_model_updated()
+            # Todo: Update to use chess.Piece()?
+            for piece in pieces_fen:
+                color = WHITE if piece.isupper() else BLACK
+                piece_type = PIECE_SYMBOLS.index(piece.lower())
+
+                self._update_material_difference(color, piece_type)
+                self._update_score(color, piece_type)
+
+            if variant == "3check":
+                self.material_difference[WHITE][KING] = 3 - self.board_model.board.remaining_checks[WHITE]
+                self.material_difference[BLACK][KING] = 3 - self.board_model.board.remaining_checks[BLACK]
+
+            self._notify_material_difference_model_updated()
 
     def _update_material_difference(self, color: Color, piece_type: PieceType) -> None:
         """Updates the material difference based on the passed in piece"""
         if piece_type in PIECE_TYPES:
             opponent_piece_type_count = self.material_difference[not color][piece_type]
+
             if opponent_piece_type_count > 0:
                 self.material_difference[not color][piece_type] -= 1
             else:
@@ -112,6 +119,10 @@ class MaterialDifferenceModel:
         """Returns the material difference
            score for the passed in color"""
         return self.score[color]
+
+    def get_board_orientation(self) -> Color:
+        """Returns the orientation of the board"""
+        return self.board_model.get_board_orientation()
 
     def _notify_material_difference_model_updated(self) -> None:
         """Notifies listeners of material difference model updates"""
