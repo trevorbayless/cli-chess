@@ -46,7 +46,7 @@ class StreamTVChannel(threading.Thread):
         # 5. When the game completes, start this loop over.
 
     def run(self):
-        log.info(f"Started watching {self.channel} TV")
+        log.info(f"TV: Started watching {self.channel} TV")
         while self.running:
             try:
                 game_id = self.get_channel_game_id(self.channel)
@@ -56,7 +56,7 @@ class StreamTVChannel(threading.Thread):
                     game_metadata = self.get_game_metadata(game_id)
                     stream = self.client.games.stream_game_moves(game_id)
 
-                    log.info(f"Started streaming TV game: {game_id}")
+                    log.info(f"TV: Started streaming TV game: {game_id}")
 
                     for event in stream:
                         if not self.running:
@@ -68,7 +68,7 @@ class StreamTVChannel(threading.Thread):
                         status = event.get('status', {}).get('name')
 
                         if winner or status != "started" and status:
-                            log.info(f"Game end, finding next TV game.")
+                            log.info(f"TV: Game end, finding next TV game.")
                             self.turns_behind = 0
                             sleep(2)
                             break
@@ -76,24 +76,41 @@ class StreamTVChannel(threading.Thread):
                         if status == "started":
                             log.info(f"STARTED -- {game_metadata}")
                             log.info(f"{event}")
-                            # TODO: Handle "Computer" games which can use "aiLevel" and don't have a rating key
-                            orientation = True if game_metadata['players']['white']['rating'] >= \
-                                                  game_metadata['players']['black']['rating'] else False
-                            self.board_model.set_board_orientation(orientation)
+
+                            white_rating = int(game_metadata.get('players', {}).get('white', {}).get('rating') or 0)
+                            black_rating = int(game_metadata.get('players', {}).get('black', {}).get('rating') or 0)
+
+                            orientation = True if white_rating >= black_rating else False
+
+                            # TODO: If the variant is 3check the initial export fen will include the check counts
+                            #       but follow up game stream FENs will not. Need to create lila api gh issue to talk
+                            #       over possible solutions (including move history, etc)
+                            self.board_model.set_board_position(fen, orientation, event.get('lastMove'))
                             self.turns_behind = event.get('turns')
 
                         if fen:
                             if self.turns_behind and self.turns_behind > 0:
                                 self.turns_behind -= 1
                             else:
-                                self.board_model.set_fen(event['fen'])
+                                self.board_model.set_board_position(fen, last_move=event.get('lm'))
                 else:
-                    log.info("Same game found, sleeping 2 seconds.")
+                    log.info("TV: Same game found, sleeping 2 seconds.")
                     sleep(2)
-            except (ApiError, ResponseError) as e:
+            except ResponseError as e:
                 # TODO: Return to main menu with reason
-                # TODO: Implement 60 second requests sleep if 429 error
-                log.critical(f"Failed TV Stream request --- {e}")
+                log.error(f"TV: ResponseError: {e}")
+                log.error(f"e.message = {e.message}, e.args = {e.args}, e.reason() = {e.reason()}, e.status_code() = {e.status_code()}")
+                if e.status_code() == "429":
+                    log.info("TV: 429 error received, sleeping 60 seconds before retrying.")
+                    sleep(60)
+                else:
+                    raise
+
+            except ApiError as e:
+                log.error(f"TV: ApiError: {e}")
+                log.error(f"e.message = {e.message}, e.args = {e.args}, e.error = {e.error}")
+                # TODO: Attempt reconnection on connect aborted:
+                #  ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
                 self.stop_watching()
                 raise
 
