@@ -1,4 +1,4 @@
-# Copyright (C) 2021-2022 Trevor Bayless <trevorbayless1@gmail.com>
+# Copyright (C) 2021-2023 Trevor Bayless <trevorbayless1@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -46,6 +46,7 @@ class MoveListView:
 
         if output:
             self.move_list_output.text = output
+            self.move_list_output.buffer.cursor_position = len(self.move_list_output.text) - 1
 
     def __pt_container__(self) -> TextArea:
         """Returns the move_list container"""
