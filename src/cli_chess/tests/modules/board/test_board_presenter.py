@@ -124,7 +124,7 @@ def test_get_board_display(model: BoardModel, presenter: BoardPresenter, board_c
         if square_data['square_number'] == chess.A1:
             assert square_data == {
                 'square_number': chess.A1,
-                'piece_str': 'b',
+                'piece_str': 'B',
                 'piece_display_color': 'black',
                 'square_display_color': 'orange',
                 'rank_label': '1',
@@ -237,7 +237,7 @@ def test_get_piece_str(model: BoardModel, presenter: BoardPresenter, board_confi
     for square in chess.SQUARES:
         piece = model.board.piece_at(square)
         if piece:
-            assert presenter.get_piece_str(square) == piece.symbol()
+            assert presenter.get_piece_str(square) == piece.symbol().upper()
         else:
             assert presenter.get_piece_str(square) == ""
 

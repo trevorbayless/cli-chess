@@ -149,7 +149,7 @@ class BoardPresenter:
         use_unicode_pieces = self.board_config_values[board_config.Keys.USE_UNICODE_PIECES.value["name"]]
 
         if piece and not blindfold_chess:
-            piece_str = get_piece_unicode_symbol(piece.symbol()) if use_unicode_pieces else piece.symbol()
+            piece_str = get_piece_unicode_symbol(piece.symbol()) if use_unicode_pieces else piece.symbol().upper()
 
         return piece_str
 
