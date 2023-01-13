@@ -33,11 +33,11 @@ class BoardPresenter:
         self.board_model.e_board_model_updated.add_listener(self.update)
         board_config.e_board_config_updated.add_listener(self._update_cached_config_values)
 
-    def update(self) -> None:
+    def update(self, **kwargs) -> None:
         """Updates the board output"""
         # TODO: Update this so the view utilizes a lambda pointing to the presenter?
         #       This would allow for this update function to be removed
-        self.view.update(self.get_board_display())
+        self.view.update(self.get_board_display(**kwargs))
 
     def _update_cached_config_values(self):
         """Updates the 'board_config_values' variable with the
@@ -58,7 +58,7 @@ class BoardPresenter:
             # TODO: Handle specific exceptions (Invalid move, ambiguous, etc )
             raise e
 
-    def get_board_display(self) -> List[Dict]:
+    def get_board_display(self, **kwargs) -> List[Dict]:
         """Returns a list containing the complete board display. Each item in the list
            is a dictionary containing the display data for that square (piece at,
            piece color, square color, square number, etc). This data is generally sent
@@ -73,7 +73,7 @@ class BoardPresenter:
             data = {'square_number': square,
                     'piece_str': self.get_piece_str(square),
                     'piece_display_color': self.get_piece_display_color(self.board_model.board.piece_at(square)),
-                    'square_display_color': self.get_square_display_color(square),
+                    'square_display_color': self.get_square_display_color(square, **kwargs),
                     'rank_label': self.get_rank_label(square),
                     'is_end_of_rank': self.is_square_end_of_rank(square)}
             board_output.append(data)
@@ -168,7 +168,7 @@ class BoardPresenter:
 
         return piece_color
 
-    def get_square_display_color(self, square: chess.Square) -> str:
+    def get_square_display_color(self, square: chess.Square, **kwargs) -> str:
         """Returns a string with the color to display the
            square based on configuration settings, last move, and check.
         """
@@ -180,10 +180,13 @@ class BoardPresenter:
         show_board_highlights = self.board_config_values[board_config.Keys.SHOW_BOARD_HIGHLIGHTS.value["name"]]
         if show_board_highlights:
             try:
-                last_move = self.board_model.board.peek()
-                if square == last_move.to_square or square == last_move.from_square:
+                if 'force_highlight_move' in kwargs:
+                    last_move = kwargs['force_highlight_move']
+                else:
+                    last_move = self.board_model.board.peek()
+                if bool(last_move) and (square == last_move.to_square or square == last_move.from_square):
                     square_color = self.board_config_values[board_config.Keys.LAST_MOVE_COLOR.value["name"]]
-                    # TODO: Lighten last move color if on light square
+                    # TODO: Lighten last move square color if on light square
             except IndexError:
                 pass
 

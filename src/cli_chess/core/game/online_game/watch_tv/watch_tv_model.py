@@ -85,14 +85,14 @@ class StreamTVChannel(threading.Thread):
                             # TODO: If the variant is 3check the initial export fen will include the check counts
                             #       but follow up game stream FENs will not. Need to create lila api gh issue to talk
                             #       over possible solutions (including move history, etc)
-                            self.board_model.set_board_position(fen, orientation, event.get('lastMove'))
+                            self.board_model.set_board_position(fen, orientation, uci_last_move=event.get('lastMove'))
                             self.turns_behind = event.get('turns')
 
                         if fen:
                             if self.turns_behind and self.turns_behind > 0:
                                 self.turns_behind -= 1
                             else:
-                                self.board_model.set_board_position(fen, last_move=event.get('lm'))
+                                self.board_model.set_board_position(fen, uci_last_move=event.get('lm'))
                 else:
                     log.info("TV: Same game found, sleeping 2 seconds.")
                     sleep(2)

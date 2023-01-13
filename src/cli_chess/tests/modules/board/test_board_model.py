@@ -208,6 +208,11 @@ def test_set_board_orientation(model: BoardModel, board_updated_listener: Mock):
     model.set_board_orientation(chess.BLACK)
     board_updated_listener.assert_called()
 
+    # Test without model update notification
+    board_updated_listener.reset_mock()
+    model.set_board_orientation(chess.WHITE, notify=False)
+    board_updated_listener.assert_not_called()
+
 
 def test_set_fen(model: BoardModel, board_updated_listener: Mock):
     model.set_fen("8/4p3/pP2p2K/1N1qnp2/4k1P1/7P/5PR1/3BB3 w - - 0 1")
@@ -221,6 +226,11 @@ def test_set_fen(model: BoardModel, board_updated_listener: Mock):
 
     with pytest.raises(ValueError):
         model.set_fen("8/4p3/pP2p2K/1N1qnp2/4k1P1/7P/5PR1/3BB3 - 0 1")
+    board_updated_listener.assert_not_called()
+
+    # Test without model update notification
+    board_updated_listener.reset_mock()
+    model.set_fen("8/4p3/pP2p2K/1N1qnp2/4k1P1/7P/5PR1/3BB3 w - - 0 1", notify=False)
     board_updated_listener.assert_not_called()
 
 
@@ -296,6 +306,22 @@ def test_is_white_orientation():
     assert not model.is_white_orientation()
     model.set_board_orientation(chess.WHITE)
     assert model.is_white_orientation()
+
+
+def test_set_board_position(model: BoardModel, board_updated_listener: Mock):
+    # Test with all valid parameters
+    model.set_board_position(fen="8/8/8/8/6K1/8/8/4Q1k1 b - - 21 61", orientation=chess.BLACK, uci_last_move="e2e1")
+    assert model.board.fen() == "8/8/8/8/6K1/8/8/4Q1k1 b - - 21 61"
+    assert model.get_board_orientation() == chess.BLACK
+    board_updated_listener.assert_called_with(force_highlight_move=chess.Move.from_uci("e2e1"))
+
+    # Test without orientation and uci_last_move forced highlight
+    board_updated_listener.reset_mock()
+    model.set_board_position(fen="8/4p3/pP2p2K/1N1qnp2/4k1P1/7P/5PR1/3BB3 w - - 0 1")
+    assert model.board.fen() == "8/4p3/pP2p2K/1N1qnp2/4k1P1/7P/5PR1/3BB3 w - - 0 1"
+    assert model.get_board_orientation() == chess.BLACK
+    board_updated_listener.assert_called()
+    assert 'force_highlight_move' not in board_updated_listener.call_args.kwargs
 
 
 def test_notify_board_model_updated(model: BoardModel, board_updated_listener: Mock):

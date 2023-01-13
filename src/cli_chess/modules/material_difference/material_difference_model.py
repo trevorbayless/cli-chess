@@ -68,7 +68,7 @@ class MaterialDifferenceModel:
         self.material_difference = self.default_material_difference()
         self.score = self.default_score()
 
-    def update(self) -> None:
+    def update(self, **kwargs) -> None:
         """Update the material difference using the latest board FEN"""
         variant = self.board_model.get_variant_name()
 

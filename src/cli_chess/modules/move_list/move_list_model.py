@@ -1,4 +1,4 @@
-# Copyright (C) 2021-2022 Trevor Bayless <trevorbayless1@gmail.com>
+# Copyright (C) 2021-2023 Trevor Bayless <trevorbayless1@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@ class MoveListModel:
         self.e_move_list_model_updated = Event()
         self.update()
 
-    def update(self) -> None:
+    def update(self, **kwargs) -> None:
         """Updates the move list data using the latest move stack"""
         self.move_list_data.clear()
 

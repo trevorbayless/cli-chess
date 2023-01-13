@@ -1,4 +1,4 @@
-# Copyright (C) 2021-2022 Trevor Bayless <trevorbayless1@gmail.com>
+# Copyright (C) 2021-2023 Trevor Bayless <trevorbayless1@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -295,6 +295,11 @@ def test_get_square_display_color(model: BoardModel, presenter: BoardPresenter, 
         # Test dark square
         elif not model.is_light_square(square):
             assert presenter.get_square_display_color(square) == "blue"
+
+    # Test forced highlight move
+    assert presenter.get_square_display_color(chess.E4, force_highlight_move=chess.Move.from_uci("e4e5")) == "yellow"
+    assert presenter.get_square_display_color(chess.E5, force_highlight_move=chess.Move.from_uci("e4e5")) == "yellow"
+    assert presenter.get_square_display_color(chess.E6, force_highlight_move=chess.Move.from_uci("e4e5")) == "white"
 
     # Test board highlights disabled (no last move color)
     board_config.set_value(board_config.Keys.SHOW_BOARD_HIGHLIGHTS, "no")

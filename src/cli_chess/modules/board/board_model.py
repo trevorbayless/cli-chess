@@ -118,18 +118,26 @@ class BoardModel:
         """Returns the board orientation"""
         return self.orientation
 
-    def set_board_orientation(self, color: chess.Color) -> None:
-        """Sets the board's orientation to the color passed in"""
+    def set_board_orientation(self, color: chess.Color, notify=True) -> None:
+        """Sets the board's orientation to the color passed in.
+           If notify is false, a model update notification will not be sent.
+        """
         self.orientation = color
-        self._notify_board_model_updated()
-        log.debug(f"board orientation set (orientation = {color}")
+        log.debug(f"board orientation set (orientation = {color})")
 
-    def set_fen(self, fen: str) -> None:
-        """Sets the board FEN. Raises ValueError if syntactically invalid."""
+        if notify:
+            self._notify_board_model_updated()
+
+    def set_fen(self, fen: str, notify=True) -> None:
+        """Sets the board FEN. Raises ValueError if syntactically invalid.
+           If notify is false, a model update notification will not be sent.
+        """
         try:
             self.board.set_fen(fen)
             self.initial_fen = fen
-            self._notify_board_model_updated()
+
+            if notify:
+                self._notify_board_model_updated()
         except Exception as e:
             log.error(f"Error setting FEN: {e}")
             raise e
@@ -200,6 +208,26 @@ class BoardModel:
     def is_white_orientation(self) -> bool:
         """Returns True if the board orientation is set as white"""
         return self.orientation is chess.WHITE
+
+    def set_board_position(self, fen: str, orientation: chess.Color = None, uci_last_move=""):
+        """Sets up the board using the passed in FEN. In addition, optionally the
+           board orientation and last move can also be passed in. The last move must be
+           passed in using the UCI format. Passing in the last move is only for handling
+           board highlights with a FEN. It does not affect the move stack.
+        """
+        try:
+            if fen:
+                self.set_fen(fen, notify=False)
+                highlight_move = chess.Move.from_uci(uci_last_move) if uci_last_move else chess.Move.null()
+                if isinstance(orientation, bool):
+                    self.set_board_orientation(orientation, notify=False)
+
+                if bool(highlight_move):
+                    self.e_board_model_updated.notify(force_highlight_move=highlight_move)
+                else:
+                    self.e_board_model_updated.notify()
+        except Exception as e:
+            log.error(f"Error caught setting board position: {e}")
 
     def _notify_board_model_updated(self) -> None:
         """Notifies listeners of board model updates"""
