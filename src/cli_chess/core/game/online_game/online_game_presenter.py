@@ -14,14 +14,17 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from cli_chess.core.game.online_game import OnlineGameModel
-from cli_chess.core.game import GamePresenterBase, GameViewBase
+from cli_chess.core.game import GamePresenterBase
+from cli_chess.core.api import IncomingEventManager
 from prompt_toolkit.application import get_app
 from prompt_toolkit.layout import Layout
 
 
 def start_online_game_vs_ai(game_parameters: dict) -> None:
     """Start a game vs the lichess ai"""
-    model = OnlineGameModel(game_parameters)
+    iem = IncomingEventManager()
+    iem.start()
+    model = OnlineGameModel(game_parameters, iem)
     presenter = OnlineGamePresenter(model)
     model.start_ai_challenge()
     get_app().layout = Layout(presenter.game_view, presenter.game_view.input_field_container)
