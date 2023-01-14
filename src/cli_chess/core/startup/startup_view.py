@@ -21,6 +21,10 @@ from prompt_toolkit.application import Application, DummyApplication, get_app
 from prompt_toolkit import print_formatted_text as pt_print, HTML
 from prompt_toolkit.styles import Style
 from prompt_toolkit.output.color_depth import ColorDepth
+try:
+    from prompt_toolkit.output.win32 import NoConsoleScreenBufferError # noqa
+except AssertionError:
+    pass
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from cli_chess.core.startup import StartupPresenter
@@ -34,13 +38,19 @@ class StartupView:
 
     def create_app(self, initial_container: Container):
         """Create the main application with the initial layout"""
-        self.app = Application(
-            layout=Layout(initial_container),
-            color_depth=ColorDepth.TRUE_COLOR,
-            mouse_support=True,
-            full_screen=True,
-            style=Style.from_dict(default)
-        )
+        try:
+            self.app = Application(
+                layout=Layout(initial_container),
+                color_depth=ColorDepth.TRUE_COLOR,
+                mouse_support=True,
+                full_screen=True,
+                style=Style.from_dict(default)
+            )
+        except NoConsoleScreenBufferError:
+            print("Error starting cli-chess:\n"
+                  "A Windows console was expected and not found.\n"
+                  "Try running this program using cmd.exe instead.")
+            exit(1)
 
     @staticmethod
     def in_terminal_error(msg: str, title: str = "Error"):
