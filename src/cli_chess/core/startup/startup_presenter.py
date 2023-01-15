@@ -1,4 +1,4 @@
-# Copyright (C) 2021-2022 Trevor Bayless <trevorbayless1@gmail.com>
+# Copyright (C) 2021-2023 Trevor Bayless <trevorbayless1@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -21,6 +21,8 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from cli_chess.core.startup import StartupModel
 
+main_presenter = MainPresenter(MainModel())
+
 
 class StartupPresenter:
     def __init__(self, model: StartupModel):
@@ -38,7 +40,6 @@ class StartupPresenter:
                 exit(1)
 
         # EXAMPLE: Starting up with the Main layout
-        main_presenter = MainPresenter(MainModel())
         self.view.create_app(main_presenter.view)
 
     def run(self):

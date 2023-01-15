@@ -46,3 +46,8 @@ class WatchTVPresenter:
     def update(self, *args):
         """Update based on model change"""
         pass
+
+    def go_back(self) -> None:
+        """Stops TV and returns to the main menu"""
+        self.model.stop_watching()
+        self.view.exit_view()

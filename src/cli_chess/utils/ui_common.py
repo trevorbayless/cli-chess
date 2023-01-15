@@ -1,4 +1,4 @@
-# Copyright (C) 2021-2022 Trevor Bayless <trevorbayless1@gmail.com>
+# Copyright (C) 2021-2023 Trevor Bayless <trevorbayless1@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,10 +16,18 @@
 from prompt_toolkit.mouse_events import MouseEvent, MouseEventType
 from prompt_toolkit.key_binding import KeyPressEvent
 from prompt_toolkit.application import get_app
+from prompt_toolkit.layout import Layout
 from typing import TypeVar, Callable, cast
 
 E = TypeVar("E", bound=Callable[[KeyPressEvent], None])
 T = TypeVar("T", bound=Callable[[MouseEvent], None])
+
+
+def go_back_to_main_menu() -> None:
+    """Returns to the main menu"""
+    from cli_chess.core.startup.startup_presenter import main_presenter
+    get_app().layout = Layout(main_presenter.view, focused_element=main_presenter.view)
+    get_app().invalidate()
 
 
 def exit_app(*args) -> None: # noqa

@@ -14,12 +14,13 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from __future__ import annotations
-from cli_chess.menus import MenuView
 from cli_chess.modules.board import BoardView
-from cli_chess.modules.move_list import MoveListView
 from cli_chess.modules.material_difference import MaterialDifferenceView
-from prompt_toolkit.layout import Container, HSplit, VSplit
-from prompt_toolkit.widgets import Box
+from cli_chess.utils.ui_common import handle_mouse_click, go_back_to_main_menu
+from prompt_toolkit.layout import Container, Window, FormattedTextControl, VSplit, HSplit, VerticalAlign, WindowAlign, D
+from prompt_toolkit.formatted_text import StyleAndTextTuples
+from prompt_toolkit.key_binding import KeyBindings
+from prompt_toolkit.keys import Keys
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from cli_chess.core.game.online_game.watch_tv import WatchTVPresenter
@@ -44,7 +45,37 @@ class WatchTVView:
                     self.material_diff_lower_container,
                 ]),
             ]),
-        ])
+            HSplit([
+                self._create_function_bar()
+            ], align=VerticalAlign.BOTTOM)
+        ], key_bindings=self._container_key_bindings())
+
+    def _create_function_bar(self) -> VSplit:
+        """Create the conditional function bar"""
+        def _get_function_bar_fragments() -> StyleAndTextTuples:
+            return ([
+                ("class:function_bar.key", "F10", handle_mouse_click(self.presenter.go_back)),
+                ("class:function_bar.label", f"{'Main menu':<14}", handle_mouse_click(self.presenter.go_back))
+            ])
+
+        return VSplit([
+            Window(FormattedTextControl(_get_function_bar_fragments)),
+        ], height=D(max=1, preferred=1))
+
+    def _container_key_bindings(self) -> KeyBindings:
+        """Creates the key bindings for this container"""
+        bindings = KeyBindings()
+
+        @bindings.add(Keys.F10, eager=True)
+        def _(event): # noqa
+            self.presenter.go_back()
+
+        return bindings
+
+    @staticmethod
+    def exit_view() -> None:
+        """Exits this view and returns to the main menu"""
+        go_back_to_main_menu()
 
     def __pt_container__(self) -> Container:
         """Return the watch tv container"""
