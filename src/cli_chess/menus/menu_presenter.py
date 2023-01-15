@@ -54,7 +54,7 @@ class MenuPresenter:
         """
         try:
             self.selection = self.model.get_menu_options()[selected_option].option
-            log.info(f"menu_selection: {self.selection}")
+            log.debug(f"menu_selection: {self.selection}")
             self._notify_selection_updated(self.selection)
 
         except Exception as e:

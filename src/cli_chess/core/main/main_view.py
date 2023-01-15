@@ -32,8 +32,6 @@ class MainView:
     def __init__(self, presenter: MainPresenter):
         self.presenter = presenter
         self._error_label = FormattedTextControl(text="", style="class:label.error.banner", show_cursor=False)
-        self._error_container = self._create_error_container()
-        self._function_bar_container = self._create_function_bar()
         self._container = self._create_container()
 
     def _create_container(self):
@@ -43,8 +41,8 @@ class MainView:
                 Box(self.presenter.main_menu_presenter.view, padding=0, padding_right=1),
             ]),
             HSplit([
-                self._error_container,
-                self._function_bar_container
+                self._create_error_container(),
+                self._create_function_bar()
             ], align=VerticalAlign.BOTTOM)
         ], key_bindings=merge_key_bindings([self._container_key_bindings(), self._create_function_bar_key_bindings()]))
 
