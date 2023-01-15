@@ -55,7 +55,7 @@ class StreamTVChannel(threading.Thread):
         self.session = berserk.TokenSession(lichess_config.get_value(lichess_config.Keys.API_TOKEN))
         self.client = berserk.Client(self.session)
         self.board_model = model
-        self.channel = channel.value
+        self.channel = channel
         self.connection_retries = 10
         self.running = True
 
@@ -80,11 +80,11 @@ class StreamTVChannel(threading.Thread):
 
     def run(self):
         """Main entrypoint for the thread"""
-        log.info(f"TV Stream: Started watching {self.channel} TV")
+        log.info(f"TV Stream: Started watching {self.channel.value} TV")
         prev_game_id = ""
         while self.running and self.connection_retries > 0:
             try:
-                game_id = self.get_channel_game_id(self.channel)
+                game_id = self.get_channel_game_id(self.channel.value)
 
                 if game_id != prev_game_id:
                     turns_behind = 0
@@ -108,13 +108,12 @@ class StreamTVChannel(threading.Thread):
                             break
 
                         if status == "started":
-                            log.info(f"TV Stream: STARTED -- {game_metadata}")
-                            log.info(f"TV Stream: {event}")
+                            log.debug(f"TV Stream: STARTED -- {game_metadata}")
+                            log.debug(f"TV Stream: {event}")
 
                             white_rating = int(game_metadata.get('players', {}).get('white', {}).get('rating') or 0)
                             black_rating = int(game_metadata.get('players', {}).get('black', {}).get('rating') or 0)
-
-                            orientation = True if white_rating >= black_rating else False
+                            orientation = True if ((white_rating >= black_rating) or self.channel.variant.lower() == "racingkings") else False
 
                             # TODO: If the variant is 3check the initial export fen will include the check counts
                             #       but follow up game stream FENs will not. Need to create lila api gh issue to talk

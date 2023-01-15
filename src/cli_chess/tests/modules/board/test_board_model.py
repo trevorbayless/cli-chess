@@ -61,6 +61,10 @@ def test_initialize_board():
     assert model.board.fen() != model.board.starting_fen
     assert model.get_turn() == chess.WHITE
 
+    # Test racing kings starts as white orientation regardless
+    model = BoardModel(variant="racingKings", orientation=chess.BLACK)
+    assert model.get_board_orientation() == chess.WHITE
+
     # Test an invalid variant
     with pytest.raises(ValueError):
         BoardModel(variant="shogi")
@@ -84,6 +88,10 @@ def test_reinitialize_board(model: BoardModel, board_updated_listener: Mock):
     assert model.orientation == chess.BLACK
     assert model.initial_fen == model.board.starting_fen
     board_updated_listener.assert_called()
+
+    # Test racing kings starts as white orientation regardless
+    model.reinitialize_board("racingKings", orientation=chess.BLACK)
+    assert model.get_board_orientation() == chess.WHITE
 
 
 def test_make_move(model: BoardModel, board_updated_listener: Mock, successful_move_listener: Mock):

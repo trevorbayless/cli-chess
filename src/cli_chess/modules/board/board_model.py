@@ -26,7 +26,7 @@ class BoardModel:
         self.board = self._initialize_board(variant, fen)
         self.initial_fen = self.board.fen()
         self.my_color = orientation
-        self.orientation = orientation
+        self.orientation = chess.WHITE if variant.lower() == "racingkings" else orientation
 
         self._log_init_info()
         self.e_board_model_updated = Event()
@@ -54,7 +54,7 @@ class BoardModel:
             self.board = self._initialize_board(variant, fen)
             self.initial_fen = self.board.fen()
             self.my_color = orientation
-            self.orientation = orientation
+            self.orientation = chess.WHITE if variant.lower() == "racingkings" else orientation
             self.e_board_model_updated.notify()
         except ValueError as e:
             log.error(f"Error while trying to reinitialize the board: {e}")
