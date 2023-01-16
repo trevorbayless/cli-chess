@@ -20,7 +20,7 @@ from cli_chess.menus.tv_channel_menu import TVChannelMenuOptions
 from cli_chess.utils.event import Event
 from cli_chess.utils.config import lichess_config
 from cli_chess.utils.logging import log
-from berserk.exceptions import ApiError, ResponseError
+from berserk.exceptions import ResponseError
 import berserk
 from time import sleep
 import threading
@@ -123,6 +123,8 @@ class StreamTVChannel(threading.Thread):
 
                         if fen:
                             if turns_behind and turns_behind > 0:
+                                # Keeping track of turns behind allows skipping this event until
+                                # we are caught up. This stops a quick game replay from happening.
                                 turns_behind -= 1
                             else:
                                 self.board_model.set_board_position(fen, uci_last_move=event.get('lm'))
@@ -133,25 +135,18 @@ class StreamTVChannel(threading.Thread):
             else:
                 if self.running:
                     self.connection_retries = 10
-                    log.info("TV Stream: Sleeping 2 seconds before finding next TV game")
-                    sleep(2)
+                    log.info("TV Stream: Sleeping 3 seconds before finding next TV game")
+                    sleep(3)
 
     def handle_exceptions(self, e: Exception):
-        """Handle the various exceptions that can be raised"""
+        """Handles the passed in exception and responds appropriately"""
+        log.error(f"TV Stream: {e}")
         self.connection_retries -= 1
         delay = 5
 
         if isinstance(e, ResponseError):
-            log.error(f"TV Stream: ResponseError: {e}")
             if e.status_code() == 429:
                 delay = 60
-        elif isinstance(e, ApiError):
-            log.error(f"TV Stream: ApiError: {e}")
-        else:
-            # TODO: Go back to main screen
-            log.exception(f"TV Stream: Caught unrecognized exception, stopping TV: {e}")
-            self.stop_watching()
-            raise
 
         log.info(f"TV Stream: Sleeping {delay} seconds before retrying ({self.connection_retries} retries left).")
         sleep(delay)
