@@ -1,5 +1,5 @@
 from .game_model_base import GameModelBase
-from .game_view_base import GameViewBase
-from .game_presenter_base import GamePresenterBase
+from .game_view_base import GameViewBase, PlayableGameViewBase
+from .game_presenter_base import GamePresenterBase, PlayableGamePresenterBase
 from .online_game.online_game_presenter import start_online_game_vs_ai
 from .offline_game.offline_game_presenter import start_offline_game

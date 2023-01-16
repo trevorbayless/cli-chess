@@ -14,10 +14,9 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from __future__ import annotations
-from cli_chess.modules.board import BoardView
-from cli_chess.modules.material_difference import MaterialDifferenceView
-from cli_chess.utils.ui_common import handle_mouse_click, go_back_to_main_menu
-from prompt_toolkit.layout import Container, Window, FormattedTextControl, VSplit, HSplit, VerticalAlign, WindowAlign, D
+from cli_chess.core.game import GameViewBase
+from cli_chess.utils.ui_common import handle_mouse_click
+from prompt_toolkit.layout import Container, Window, FormattedTextControl, VSplit, HSplit, VerticalAlign, D
 from prompt_toolkit.formatted_text import StyleAndTextTuples
 from prompt_toolkit.key_binding import KeyBindings
 from prompt_toolkit.keys import Keys
@@ -26,17 +25,12 @@ if TYPE_CHECKING:
     from cli_chess.core.game.online_game.watch_tv import WatchTVPresenter
 
 
-# TODO: Update this (as well as the presenter) to utilize the GamePresenterBase and GameViewBase classes
-class WatchTVView:
-    def __init__(self, presenter: WatchTVPresenter, board_view: BoardView,
-                 material_diff_upper_view: MaterialDifferenceView, material_diff_lower_view: MaterialDifferenceView) -> None:
+class WatchTVView(GameViewBase):
+    def __init__(self, presenter: WatchTVPresenter):
         self.presenter = presenter
-        self.board_output_container = board_view
-        self.material_diff_upper_container = material_diff_upper_view
-        self.material_diff_lower_container = material_diff_lower_view
-        self.root_container = self._create_root_container()
+        super().__init__(presenter)
 
-    def _create_root_container(self) -> Container:
+    def _create_container(self) -> Container:
         return HSplit([
             VSplit([
                 self.board_output_container,
@@ -71,12 +65,3 @@ class WatchTVView:
             self.presenter.go_back()
 
         return bindings
-
-    @staticmethod
-    def exit_view() -> None:
-        """Exits this view and returns to the main menu"""
-        go_back_to_main_menu()
-
-    def __pt_container__(self) -> Container:
-        """Return the watch tv container"""
-        return self.root_container

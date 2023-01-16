@@ -13,35 +13,25 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+from cli_chess.core.game import GamePresenterBase
 from cli_chess.core.game.online_game.watch_tv import WatchTVModel, WatchTVView
 from cli_chess.menus.tv_channel_menu import TVChannelMenuOptions
-from cli_chess.modules.board import BoardPresenter
-from cli_chess.modules.material_difference import MaterialDifferencePresenter
-from prompt_toolkit.application import get_app
-from prompt_toolkit.layout import Layout
+from cli_chess.utils.ui_common import change_views
 
 
-# TODO: Update the get_app() and layout calls to use MainPresenter/View to split out view logic
 def start_watching_tv(channel: TVChannelMenuOptions) -> None:
-    tv_presenter = WatchTVPresenter(WatchTVModel(channel))
-    get_app().layout = Layout(tv_presenter.view)
-    get_app().invalidate()
+    presenter = WatchTVPresenter(WatchTVModel(channel))
+    change_views(presenter.view) # noqa
 
 
-# TODO: Update this (as well as the view) to utilize the GamePresenterBase and GameViewBase classes
-class WatchTVPresenter:
+class WatchTVPresenter(GamePresenterBase):
     def __init__(self, model: WatchTVModel):
         self.model = model
-        self.board_presenter = BoardPresenter(self.model.board_model)
-        self.material_diff_presenter = MaterialDifferencePresenter(self.model.material_diff_model)
-        self.view = WatchTVView(self,
-                                self.board_presenter.view,
-                                self.material_diff_presenter.view_upper,
-                                self.material_diff_presenter.view_lower)
+        super().__init__(model)
+        self.view = WatchTVView(self)
 
         self.model.e_watch_tv_model_updated.add_listener(self.update)
-
-        model.start_watching()
+        self.model.start_watching()
 
     def update(self, *args):
         """Update based on model change"""

@@ -1,4 +1,4 @@
-# Copyright (C) 2021-2022 Trevor Bayless <trevorbayless1@gmail.com>
+# Copyright (C) 2021-2023 Trevor Bayless <trevorbayless1@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,34 +15,79 @@
 
 from __future__ import annotations
 from cli_chess.utils import log
+from cli_chess.utils.ui_common import go_back_to_main_menu, exit_app
 from prompt_toolkit.formatted_text import HTML
 from prompt_toolkit.widgets import TextArea
 from prompt_toolkit.layout import Window, Container, FormattedTextControl, ConditionalContainer, HSplit, VSplit, D
 from prompt_toolkit.buffer import Buffer
-from prompt_toolkit.application import get_app
 from prompt_toolkit.filters import to_filter
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from cli_chess.core.game import GamePresenterBase
-    from cli_chess.modules.board import BoardView
-    from cli_chess.modules.move_list import MoveListView
-    from cli_chess.modules.material_difference import MaterialDifferenceView
+    from cli_chess.core.game import GamePresenterBase, PlayableGamePresenterBase
 
 
 class GameViewBase:
-    def __init__(self, game_presenter: GamePresenterBase, board_view: BoardView, move_list_view: MoveListView,
-                 material_diff_upper_view: MaterialDifferenceView, material_diff_lower_view: MaterialDifferenceView) -> None:
-        self.game_presenter = game_presenter
-        self.board_output_container = board_view
-        self.move_list_container = move_list_view
-        self.material_diff_upper_container = material_diff_upper_view
-        self.material_diff_lower_container = material_diff_lower_view
-        self.input_field_container = self._create_input_field_container()
+    def __init__(self, presenter: GamePresenterBase) -> None:
+        self.board_output_container = presenter.board_presenter.view
+        self.move_list_container = presenter.move_list_presenter.view
+        self.material_diff_upper_container = presenter.material_diff_presenter.view_upper
+        self.material_diff_lower_container = presenter.material_diff_presenter.view_lower
         self.error_label = FormattedTextControl(text="", style="class:label.error.banner", show_cursor=False)
         self.error_container = self._create_error_container()
-        self.root_container = self._create_root_container()
+        self._container = self._create_container()
 
-    def _create_root_container(self) -> Container:
+    def _create_container(self) -> Container:
+        return HSplit([
+            VSplit([
+                self.board_output_container,
+                HSplit([
+                    self.material_diff_upper_container,
+                    self.move_list_container,
+                    self.material_diff_lower_container,
+                ])
+            ]),
+            self.error_container
+        ])
+
+    def _create_error_container(self) -> ConditionalContainer:
+        """Create the error container"""
+        return ConditionalContainer(
+            Window(
+                self.error_label,
+                always_hide_cursor=True,
+                height=D(max=1)
+            ),
+            filter=to_filter(False)
+        )
+
+    def show_error(self, text: str) -> None:
+        """Displays the error label with the text passed in"""
+        self.error_label.text = text
+        self.error_container.filter = to_filter(True)
+
+    def clear_error(self) -> None:
+        """Clears the error containers"""
+        self.error_label.text = ""
+        self.error_container.filter = to_filter(False)
+
+    @staticmethod
+    def exit_view() -> None:
+        """Exits this view and returns to the main menu"""
+        go_back_to_main_menu()
+
+    def __pt_container__(self) -> Container:
+        """Return the view container"""
+        return self._container
+
+
+class PlayableGameViewBase(GameViewBase):
+    """Implements a base game view which has a move input field"""
+    def __init__(self, presenter: PlayableGamePresenterBase):
+        self.presenter = presenter
+        self.input_field_container = self._create_input_field_container()
+        super().__init__(presenter)
+
+    def _create_container(self) -> Container:
         return HSplit([
             VSplit([
                 self.board_output_container,
@@ -69,24 +114,14 @@ class GameViewBase:
         input_field.accept_handler = self._accept_input
         return input_field
 
-    def _create_error_container(self) -> ConditionalContainer:
-        """Create the error container"""
-        return ConditionalContainer(
-            Window(
-                self.error_label,
-                always_hide_cursor=True,
-                height=D(max=1)
-            ),
-            filter=to_filter(False)
-        )
-
     def _accept_input(self, input: Buffer) -> None:
         """Accept handler for the input field"""
+        # TODO: Remove this as it's for testing only
         if input.text == "quit":
             log.debug("User quit")
-            get_app().exit()
+            exit_app()
         else:
-            self.game_presenter.user_input_received(input.text)
+            self.presenter.user_input_received(input.text)
             self.input_field_container.text = ''
 
     def lock_input(self) -> None:
@@ -96,17 +131,3 @@ class GameViewBase:
     def unlock_input(self) -> None:
         """Removes the read-only flag from the input field"""
         self.input_field_container.read_only = False
-
-    def show_error(self, text: str) -> None:
-        """Displays the error label with the text passed in"""
-        self.error_label.text = text
-        self.error_container.filter = to_filter(True)
-
-    def clear_error(self) -> None:
-        """Clears the error containers"""
-        self.error_label.text = ""
-        self.error_container.filter = to_filter(False)
-
-    def __pt_container__(self) -> Container:
-        """Return the game view container"""
-        return self.root_container

@@ -1,4 +1,4 @@
-# Copyright (C) 2021-2022 Trevor Bayless <trevorbayless1@gmail.com>
+# Copyright (C) 2021-2023 Trevor Bayless <trevorbayless1@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -14,7 +14,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from __future__ import annotations
-from cli_chess.core.game import GameViewBase
+from cli_chess.core.game import GameViewBase, PlayableGameViewBase
 from cli_chess.modules.board import BoardPresenter
 from cli_chess.modules.move_list import MoveListPresenter
 from cli_chess.modules.material_difference import MaterialDifferencePresenter
@@ -24,25 +24,27 @@ if TYPE_CHECKING:
 
 
 class GamePresenterBase:
-    def __init__(self, game_model: GameModelBase):
-        self.game_model = game_model
-        self.board_presenter = BoardPresenter(self.game_model.board_model)
-        self.move_list_presenter = MoveListPresenter(self.game_model.move_list_model)
-        self.material_diff_presenter = MaterialDifferencePresenter(self.game_model.material_diff_model)
-        self.game_view = GameViewBase(self,
-                                      self.board_presenter.view,
-                                      self.move_list_presenter.view,
-                                      self.material_diff_presenter.view_upper,
-                                      self.material_diff_presenter.view_lower)
+    def __init__(self, model: GameModelBase):
+        self.board_presenter = BoardPresenter(model.board_model)
+        self.move_list_presenter = MoveListPresenter(model.move_list_model)
+        self.material_diff_presenter = MaterialDifferencePresenter(model.material_diff_model)
+        self.view = GameViewBase(self)
 
-        self.game_model.board_model.e_successful_move_made.add_listener(self.game_view.clear_error)
 
-    def user_input_received(self, input: str) -> None:
-        self.make_move(input, human=True)
+class PlayableGamePresenterBase(GamePresenterBase):
+    def __init__(self, model: GameModelBase):
+        self.model = model
+        super().__init__(model)
+        self.view = PlayableGameViewBase(self)
+
+        self.model.board_model.e_successful_move_made.add_listener(self.view.clear_error)
+
+    def user_input_received(self, inpt: str) -> None:
+        self.make_move(inpt, human=True)
 
     def make_move(self, move: str, human=True) -> None:
         try:
             self.board_presenter.make_move(move, human=human)
         except Exception as e:
-            self.game_view.show_error(f"{e}")
+            self.view.show_error(f"{e}")
             raise e

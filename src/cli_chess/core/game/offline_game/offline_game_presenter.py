@@ -15,11 +15,10 @@
 
 import asyncio
 from cli_chess.core.game.offline_game import OfflineGameModel
-from cli_chess.core.game import GamePresenterBase
+from cli_chess.core.game import PlayableGamePresenterBase
 from cli_chess.modules.engine import EnginePresenter, EngineModel, create_engine_model
 from cli_chess.utils.logging import log
-from prompt_toolkit.application import get_app
-from prompt_toolkit.layout import Layout
+from cli_chess.utils.ui_common import change_views
 
 
 def start_offline_game(game_parameters: dict) -> None:
@@ -27,26 +26,24 @@ def start_offline_game(game_parameters: dict) -> None:
     asyncio.create_task(_play_offline(game_parameters))
 
 
-# TODO: Update the get_app() and layout calls to use MainPresenter/View to split out view logic
 async def _play_offline(game_parameters: dict) -> None:
     try:
-        game_model = OfflineGameModel(game_parameters)
-        engine_model = await create_engine_model(game_model.board_model, game_parameters)
+        model = OfflineGameModel(game_parameters)
+        engine_model = await create_engine_model(model.board_model, game_parameters)
 
-        game_presenter = OfflineGamePresenter(game_model, engine_model)
-        get_app().layout = Layout(game_presenter.game_view, game_presenter.game_view.input_field_container)
-        get_app().invalidate()
+        presenter = OfflineGamePresenter(model, engine_model)
+        change_views(presenter.view, presenter.view.input_field_container)
     except Exception as e:
         log.error(f"Error starting engine: {e}")
         print(e)
 
 
-class OfflineGamePresenter(GamePresenterBase):
-    def __init__(self, game_model: OfflineGameModel, engine_model: EngineModel):
-        super().__init__(game_model)
+class OfflineGamePresenter(PlayableGamePresenterBase):
+    def __init__(self, model: OfflineGameModel, engine_model: EngineModel):
+        super().__init__(model)
         self.engine_presenter = EnginePresenter(engine_model)
 
-        if self.game_model.board_model.get_turn() != self.game_model.board_model.my_color:
+        if self.model.board_model.get_turn() != self.model.board_model.my_color:
             asyncio.create_task(self.make_engine_move())
 
     def user_input_received(self, input) -> None:
@@ -58,7 +55,7 @@ class OfflineGamePresenter(GamePresenterBase):
             pass
 
     async def make_engine_move(self) -> None:
-        self.game_view.lock_input()
+        self.view.lock_input()
         engine_move = await self.engine_presenter.get_best_move()
         self.make_move(engine_move.move.uci(), human=False)
-        self.game_view.unlock_input()
+        self.view.unlock_input()

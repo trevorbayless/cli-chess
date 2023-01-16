@@ -14,9 +14,9 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from __future__ import annotations
+from cli_chess.utils.ui_common import repaint_ui
 from prompt_toolkit.layout import Window, FormattedTextControl, D
 from prompt_toolkit.formatted_text import HTML
-from prompt_toolkit.application import get_app
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from cli_chess.modules.board import BoardPresenter
@@ -26,7 +26,7 @@ class BoardView:
     def __init__(self, board_presenter: BoardPresenter, initial_board_output: list):
         self.board_presenter = board_presenter
         self.board_output = FormattedTextControl(HTML(self._build_output(initial_board_output)))
-        self.root_container = self._create_container()
+        self._container = self._create_container()
 
     def _create_container(self):
         """Create the Board container"""
@@ -63,8 +63,8 @@ class BoardView:
     def update(self, board_output_list: list):
         """Updates the board output with the passed in text"""
         self.board_output.text = HTML(self._build_output(board_output_list))
-        get_app().invalidate()
+        repaint_ui()
 
     def __pt_container__(self) -> Window:
-        """Returns the game_view container"""
-        return self.root_container
+        """Returns this container"""
+        return self._container

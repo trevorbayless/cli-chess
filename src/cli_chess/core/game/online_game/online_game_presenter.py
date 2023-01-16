@@ -13,11 +13,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+from cli_chess.core.game import PlayableGamePresenterBase
 from cli_chess.core.game.online_game import OnlineGameModel
-from cli_chess.core.game import GamePresenterBase
 from cli_chess.core.api import IncomingEventManager
-from prompt_toolkit.application import get_app
-from prompt_toolkit.layout import Layout
+from cli_chess.utils.ui_common import change_views
 
 
 def start_online_game_vs_ai(game_parameters: dict) -> None:
@@ -27,17 +26,17 @@ def start_online_game_vs_ai(game_parameters: dict) -> None:
     model = OnlineGameModel(game_parameters, iem)
     presenter = OnlineGamePresenter(model)
     model.start_ai_challenge()
-    get_app().layout = Layout(presenter.game_view, presenter.game_view.input_field_container)
-    get_app().invalidate()
+    change_views(presenter.view, presenter.view.input_field_container)
 
 
-class OnlineGamePresenter(GamePresenterBase):
+class OnlineGamePresenter(PlayableGamePresenterBase):
     def __init__(self, model: OnlineGameModel):
+        self.model = model
         super().__init__(model)
 
     def make_move(self, move: str, human=True) -> None:
         try:
             self.board_presenter.make_move(move, human=human)
         except Exception as e:
-            self.game_view.show_error(f"{e}")
+            self.view.show_error(f"{e}")
             raise e

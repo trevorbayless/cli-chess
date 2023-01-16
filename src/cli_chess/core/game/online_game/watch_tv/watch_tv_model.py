@@ -13,9 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from cli_chess.modules.board import BoardModel
-from cli_chess.modules.move_list import MoveListModel
-from cli_chess.modules.material_difference import MaterialDifferenceModel
+from cli_chess.core.game import GameModelBase
 from cli_chess.menus.tv_channel_menu import TVChannelMenuOptions
 from cli_chess.utils.event import Event
 from cli_chess.utils.config import lichess_config
@@ -26,11 +24,9 @@ from time import sleep
 import threading
 
 
-class WatchTVModel:
+class WatchTVModel(GameModelBase):
     def __init__(self, channel: TVChannelMenuOptions):
-        self.board_model = BoardModel(variant=channel.variant)
-        self.move_list_model = MoveListModel(self.board_model)
-        self.material_diff_model = MaterialDifferenceModel(self.board_model)
+        super().__init__(variant=channel.variant)
         self.channel = channel
         self._tv_stream = StreamTVChannel(self.channel, self.board_model)
         self.e_watch_tv_model_updated = Event()
