@@ -160,7 +160,7 @@ class StreamTVChannel(threading.Thread):
         delay = 5
 
         if isinstance(e, ResponseError):
-            if e.status_code() == 429:
+            if e.status_code == 429:
                 delay = 60
 
         log.info(f"TV Stream: Sleeping {delay} seconds before retrying ({self.connection_retries} retries left).")
