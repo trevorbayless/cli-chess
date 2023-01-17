@@ -27,6 +27,7 @@ class BoardModel:
         self.initial_fen = self.board.fen()
         self.my_color = orientation
         self.orientation = chess.WHITE if variant.lower() == "racingkings" else orientation
+        self.highlight_move = chess.Move.null()
 
         self._log_init_info()
         self.e_board_model_updated = Event()
@@ -55,6 +56,7 @@ class BoardModel:
             self.initial_fen = self.board.fen()
             self.my_color = orientation
             self.orientation = chess.WHITE if variant.lower() == "racingkings" else orientation
+            self.highlight_move = chess.Move.null()
             self.e_board_model_updated.notify()
         except ValueError as e:
             log.error(f"Error while trying to reinitialize the board: {e}")
@@ -67,7 +69,7 @@ class BoardModel:
         player = "human" if human else "engine"
         try:
             move = move.strip()
-            self.board.push_san(move)
+            self.highlight_move = self.board.push_san(move)
             self._notify_successful_move_made()
             self._notify_board_model_updated()
             log.info(f"make_move ({player}): {move}")
@@ -81,9 +83,10 @@ class BoardModel:
         """
         for move in move_list:
             try:
-                self.board.push_san(move)
+                self.highlight_move = self.board.push_san(move)
             except ValueError as e:
                 log.error(f"Invalid move while making moves from list: {e}")
+                raise e
 
         self._notify_board_model_updated()
 
@@ -93,10 +96,12 @@ class BoardModel:
         """
         try:
             self.board.pop()
+            self.highlight_move = self.board.peek() if len(self.board.move_stack) > 0 else chess.Move.null()
             self._notify_board_model_updated()
             self._notify_successful_move_made()
         except IndexError as e:
             log.error(f"Error attempting takeback: {e}")
+            self.highlight_move = chess.Move.null()
             raise e
 
     def get_move_stack(self) -> List[chess.Move]:
@@ -117,6 +122,15 @@ class BoardModel:
     def get_board_orientation(self) -> chess.Color:
         """Returns the board orientation"""
         return self.orientation
+
+    def get_highlight_move(self) -> chess.Move:
+        """Returns the move that should be highlighted on the board.
+           NOTE: this move should never be popped from the board as it
+           is not guaranteed to be valid in the context of the move stack
+           (example: setting the FEN with the last known move). To get
+           the true last move always use board.peek()
+        """
+        return self.highlight_move
 
     def set_board_orientation(self, color: chess.Color, notify=True) -> None:
         """Sets the board's orientation to the color passed in.
@@ -218,14 +232,11 @@ class BoardModel:
         try:
             if fen:
                 self.set_fen(fen, notify=False)
-                highlight_move = chess.Move.from_uci(uci_last_move) if uci_last_move else chess.Move.null()
+                self.highlight_move = chess.Move.from_uci(uci_last_move) if uci_last_move else chess.Move.null()
                 if isinstance(orientation, bool):
                     self.set_board_orientation(orientation, notify=False)
 
-                if bool(highlight_move):
-                    self.e_board_model_updated.notify(force_highlight_move=highlight_move)
-                else:
-                    self.e_board_model_updated.notify()
+                self.e_board_model_updated.notify()
         except Exception as e:
             log.error(f"Error caught setting board position: {e}")
 

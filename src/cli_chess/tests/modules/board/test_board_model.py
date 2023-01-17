@@ -44,6 +44,7 @@ def test_initialize_board():
     assert type(model.board) == chess.Board
     assert model.get_board_orientation() == chess.WHITE
     assert model.board.fen() == chess.STARTING_FEN
+    assert model.get_highlight_move() == chess.Move.null()
 
     # Test "startpos" as starting fen
     model = BoardModel(variant="racingKings", fen="startpos")
@@ -87,6 +88,7 @@ def test_reinitialize_board(model: BoardModel, board_updated_listener: Mock):
     assert model.my_color == chess.BLACK
     assert model.orientation == chess.BLACK
     assert model.initial_fen == model.board.starting_fen
+    assert model.get_highlight_move() == chess.Move.null()
     board_updated_listener.assert_called()
 
     # Test racing kings starts as white orientation regardless
@@ -100,6 +102,7 @@ def test_make_move(model: BoardModel, board_updated_listener: Mock, successful_m
         model.make_move("Nf3")
         board_updated_listener.assert_called()
         successful_move_listener.assert_called()
+        assert model.get_highlight_move() == model.board.peek()
     except Exception as e:
         pytest.fail(f"test_make_move raised {e}")
 
@@ -112,17 +115,37 @@ def test_make_move(model: BoardModel, board_updated_listener: Mock, successful_m
 
     board_updated_listener.assert_not_called()
     successful_move_listener.assert_not_called()
+    assert model.get_highlight_move() == model.board.peek()
+
+
+def test_make_moves_from_list(model: BoardModel, board_updated_listener: Mock):
+    # Test a valid move sequence
+    moves = ["e4", "g6", "d4", "Bg7"]
+    model.make_moves_from_list(moves)
+    assert model.board.peek() == chess.Move.from_uci("f8g7")
+    assert model.get_highlight_move() == chess.Move.from_uci("f8g7")
+    board_updated_listener.assert_called()
+
+    # Test an invalid sequence
+    board_updated_listener.reset_mock()
+    moves = ["Nf3", "Bh8"]  # Bh8 is invalid
+    with pytest.raises(ValueError):
+        model.make_moves_from_list(moves)
+    assert model.board.peek() == chess.Move.from_uci("g1f3")
+    assert model.get_highlight_move() == chess.Move.from_uci("g1f3")
+    board_updated_listener.assert_not_called()
 
 
 def test_takeback(model: BoardModel, board_updated_listener: Mock, successful_move_listener: Mock):
-    model.make_move("e4")
+    model.make_moves_from_list(["e4", "e5", "Nf3"])
     assert model.get_turn() == chess.BLACK
-    assert len(model.get_move_stack()) == 1
+    assert len(model.get_move_stack()) == 3
 
     # Test a valid takeback
     model.takeback()
-    assert len(model.get_move_stack()) == 0
+    assert len(model.get_move_stack()) == 2
     assert model.get_turn() == chess.WHITE
+    assert model.get_highlight_move() == model.board.peek()
     board_updated_listener.assert_called()
     successful_move_listener.assert_called()
 
@@ -134,14 +157,14 @@ def test_takeback(model: BoardModel, board_updated_listener: Mock, successful_mo
         model.takeback()
 
     assert model.get_turn() == chess.WHITE
+    assert model.get_highlight_move() == chess.Move.null()
     board_updated_listener.assert_not_called()
     successful_move_listener.assert_not_called()
 
 
 def test_get_move_stack(model: BoardModel):
     moves = ["e4", "d6", "d4", "Nf6", "Nc3", "g6"]
-    for move in moves:
-        model.make_move(move)
+    model.make_moves_from_list(moves)
 
     with pytest.raises(ValueError):
         model.make_move("Nb3")
@@ -321,7 +344,7 @@ def test_set_board_position(model: BoardModel, board_updated_listener: Mock):
     model.set_board_position(fen="8/8/8/8/6K1/8/8/4Q1k1 b - - 21 61", orientation=chess.BLACK, uci_last_move="e2e1")
     assert model.board.fen() == "8/8/8/8/6K1/8/8/4Q1k1 b - - 21 61"
     assert model.get_board_orientation() == chess.BLACK
-    board_updated_listener.assert_called_with(force_highlight_move=chess.Move.from_uci("e2e1"))
+    assert model.get_highlight_move() == chess.Move.from_uci("e2e1")
 
     # Test without orientation and uci_last_move forced highlight
     board_updated_listener.reset_mock()
@@ -329,7 +352,7 @@ def test_set_board_position(model: BoardModel, board_updated_listener: Mock):
     assert model.board.fen() == "8/4p3/pP2p2K/1N1qnp2/4k1P1/7P/5PR1/3BB3 w - - 0 1"
     assert model.get_board_orientation() == chess.BLACK
     board_updated_listener.assert_called()
-    assert 'force_highlight_move' not in board_updated_listener.call_args.kwargs
+    assert model.get_highlight_move() == chess.Move.null()
 
 
 def test_notify_board_model_updated(model: BoardModel, board_updated_listener: Mock):
