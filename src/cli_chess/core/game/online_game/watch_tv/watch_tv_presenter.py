@@ -37,7 +37,7 @@ class WatchTVPresenter(GamePresenterBase):
         """Update based on model change"""
         pass
 
-    def go_back(self) -> None:
+    def exit(self) -> None:
         """Stops TV and returns to the main menu"""
         self.model.stop_watching()
-        self.view.exit_view()
+        self.view.exit()

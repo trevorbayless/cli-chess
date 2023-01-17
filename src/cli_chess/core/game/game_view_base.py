@@ -15,10 +15,13 @@
 
 from __future__ import annotations
 from cli_chess.utils import log
-from cli_chess.utils.ui_common import go_back_to_main_menu, exit_app
+from cli_chess.utils.ui_common import handle_mouse_click, go_back_to_main_menu, exit_app
 from prompt_toolkit.formatted_text import HTML
 from prompt_toolkit.widgets import TextArea
-from prompt_toolkit.layout import Window, Container, FormattedTextControl, ConditionalContainer, HSplit, VSplit, D
+from prompt_toolkit.layout import Window, Container, FormattedTextControl, ConditionalContainer, HSplit, VSplit, VerticalAlign, D
+from prompt_toolkit.formatted_text import StyleAndTextTuples
+from prompt_toolkit.key_binding import KeyBindings
+from prompt_toolkit.keys import Keys
 from prompt_toolkit.buffer import Buffer
 from prompt_toolkit.filters import to_filter
 from typing import TYPE_CHECKING
@@ -28,6 +31,7 @@ if TYPE_CHECKING:
 
 class GameViewBase:
     def __init__(self, presenter: GamePresenterBase) -> None:
+        self.presenter = presenter
         self.board_output_container = presenter.board_presenter.view
         self.move_list_container = presenter.move_list_presenter.view
         self.material_diff_upper_container = presenter.material_diff_presenter.view_upper
@@ -38,6 +42,30 @@ class GameViewBase:
 
     def _create_container(self) -> Container:
         return Window(FormattedTextControl("Parent class needs to override _create_container()"))
+
+    def _base_function_bar_fragments(self) -> StyleAndTextTuples:
+        """Return the base function bar fragments"""
+        return ([
+            ("class:function_bar.key", "F1", handle_mouse_click(self.presenter.flip_board)),
+            ("class:function_bar.label", f"{'Flip board':<14}", handle_mouse_click(self.presenter.flip_board)),
+            ("class:function_bar.spacer", " ")
+        ])
+
+    def _create_function_bar(self) -> VSplit:
+        """Creates the views function bar"""
+        return VSplit([
+            Window(FormattedTextControl(self._base_function_bar_fragments())),
+        ], height=D(max=1, preferred=1))
+
+    def _container_key_bindings(self) -> KeyBindings:
+        """Creates the key bindings for this container"""
+        bindings = KeyBindings()
+
+        @bindings.add(Keys.F1, eager=True)
+        def _(event): # noqa
+            self.presenter.flip_board()
+
+        return bindings
 
     def _create_error_container(self) -> ConditionalContainer:
         """Create the error container"""
@@ -61,7 +89,7 @@ class GameViewBase:
         self.error_container.filter = to_filter(False)
 
     @staticmethod
-    def exit_view() -> None:
+    def exit() -> None:
         """Exits this view and returns to the main menu"""
         go_back_to_main_menu()
 
@@ -88,8 +116,11 @@ class PlayableGameViewBase(GameViewBase):
                 ])
             ]),
             self.input_field_container,
-            self.error_container
-        ])
+            self.error_container,
+            HSplit([
+                self._create_function_bar()
+            ], align=VerticalAlign.BOTTOM)
+        ], key_bindings=self._container_key_bindings())
 
     def _create_input_field_container(self) -> TextArea:
         """Returns a TextArea to use as the input field"""

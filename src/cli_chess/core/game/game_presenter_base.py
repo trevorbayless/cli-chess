@@ -25,10 +25,19 @@ if TYPE_CHECKING:
 
 class GamePresenterBase:
     def __init__(self, model: GameModelBase):
+        self.model = model
         self.board_presenter = BoardPresenter(model.board_model)
         self.move_list_presenter = MoveListPresenter(model.move_list_model)
         self.material_diff_presenter = MaterialDifferencePresenter(model.material_diff_model)
         self.view = GameViewBase(self)
+
+    def flip_board(self) -> None:
+        """Flip the board orientation"""
+        self.model.board_model.set_board_orientation(not self.model.board_model.get_board_orientation())
+
+    def exit(self) -> None:
+        """Exit current presenter/view"""
+        self.view.exit()
 
 
 class PlayableGamePresenterBase(GamePresenterBase):

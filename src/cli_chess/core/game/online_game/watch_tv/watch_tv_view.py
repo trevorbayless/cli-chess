@@ -18,7 +18,7 @@ from cli_chess.core.game import GameViewBase
 from cli_chess.utils.ui_common import handle_mouse_click
 from prompt_toolkit.layout import Container, Window, FormattedTextControl, VSplit, HSplit, VerticalAlign, D
 from prompt_toolkit.formatted_text import StyleAndTextTuples
-from prompt_toolkit.key_binding import KeyBindings
+from prompt_toolkit.key_binding import KeyBindings, merge_key_bindings
 from prompt_toolkit.keys import Keys
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -42,15 +42,17 @@ class WatchTVView(GameViewBase):
             HSplit([
                 self._create_function_bar()
             ], align=VerticalAlign.BOTTOM)
-        ], key_bindings=self._container_key_bindings())
+        ], key_bindings=merge_key_bindings([super()._container_key_bindings(), self._container_key_bindings()]))
 
     def _create_function_bar(self) -> VSplit:
         """Create the conditional function bar"""
         def _get_function_bar_fragments() -> StyleAndTextTuples:
-            return ([
-                ("class:function_bar.key", "F10", handle_mouse_click(self.presenter.go_back)),
-                ("class:function_bar.label", f"{'Main menu':<14}", handle_mouse_click(self.presenter.go_back))
+            fragments = self._base_function_bar_fragments()
+            fragments.extend([
+                ("class:function_bar.key", "F10", handle_mouse_click(self.presenter.exit)),
+                ("class:function_bar.label", f"{'Exit':<14}", handle_mouse_click(self.presenter.exit))
             ])
+            return fragments
 
         return VSplit([
             Window(FormattedTextControl(_get_function_bar_fragments)),
@@ -62,6 +64,6 @@ class WatchTVView(GameViewBase):
 
         @bindings.add(Keys.F10, eager=True)
         def _(event): # noqa
-            self.presenter.go_back()
+            self.presenter.exit()
 
         return bindings
