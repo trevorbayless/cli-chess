@@ -37,17 +37,7 @@ class GameViewBase:
         self._container = self._create_container()
 
     def _create_container(self) -> Container:
-        return HSplit([
-            VSplit([
-                self.board_output_container,
-                HSplit([
-                    self.material_diff_upper_container,
-                    self.move_list_container,
-                    self.material_diff_lower_container,
-                ])
-            ]),
-            self.error_container
-        ])
+        return Window(FormattedTextControl("Parent class needs to override _create_container()"))
 
     def _create_error_container(self) -> ConditionalContainer:
         """Create the error container"""
