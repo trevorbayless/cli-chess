@@ -28,17 +28,43 @@ class WatchTVModel(GameModelBase):
     def __init__(self, channel: TVChannelMenuOptions):
         super().__init__(variant=channel.variant)
         self.channel = channel
-        self._tv_stream = StreamTVChannel(self.channel, self.board_model)
+        self._tv_stream = StreamTVChannel(self.channel)
+
         self.e_watch_tv_model_updated = Event()
+        self._tv_stream.e_tv_stream_event.add_listener(self.stream_event_received)
 
     def start_watching(self):
+        """Notify the TV stream thread to start"""
         log.info(f"TV Model: Starting TV stream")
         self._tv_stream.start()
 
     def stop_watching(self):
+        """Stop the TV stream thread"""
         if self._tv_stream.is_alive():
             log.info("TV Model: Stopping TV stream")
             self._tv_stream.stop_watching()
+
+    def stream_event_received(self, **kwargs):
+        """An event was received from the TV thread"""
+        # TODO: Data needs to be organized and sent to presenter to handle display
+        if '_startGameEvent' in kwargs and '_gameMetadata' in kwargs:
+            game_metadata = kwargs['_gameMetadata']
+            event = kwargs['_startGameEvent']
+            white_rating = int(game_metadata.get('players', {}).get('white', {}).get('rating') or 0)
+            black_rating = int(game_metadata.get('players', {}).get('black', {}).get('rating') or 0)
+            orientation = True if ((white_rating >= black_rating) or self.channel.variant.lower() == "racingkings") else False
+
+            # TODO: If the variant is 3check the initial export fen will include the check counts
+            #       but follow up game stream FENs will not. Need to create lila api gh issue to talk
+            #       over possible solutions (including move history, etc)
+            self.board_model.set_board_position(event.get('fen'), orientation, uci_last_move=event.get('lastMove'))
+
+        if '_coreGameEvent' in kwargs:
+            event = kwargs['_coreGameEvent']
+            self.board_model.set_board_position(event.get('fen'), uci_last_move=event.get('lm'))
+
+        if '_endGameEvent' in kwargs:
+            event = kwargs['_endGameEvent']
 
     def _notify_watch_tv_model_updated(self) -> None:
         """Notify listeners that the model has updated"""
@@ -46,14 +72,15 @@ class WatchTVModel(GameModelBase):
 
 
 class StreamTVChannel(threading.Thread):
-    def __init__(self, channel: TVChannelMenuOptions, model, **kwargs):
+    def __init__(self, channel: TVChannelMenuOptions, **kwargs):
         super().__init__(**kwargs)
         self.session = berserk.TokenSession(lichess_config.get_value(lichess_config.Keys.API_TOKEN))
         self.client = berserk.Client(self.session)
-        self.board_model = model
         self.channel = channel
+        self.current_game = ""
         self.connection_retries = 10
-        self.running = True
+        self.running = False
+        self.e_tv_stream_event = Event()
 
         # Current flow that has to be followed to watch the "variant" tv channels
         # as /api/tv/feed is only for the top rated game, and doesn't allow channel specification
@@ -77,18 +104,17 @@ class StreamTVChannel(threading.Thread):
     def run(self):
         """Main entrypoint for the thread"""
         log.info(f"TV Stream: Started watching {self.channel.value} TV")
-        prev_game_id = ""
+        self.running = True
+        # TODO: Need to handle going back to the main menu if the TVStream connection retries are exhausted
         while self.running and self.connection_retries > 0:
             try:
                 game_id = self.get_channel_game_id(self.channel.value)
 
-                if game_id != prev_game_id:
+                if game_id != self.current_game:
+                    self.current_game = game_id
                     turns_behind = 0
-                    prev_game_id = game_id
                     game_metadata = self.get_game_metadata(game_id)
                     stream = self.client.games.stream_game_moves(game_id)
-
-                    log.info(f"TV Stream: Started streaming TV game: {game_id}")
 
                     for event in stream:
                         if not self.running:
@@ -101,20 +127,12 @@ class StreamTVChannel(threading.Thread):
 
                         if winner or status != "started" and status:
                             log.info(f"TV Stream: Game finished: {game_id}")
+                            self.e_tv_stream_event.notify(_endGameEvent=event)
                             break
 
                         if status == "started":
-                            log.debug(f"TV Stream: STARTED -- {game_metadata}")
-                            log.debug(f"TV Stream: {event}")
-
-                            white_rating = int(game_metadata.get('players', {}).get('white', {}).get('rating') or 0)
-                            black_rating = int(game_metadata.get('players', {}).get('black', {}).get('rating') or 0)
-                            orientation = True if ((white_rating >= black_rating) or self.channel.variant.lower() == "racingkings") else False
-
-                            # TODO: If the variant is 3check the initial export fen will include the check counts
-                            #       but follow up game stream FENs will not. Need to create lila api gh issue to talk
-                            #       over possible solutions (including move history, etc)
-                            self.board_model.set_board_position(fen, orientation, uci_last_move=event.get('lastMove'))
+                            log.info(f"TV Stream: Started streaming TV game: {game_id}")
+                            self.e_tv_stream_event.notify(_gameMetadata=game_metadata, _startGameEvent=event)
                             turns_behind = event.get('turns')
 
                         if fen:
@@ -123,7 +141,7 @@ class StreamTVChannel(threading.Thread):
                                 # we are caught up. This stops a quick game replay from happening.
                                 turns_behind -= 1
                             else:
-                                self.board_model.set_board_position(fen, uci_last_move=event.get('lm'))
+                                self.e_tv_stream_event.notify(_coreGameEvent=event)
 
             except Exception as e:
                 self.handle_exceptions(e)
@@ -131,13 +149,14 @@ class StreamTVChannel(threading.Thread):
             else:
                 if self.running:
                     self.connection_retries = 10
-                    log.info("TV Stream: Sleeping 3 seconds before finding next TV game")
-                    sleep(3)
+                    log.info("TV Stream: Sleeping 2 seconds before finding next TV game")
+                    sleep(2)
 
     def handle_exceptions(self, e: Exception):
         """Handles the passed in exception and responds appropriately"""
         log.error(f"TV Stream: {e}")
         self.connection_retries -= 1
+        self.current_game = ""
         delay = 5
 
         if isinstance(e, ResponseError):
