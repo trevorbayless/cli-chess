@@ -15,7 +15,7 @@
 
 from cli_chess.modules.board import BoardModel
 from cli_chess.utils import Event, log
-from chess import piece_symbol, WHITE, BLACK
+from chess import piece_symbol
 from typing import List
 
 
@@ -28,7 +28,7 @@ class MoveListModel:
         self.e_move_list_model_updated = Event()
         self.update()
 
-    def update(self, **kwargs) -> None:
+    def update(self, **kwargs) -> None: # noqa
         """Updates the move list data using the latest move stack"""
         self.move_list_data.clear()
 
@@ -38,28 +38,21 @@ class MoveListModel:
         move_replay_board.set_fen(self.board_model.initial_fen)
 
         for move in self.board_model.get_move_stack():
-            color = WHITE if move_replay_board.turn == WHITE else BLACK
+            piece_type = None
+            if bool(move):
+                piece_type = move_replay_board.piece_type_at(move.from_square) if not move.drop else move.drop
 
-            # Use the drop piece type if this is a crazyhouse drop
-            if move.drop is None:
-                piece_type = move_replay_board.piece_type_at(move.from_square)
-            else:
-                piece_type = move.drop
-
-            symbol = piece_symbol(piece_type)
-            is_castling = move_replay_board.is_castling(move)
             try:
-                san = move_replay_board.san(move)
-                move_replay_board.push_san(san)
-                move_data = {
-                    'turn': color,
-                    'move': san,
+                san_move = move_replay_board.san(move)
+                self.move_list_data.append({
+                    'turn': move_replay_board.turn,
+                    'move': san_move,
                     'piece_type': piece_type,
-                    'piece_symbol': symbol,
-                    'is_castling': is_castling,
-                    'is_promotion': True if move.promotion else False
-                }
-                self.move_list_data.append(move_data)
+                    'piece_symbol': piece_symbol(piece_type) if bool(move) else None,
+                    'is_castling': move_replay_board.is_castling(move),
+                    'is_promotion': True if move.promotion else False,
+                })
+                move_replay_board.push_san(san_move)
             except ValueError as e:
                 log.error(f"Error creating move list: {e}")
                 log.error(f"Move list data: {self.board_model.get_move_stack()}")

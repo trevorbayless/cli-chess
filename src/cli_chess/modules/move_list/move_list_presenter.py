@@ -1,4 +1,4 @@
-# Copyright (C) 2021-2022 Trevor Bayless <trevorbayless1@gmail.com>
+# Copyright (C) 2021-2023 Trevor Bayless <trevorbayless1@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -55,10 +55,10 @@ class MoveListPresenter:
     def get_move_as_unicode(move_data: dict) -> str:
         """Returns the passed in move data in unicode representation"""
         output = ""
-        move = move_data['move']
+        move = move_data.get('move')
         if move:
             output = move
-            if move_data['piece_type'] != PAWN and not move_data['is_castling']:
+            if move_data['piece_type'] and move_data['piece_type'] != PAWN and not move_data['is_castling']:
                 piece_unicode_symbol = get_piece_unicode_symbol(move_data['piece_symbol'])
                 output = piece_unicode_symbol + move[1:]
 
@@ -68,6 +68,4 @@ class MoveListPresenter:
                     promotion_unicode_symbol = get_piece_unicode_symbol(output[eq_index+1])
                     output = output[:eq_index+1] + promotion_unicode_symbol + output[eq_index+2:]
 
-        if not output:
-            output = move
-        return output
+        return output if output else move

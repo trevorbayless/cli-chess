@@ -1,4 +1,4 @@
-# Copyright (C) 2021-2022 Trevor Bayless <trevorbayless1@gmail.com>
+# Copyright (C) 2021-2023 Trevor Bayless <trevorbayless1@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -26,7 +26,7 @@ UNICODE_PIECE_SYMBOLS = {
 def get_piece_unicode_symbol(symbol: str) -> str:
     """Returns the unicode symbol associated to the symbol passed in"""
     unicode_symbol = ""
-    symbol = symbol.lower()
+    symbol = symbol.lower() if symbol else ""
     if symbol in UNICODE_PIECE_SYMBOLS:
         unicode_symbol = UNICODE_PIECE_SYMBOLS[symbol]
 

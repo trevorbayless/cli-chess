@@ -1,4 +1,4 @@
-# Copyright (C) 2021-2022 Trevor Bayless <trevorbayless1@gmail.com>
+# Copyright (C) 2021-2023 Trevor Bayless <trevorbayless1@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -128,3 +128,7 @@ def test_get_move_as_unicode(presenter: MoveListPresenter, board_config: BoardCo
     # Test kingside castle
     model.board_model.make_move("e1g1")
     assert presenter.get_move_as_unicode(model.get_move_list_data()[-1]) == "O-O"
+
+    # Test null move
+    model.board_model.make_move("0000")
+    assert presenter.get_move_as_unicode(model.get_move_list_data()[-1]) == "--"

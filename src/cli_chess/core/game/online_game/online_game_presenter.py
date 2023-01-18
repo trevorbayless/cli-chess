@@ -34,9 +34,12 @@ class OnlineGamePresenter(PlayableGamePresenterBase):
         self.model = model
         super().__init__(model)
 
-    def make_move(self, move: str, human=True) -> None:
+    def make_move(self, move: str) -> None:
+        """Make the move on the board"""
         try:
-            self.board_presenter.make_move(move, human=human)
+            if move == "0000":
+                raise ValueError("Null moves are not supported in online games")
+            else:
+                self.board_presenter.make_move(move, human=True)
         except Exception as e:
             self.view.show_error(f"{e}")
-            raise e

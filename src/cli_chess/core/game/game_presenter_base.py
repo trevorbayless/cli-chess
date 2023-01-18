@@ -49,11 +49,7 @@ class PlayableGamePresenterBase(GamePresenterBase):
         self.model.board_model.e_successful_move_made.add_listener(self.view.clear_error)
 
     def user_input_received(self, inpt: str) -> None:
-        self.make_move(inpt, human=True)
+        self.make_move(inpt)
 
-    def make_move(self, move: str, human=True) -> None:
-        try:
-            self.board_presenter.make_move(move, human=human)
-        except Exception as e:
-            self.view.show_error(f"{e}")
-            raise e
+    def make_move(self, move: str) -> None:
+        raise NotImplementedError

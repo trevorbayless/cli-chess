@@ -1,4 +1,4 @@
-# Copyright (C) 2021-2022 Trevor Bayless <trevorbayless1@gmail.com>
+# Copyright (C) 2021-2023 Trevor Bayless <trevorbayless1@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -76,6 +76,17 @@ def test_update(model: MoveListModel, model_listener: Mock):
         'piece_symbol': PIECE_SYMBOLS[PAWN],
         'is_castling': False,
         'is_promotion': True
+    }
+
+    # Test a null move
+    model.board_model.make_move("0000")
+    assert model.move_list_data[-1] == {
+        'turn': BLACK,
+        'move': '--',
+        'piece_type': None,
+        'piece_symbol': None,
+        'is_castling': False,
+        'is_promotion': False
     }
 
     # Test crazyhouse drop piece

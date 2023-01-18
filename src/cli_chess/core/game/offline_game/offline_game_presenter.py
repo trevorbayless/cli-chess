@@ -46,16 +46,22 @@ class OfflineGamePresenter(PlayableGamePresenterBase):
         if self.model.board_model.get_turn() != self.model.board_model.my_color:
             asyncio.create_task(self.make_engine_move())
 
-    def user_input_received(self, input) -> None:
+    def make_move(self, move: str) -> None:
+        """Make the users move on the board"""
         try:
-            super().user_input_received(input)
+            self.board_presenter.make_move(move, human=True)
             asyncio.create_task(self.make_engine_move())
         except Exception as e:
-            # Exceptions are logged in base class
-            pass
+            self.view.show_error(f"{e}")
 
     async def make_engine_move(self) -> None:
-        self.view.lock_input()
-        engine_move = await self.engine_presenter.get_best_move()
-        self.make_move(engine_move.move.uci(), human=False)
+        """Get the best move from the engine and make it"""
+        try:
+            self.view.lock_input()
+            engine_move = await self.engine_presenter.get_best_move()
+            self.board_presenter.make_move(engine_move.move.uci(), human=False)
+        except Exception as e:
+            log.critical(f"Received an invalid move from the engine: {e}")
+            self.view.show_error(f"Invalid move received from engine - inspect logs")
+
         self.view.unlock_input()
