@@ -55,7 +55,7 @@ class TokenManagerView:
     def _create_container(self) -> HSplit:
         """Creates the container for the token manager view"""
         return HSplit([
-            Label(f"{'Authenticate with Lichess':<{self.container_width}}", style="class:menu.category_title", wrap_lines=False),
+            Label(f"{'Authenticate with Lichess':<{self.container_width}}", style="class:menu.category-title", wrap_lines=False),
             VSplit([
                 Label("API Token: ", style="bold", dont_extend_width=True),
                 ConditionalContainer(

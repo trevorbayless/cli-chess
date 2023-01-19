@@ -60,11 +60,11 @@ class MainView:
             self._error_label.text = ""
 
             if fragments:
-                fragments.append(("class:function_bar.spacer", " "))
+                fragments.append(("class:function-bar.spacer", " "))
 
             fragments.extend([
-                ("class:function_bar.key", "F10", handle_mouse_click(exit_app)),
-                ("class:function_bar.label", f"{'Quit':<14}", handle_mouse_click(exit_app))
+                ("class:function-bar.key", "F10", handle_mouse_click(exit_app)),
+                ("class:function-bar.label", f"{'Quit':<14}", handle_mouse_click(exit_app))
             ])
 
             return fragments

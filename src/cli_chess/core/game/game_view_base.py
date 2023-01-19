@@ -46,9 +46,9 @@ class GameViewBase:
     def _base_function_bar_fragments(self) -> StyleAndTextTuples:
         """Return the base function bar fragments"""
         return ([
-            ("class:function_bar.key", "F1", handle_mouse_click(self.presenter.flip_board)),
-            ("class:function_bar.label", f"{'Flip board':<14}", handle_mouse_click(self.presenter.flip_board)),
-            ("class:function_bar.spacer", " ")
+            ("class:function-bar.key", "F1", handle_mouse_click(self.presenter.flip_board)),
+            ("class:function-bar.label", f"{'Flip board':<14}", handle_mouse_click(self.presenter.flip_board)),
+            ("class:function-bar.spacer", " ")
         ])
 
     def _create_function_bar(self) -> VSplit:

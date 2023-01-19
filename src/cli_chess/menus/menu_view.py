@@ -1,4 +1,4 @@
-# Copyright (C) 2021-2022 Trevor Bayless <trevorbayless1@gmail.com>
+# Copyright (C) 2021-2023 Trevor Bayless <trevorbayless1@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -49,7 +49,7 @@ class MenuView:
     def _get_title_text_fragments(self) -> StyleAndTextTuples:
         """Create the text fragments for the menu title"""
         return [
-            ("class:menu.category_title", f"{self.presenter.get_menu_category().title:<{self.container_width}}"),
+            ("class:menu.category-title", f"{self.presenter.get_menu_category().title:<{self.container_width}}"),
             ("class:menu", "\n")
         ]
 

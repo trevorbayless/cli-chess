@@ -43,8 +43,8 @@ class TVChannelMenuView(MenuView):
     def get_function_bar_fragments(self) -> StyleAndTextTuples:
         """Returns the tv menu function bar fragments"""
         return [
-            ("class:function_bar.key", "F1", handle_mouse_click(self.presenter.handle_start_watching_tv)),
-            ("class:function_bar.label", f"{'Watch channel':<14}", handle_mouse_click(self.presenter.handle_start_watching_tv)),
+            ("class:function-bar.key", "F1", handle_mouse_click(self.presenter.handle_start_watching_tv)),
+            ("class:function-bar.label", f"{'Watch channel':<14}", handle_mouse_click(self.presenter.handle_start_watching_tv)),
         ]
 
     def get_function_bar_key_bindings(self) -> KeyBindings:

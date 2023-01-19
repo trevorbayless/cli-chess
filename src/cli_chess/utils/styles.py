@@ -1,4 +1,4 @@
-# Copyright (C) 2021-2022 Trevor Bayless <trevorbayless1@gmail.com>
+# Copyright (C) 2021-2023 Trevor Bayless <trevorbayless1@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,7 +15,7 @@
 
 default = {
     "menu": "bg:",
-    "menu.category_title": "fg:black bg:limegreen underline",
+    "menu.category-title": "fg:black bg:limegreen underline",
     "menu.option": "fg:white",
     "menu.multi-value": "fg:orangered",
     "focused-selected": "fg:black bg:mediumturquoise noinherit",
@@ -23,9 +23,9 @@ default = {
     "menu.multi-value focused-selected": "fg:orangered bold noinherit",
     "menu.multi-value unfocused-selected": "fg:orangered noinherit",
 
-    "function_bar.key": "fg:white",
-    "function_bar.label": "fg:black bg:mediumturquoise",
-    "function_bar.spacer": "",
+    "function-bar.key": "fg:white",
+    "function-bar.label": "fg:black bg:mediumturquoise",
+    "function-bar.spacer": "",
 
     "label": "fg:white",
     "label.success": "fg:darkgreen",
@@ -42,7 +42,7 @@ default = {
 
 twilight = {
     "menu": "bg:",
-    "menu.category_title": "fg:black bg:darkseagreen underline",
+    "menu.category-title": "fg:black bg:darkseagreen underline",
     "menu.option": "fg:white",
     "menu.multi-value": "fg:tomato",
     "focused-selected": "fg:black bg:plum noinherit",
@@ -50,9 +50,9 @@ twilight = {
     "menu.multi-value focused-selected": "fg:tomato bold noinherit",
     "menu.multi-value unfocused-selected": "fg:tomato noinherit",
 
-    "function_bar.key": "fg:white",
-    "function_bar.label": "fg:black bg:plum",
-    "function_bar.spacer": "",
+    "function-bar.key": "fg:white",
+    "function-bar.label": "fg:black bg:plum",
+    "function-bar.spacer": "",
 
     "label": "fg:white",
     "label.success": "fg:skyblue",

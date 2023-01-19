@@ -49,8 +49,8 @@ class WatchTVView(GameViewBase):
         def _get_function_bar_fragments() -> StyleAndTextTuples:
             fragments = self._base_function_bar_fragments()
             fragments.extend([
-                ("class:function_bar.key", "F10", handle_mouse_click(self.presenter.exit)),
-                ("class:function_bar.label", f"{'Exit':<14}", handle_mouse_click(self.presenter.exit))
+                ("class:function-bar.key", "F10", handle_mouse_click(self.presenter.exit)),
+                ("class:function-bar.label", f"{'Exit':<14}", handle_mouse_click(self.presenter.exit))
             ])
             return fragments
 

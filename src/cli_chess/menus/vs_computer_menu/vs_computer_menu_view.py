@@ -31,8 +31,8 @@ class VsComputerMenuView(MultiValueMenuView):
 
     def get_function_bar_fragments(self) -> StyleAndTextTuples:
         return [
-            ("class:function_bar.key", "F1", handle_mouse_click(self.presenter.handle_start_game)),
-            ("class:function_bar.label", f"{'Start game':<14}", handle_mouse_click(self.presenter.handle_start_game)),
+            ("class:function-bar.key", "F1", handle_mouse_click(self.presenter.handle_start_game)),
+            ("class:function-bar.label", f"{'Start game':<14}", handle_mouse_click(self.presenter.handle_start_game)),
         ]
 
     def get_function_bar_key_bindings(self) -> KeyBindings:
