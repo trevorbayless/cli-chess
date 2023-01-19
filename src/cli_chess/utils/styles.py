@@ -39,6 +39,8 @@ default = {
 
     "validation-toolbar": "fg:white bg:darkred",
 
+    "material-difference": "fg:gray",
+
     "move-input": "fg:white bold",
     "move-list": "fg:gray"
 }
@@ -68,6 +70,8 @@ twilight = {
     "text-area.prompt": "fg:white bold noinherit",
 
     "validation-toolbar": "fg:white bg:crimson",
+
+    "material-difference": "fg:gray",
 
     "move-input": "fg:white bold",
     "move-list": "fg:gray"

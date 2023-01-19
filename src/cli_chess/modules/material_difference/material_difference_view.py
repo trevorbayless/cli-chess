@@ -26,6 +26,7 @@ class MaterialDifferenceView:
     def __init__(self, presenter: MaterialDifferencePresenter, initial_diff: str, show: bool = True):
         self.presenter = presenter
         self._diff_text_area = TextArea(text=initial_diff,
+                                        style="class:material-difference",
                                         width=D(min=1, max=20),
                                         height=D(min=1, max=1),
                                         read_only=True,
