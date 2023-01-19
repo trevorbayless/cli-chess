@@ -78,8 +78,9 @@ class StreamTVChannel(threading.Thread):
         self.client = berserk.Client(self.session)
         self.channel = channel
         self.current_game = ""
-        self.connection_retries = 10
         self.running = False
+        self.max_retries = 10
+        self.retries = 0
         self.e_tv_stream_event = Event()
 
         # Current flow that has to be followed to watch the "variant" tv channels
@@ -90,23 +91,27 @@ class StreamTVChannel(threading.Thread):
         # 4. Stream the moves of the game using /api/stream/game/{id}
         # 5. When the game completes, start this loop over.
 
-    def get_channel_game_id(self, channel: str):
+    def get_channel_game_id(self, channel: str) -> str:
         """Returns the game ID of the ongoing TV game of the passed in channel"""
-        return self.client.tv.get_current_games()[channel]['gameId']
+        channel_game_id = self.client.tv.get_current_games().get(channel, {}).get('gameId')
+        if not channel_game_id:
+            raise ValueError(f"Didn't receive game ID for current {channel} TV game")
+
+        return channel_game_id
 
     def get_game_metadata(self, game_id: str):
         """Return the metadata for the passed in Game ID"""
-        return self.client.games.export(game_id)
+        game_metadata = self.client.games.export(game_id)
+        if not game_metadata:
+            raise ValueError("Didn't receive game metadata for current TV game")
 
-    def stop_watching(self):
-        self.running = False
+        return game_metadata
 
     def run(self):
         """Main entrypoint for the thread"""
         log.info(f"TV Stream: Started watching {self.channel.value} TV")
         self.running = True
-        # TODO: Need to handle going back to the main menu if the TVStream connection retries are exhausted
-        while self.running and self.connection_retries > 0:
+        while self.running:
             try:
                 game_id = self.get_channel_game_id(self.channel.value)
 
@@ -148,20 +153,30 @@ class StreamTVChannel(threading.Thread):
 
             else:
                 if self.running:
-                    self.connection_retries = 10
+                    self.retries = 0
                     log.info("TV Stream: Sleeping 2 seconds before finding next TV game")
                     sleep(2)
 
     def handle_exceptions(self, e: Exception):
         """Handles the passed in exception and responds appropriately"""
-        log.error(f"TV Stream: {e}")
-        self.connection_retries -= 1
-        self.current_game = ""
-        delay = 5
+        if self.retries <= self.max_retries:
+            log.error(f"TV Stream: {e}")
+            self.current_game = ""
+            delay = 2 * (self.retries + 1)
 
-        if isinstance(e, ResponseError):
-            if e.status_code == 429:
-                delay = 60
+            if isinstance(e, ResponseError):
+                if e.status_code == 429:
+                    delay = 60
 
-        log.info(f"TV Stream: Sleeping {delay} seconds before retrying ({self.connection_retries} retries left).")
-        sleep(delay)
+            # TODO: Send event to model with retry notification so we can display it to the user
+            log.info(f"TV Stream: Sleeping {delay} seconds before retrying ({self.max_retries - self.retries} retries left).")
+            sleep(delay)
+            self.retries += 1
+        else:
+            self.stop_watching()
+
+    def stop_watching(self):
+        # TODO: Need to handle going back to the main menu when the TVStream
+        #       connection retries are exhausted. Send event notification to model?
+        log.info("TV Stream: Stopping TV stream")
+        self.running = False
