@@ -34,10 +34,13 @@ default = {
     "label.error.banner": "bg:darkred fg:white",
 
     "text-area": "fg:orangered bold",
-    "text-area-placeholder": "fg:orangered italic",
-    "text-area.prompt": "fg:white bold noinherit",
+    "text-area-placeholder": "italic",
+    "text-area.prompt": "fg:white bg:darkcyan bold noinherit",
 
-    "validation-toolbar": "fg:white bg:darkred"
+    "validation-toolbar": "fg:white bg:darkred",
+
+    "move-input": "fg:white bold",
+    "move-list": "fg:gray"
 }
 
 twilight = {
@@ -61,8 +64,11 @@ twilight = {
     "label.error.banner": "fg:crimson fg:white",
 
     "text-area": "fg:tomato bold",
-    "text-area-placeholder": "fg:tomato italic",
+    "text-area-placeholder": "italic",
     "text-area.prompt": "fg:white bold noinherit",
 
-    "validation-toolbar": "fg:white bg:crimson"
+    "validation-toolbar": "fg:white bg:crimson",
+
+    "move-input": "fg:white bold",
+    "move-list": "fg:gray"
 }

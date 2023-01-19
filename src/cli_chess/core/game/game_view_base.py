@@ -16,7 +16,6 @@
 from __future__ import annotations
 from cli_chess.utils import log
 from cli_chess.utils.ui_common import handle_mouse_click, go_back_to_main_menu, exit_app
-from prompt_toolkit.formatted_text import HTML
 from prompt_toolkit.widgets import TextArea
 from prompt_toolkit.layout import Window, Container, FormattedTextControl, ConditionalContainer, HSplit, VSplit, VerticalAlign, D
 from prompt_toolkit.formatted_text import StyleAndTextTuples
@@ -112,7 +111,7 @@ class PlayableGameViewBase(GameViewBase):
                 HSplit([
                     self.material_diff_upper_container,
                     self.move_list_container,
-                    self.material_diff_lower_container,
+                    self.material_diff_lower_container
                 ])
             ]),
             self.input_field_container,
@@ -124,10 +123,9 @@ class PlayableGameViewBase(GameViewBase):
 
     def _create_input_field_container(self) -> TextArea:
         """Returns a TextArea to use as the input field"""
-        input_type = "GAME"
         input_field = TextArea(height=D(max=1),
-                               prompt=HTML(f"<style bg='darkcyan'>[{input_type}] $ </style>"),
-                               style="class:input-field",
+                               prompt="Move:",
+                               style="class:move-input",
                                multiline=False,
                                wrap_lines=True,
                                focus_on_click=True)
