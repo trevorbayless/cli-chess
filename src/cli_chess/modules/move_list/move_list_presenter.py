@@ -24,11 +24,11 @@ if TYPE_CHECKING:
 
 
 class MoveListPresenter:
-    def __init__(self, move_list_model: MoveListModel):
-        self.move_list_model = move_list_model
+    def __init__(self, model: MoveListModel):
+        self.model = model
         self.view = MoveListView(self)
 
-        self.move_list_model.e_move_list_model_updated.add_listener(self.update)
+        self.model.e_move_list_model_updated.add_listener(self.update)
         board_config.e_board_config_updated.add_listener(self.update)
 
     def update(self) -> None:
@@ -38,7 +38,7 @@ class MoveListPresenter:
     def get_formatted_move_list(self) -> List[str]:
         """Returns a list containing the formatted moves"""
         formatted_move_list = []
-        move_list_data = self.move_list_model.get_move_list_data()
+        move_list_data = self.model.get_move_list_data()
         use_unicode = board_config.get_boolean(board_config.Keys.USE_UNICODE_PIECES)
 
         for entry in move_list_data:

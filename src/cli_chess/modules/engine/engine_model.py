@@ -22,9 +22,9 @@ import chess.engine
 
 async def create_engine_model(board_model: BoardModel, game_parameters: dict):
     """Create an instance of the engine model with the engine loaded"""
-    engine_model = EngineModel(board_model, game_parameters)
-    await engine_model._init()
-    return engine_model
+    model = EngineModel(board_model, game_parameters)
+    await model._init()
+    return model
 
 
 class EngineModel:

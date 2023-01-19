@@ -22,8 +22,8 @@ if TYPE_CHECKING:
 
 
 class MoveListView:
-    def __init__(self, move_list_presenter: MoveListPresenter):
-        self.move_list_presenter = move_list_presenter
+    def __init__(self, presenter: MoveListPresenter):
+        self.presenter = presenter
         self.move_list_output = TextArea(text="No moves...",
                                          width=D(max=20, preferred=20),
                                          height=D(max=4, preferred=4),

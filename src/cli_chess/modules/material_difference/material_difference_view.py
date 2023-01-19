@@ -1,4 +1,4 @@
-# Copyright (C) 2021-2022 Trevor Bayless <trevorbayless1@gmail.com>
+# Copyright (C) 2021-2023 Trevor Bayless <trevorbayless1@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -23,8 +23,8 @@ if TYPE_CHECKING:
 
 
 class MaterialDifferenceView:
-    def __init__(self, material_diff_presenter: MaterialDifferencePresenter, initial_diff: str, show: bool = True):
-        self.material_diff_presenter = material_diff_presenter
+    def __init__(self, presenter: MaterialDifferencePresenter, initial_diff: str, show: bool = True):
+        self.presenter = presenter
         self._diff_text_area = TextArea(text=initial_diff,
                                         width=D(min=1, max=20),
                                         height=D(min=1, max=1),

@@ -1,4 +1,4 @@
-# Copyright (C) 2021-2022 Trevor Bayless <trevorbayless1@gmail.com>
+# Copyright (C) 2021-2023 Trevor Bayless <trevorbayless1@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -25,12 +25,12 @@ if TYPE_CHECKING:
 
 
 class BoardPresenter:
-    def __init__(self, board_model: BoardModel) -> None:
-        self.board_model = board_model
+    def __init__(self, model: BoardModel) -> None:
+        self.model = model
         self.board_config_values = board_config.get_all_values()
         self.view = BoardView(self, self.get_board_display())
 
-        self.board_model.e_board_model_updated.add_listener(self.update)
+        self.model.e_board_model_updated.add_listener(self.update)
         board_config.e_board_config_updated.add_listener(self._update_cached_config_values)
 
     def update(self, **kwargs) -> None: # noqa
@@ -53,7 +53,7 @@ class BoardPresenter:
            Raises an exception on invalid moves
         """
         try:
-            self.board_model.make_move(move, human=human)
+            self.model.make_move(move, human=human)
         except Exception as e:
             # TODO: Handle specific exceptions (Invalid move, ambiguous, etc )
             raise e
@@ -65,14 +65,14 @@ class BoardPresenter:
            to the view to output the board display.
         """
         board_output = []
-        board_squares = self.board_model.get_board_squares()
+        board_squares = self.model.get_board_squares()
 
         # TODO: Update this implementation to use a dictionary so
         #       the following syntax can be used: board_output[chess.D2]?
         for square in board_squares:
             data = {'square_number': square,
                     'piece_str': self.get_piece_str(square),
-                    'piece_display_color': self.get_piece_display_color(self.board_model.board.piece_at(square)),
+                    'piece_display_color': self.get_piece_display_color(self.model.board.piece_at(square)),
                     'square_display_color': self.get_square_display_color(square),
                     'rank_label': self.get_rank_label(square),
                     'is_end_of_rank': self.is_square_end_of_rank(square)}
@@ -89,7 +89,7 @@ class BoardPresenter:
         show_board_coordinates = self.board_config_values[board_config.Keys.SHOW_BOARD_COORDINATES.value["name"]]
 
         if show_board_coordinates:
-            file_labels = self.board_model.get_file_labels()
+            file_labels = self.model.get_file_labels()
 
         return file_labels
 
@@ -106,11 +106,11 @@ class BoardPresenter:
            otherwise an empty string will be returned
         """
         rank_label = ""
-        rank_index = self.board_model.get_square_rank_index(square)
+        rank_index = self.model.get_square_rank_index(square)
         show_board_coordinates = self.board_config_values[board_config.Keys.SHOW_BOARD_COORDINATES.value["name"]]
 
         if self.is_square_start_of_rank(square) and show_board_coordinates:
-            rank_label = self.board_model.get_rank_label(rank_index)
+            rank_label = self.model.get_rank_label(rank_index)
 
         return rank_label
 
@@ -118,9 +118,9 @@ class BoardPresenter:
         """Returns True if the square passed in is the start of a rank"""
         is_start_of_rank = False
 
-        if self.board_model.is_white_orientation() and chess.BB_SQUARES[square] & chess.BB_FILE_A:
+        if self.model.is_white_orientation() and chess.BB_SQUARES[square] & chess.BB_FILE_A:
             is_start_of_rank = True
-        elif not self.board_model.is_white_orientation() and chess.BB_SQUARES[square] & chess.BB_FILE_H:
+        elif not self.model.is_white_orientation() and chess.BB_SQUARES[square] & chess.BB_FILE_H:
             is_start_of_rank = True
 
         return is_start_of_rank
@@ -129,9 +129,9 @@ class BoardPresenter:
         """Returns True if the square passed in is the last on the rank"""
         is_end_of_rank = False
 
-        if self.board_model.is_white_orientation() and chess.BB_SQUARES[square] & chess.BB_FILE_H:
+        if self.model.is_white_orientation() and chess.BB_SQUARES[square] & chess.BB_FILE_H:
             is_end_of_rank = True
-        elif not self.board_model.is_white_orientation() and chess.BB_SQUARES[square] & chess.BB_FILE_A:
+        elif not self.model.is_white_orientation() and chess.BB_SQUARES[square] & chess.BB_FILE_A:
             is_end_of_rank = True
 
         return is_end_of_rank
@@ -142,7 +142,7 @@ class BoardPresenter:
            string if blindfold chess is enabled in the configuration, or there is
            not a piece at the square
         """
-        piece = self.board_model.board.piece_at(square)
+        piece = self.model.board.piece_at(square)
         piece_str = ""
 
         blindfold_chess = self.board_config_values[board_config.Keys.BLINDFOLD_CHESS.value["name"]]
@@ -172,7 +172,7 @@ class BoardPresenter:
         """Returns a string with the color to display the
            square based on configuration settings, last move, and check.
         """
-        if self.board_model.is_light_square(square):
+        if self.model.is_light_square(square):
             square_color = self.board_config_values[board_config.Keys.LIGHT_SQUARE_COLOR.value["name"]]
         else:
             square_color = self.board_config_values[board_config.Keys.DARK_SQUARE_COLOR.value["name"]]
@@ -180,22 +180,22 @@ class BoardPresenter:
         show_board_highlights = self.board_config_values[board_config.Keys.SHOW_BOARD_HIGHLIGHTS.value["name"]]
         if show_board_highlights:
             try:
-                last_move = self.board_model.get_highlight_move()
+                last_move = self.model.get_highlight_move()
                 if bool(last_move) and (square == last_move.to_square or square == last_move.from_square):
                     square_color = self.board_config_values[board_config.Keys.LAST_MOVE_COLOR.value["name"]]
                     # TODO: Lighten last move square color if on light square
             except IndexError:
                 pass
 
-            if self.board_model.is_square_in_check(square):
+            if self.model.is_square_in_check(square):
                 square_color = self.board_config_values[board_config.Keys.IN_CHECK_COLOR.value["name"]]
 
         return square_color
 
     def game_result(self) -> str:
         """Returns a string containing the result of the game"""
-        game_result = self.board_model.board.result()
-        is_checkmate = self.board_model.board.is_checkmate()
+        game_result = self.model.board.result()
+        is_checkmate = self.model.board.is_checkmate()
         output = ""
 
         if is_checkmate:
@@ -205,7 +205,7 @@ class BoardPresenter:
         elif game_result == "0-1":
             output += "Black is victorious"
         elif game_result == "1/2-1/2":
-            if self.board_model.board.is_stalemate():
+            if self.model.board.is_stalemate():
                 output = "Stalemate"
             else:
                 output = "Draw"

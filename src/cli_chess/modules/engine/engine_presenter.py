@@ -1,4 +1,4 @@
-# Copyright (C) 2021-2022 Trevor Bayless <trevorbayless1@gmail.com>
+# Copyright (C) 2021-2023 Trevor Bayless <trevorbayless1@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -21,9 +21,9 @@ if TYPE_CHECKING:
 
 
 class EnginePresenter:
-    def __init__(self, engine_model: EngineModel):
-        self.engine_model = engine_model
+    def __init__(self, model: EngineModel):
+        self.model = model
 
     async def get_best_move(self) -> PlayResult:
         """Notify the engine to get the best move from the current position"""
-        return await self.engine_model.get_best_move()
+        return await self.model.get_best_move()

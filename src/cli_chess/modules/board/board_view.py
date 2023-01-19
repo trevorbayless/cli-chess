@@ -23,8 +23,8 @@ if TYPE_CHECKING:
 
 
 class BoardView:
-    def __init__(self, board_presenter: BoardPresenter, initial_board_output: list):
-        self.board_presenter = board_presenter
+    def __init__(self, presenter: BoardPresenter, initial_board_output: list):
+        self.presenter = presenter
         self.board_output = FormattedTextControl(HTML(self._build_output(initial_board_output)))
         self._container = self._create_container()
 
@@ -41,8 +41,8 @@ class BoardView:
         """Returns a string containing the board output to be used for
            display. The string returned will contain HTML elements"""
         board_output_str = ""
-        file_label_color = self.board_presenter.get_file_label_color()
-        rank_label_color = self.board_presenter.get_rank_label_color()
+        file_label_color = self.presenter.get_file_label_color()
+        rank_label_color = self.presenter.get_rank_label_color()
 
         for square in board_output_list:
             piece_str = square['piece_str']
@@ -55,7 +55,7 @@ class BoardView:
             if square['is_end_of_rank']:
                 board_output_str += "\n"
 
-        file_labels = " " + self.board_presenter.get_file_labels()
+        file_labels = " " + self.presenter.get_file_labels()
         board_output_str += f"<style fg='{file_label_color}'>{file_labels}</style>"
 
         return board_output_str

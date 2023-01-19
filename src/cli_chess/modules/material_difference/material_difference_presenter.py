@@ -24,28 +24,28 @@ if TYPE_CHECKING:
 
 
 class MaterialDifferencePresenter:
-    def __init__(self, material_diff_model: MaterialDifferenceModel):
-        self.material_diff_model = material_diff_model
-        self.show_diff = self.material_diff_model.board_model.get_variant_name() != "horde"
+    def __init__(self, model: MaterialDifferenceModel):
+        self.model = model
+        self.show_diff = self.model.board_model.get_variant_name() != "horde"
 
-        orientation = self.material_diff_model.get_board_orientation()
+        orientation = self.model.get_board_orientation()
         self.view_upper = MaterialDifferenceView(self, self.format_diff_output(not orientation), self.show_diff)
         self.view_lower = MaterialDifferenceView(self, self.format_diff_output(orientation), self.show_diff)
 
-        self.material_diff_model.e_material_difference_model_updated.add_listener(self.update)
+        self.model.e_material_difference_model_updated.add_listener(self.update)
         board_config.e_board_config_updated.add_listener(self.update)
 
     def update(self) -> None:
         """Updates the material differences for both sides"""
-        orientation = self.material_diff_model.get_board_orientation()
+        orientation = self.model.get_board_orientation()
         self.view_upper.update(self.format_diff_output(not orientation))
         self.view_lower.update(self.format_diff_output(orientation))
 
     def format_diff_output(self, color: Color) -> str:
         """Returns the formatted difference of the color passed in as a string"""
         output = ""
-        material_difference = self.material_diff_model.get_material_difference(color)
-        score = self.material_diff_model.get_score(color)
+        material_difference = self.model.get_material_difference(color)
+        score = self.model.get_score(color)
         use_unicode = board_config.get_boolean(board_config.Keys.USE_UNICODE_PIECES)
 
         for piece_type in PIECE_TYPES:

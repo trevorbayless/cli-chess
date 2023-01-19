@@ -57,7 +57,7 @@ def test_update(model: MoveListModel, presenter: MoveListPresenter, board_config
 
 def test_get_formatted_move_list(presenter: MoveListPresenter, board_config: BoardConfig):
     model = MoveListModel(BoardModel(fen="3pkb1r/P4pp1/8/8/8/8/1PPP3p/R2NKP2 w Qk - 0 40"))
-    presenter.move_list_model = model
+    presenter.model = model
 
     # Test empty move list
     assert presenter.get_formatted_move_list() == []
@@ -87,7 +87,7 @@ def test_get_formatted_move_list(presenter: MoveListPresenter, board_config: Boa
     # Test move list formatting when the first move is black
     board_config.set_value(board_config.Keys.USE_UNICODE_PIECES, "no")
     model = MoveListModel(BoardModel(fen="8/1PK5/8/8/8/8/4kp2/8 b - - 2 70"))
-    presenter.move_list_model = model
+    presenter.model = model
     model.board_model.make_move("f1Q")
     assert presenter.get_formatted_move_list() == ["...", "f1=Q"]
 
@@ -99,7 +99,7 @@ def test_get_formatted_move_list(presenter: MoveListPresenter, board_config: Boa
 def test_get_move_as_unicode(presenter: MoveListPresenter, board_config: BoardConfig):
     board_config.set_value(board_config.Keys.USE_UNICODE_PIECES, "yes")
     model = MoveListModel(BoardModel(fen="r3kbn1/p2p3P/8/8/5p2/8/p3P3/RNBQK2R w KQq - 0 1"))
-    presenter.move_list_model = model
+    presenter.model = model
 
     # Test pawn move
     model.board_model.make_move("e3")
