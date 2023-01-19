@@ -26,8 +26,8 @@ class MoveListView:
         self.presenter = presenter
         self.move_list_output = TextArea(text="No moves...",
                                          style="class:move-list",
-                                         width=D(max=20, preferred=20),
-                                         height=D(max=4, preferred=4),
+                                         width=D(min=1, max=20),
+                                         height=D(min=1, max=4, preferred=4),
                                          line_numbers=True,
                                          multiline=True,
                                          wrap_lines=False,
