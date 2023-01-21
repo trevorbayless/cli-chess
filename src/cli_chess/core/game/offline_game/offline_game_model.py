@@ -15,6 +15,7 @@
 
 from cli_chess.core.game import GameModelBase
 from cli_chess.modules.game_options import GameOption
+from cli_chess.utils.logging import log
 from random import getrandbits
 import chess
 
@@ -34,3 +35,30 @@ class OfflineGameModel(GameModelBase):
         super().__init__(orientation=get_player_color(game_parameters[GameOption.COLOR]),
                          variant=game_parameters[GameOption.VARIANT],
                          fen="")
+        self._save_game_metadata(game_parameters=game_parameters)
+
+    def _default_game_metadata(self) -> dict:
+        """Returns the default structure for game metadata"""
+        game_metadata = super()._default_game_metadata()
+        game_metadata.update({
+            'my_color': "",
+            'rated': False,
+            'speed': None,
+        })
+        return game_metadata
+
+    def _save_game_metadata(self, **kwargs) -> None:
+        """Parses and saves the data of the game being played"""
+        try:
+            if 'game_parameters' in kwargs:
+                data = kwargs['game_parameters']
+                self.game_metadata['my_color'] = self.board_model.my_color
+                self.game_metadata['variant'] = data[GameOption.VARIANT]
+                #self.game_metadata['players']['white'] =  # TODO: Need to set player names in offline games
+                #self.game_metadata['players']['black'] =
+                self.game_metadata['clock']['white']['time'] = data[GameOption.TIME_CONTROL][0]
+                self.game_metadata['clock']['white']['increment'] = data[GameOption.TIME_CONTROL][1]
+
+            self.e_game_model_updated.notify()
+        except KeyError as e:
+            log.error(f"Error saving offline game metadata: {e}")

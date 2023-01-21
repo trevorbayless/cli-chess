@@ -39,6 +39,7 @@ class EngineModel:
     @staticmethod
     async def load_engine() -> chess.engine.UciProtocol:
         """Load the chess engine"""
+        # TODO: Assert for the time being that the engine name matches "Fairy-Stockfish"
         engine_path = engine_config.get_value(engine_config.Keys.ENGINE_PATH)
         try:
             _, engine = await chess.engine.popen_uci(engine_path)

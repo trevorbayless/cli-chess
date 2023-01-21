@@ -31,6 +31,15 @@ class GamePresenterBase:
         self.material_diff_presenter = MaterialDifferencePresenter(model.material_diff_model)
         self.view = GameViewBase(self)
 
+        self.model.e_game_model_updated.add_listener(self.update)
+
+    def update(self, **kwargs) -> None:
+        """Listens to game model updates when notified. Child classes should
+           override if interested in specific kwargs. See model for specific
+           kwargs that are currently being sent.
+        """
+        pass
+
     def flip_board(self) -> None:
         """Flip the board orientation"""
         self.model.board_model.set_board_orientation(not self.model.board_model.get_board_orientation())
@@ -42,6 +51,7 @@ class GamePresenterBase:
 
 class PlayableGamePresenterBase(GamePresenterBase):
     def __init__(self, model: GameModelBase):
+        # NOTE: Base Model subscriptions are currently handled in parent. Override here if needed.
         self.model = model
         super().__init__(model)
         self.view = PlayableGameViewBase(self)

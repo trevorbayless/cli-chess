@@ -31,6 +31,7 @@ def start_online_game_vs_ai(game_parameters: dict) -> None:
 
 class OnlineGamePresenter(PlayableGamePresenterBase):
     def __init__(self, model: OnlineGameModel):
+        # NOTE: Model subscriptions are currently handled in parent. Override here if needed.
         self.model = model
         super().__init__(model)
 

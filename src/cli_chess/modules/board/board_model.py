@@ -55,9 +55,9 @@ class BoardModel:
             self.board = self._initialize_board(variant, fen)
             self.initial_fen = self.board.fen()
             self.my_color = orientation
-            self.orientation = chess.WHITE if variant.lower() == "racingkings" else orientation
+            self.set_board_orientation(chess.WHITE if variant.lower() == "racingkings" else orientation, notify=False)
             self.highlight_move = chess.Move.null()
-            self.e_board_model_updated.notify()
+            self.e_board_model_updated.notify(board_orientation=self.orientation)
         except ValueError as e:
             log.error(f"Error while trying to reinitialize the board: {e}")
             raise
@@ -125,8 +125,8 @@ class BoardModel:
 
     def get_highlight_move(self) -> chess.Move:
         """Returns the move that should be highlighted on the board.
-           NOTE: this move should never be popped from the board as it
-           is not guaranteed to be valid in the context of the move stack
+           This move should never be popped from the board as it is
+           not guaranteed to be valid in the context of the move stack
            (example: setting the FEN with the last known move). To get
            the true last move always use board.peek()
         """
@@ -140,7 +140,7 @@ class BoardModel:
         log.debug(f"board orientation set (orientation = {color})")
 
         if notify:
-            self._notify_board_model_updated()
+            self._notify_board_model_updated(board_orientation=self.orientation)
 
     def set_fen(self, fen: str, notify=True) -> None:
         """Sets the board FEN. Raises ValueError if syntactically invalid.
@@ -236,13 +236,13 @@ class BoardModel:
                 if isinstance(orientation, bool):
                     self.set_board_orientation(orientation, notify=False)
 
-                self.e_board_model_updated.notify()
+                self.e_board_model_updated.notify(board_orientation=self.orientation)
         except Exception as e:
             log.error(f"Error caught setting board position: {e}")
 
-    def _notify_board_model_updated(self) -> None:
+    def _notify_board_model_updated(self, **kwargs) -> None:
         """Notifies listeners of board model updates"""
-        self.e_board_model_updated.notify()
+        self.e_board_model_updated.notify(**kwargs)
 
     def _notify_successful_move_made(self) -> None:
         """Notifies listeners that a board move has been made"""
@@ -251,7 +251,7 @@ class BoardModel:
     def _log_init_info(self):
         """Logs class initialization"""
         log.debug("=============== BOARD INITIALIZATION ===============")
-        log.debug(f"My color: {chess.COLOR_NAMES[self.my_color]}")
         log.debug(f"Variant: {self.get_variant_name()}")
         log.debug(f"Starting FEN: {self.board.fen()}")
+        log.debug(f"Orientation: {chess.COLOR_NAMES[self.my_color]}")
         log.debug("====================================================")
