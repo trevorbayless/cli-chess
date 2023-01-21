@@ -25,7 +25,6 @@ class BoardModel:
     def __init__(self, orientation: chess.Color = chess.WHITE, variant="standard", fen="") -> None:
         self.board = self._initialize_board(variant, fen)
         self.initial_fen = self.board.fen()
-        self.my_color = orientation
         self.orientation = chess.WHITE if variant.lower() == "racingkings" else orientation
         self.highlight_move = chess.Move.null()
 
@@ -54,7 +53,6 @@ class BoardModel:
         try:
             self.board = self._initialize_board(variant, fen)
             self.initial_fen = self.board.fen()
-            self.my_color = orientation
             self.set_board_orientation(chess.WHITE if variant.lower() == "racingkings" else orientation, notify=False)
             self.highlight_move = chess.Move.null()
             self.e_board_model_updated.notify(board_orientation=self.orientation)
@@ -253,5 +251,5 @@ class BoardModel:
         log.debug("=============== BOARD INITIALIZATION ===============")
         log.debug(f"Variant: {self.get_variant_name()}")
         log.debug(f"Starting FEN: {self.board.fen()}")
-        log.debug(f"Orientation: {chess.COLOR_NAMES[self.my_color]}")
+        log.debug(f"Orientation: {chess.COLOR_NAMES[self.orientation]}")
         log.debug("====================================================")

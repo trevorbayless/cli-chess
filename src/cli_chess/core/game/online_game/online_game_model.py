@@ -18,7 +18,7 @@ from cli_chess.modules.game_options import GameOption
 from cli_chess.core.api import IncomingEventManager, GameStream
 from cli_chess.utils import log
 from cli_chess.modules.token_manager import TokenManagerModel
-from chess import Color
+from chess import Color, WHITE
 from typing import Optional
 
 
@@ -27,12 +27,14 @@ class OnlineGameModel(GameModelBase):
        Games not owned by this account must directly use the base model instead.
     """
     def __init__(self, game_parameters: dict, iem: IncomingEventManager):
+        # TODO: Send None here instead on random (need to update board model logic if so)?
+        self.my_color: Color = game_parameters[GameOption.COLOR] if not "random" else WHITE
         self._save_game_metadata(game_parameters=game_parameters)
         self.incoming_event_manager = iem
         self.game_stream = Optional[GameStream]
 
         self.incoming_event_manager.e_new_event_received.add_listener(self.handle_iem_event)
-        super().__init__()
+        super().__init__(orientation=self.my_color)
 
     def handle_iem_event(self, **kwargs) -> None:
         """Handle event from the incoming event manager"""
@@ -53,8 +55,9 @@ class OnlineGameModel(GameModelBase):
         if 'gameFull' in kwargs:
             event = kwargs['gameFull']
             self._save_game_metadata(gs_gameFull=event)
+            self.my_color = Color(self.game_metadata['my_color'])
             self.board_model.reinitialize_board(variant=self.game_metadata['variant'],
-                                                orientation=Color(self.game_metadata['my_color']),
+                                                orientation=self.my_color,
                                                 fen=event['initialFen'])
             self.board_model.make_moves_from_list(event['state']['moves'].split())
 
@@ -115,7 +118,7 @@ class OnlineGameModel(GameModelBase):
                 data = kwargs['iem_gameStart']
                 log.debug(f"OnlineGameModel: iem_gameStart ---- {data}")  # TODO: Remove after testing
                 self.game_metadata['gameId'] = data['gameId']
-                self.game_metadata['my_color'] = data['color']
+                self.game_metadata['my_color'] = data['color']  # TODO: Update to use bool instead? Color(data['color')
                 self.game_metadata['rated'] = data['rated']
                 self.game_metadata['variant'] = data['variant']['name']
                 self.game_metadata['speed'] = data['speed']

@@ -32,7 +32,8 @@ def get_player_color(color: str) -> chess.Color:
 
 class OfflineGameModel(GameModelBase):
     def __init__(self, game_parameters: dict):
-        super().__init__(orientation=get_player_color(game_parameters[GameOption.COLOR]),
+        self.my_color = get_player_color(game_parameters[GameOption.COLOR])
+        super().__init__(orientation=self.my_color,
                          variant=game_parameters[GameOption.VARIANT],
                          fen="")
         self._save_game_metadata(game_parameters=game_parameters)
@@ -52,7 +53,7 @@ class OfflineGameModel(GameModelBase):
         try:
             if 'game_parameters' in kwargs:
                 data = kwargs['game_parameters']
-                self.game_metadata['my_color'] = self.board_model.my_color
+                self.game_metadata['my_color'] = self.my_color
                 self.game_metadata['variant'] = data[GameOption.VARIANT]
                 #self.game_metadata['players']['white'] =  # TODO: Need to set player names in offline games
                 #self.game_metadata['players']['black'] =

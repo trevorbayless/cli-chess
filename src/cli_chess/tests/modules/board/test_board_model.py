@@ -85,7 +85,6 @@ def test_reinitialize_board(model: BoardModel, board_updated_listener: Mock):
     # Test valid initialization
     model.reinitialize_board("Horde", chess.BLACK)
     assert model.board.uci_variant == "horde"
-    assert model.my_color == chess.BLACK
     assert model.orientation == chess.BLACK
     assert model.initial_fen == model.board.starting_fen
     assert model.get_highlight_move() == chess.Move.null()

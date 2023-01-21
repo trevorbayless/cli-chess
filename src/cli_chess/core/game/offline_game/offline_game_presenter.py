@@ -41,10 +41,11 @@ async def _play_offline(game_parameters: dict) -> None:
 class OfflineGamePresenter(PlayableGamePresenterBase):
     def __init__(self, model: OfflineGameModel, engine_model: EngineModel):
         # NOTE: Model subscriptions are currently handled in parent. Override here if needed.
-        super().__init__(model)
+        self.model = model
         self.engine_presenter = EnginePresenter(engine_model)
+        super().__init__(model)
 
-        if self.model.board_model.get_turn() != self.model.board_model.my_color:
+        if self.model.board_model.get_turn() != self.model.my_color:
             asyncio.create_task(self.make_engine_move())
 
     def make_move(self, move: str) -> None:
