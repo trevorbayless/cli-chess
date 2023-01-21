@@ -29,8 +29,6 @@ class WatchTVModel(GameModelBase):
         super().__init__(variant=channel.variant)
         self.channel = channel
         self._tv_stream = StreamTVChannel(self.channel)
-
-        self.e_watch_tv_model_updated = Event()
         self._tv_stream.e_tv_stream_event.add_listener(self.stream_event_received)
 
     def start_watching(self):
@@ -65,10 +63,6 @@ class WatchTVModel(GameModelBase):
 
         if '_endGameEvent' in kwargs:
             event = kwargs['_endGameEvent']
-
-    def _notify_watch_tv_model_updated(self) -> None:
-        """Notify listeners that the model has updated"""
-        self.e_watch_tv_model_updated.notify()
 
 
 class StreamTVChannel(threading.Thread):
@@ -154,7 +148,7 @@ class StreamTVChannel(threading.Thread):
             else:
                 if self.running:
                     self.retries = 0
-                    log.info("TV Stream: Sleeping 2 seconds before finding next TV game")
+                    log.debug("TV Stream: Sleeping 2 seconds before finding next TV game")
                     sleep(2)
 
     def handle_exceptions(self, e: Exception):

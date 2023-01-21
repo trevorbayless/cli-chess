@@ -30,12 +30,7 @@ class WatchTVPresenter(GamePresenterBase):
         super().__init__(model)
         self.view = WatchTVView(self)
 
-        self.model.e_watch_tv_model_updated.add_listener(self.update)
         self.model.start_watching()
-
-    def update(self, *args):
-        """Update based on model change"""
-        pass
 
     def exit(self) -> None:
         """Stops TV and returns to the main menu"""
