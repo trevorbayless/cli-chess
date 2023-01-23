@@ -106,37 +106,30 @@ class OnlineGameModel(GameModelBase):
            Raises an exception on invalid data.
         """
         try:
-            if 'game_parameters' in kwargs:
+            if 'game_parameters' in kwargs:  # This is the data that came from the menu selections
                 data = kwargs['game_parameters']
-                # This is the data that came from the menu selections
                 self.game_metadata['my_color'] = data[GameOption.COLOR]
                 self.game_metadata['variant'] = data[GameOption.VARIANT]
-                # self.game_metadata['players']['white'] =  # TODO: Need to set player names in offline games
-                # self.game_metadata['players']['black'] =
                 self.game_metadata['clock']['white']['time'] = data[GameOption.TIME_CONTROL][0]
                 self.game_metadata['clock']['white']['increment'] = data[GameOption.TIME_CONTROL][1]
                 self.game_metadata['clock']['black'] = self.game_metadata['clock']['white']
 
             if 'iem_gameStart' in kwargs:
                 data = kwargs['iem_gameStart']
-                log.debug(f"OnlineGameModel: iem_gameStart ---- {data}")  # TODO: Remove after testing
                 self.game_metadata['gameId'] = data['gameId']
                 self.game_metadata['my_color'] = data['color']  # TODO: Update to use bool instead? Color(data['color')
                 self.game_metadata['rated'] = data['rated']
                 self.game_metadata['variant'] = data['variant']['name']
                 self.game_metadata['speed'] = data['speed']
-                log.debug(f"self.game_metadata ---- {self.game_metadata}")  # TODO: Remove after testing
 
             elif 'gs_gameFull' in kwargs:
                 data = kwargs['gs_gameFull']
-                log.debug(f"OnlineGameModel: gs_gameFull ---- {data}")  # TODO: Remove after testing
                 self.game_metadata['players']['white'] = data['white']
                 self.game_metadata['players']['black'] = data['black']
                 self.game_metadata['clock']['white']['time'] = data['state']['wtime']
                 self.game_metadata['clock']['white']['increment'] = data['state']['winc']
                 self.game_metadata['clock']['black']['time'] = data['state']['btime']
                 self.game_metadata['clock']['black']['increment'] = data['state']['binc']
-                log.debug(f"self.game_metadata ---- {self.game_metadata}")  # TODO: Remove after testing
 
             self._notify_game_model_updated()
         except Exception as e:
