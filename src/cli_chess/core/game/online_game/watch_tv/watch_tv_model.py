@@ -89,7 +89,8 @@ class WatchTVModel(GameModelBase):
                 event = kwargs['_startGameEvent']
                 white_rating = int(game_metadata['players']['white']['rating'] or 0)
                 black_rating = int(game_metadata['players']['black']['rating'] or 0)
-                orientation = True if ((white_rating >= black_rating) or self.channel.variant.lower() == "racingkings") else False
+                orientation = True if (
+                            (white_rating >= black_rating) or self.channel.variant.lower() == "racingkings") else False
 
                 self._save_game_metadata(_gameMetadata=game_metadata)
                 # TODO: If the variant is 3check the initial export fen will include the check counts
@@ -113,7 +114,8 @@ class WatchTVModel(GameModelBase):
 class StreamTVChannel(threading.Thread):
     def __init__(self, channel: TVChannelMenuOptions, **kwargs):
         super().__init__(**kwargs)
-        self.daemon = True
+        self.daemon = True  # NOTE: This is only here since when exiting the program and watching a longer game (eg. classical)
+                            #       the thread remained open. Remove this if a better way of closing the stream is found.
         self.session = berserk.TokenSession(lichess_config.get_value(lichess_config.Keys.API_TOKEN))
         self.client = berserk.Client(self.session)
         self.channel = channel
@@ -186,7 +188,8 @@ class StreamTVChannel(threading.Thread):
                                 # we are caught up. This stops a quick game replay from happening.
                                 turns_behind -= 1
                             else:
-                                self.e_tv_stream_event.notify(_coreGameEvent=event)
+                                if event.get('wc') and event.get('bc'):
+                                    self.e_tv_stream_event.notify(_coreGameEvent=event)
 
             except Exception as e:
                 self.handle_exceptions(e)
@@ -209,7 +212,8 @@ class StreamTVChannel(threading.Thread):
                     delay = 60
 
             # TODO: Send event to model with retry notification so we can display it to the user
-            log.info(f"TV Stream: Sleeping {delay} seconds before retrying ({self.max_retries - self.retries} retries left).")
+            log.info(
+                f"TV Stream: Sleeping {delay} seconds before retrying ({self.max_retries - self.retries} retries left).")
             sleep(delay)
             self.retries += 1
         else:
