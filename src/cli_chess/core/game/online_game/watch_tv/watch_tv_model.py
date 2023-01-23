@@ -31,43 +31,89 @@ class WatchTVModel(GameModelBase):
         self._tv_stream = StreamTVChannel(self.channel)
         self._tv_stream.e_tv_stream_event.add_listener(self.stream_event_received)
 
+    def _default_game_metadata(self) -> dict:
+        """Returns the default structure for game metadata"""
+        game_metadata = super()._default_game_metadata()
+        game_metadata.update({
+            'rated': None,
+            'speed': None,
+        })
+        return game_metadata
+
     def start_watching(self):
         """Notify the TV stream thread to start"""
-        log.info(f"TV Model: Starting TV stream")
         self._tv_stream.start()
 
     def stop_watching(self):
         """Stop the TV stream thread"""
         if self._tv_stream.is_alive():
-            log.info("TV Model: Stopping TV stream")
             self._tv_stream.stop_watching()
 
+    def _save_game_metadata(self, **kwargs) -> None:
+        """Parses and saves the data of the game being played"""
+        try:
+            if '_gameMetadata' in kwargs:
+                data = kwargs['_gameMetadata']
+                self.game_metadata['gameId'] = data.get('id')
+                self.game_metadata['rated'] = data.get('rated')
+                self.game_metadata['variant'] = data.get('variant')
+                self.game_metadata['speed'] = data.get('speed')
+                self.game_metadata['players']['white'] = data['players']['white']['user']
+                self.game_metadata['players']['white']['rating'] = data['players']['white']['rating']
+                self.game_metadata['players']['black'] = data['players']['black']['user']
+                self.game_metadata['players']['black']['rating'] = data['players']['black']['rating']
+
+            if '_coreGameEvent' in kwargs:
+                data = kwargs['_coreGameEvent']
+                self.game_metadata['clock']['white']['time'] = data['wc']  # in seconds
+                self.game_metadata['clock']['white']['increment'] = 0
+                self.game_metadata['clock']['black']['time'] = data['bc']  # in seconds
+                self.game_metadata['clock']['black']['increment'] = 0
+
+            if '_endGameEvent' in kwargs:
+                data = kwargs['_endGameEvent']
+                self.game_metadata['status'] = data['status']
+                self.game_metadata['winner'] = data.get('winner')  # Not included on draws
+
+            self.e_game_model_updated.notify()
+        except Exception as e:
+            log.error(f"TV Model: Error saving game metadata: {e}")
+            raise
+
     def stream_event_received(self, **kwargs):
-        """An event was received from the TV thread"""
-        # TODO: Data needs to be organized and sent to presenter to handle display
-        if '_startGameEvent' in kwargs and '_gameMetadata' in kwargs:
-            game_metadata = kwargs['_gameMetadata']
-            event = kwargs['_startGameEvent']
-            white_rating = int(game_metadata.get('players', {}).get('white', {}).get('rating') or 0)
-            black_rating = int(game_metadata.get('players', {}).get('black', {}).get('rating') or 0)
-            orientation = True if ((white_rating >= black_rating) or self.channel.variant.lower() == "racingkings") else False
+        """An event was received from the TV thread. Raises exception on invalid data"""
+        try:
+            # TODO: Data needs to be organized and sent to presenter to handle display
+            if '_startGameEvent' in kwargs and '_gameMetadata' in kwargs:
+                game_metadata = kwargs['_gameMetadata']
+                event = kwargs['_startGameEvent']
+                white_rating = int(game_metadata['players']['white']['rating'] or 0)
+                black_rating = int(game_metadata['players']['black']['rating'] or 0)
+                orientation = True if ((white_rating >= black_rating) or self.channel.variant.lower() == "racingkings") else False
 
-            # TODO: If the variant is 3check the initial export fen will include the check counts
-            #       but follow up game stream FENs will not. Need to create lila api gh issue to talk
-            #       over possible solutions (including move history, etc)
-            self.board_model.set_board_position(event.get('fen'), orientation, uci_last_move=event.get('lastMove'))
+                self._save_game_metadata(_gameMetadata=game_metadata)
+                # TODO: If the variant is 3check the initial export fen will include the check counts
+                #       but follow up game stream FENs will not. Need to create lila api gh issue to talk
+                #       over possible solutions (including move history, etc)
+                self.board_model.set_board_position(event.get('fen'), orientation, uci_last_move=event.get('lastMove'))
 
-        if '_coreGameEvent' in kwargs:
-            event = kwargs['_coreGameEvent']
-            self.board_model.set_board_position(event.get('fen'), uci_last_move=event.get('lm'))
+            if '_coreGameEvent' in kwargs:
+                event = kwargs['_coreGameEvent']
+                self._save_game_metadata(_coreGameEvent=event)
+                self.board_model.set_board_position(event.get('fen'), uci_last_move=event.get('lm'))
 
-        if '_endGameEvent' in kwargs:
-            event = kwargs['_endGameEvent']
+            if '_endGameEvent' in kwargs:
+                event = kwargs['_endGameEvent']
+                self._save_game_metadata(_endGameEvent=event)
+        except Exception as e:
+            log.error(f"TV Model: Error parsing stream data: {e}")
+            raise
 
 
 class StreamTVChannel(threading.Thread):
     def __init__(self, channel: TVChannelMenuOptions, **kwargs):
         super().__init__(**kwargs)
+        self.daemon = True
         self.session = berserk.TokenSession(lichess_config.get_value(lichess_config.Keys.API_TOKEN))
         self.client = berserk.Client(self.session)
         self.channel = channel
@@ -89,7 +135,7 @@ class StreamTVChannel(threading.Thread):
         """Returns the game ID of the ongoing TV game of the passed in channel"""
         channel_game_id = self.client.tv.get_current_games().get(channel, {}).get('gameId')
         if not channel_game_id:
-            raise ValueError(f"Didn't receive game ID for current {channel} TV game")
+            raise ValueError(f"TV Stream: Didn't receive game ID for current {channel} TV game")
 
         return channel_game_id
 
@@ -97,7 +143,7 @@ class StreamTVChannel(threading.Thread):
         """Return the metadata for the passed in Game ID"""
         game_metadata = self.client.games.export(game_id)
         if not game_metadata:
-            raise ValueError("Didn't receive game metadata for current TV game")
+            raise ValueError("TV Stream: Didn't receive game metadata for current TV game")
 
         return game_metadata
 

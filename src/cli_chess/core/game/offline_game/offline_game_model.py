@@ -43,7 +43,7 @@ class OfflineGameModel(GameModelBase):
         game_metadata = super()._default_game_metadata()
         game_metadata.update({
             'my_color': "",
-            'rated': False,
+            'rated': None,
             'speed': None,
         })
         return game_metadata
@@ -59,6 +59,7 @@ class OfflineGameModel(GameModelBase):
                 #self.game_metadata['players']['black'] =
                 self.game_metadata['clock']['white']['time'] = data[GameOption.TIME_CONTROL][0]
                 self.game_metadata['clock']['white']['increment'] = data[GameOption.TIME_CONTROL][1]
+                self.game_metadata['clock']['black'] = self.game_metadata['clock']['white']
 
             self.e_game_model_updated.notify()
         except KeyError as e:

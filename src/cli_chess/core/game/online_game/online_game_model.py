@@ -102,7 +102,9 @@ class OnlineGameModel(GameModelBase):
         return game_metadata
 
     def _save_game_metadata(self, **kwargs) -> None:
-        """Parses and saves the data of the game being played"""
+        """Parses and saves the data of the game being played.
+           Raises an exception on invalid data.
+        """
         try:
             if 'game_parameters' in kwargs:
                 data = kwargs['game_parameters']
@@ -113,6 +115,7 @@ class OnlineGameModel(GameModelBase):
                 # self.game_metadata['players']['black'] =
                 self.game_metadata['clock']['white']['time'] = data[GameOption.TIME_CONTROL][0]
                 self.game_metadata['clock']['white']['increment'] = data[GameOption.TIME_CONTROL][1]
+                self.game_metadata['clock']['black'] = self.game_metadata['clock']['white']
 
             if 'iem_gameStart' in kwargs:
                 data = kwargs['iem_gameStart']
@@ -136,5 +139,6 @@ class OnlineGameModel(GameModelBase):
                 log.debug(f"self.game_metadata ---- {self.game_metadata}")  # TODO: Remove after testing
 
             self._notify_game_model_updated()
-        except KeyError as e:
-            log.error(f"Error saving online game metadata: {e}")
+        except Exception as e:
+            log.exception(f"Error saving online game metadata: {e}")
+            raise
