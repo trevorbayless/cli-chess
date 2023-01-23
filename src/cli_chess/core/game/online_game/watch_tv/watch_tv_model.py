@@ -114,8 +114,7 @@ class WatchTVModel(GameModelBase):
 class StreamTVChannel(threading.Thread):
     def __init__(self, channel: TVChannelMenuOptions, **kwargs):
         super().__init__(**kwargs)
-        self.daemon = True  # NOTE: This is only here since when exiting the program and watching a longer game (eg. classical)
-                            #       the thread remained open. Remove this if a better way of closing the stream is found.
+        self.daemon = True
         self.session = berserk.TokenSession(lichess_config.get_value(lichess_config.Keys.API_TOKEN))
         self.client = berserk.Client(self.session)
         self.channel = channel
@@ -164,6 +163,12 @@ class StreamTVChannel(threading.Thread):
                     stream = self.client.games.stream_game_moves(game_id)
 
                     for event in stream:
+                        # TODO: This does close the stream, but not until the next event comes in (which can be a while
+                        #  sometimes (especially in longer time format games like Classical). Ideally there's
+                        #  a way to immediately kill the stream, without waiting for another event. This is certainly
+                        #  something to watch for since if a user backs out of multiple TV streams and immediately
+                        #  enters another streams/threads will start to compound streams/threads and quickly
+                        #  bring us close to the 8 streams open per IP limit.
                         if not self.running:
                             stream.close()
                             break
