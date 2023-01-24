@@ -54,12 +54,12 @@ class GameModelBase:
             'players': {
                 'white': {
                     'title': "",
-                    'userId': "",
+                    'name': "",
                     'rating': ""
                 },
                 'black': {
                     'title': "",
-                    'userId': "",
+                    'name': "",
                     'rating': ""
                 },
             },

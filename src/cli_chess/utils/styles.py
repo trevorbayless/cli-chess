@@ -42,7 +42,11 @@ default = {
     "material-difference": "fg:gray",
 
     "move-input": "fg:white bold",
-    "move-list": "fg:gray"
+    "move-list": "fg:gray",
+
+    "player-info": "fg:white",
+    "player-info.title": "fg:darkorange bold",
+    "player-info.title.bot": "fg:darkmagenta"
 }
 
 twilight = {
@@ -74,5 +78,9 @@ twilight = {
     "material-difference": "fg:gray",
 
     "move-input": "fg:white bold",
-    "move-list": "fg:gray"
+    "move-list": "fg:gray",
+
+    "player-info": "fg:white",
+    "player-info.title": "fg:darkorange bold",
+    "player-info.title.bot": "fg:darkmagenta"
 }

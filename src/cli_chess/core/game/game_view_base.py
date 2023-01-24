@@ -35,6 +35,8 @@ class GameViewBase:
         self.move_list_container = presenter.move_list_presenter.view
         self.material_diff_upper_container = presenter.material_diff_presenter.view_upper
         self.material_diff_lower_container = presenter.material_diff_presenter.view_lower
+        self.player_info_upper_container = presenter.player_info_presenter.view_upper
+        self.player_info_lower_container = presenter.player_info_presenter.view_lower
         self.error_label = FormattedTextControl(text="", style="class:label.error.banner", show_cursor=False)
         self.error_container = self._create_error_container()
         self._container = self._create_container()
@@ -110,7 +112,9 @@ class PlayableGameViewBase(GameViewBase):
                 self.board_output_container,
                 HSplit([
                     self.material_diff_upper_container,
+                    self.player_info_upper_container,
                     self.move_list_container,
+                    self.player_info_lower_container,
                     self.material_diff_lower_container
                 ])
             ]),

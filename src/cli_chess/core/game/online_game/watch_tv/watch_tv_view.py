@@ -36,7 +36,9 @@ class WatchTVView(GameViewBase):
                 self.board_output_container,
                 HSplit([
                     self.material_diff_upper_container,
+                    self.player_info_upper_container,
                     self.material_diff_lower_container,
+                    self.player_info_lower_container,
                 ]),
             ]),
             HSplit([

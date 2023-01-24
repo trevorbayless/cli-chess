@@ -18,7 +18,9 @@ from cli_chess.core.game import GameViewBase, PlayableGameViewBase
 from cli_chess.modules.board import BoardPresenter
 from cli_chess.modules.move_list import MoveListPresenter
 from cli_chess.modules.material_difference import MaterialDifferencePresenter
+from cli_chess.modules.player_info import PlayerInfoPresenter
 from typing import TYPE_CHECKING
+
 if TYPE_CHECKING:
     from cli_chess.core.game import GameModelBase
 
@@ -29,6 +31,7 @@ class GamePresenterBase:
         self.board_presenter = BoardPresenter(model.board_model)
         self.move_list_presenter = MoveListPresenter(model.move_list_model)
         self.material_diff_presenter = MaterialDifferencePresenter(model.material_diff_model)
+        self.player_info_presenter = PlayerInfoPresenter(model)
         self.view = GameViewBase(self)
 
         self.model.e_game_model_updated.add_listener(self.update)
@@ -51,7 +54,8 @@ class GamePresenterBase:
 
 class PlayableGamePresenterBase(GamePresenterBase):
     def __init__(self, model: GameModelBase):
-        # NOTE: Base Model subscriptions are currently handled in parent. Override here if needed.
+        # NOTE: Base Model subscriptions are currently handled in parent.
+        #  Override the update function here if needed.
         self.model = model
         super().__init__(model)
         self.view = PlayableGameViewBase(self)
