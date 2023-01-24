@@ -18,6 +18,7 @@ from cli_chess.menus.tv_channel_menu import TVChannelMenuOptions
 from cli_chess.utils.event import Event
 from cli_chess.utils.config import lichess_config
 from cli_chess.utils.logging import log
+from chess import Color, COLOR_NAMES
 from berserk.exceptions import ResponseError
 import berserk
 from time import sleep
@@ -58,10 +59,15 @@ class WatchTVModel(GameModelBase):
                 self.game_metadata['rated'] = data.get('rated')
                 self.game_metadata['variant'] = data.get('variant')
                 self.game_metadata['speed'] = data.get('speed')
-                self.game_metadata['players']['white'] = data['players']['white']['user']
-                self.game_metadata['players']['white']['rating'] = data['players']['white']['rating']
-                self.game_metadata['players']['black'] = data['players']['black']['user']
-                self.game_metadata['players']['black']['rating'] = data['players']['black']['rating']
+
+                for color in COLOR_NAMES:
+                    if data['players'][color].get('user'):
+                        self.game_metadata['players'][color] = data['players'][color]['user']
+                        self.game_metadata['players'][color]['rating'] = data['players'][color]['rating']
+                    elif data['players'][color].get('aiLevel'):
+                        self.game_metadata['players'][color]['title'] = ""
+                        self.game_metadata['players'][color]['name'] = f"Stockfish level {data['players'][color]['aiLevel']}"
+                        self.game_metadata['players'][color]['rating'] = ""
 
             if '_coreGameEvent' in kwargs:
                 data = kwargs['_coreGameEvent']
@@ -87,10 +93,9 @@ class WatchTVModel(GameModelBase):
             if '_startGameEvent' in kwargs and '_gameMetadata' in kwargs:
                 game_metadata = kwargs['_gameMetadata']
                 event = kwargs['_startGameEvent']
-                white_rating = int(game_metadata['players']['white']['rating'] or 0)
-                black_rating = int(game_metadata['players']['black']['rating'] or 0)
-                orientation = True if (
-                            (white_rating >= black_rating) or self.channel.variant.lower() == "racingkings") else False
+                white_rating = int(game_metadata['players']['white'].get('rating') or 0)
+                black_rating = int(game_metadata['players']['black'].get('rating') or 0)
+                orientation = True if ((white_rating >= black_rating) or self.channel.variant.lower() == "racingkings") else False
 
                 self._save_game_metadata(_gameMetadata=game_metadata)
                 # TODO: If the variant is 3check the initial export fen will include the check counts
