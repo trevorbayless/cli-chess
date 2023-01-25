@@ -31,7 +31,7 @@ class MoveListView:
                                          line_numbers=True,
                                          multiline=True,
                                          wrap_lines=False,
-                                         focus_on_click=True,
+                                         focus_on_click=False,
                                          scrollbar=True,
                                          read_only=True)
 
@@ -47,7 +47,10 @@ class MoveListView:
 
         if output:
             self.move_list_output.text = output
-            self.move_list_output.buffer.cursor_position = len(self.move_list_output.text) - 1
+
+            line_count = self.move_list_output.buffer.document.line_count
+            self.move_list_output.buffer.preferred_column = 0
+            self.move_list_output.buffer.cursor_down(line_count)
 
     def __pt_container__(self) -> TextArea:
         """Returns the move_list container"""
