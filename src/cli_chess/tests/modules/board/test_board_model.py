@@ -88,16 +88,17 @@ def test_reinitialize_board(model: BoardModel, board_updated_listener: Mock):
     board_updated_listener.assert_not_called()
 
     # Test valid initialization
-    model.reinitialize_board("Horde", chess.BLACK)
+    model.reinitialize_board("Horde", chess.BLACK, uci_last_move="e2e4")
     assert model.board.uci_variant == "horde"
     assert model.orientation == chess.BLACK
     assert model.initial_fen == model.board.starting_fen
-    assert model.get_highlight_move() == chess.Move.null()
+    assert model.get_highlight_move() == chess.Move.from_uci("e2e4")
     board_updated_listener.assert_called()
 
     # Test racing kings starts as white orientation regardless
     model.reinitialize_board("racingKings", orientation=chess.BLACK)
     assert model.get_board_orientation() == chess.WHITE
+    assert model.get_highlight_move() == chess.Move.null()
 
 
 def test_make_move(model: BoardModel, board_updated_listener: Mock, successful_move_listener: Mock):

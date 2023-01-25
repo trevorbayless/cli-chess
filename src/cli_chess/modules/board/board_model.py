@@ -53,13 +53,15 @@ class BoardModel:
             else:
                 return chess.variant.find_variant(variant)()
 
-    def reinitialize_board(self, variant: str, orientation: chess.Color, fen: str = ""):
-        """Reinitializes the existing board object to the new variant/fen"""
+    def reinitialize_board(self, variant: str, orientation: chess.Color, fen: str = "", uci_last_move=""):
+        """Reinitializes the existing board object to the new variant/fen.
+           An optional uci_last_move can be passed in to highlight the last known move
+        """
         try:
             self.board = self._initialize_board(variant, fen)
             self.initial_fen = self.board.fen()
             self.set_board_orientation(chess.WHITE if variant.lower() == "racingkings" else orientation, notify=False)
-            self.highlight_move = chess.Move.null()
+            self.highlight_move = chess.Move.from_uci(uci_last_move) if uci_last_move else chess.Move.null()
             self.e_board_model_updated.notify(board_orientation=self.orientation)
         except ValueError as e:
             log.error(f"Error while trying to reinitialize the board: {e}")
