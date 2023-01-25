@@ -39,7 +39,7 @@ class PlayerInfoView:
             Box(Window(FormattedTextControl(text=lambda: self.player_name, style="class:player-info")), padding=0, padding_right=1),
             Box(Window(FormattedTextControl(text=lambda: self.player_rating, style="class:player-info")), padding=0, padding_right=1),
 
-        ], width=D(min=1), height=D(max=1))
+        ], width=D(min=1), height=D(max=1), window_too_small=ConditionalContainer(Window(), False))
 
     def update(self, player_info: dict) -> None:
         """Updates the player info using the data passed in"""
