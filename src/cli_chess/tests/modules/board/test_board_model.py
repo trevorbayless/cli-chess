@@ -50,6 +50,11 @@ def test_initialize_board():
     model = BoardModel(variant="racingKings", fen="startpos")
     assert model.board.fen() == model.board.starting_fen
 
+    # Test initializing an empty board
+    model = BoardModel(variant="racingKings", fen=None)
+    assert model.board.fen() == "8/8/8/8/8/8/8/8 w - - 0 1"
+    assert model.board.occupied == chess.BB_EMPTY
+
     # Test chess960 initialization
     model = BoardModel(orientation=chess.BLACK, variant="chess960")
     assert model.board.chess960

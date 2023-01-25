@@ -41,12 +41,17 @@ class BoardModel:
         if variant == "chess960":
             if fen:
                 return chess.Board(fen, chess960=True)
+            elif fen is None:
+                return chess.Board(chess960=True)
             else:
                 return chess.Board.from_chess960_pos(randint(0, 959))
         else:
             if fen:
                 return chess.variant.find_variant(variant)(fen)
-            return chess.variant.find_variant(variant)()
+            elif fen is None:
+                return chess.variant.find_variant(variant)(fen=None)
+            else:
+                return chess.variant.find_variant(variant)()
 
     def reinitialize_board(self, variant: str, orientation: chess.Color, fen: str = ""):
         """Reinitializes the existing board object to the new variant/fen"""
