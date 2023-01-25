@@ -18,7 +18,7 @@ from cli_chess.menus.tv_channel_menu import TVChannelMenuOptions
 from cli_chess.utils.event import Event
 from cli_chess.utils.config import lichess_config
 from cli_chess.utils.logging import log
-from chess import Color, COLOR_NAMES
+from chess import COLOR_NAMES
 from berserk.exceptions import ResponseError
 import berserk
 from time import sleep
@@ -27,7 +27,7 @@ import threading
 
 class WatchTVModel(GameModelBase):
     def __init__(self, channel: TVChannelMenuOptions):
-        super().__init__(variant=channel.variant)
+        super().__init__(variant=channel.variant, fen=None)
         self.channel = channel
         self._tv_stream = StreamTVChannel(self.channel)
         self._tv_stream.e_tv_stream_event.add_listener(self.stream_event_received)
@@ -101,7 +101,7 @@ class WatchTVModel(GameModelBase):
                 # TODO: If the variant is 3check the initial export fen will include the check counts
                 #       but follow up game stream FENs will not. Need to create lila api gh issue to talk
                 #       over possible solutions (including move history, etc)
-                self.board_model.set_board_position(event.get('fen'), orientation, uci_last_move=event.get('lastMove'))
+                self.board_model.reinitialize_board(game_metadata['variant'], orientation, event.get('fen'), event.get('lastMove'))
 
             if '_coreGameEvent' in kwargs:
                 event = kwargs['_coreGameEvent']
