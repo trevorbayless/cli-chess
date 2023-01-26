@@ -14,8 +14,8 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from __future__ import annotations
-from prompt_toolkit.layout import Container, ConditionalContainer, VSplit, D, Window, FormattedTextControl
-from prompt_toolkit.widgets import Label, Box
+from prompt_toolkit.layout import Container, ConditionalContainer, VSplit, D, Window, FormattedTextControl, WindowAlign
+from prompt_toolkit.widgets import Box
 from prompt_toolkit.filters import Condition
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -28,24 +28,30 @@ class PlayerInfoView:
         self.player_title = player_info.get('title', "")
         self.player_name = player_info.get('name', "Unknown")
         self.player_rating = str(player_info.get('rating', ""))
+        self._player_title_control = FormattedTextControl(text=lambda: self.player_title, style="class:player-info.title")
+        self._player_name_control = FormattedTextControl(text=lambda: self.player_name, style="class:player-info")
+        self._player_rating_control = FormattedTextControl(text=lambda: self.player_rating, style="class:player-info")
         self._container = self._create_container()
 
     def _create_container(self) -> Container:
         return VSplit([
             ConditionalContainer(
-                Box(Window(FormattedTextControl(text=lambda: self.player_title, style="class:player-info.title")), padding=0, padding_right=1),
+                Box(Window(self._player_title_control, align=WindowAlign.LEFT, dont_extend_width=True), padding=0, padding_right=1),
                 Condition(lambda: self.player_title != "")
             ),
-            Box(Window(FormattedTextControl(text=lambda: self.player_name, style="class:player-info")), padding=0, padding_right=1),
-            Box(Window(FormattedTextControl(text=lambda: self.player_rating, style="class:player-info")), padding=0, padding_right=1),
+            Box(Window(self._player_name_control, align=WindowAlign.LEFT, dont_extend_width=True), padding=0, padding_right=1),
+            Box(Window(self._player_rating_control, align=WindowAlign.RIGHT, dont_extend_width=True), padding=0, padding_right=1),
 
         ], width=D(min=1), height=D(max=1), window_too_small=ConditionalContainer(Window(), False))
 
     def update(self, player_info: dict) -> None:
         """Updates the player info using the data passed in"""
-        self.player_title = player_info.get('title', "")
-        self.player_name = player_info.get('name', "Unknown")
-        self.player_rating = str(player_info.get('rating', ""))
+        self.player_title = player_info.get('title', '')
+        self.player_name = f"{player_info.get('name', 'Unknown'):<20}"
+        self.player_rating = f"({str(player_info.get('rating', ''))})" if player_info.get('rating') else ""
+
+        if self.player_title == "BOT":
+            self._player_title_control.style = "class:player-info.title.bot"
 
     def __pt_container__(self) -> Container:
         """Returns this views container"""
