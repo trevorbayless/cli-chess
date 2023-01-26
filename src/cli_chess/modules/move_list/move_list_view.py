@@ -15,7 +15,7 @@
 
 from __future__ import annotations
 from prompt_toolkit.layout import D
-from prompt_toolkit.widgets import TextArea
+from prompt_toolkit.widgets import TextArea, Box
 from typing import TYPE_CHECKING, List
 if TYPE_CHECKING:
     from cli_chess.modules.move_list import MoveListPresenter
@@ -24,16 +24,22 @@ if TYPE_CHECKING:
 class MoveListView:
     def __init__(self, presenter: MoveListPresenter):
         self.presenter = presenter
-        self.move_list_output = TextArea(text="No moves...",
-                                         style="class:move-list",
-                                         width=D(min=1, max=20),
-                                         height=D(min=1, max=4, preferred=4),
-                                         line_numbers=True,
-                                         multiline=True,
-                                         wrap_lines=False,
-                                         focus_on_click=False,
-                                         scrollbar=True,
-                                         read_only=True)
+        self._move_list_output = TextArea(text="No moves...",
+                                          style="class:move-list",
+                                          line_numbers=True,
+                                          multiline=True,
+                                          wrap_lines=False,
+                                          focus_on_click=False,
+                                          scrollbar=True,
+                                          read_only=True)
+        self._container = self._create_container()
+
+    def _create_container(self) -> Box:
+        """Create the move list container"""
+        return Box(self._move_list_output,
+                   width=D(min=1, max=20),
+                   height=D(min=1, max=4, preferred=4),
+                   padding=0)
 
     def update(self, formatted_move_list: List[str]):
         """Loops through the passed in move list
@@ -46,12 +52,12 @@ class MoveListView:
             output += move.ljust(8)
 
         if output:
-            self.move_list_output.text = output
+            self._move_list_output.text = output
 
-            line_count = self.move_list_output.buffer.document.line_count
-            self.move_list_output.buffer.preferred_column = 0
-            self.move_list_output.buffer.cursor_down(line_count)
+            line_count = self._move_list_output.buffer.document.line_count
+            self._move_list_output.buffer.preferred_column = 0
+            self._move_list_output.buffer.cursor_down(line_count)
 
-    def __pt_container__(self) -> TextArea:
+    def __pt_container__(self) -> Box:
         """Returns the move_list container"""
-        return self.move_list_output
+        return self._container
