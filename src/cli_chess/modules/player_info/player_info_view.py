@@ -47,7 +47,7 @@ class PlayerInfoView:
     def update(self, player_info: dict) -> None:
         """Updates the player info using the data passed in"""
         self.player_title = player_info.get('title', '')
-        self.player_name = f"{player_info.get('name', 'Unknown'):<20}"
+        self.player_name = player_info.get('name', 'Unknown')
         self.player_rating = f"({str(player_info.get('rating', ''))})" if player_info.get('rating') else ""
 
         if self.player_title == "BOT":

@@ -17,6 +17,7 @@ from __future__ import annotations
 from cli_chess.core.game import GameViewBase
 from cli_chess.utils.ui_common import handle_mouse_click
 from prompt_toolkit.layout import Container, Window, FormattedTextControl, VSplit, HSplit, VerticalAlign, D
+from prompt_toolkit.widgets import Box
 from prompt_toolkit.formatted_text import StyleAndTextTuples
 from prompt_toolkit.key_binding import KeyBindings, merge_key_bindings
 from prompt_toolkit.keys import Keys
@@ -35,8 +36,9 @@ class WatchTVView(GameViewBase):
             VSplit([
                 self.board_output_container,
                 HSplit([
-                    self.material_diff_upper_container,
                     self.player_info_upper_container,
+                    self.material_diff_upper_container,
+                    Box(Window(), height=D(min=1, max=4)),
                     self.material_diff_lower_container,
                     self.player_info_lower_container,
                 ]),

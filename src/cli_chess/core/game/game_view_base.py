@@ -113,7 +113,7 @@ class PlayableGameViewBase(GameViewBase):
                 HSplit([
                     self.material_diff_upper_container,
                     self.player_info_upper_container,
-                    self.move_list_container,
+                    self.move_list_container,  # VSplit([self.move_list_container], align=HorizontalAlign.LEFT),
                     self.player_info_lower_container,
                     self.material_diff_lower_container
                 ])
