@@ -1,4 +1,4 @@
-# Copyright (C) 2021-2022 Trevor Bayless <trevorbayless1@gmail.com>
+# Copyright (C) 2021-2023 Trevor Bayless <trevorbayless1@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,17 +19,17 @@ from re import findall
 metadata_file = open("src/cli_chess/__metadata__.py").read()
 metadata = dict(findall(r'__(\w*)__\s*=\s*"([^"]+)"', metadata_file))
 
-requirements = [
-    "chess>=1.9.4",
-    "berserk-downstream>=0.11.12",
-    "prompt-toolkit>=3.0.36"
+dependencies = [
+    "chess>=1.9.4,<2.0.0",
+    "berserk-downstream>=0.11.12,<1.0.0",
+    "prompt-toolkit>=3.0.36,<4.0.0"
 ]
 
-dev_requirements = {
+dev_dependencies = {
     'dev': [
-        'pytest>=7.2.1',
-        'pytest-cov>=4.0.0',
-        'flake8>=6.0.0'
+        'pytest>=7.2.1,<8.0.0',
+        'pytest-cov>=4.0.0,<5.0.0',
+        'flake8>=6.0.0,<7.0.0'
     ]
 }
 
@@ -41,7 +41,7 @@ setup(
     author_email=metadata['author_email'],
     url=metadata['url'],
     license=metadata['license'],
-    install_requires=requirements,
-    setup_requires=requirements,
-    extras_require=dev_requirements
+    install_requires=dependencies,
+    setup_requires=dependencies,
+    extras_require=dev_dependencies
 )
