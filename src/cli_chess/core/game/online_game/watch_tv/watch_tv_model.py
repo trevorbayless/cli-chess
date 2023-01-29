@@ -53,8 +53,8 @@ class WatchTVModel(GameModelBase):
     def _save_game_metadata(self, **kwargs) -> None:
         """Parses and saves the data of the game being played"""
         try:
-            if '_gameMetadata' in kwargs:
-                data = kwargs['_gameMetadata']
+            if 'tv_gameMetadata' in kwargs:
+                data = kwargs['tv_gameMetadata']
                 self.game_metadata['gameId'] = data.get('id')
                 self.game_metadata['rated'] = data.get('rated')
                 self.game_metadata['variant'] = data.get('variant')
@@ -67,17 +67,17 @@ class WatchTVModel(GameModelBase):
                     elif data['players'][color].get('aiLevel'):
                         self.game_metadata['players'][color]['title'] = ""
                         self.game_metadata['players'][color]['name'] = f"Stockfish level {data['players'][color]['aiLevel']}"
-                        self.game_metadata['players'][color]['rating'] = ""
+                        self.game_metadata['players'][color]['rating'] = None
 
-            if '_coreGameEvent' in kwargs:
-                data = kwargs['_coreGameEvent']
+            if 'tv_coreGameEvent' in kwargs:
+                data = kwargs['tv_coreGameEvent']
                 self.game_metadata['clock']['white']['time'] = data['wc']  # in seconds
                 self.game_metadata['clock']['white']['increment'] = 0
                 self.game_metadata['clock']['black']['time'] = data['bc']  # in seconds
                 self.game_metadata['clock']['black']['increment'] = 0
 
-            if '_endGameEvent' in kwargs:
-                data = kwargs['_endGameEvent']
+            if 'tv_endGameEvent' in kwargs:
+                data = kwargs['tv_endGameEvent']
                 self.game_metadata['status'] = data['status']
                 self.game_metadata['winner'] = data.get('winner')  # Not included on draws
 
@@ -90,27 +90,27 @@ class WatchTVModel(GameModelBase):
         """An event was received from the TV thread. Raises exception on invalid data"""
         try:
             # TODO: Data needs to be organized and sent to presenter to handle display
-            if '_startGameEvent' in kwargs and '_gameMetadata' in kwargs:
-                game_metadata = kwargs['_gameMetadata']
-                event = kwargs['_startGameEvent']
+            if 'startGameEvent' in kwargs and 'gameMetadata' in kwargs:
+                game_metadata = kwargs['gameMetadata']
+                event = kwargs['startGameEvent']
                 white_rating = int(game_metadata['players']['white'].get('rating') or 0)
                 black_rating = int(game_metadata['players']['black'].get('rating') or 0)
                 orientation = True if ((white_rating >= black_rating) or self.channel.variant.lower() == "racingkings") else False
 
-                self._save_game_metadata(_gameMetadata=game_metadata)
+                self._save_game_metadata(tv_gameMetadata=game_metadata)
                 # TODO: If the variant is 3check the initial export fen will include the check counts
                 #       but follow up game stream FENs will not. Need to create lila api gh issue to talk
                 #       over possible solutions (including move history, etc)
                 self.board_model.reinitialize_board(game_metadata['variant'], orientation, event.get('fen'), event.get('lastMove'))
 
-            if '_coreGameEvent' in kwargs:
-                event = kwargs['_coreGameEvent']
-                self._save_game_metadata(_coreGameEvent=event)
+            if 'coreGameEvent' in kwargs:
+                event = kwargs['coreGameEvent']
+                self._save_game_metadata(tv_coreGameEvent=event)
                 self.board_model.set_board_position(event.get('fen'), uci_last_move=event.get('lm'))
 
-            if '_endGameEvent' in kwargs:
-                event = kwargs['_endGameEvent']
-                self._save_game_metadata(_endGameEvent=event)
+            if 'endGameEvent' in kwargs:
+                event = kwargs['endGameEvent']
+                self._save_game_metadata(tv_endGameEvent=event)
         except Exception as e:
             log.error(f"TV Model: Error parsing stream data: {e}")
             raise
@@ -184,12 +184,12 @@ class StreamTVChannel(threading.Thread):
 
                         if winner or status != "started" and status:
                             log.info(f"TV Stream: Game finished: {game_id}")
-                            self.e_tv_stream_event.notify(_endGameEvent=event)
+                            self.e_tv_stream_event.notify(endGameEvent=event)
                             break
 
                         if status == "started":
                             log.info(f"TV Stream: Started streaming TV game: {game_id}")
-                            self.e_tv_stream_event.notify(_gameMetadata=game_metadata, _startGameEvent=event)
+                            self.e_tv_stream_event.notify(gameMetadata=game_metadata, startGameEvent=event)
                             turns_behind = event.get('turns')
 
                         if fen:
@@ -199,7 +199,7 @@ class StreamTVChannel(threading.Thread):
                                 turns_behind -= 1
                             else:
                                 if event.get('wc') and event.get('bc'):
-                                    self.e_tv_stream_event.notify(_coreGameEvent=event)
+                                    self.e_tv_stream_event.notify(coreGameEvent=event)
 
             except Exception as e:
                 self.handle_exceptions(e)
