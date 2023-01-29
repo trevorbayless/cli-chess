@@ -1,0 +1,16 @@
+config.ini
+*.swp
+*.~
+*.spec
+*.pyc
+*.egg-info
+*.eggs/
+.coverage
+.venv/
+.vscode/
+.idea/
+venv/
+dist/
+build/
+engines/
+__pycache__/
