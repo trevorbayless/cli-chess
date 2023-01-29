@@ -67,7 +67,7 @@ class WatchTVModel(GameModelBase):
                     elif data['players'][color].get('aiLevel'):
                         self.game_metadata['players'][color]['title'] = ""
                         self.game_metadata['players'][color]['name'] = f"Stockfish level {data['players'][color]['aiLevel']}"
-                        self.game_metadata['players'][color]['rating'] = None
+                        self.game_metadata['players'][color]['rating'] = ""
 
             if 'tv_coreGameEvent' in kwargs:
                 data = kwargs['tv_coreGameEvent']

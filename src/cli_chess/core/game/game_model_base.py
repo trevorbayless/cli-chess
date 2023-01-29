@@ -55,13 +55,13 @@ class GameModelBase:
                 'white': {
                     'title': "",
                     'name': "",
-                    'rating': None,
+                    'rating': "",
                     'provisional': False,
                 },
                 'black': {
                     'title': "",
                     'name': "",
-                    'rating': None,
+                    'rating': "",
                     'provisional': False,
                 },
             },

@@ -48,7 +48,10 @@ class PlayerInfoView:
         """Updates the player info using the data passed in"""
         self.player_title = player_info.get('title', '')
         self.player_name = player_info.get('name', 'Unknown')
-        self.player_rating = f"({str(player_info.get('rating', '')) + '?' if player_info['provisional'] else ''})" if player_info.get('rating') else ""
+
+        rating = str(player_info.get('rating', ''))
+        if rating:
+            self.player_rating = f"({rating})" if not player_info.get('provisional') else f"({rating}?)"
 
         if self.player_title == "BOT":
             self._player_title_control.style = "class:player-info.title.bot"
