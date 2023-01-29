@@ -26,8 +26,8 @@ class PlayerInfoPresenter:
         self.model = model
 
         orientation = self.model.board_model.get_board_orientation()
-        self.view_upper = PlayerInfoView(self, self.parse_player_info(not orientation))
-        self.view_lower = PlayerInfoView(self, self.parse_player_info(orientation))
+        self.view_upper = PlayerInfoView(self, self.get_player_info(not orientation))
+        self.view_lower = PlayerInfoView(self, self.get_player_info(orientation))
 
         self.model.e_game_model_updated.add_listener(self.update)
 
@@ -38,8 +38,8 @@ class PlayerInfoPresenter:
             pass
 
         orientation = self.model.board_model.get_board_orientation()
-        self.view_upper.update(self.parse_player_info(not orientation))
-        self.view_lower.update(self.parse_player_info(orientation))
+        self.view_upper.update(self.get_player_info(not orientation))
+        self.view_lower.update(self.get_player_info(orientation))
 
-    def parse_player_info(self, color: Color) -> dict:
+    def get_player_info(self, color: Color) -> dict:
         return self.model.game_metadata['players'][COLOR_NAMES[color]]

@@ -55,12 +55,14 @@ class GameModelBase:
                 'white': {
                     'title': "",
                     'name': "",
-                    'rating': ""
+                    'rating': None,
+                    'provisional': False,
                 },
                 'black': {
                     'title': "",
                     'name': "",
-                    'rating': ""
+                    'rating': None,
+                    'provisional': False,
                 },
             },
             'clock': {
