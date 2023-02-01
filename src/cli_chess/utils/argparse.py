@@ -16,6 +16,7 @@
 import argparse
 from cli_chess.__metadata__ import __version__
 from cli_chess.utils.logging import redact_from_logs, log
+from cli_chess.core.api import required_token_scopes
 
 
 class ArgumentParser(argparse.ArgumentParser):
@@ -28,8 +29,8 @@ class ArgumentParser(argparse.ArgumentParser):
            arguments to be added to the log redactor
         """
         arguments = super().parse_args(args, namespace)
-        if arguments.api_token:
-            redact_from_logs(arguments.api_token)
+        if arguments.token:
+            redact_from_logs(arguments.token)
 
         log.debug(f"Parsed arguments: {arguments}")
         return arguments
@@ -39,12 +40,12 @@ def setup_argparse() -> ArgumentParser:
     """Sets up argparse and parses the arguments passed in at startup"""
     parser = ArgumentParser(description="cli-chess: Play chess in your terminal")
     parser.add_argument(
-        "-t",
-        "--api-token", type=str, help="The API token associated to your Lichess account"
+        "--token",
+        metavar="API_TOKEN",
+        type=str, help=f"The API token associated to your Lichess account. Scopes required: {required_token_scopes}"
     )
     parser.add_argument(
-        "-v",
-        "--version",
+        "-v", "--version",
         action="version",
         version=f"cli-chess v{__version__}",
     )
