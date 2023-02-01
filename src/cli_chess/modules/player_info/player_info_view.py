@@ -37,7 +37,7 @@ class PlayerInfoView:
         return VSplit([
             ConditionalContainer(
                 Box(Window(self._player_title_control, align=WindowAlign.LEFT, dont_extend_width=True), padding=0, padding_right=1),
-                Condition(lambda: self.player_title != "")
+                Condition(lambda: self.player_title)
             ),
             Box(Window(self._player_name_control, align=WindowAlign.LEFT, dont_extend_width=True), padding=0, padding_right=1),
             Box(Window(self._player_rating_control, align=WindowAlign.RIGHT, dont_extend_width=True), padding=0, padding_right=1),
@@ -46,12 +46,11 @@ class PlayerInfoView:
 
     def update(self, player_info: dict) -> None:
         """Updates the player info using the data passed in"""
-        self.player_title = player_info.get('title', '')
-        self.player_name = player_info.get('name', 'Unknown')
+        self.player_title = player_info.get('title', "")
+        self.player_name = player_info.get('name', "Unknown")
 
-        rating = str(player_info.get('rating', ''))
-        if rating:
-            self.player_rating = f"({rating})" if not player_info.get('provisional') else f"({rating}?)"
+        rating = player_info.get('rating', "")
+        self.player_rating = (f"({rating})" if not player_info.get('provisional') else f"({rating}?)") if rating else ""
 
         if self.player_title == "BOT":
             self._player_title_control.style = "class:player-info.title.bot"
