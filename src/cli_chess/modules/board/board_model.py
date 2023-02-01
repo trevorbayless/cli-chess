@@ -35,6 +35,7 @@ class BoardModel:
     @staticmethod
     def _initialize_board(variant: str, fen: str):
         """Initializes the main board object"""
+        variant = variant.lower()
         if fen == "startpos":
             fen = ""
 
@@ -42,7 +43,7 @@ class BoardModel:
             if fen:
                 return chess.Board(fen, chess960=True)
             elif fen is None:
-                return chess.Board(chess960=True)
+                return chess.Board(fen=None, chess960=True)
             else:
                 return chess.Board.from_chess960_pos(randint(0, 959))
         else:
@@ -67,6 +68,16 @@ class BoardModel:
             log.error(f"Error while trying to reinitialize the board: {e}")
             raise
 
+    def reset(self, notify=True):
+        """Fully restores the board to it's initial starting state.
+           If notify is false, a model update notification will not be sent.
+        """
+        self.board.reset()
+        self.set_fen(self.initial_fen, notify=False)
+
+        if notify:
+            self._notify_board_model_updated()
+
     def make_move(self, move: str, human=True) -> None:
         """Attempts to make a move on the board.
            Raises a ValueError on illegal moves.
@@ -81,6 +92,13 @@ class BoardModel:
         except Exception as e:
             log.error(f"make_move ({player}): {e}")
             raise e
+
+    def verify_move(self, move: str) -> str:
+        """Verify if the passed in move is valid in the current position.
+           Raises a ValueError on move errors (ambiguous, invalid, illegal).
+           Returns a string of the move in UCI format.
+        """
+        return str(self.board.parse_san(move))
 
     def make_moves_from_list(self, move_list: list) -> None:
         """Attempts to make all moves in the provided move list.
