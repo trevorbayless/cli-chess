@@ -32,10 +32,15 @@ class OnlineGameModel(GameModelBase):
         self._save_game_metadata(game_parameters=game_parameters)
         self.game_stream = Optional[GameStream]
 
-        from cli_chess.core.api.api_manager import api_client, api_iem
-        self.api_iem = api_iem
-        self.api_iem.e_new_event_received.add_listener(self.handle_iem_event)
-        self.api_client = api_client
+        try:
+            from cli_chess.core.api.api_manager import api_client, api_iem
+            self.api_iem = api_iem
+            self.api_iem.e_new_event_received.add_listener(self.handle_iem_event)
+            self.api_client = api_client
+        except ImportError:
+            # TODO: Clean this up so the error is displayed on the main screen
+            log.error("OnlineGameModel: Failed to import api_iem and api_client")
+            raise ImportError("API client not setup. Do you have an API token linked?")
 
     @threaded
     def start_ai_challenge(self) -> None:

@@ -124,8 +124,13 @@ class StreamTVChannel(threading.Thread):
         self.retries = 0
         self.e_tv_stream_event = Event()
 
-        from cli_chess.core.api.api_manager import api_client
-        self.api_client = api_client
+        try:
+            from cli_chess.core.api.api_manager import api_client
+            self.api_client = api_client
+        except ImportError:
+            # TODO: Clean this up so the error is displayed on the main screen
+            log.error("StreamTVChannel: Failed to import api_client")
+            raise ImportError("API client not setup. Do you have an API token linked?")
 
         # Current flow that has to be followed to watch the "variant" tv channels
         # as /api/tv/feed is only for the top rated game, and doesn't allow channel specification

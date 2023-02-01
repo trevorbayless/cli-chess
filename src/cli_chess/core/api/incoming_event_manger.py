@@ -28,7 +28,13 @@ class IncomingEventManager(threading.Thread):
         self.my_games = []
 
     def run(self) -> None:
-        from cli_chess.core.api.api_manager import api_client
+        try:
+            from cli_chess.core.api.api_manager import api_client
+        except ImportError:
+            # TODO: Clean this up so the error is displayed on the main screen
+            log.error("IEM: Failed to import api_client")
+            raise ImportError("API client not setup. Do you have an API token linked?")
+
         log.info("IEM: Started listening to Lichess incoming events")
 
         for event in api_client.board.stream_incoming_events():
