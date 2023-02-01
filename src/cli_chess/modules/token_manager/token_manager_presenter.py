@@ -31,7 +31,7 @@ class TokenManagerPresenter:
         self.model = model
         self.view = TokenManagerView(self)
         self.model.e_token_manager_model_updated.add_listener(self.update)
-        self.model.validate_existing_account_data()
+        self.model.validate_existing_linked_account()
 
     def update(self):
         """Updates the token manager view"""

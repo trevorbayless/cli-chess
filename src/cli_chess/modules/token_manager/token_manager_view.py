@@ -38,7 +38,7 @@ class TokenManagerView:
         """Creates and returns the TextArea used for token input"""
         validator = Validator.from_callable(
             self.presenter.update_linked_account,
-            error_message="Invalid Lichess API token",
+            error_message="Invalid token or missing scopes",
             move_cursor_to_end=True,
         )
 
