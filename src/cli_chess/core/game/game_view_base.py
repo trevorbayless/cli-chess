@@ -111,11 +111,11 @@ class PlayableGameViewBase(GameViewBase):
             VSplit([
                 self.board_output_container,
                 HSplit([
-                    self.material_diff_upper_container,
                     self.player_info_upper_container,
+                    self.material_diff_upper_container,
                     self.move_list_container,  # VSplit([self.move_list_container], align=HorizontalAlign.LEFT),
-                    self.player_info_lower_container,
-                    self.material_diff_lower_container
+                    self.material_diff_lower_container,
+                    self.player_info_lower_container
                 ])
             ]),
             self.input_field_container,
@@ -137,7 +137,7 @@ class PlayableGameViewBase(GameViewBase):
         input_field.accept_handler = self._accept_input
         return input_field
 
-    def _accept_input(self, input: Buffer) -> None:
+    def _accept_input(self, input: Buffer) -> None: # noqa
         """Accept handler for the input field"""
         # TODO: Remove this as it's for testing only
         if input.text == "quit":
