@@ -13,7 +13,20 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import annotations
+from cli_chess.core.game import PlayableGameViewBase
+from cli_chess.utils import log
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from cli_chess.core.game.online_game import OnlineGamePresenter
 
-class OnlineGameView:
-    def __init__(self):
-        pass
+
+class OnlineGameView(PlayableGameViewBase):
+    def __init__(self, presenter: OnlineGamePresenter):
+        self.presenter = presenter
+        super().__init__(presenter)
+
+    def _accept_input(self, input: Buffer) -> None: # noqa
+        """Accept handler for the input field"""
+        self.presenter.user_input_received(input.text)
+        self.input_field_container.text = ''

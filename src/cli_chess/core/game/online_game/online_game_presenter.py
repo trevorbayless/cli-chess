@@ -14,7 +14,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from cli_chess.core.game import PlayableGamePresenterBase
-from cli_chess.core.game.online_game import OnlineGameModel
+from cli_chess.core.game.online_game import OnlineGameModel, OnlineGameView
 from cli_chess.utils.ui_common import change_views
 
 
@@ -31,6 +31,7 @@ class OnlineGamePresenter(PlayableGamePresenterBase):
         # NOTE: Model subscriptions are currently handled in parent. Override here if needed.
         self.model = model
         super().__init__(model)
+        self.view = OnlineGameView(self)
 
     def make_move(self, move: str) -> None:
         """Make the move on the board"""
@@ -44,3 +45,20 @@ class OnlineGamePresenter(PlayableGamePresenterBase):
                     self.view.clear_error()
         except Exception as e:
             self.view.show_error(f"{e}")
+
+    def user_input_received(self, inpt: str) -> None:
+        """Respond to the users input. This input can either be the
+           move input, or game actions (such as resign)
+        """
+        inpt_lower = inpt.lower()
+        if inpt_lower == "resign" or inpt_lower == "quit":
+            # TODO: Send back to view to show a confirmation prompt
+            pass
+        elif inpt_lower == "draw" or inpt_lower == "offer draw":
+            # TODO: Send back to view to show a confirmation prompt
+            pass
+        elif inpt_lower == "takeback" or inpt_lower == "back" or inpt_lower == "undo":
+            # TODO: Send back to view to show a confirmation prompt
+            pass
+        else:
+            self.make_move(inpt)
