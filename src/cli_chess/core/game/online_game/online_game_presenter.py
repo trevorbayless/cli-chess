@@ -40,12 +40,7 @@ class OnlineGamePresenter(PlayableGamePresenterBase):
                 if move == "0000":
                     raise ValueError("Null moves are not supported in online games")
                 else:
-                    # TODO: 1. Use make a "verify move" function on the board model (use "parse_san" to check the move)
-                    #       2. Call the verify move function with the desired move
-                    #       3. If the move is valid, call a "model.send_move" function to send it over to lichess
-                    #       4. Actually make the move on the board when we get a response from lichess?
                     self.model.send_move(move)
-                    # self.board_presenter.model.verify_move(move)
-                    # self.board_presenter.make_move(move, human=True)
+                    self.view.clear_error()
         except Exception as e:
             self.view.show_error(f"{e}")
