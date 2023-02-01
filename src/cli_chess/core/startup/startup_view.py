@@ -62,5 +62,4 @@ class StartupView:
 
     def run(self) -> None:
         """Runs the main application"""
-        with patch_stdout():
-            self.app.run()
+        self.app.run()
