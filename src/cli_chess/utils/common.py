@@ -13,6 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+import threading
 from os import name as os_name
 
 
@@ -24,3 +25,10 @@ def is_windows_system() -> bool:
 def str_to_bool(s: str) -> bool:
     """Returns a boolean based on the passed in string"""
     return s.lower() in ("true", "yes", "1")
+
+
+def threaded(fn):
+    """Decorator for a threaded function"""
+    def wrapper(*args, **kwargs):
+        threading.Thread(target=fn, args=args, kwargs=kwargs).start()
+    return wrapper
