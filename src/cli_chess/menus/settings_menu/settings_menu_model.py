@@ -19,7 +19,6 @@ from enum import Enum
 
 class SettingsMenuOptions(Enum):
     LICHESS_AUTHENTICATION = "Authenticate with Lichess"
-    ADD_ENGINE = "Add a chess engine"
     GAME_SETTINGS = "Game settings"
     PROGRAM_SETTINGS = "Program settings"
 
@@ -34,7 +33,6 @@ class SettingsMenuModel(MenuModel):
         """Create the menu options"""
         menu_options = [
             MenuOption(SettingsMenuOptions.LICHESS_AUTHENTICATION, "Authenticate with Lichess by adding your API access token (required for playing online)"),
-            MenuOption(SettingsMenuOptions.ADD_ENGINE, "Add/update a chess engine (required for playing offline)"),
             MenuOption(SettingsMenuOptions.GAME_SETTINGS, "Customize the look and feel when playing games"),
             MenuOption(SettingsMenuOptions.PROGRAM_SETTINGS, "Customize the look and feel of cli-chess"),
         ]
