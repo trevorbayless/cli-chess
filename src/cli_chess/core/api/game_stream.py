@@ -13,7 +13,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from cli_chess.modules.token_manager import TokenManagerModel
 from cli_chess.utils import Event, log
 import threading
 
@@ -30,10 +29,10 @@ class GameStream(threading.Thread):
         self.e_new_game_stream_event = Event()
 
     def run(self):
-        client = TokenManagerModel().get_validated_client()
+        from cli_chess.core.api.api_manager import api_client
         log.info(f"GameStream: Started streaming game state: {self.game_id}")
 
-        for event in client.board.stream_game_state(self.game_id):
+        for event in api_client.board.stream_game_state(self.game_id):
             if event['type'] == "gameFull":
                 self.e_new_game_stream_event.notify(gameFull=event)
 

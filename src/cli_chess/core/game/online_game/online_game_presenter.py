@@ -15,18 +15,15 @@
 
 from cli_chess.core.game import PlayableGamePresenterBase
 from cli_chess.core.game.online_game import OnlineGameModel
-from cli_chess.core.api import IncomingEventManager
 from cli_chess.utils.ui_common import change_views
 
 
 def start_online_game_vs_ai(game_parameters: dict) -> None:
     """Start a game vs the lichess ai"""
-    iem = IncomingEventManager()
-    iem.start()
-    model = OnlineGameModel(game_parameters, iem)
+    model = OnlineGameModel(game_parameters)
     presenter = OnlineGamePresenter(model)
-    model.start_ai_challenge()
     change_views(presenter.view, presenter.view.input_field_container)
+    model.start_ai_challenge()
 
 
 class OnlineGamePresenter(PlayableGamePresenterBase):
@@ -38,9 +35,17 @@ class OnlineGamePresenter(PlayableGamePresenterBase):
     def make_move(self, move: str) -> None:
         """Make the move on the board"""
         try:
-            if move == "0000":
-                raise ValueError("Null moves are not supported in online games")
-            else:
-                self.board_presenter.make_move(move, human=True)
+            move = move.strip()
+            if move:
+                if move == "0000":
+                    raise ValueError("Null moves are not supported in online games")
+                else:
+                    # TODO: 1. Use make a "verify move" function on the board model (use "parse_san" to check the move)
+                    #       2. Call the verify move function with the desired move
+                    #       3. If the move is valid, call a "model.send_move" function to send it over to lichess
+                    #       4. Actually make the move on the board when we get a response from lichess?
+                    self.model.send_move(move)
+                    # self.board_presenter.model.verify_move(move)
+                    # self.board_presenter.make_move(move, human=True)
         except Exception as e:
             self.view.show_error(f"{e}")

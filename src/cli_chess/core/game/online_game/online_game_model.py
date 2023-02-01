@@ -15,9 +15,8 @@
 
 from cli_chess.core.game import GameModelBase
 from cli_chess.modules.game_options import GameOption
-from cli_chess.core.api import IncomingEventManager, GameStream
-from cli_chess.utils import log
-from cli_chess.modules.token_manager import TokenManagerModel
+from cli_chess.core.api import GameStream
+from cli_chess.utils import log, threaded
 from chess import Color, COLOR_NAMES, WHITE
 from typing import Optional
 
@@ -26,25 +25,38 @@ class OnlineGameModel(GameModelBase):
     """This model must only be used for games owned by the linked lichess user.
        Games not owned by this account must directly use the base model instead.
     """
-    def __init__(self, game_parameters: dict, iem: IncomingEventManager):
+    def __init__(self, game_parameters: dict):
         # TODO: Send None here instead on random (need to update board model logic if so)?
         self.my_color: Color = game_parameters[GameOption.COLOR] if not "random" else WHITE
         super().__init__(variant=game_parameters[GameOption.VARIANT], orientation=self.my_color, fen=None)
-
         self._save_game_metadata(game_parameters=game_parameters)
-        self.incoming_event_manager = iem
         self.game_stream = Optional[GameStream]
 
-        self.incoming_event_manager.e_new_event_received.add_listener(self.handle_iem_event)
+        from cli_chess.core.api.api_manager import api_client, api_iem
+        self.api_iem = api_iem
+        self.api_iem.e_new_event_received.add_listener(self.handle_iem_event)
+        self.api_client = api_client
 
+    @threaded
     def start_ai_challenge(self) -> None:
-        # TODO: This should probably be pushed over to the GameStream to handle
-        client = TokenManagerModel().get_validated_client()
-        client.challenges.create_ai(level=self.game_metadata['ai_level'],
-                                    clock_limit=self.game_metadata['clock']['white']['time'],
-                                    clock_increment=self.game_metadata['clock']['white']['increment'],
-                                    color=self.game_metadata['my_color'],
-                                    variant=self.game_metadata['variant'])
+        self.api_client.challenges.create_ai(level=self.game_metadata['ai_level'],
+                                             clock_limit=self.game_metadata['clock']['white']['time'],
+                                             clock_increment=self.game_metadata['clock']['white']['increment'],
+                                             color=self.game_metadata['my_color'],
+                                             variant=self.game_metadata['variant'])
+
+    def send_move(self, move: str):
+        """Sends the move to the board model for a validity check. If valid this
+           function handles sending it to lichess. Raises a ValueError if lichess
+           responds with a failure.
+        """
+        try:
+            move = self.board_model.verify_move(move)
+
+            log.info(f"OnlineGameModel: Sending move ({move}) to lichess")
+            self.api_client.board.make_move(self.game_metadata['gameId'], move)
+        except Exception:
+            raise
 
     def handle_iem_event(self, **kwargs) -> None:
         """Handle event from the incoming event manager"""
@@ -81,8 +93,12 @@ class OnlineGameModel(GameModelBase):
         elif 'gameState' in kwargs:
             event = kwargs['gameState']
             self._save_game_metadata(gs_gameState=event)
-            # moves = event['moves'].split()
-            # self.board_model.make_move(moves[-1])
+
+            # Resetting and replaying the moves guarantees the game between lichess
+            # and our local board are in sync (eg. takebacks, moves played on website, etc)
+            # TODO: Take some time measurements to see how much of an impact this approach is
+            self.board_model.reset(notify=False)
+            self.board_model.make_moves_from_list(event['moves'].split())
 
         elif 'chatLine' in kwargs:
             event = kwargs['chatLine']
@@ -106,6 +122,7 @@ class OnlineGameModel(GameModelBase):
 
     def _save_game_metadata(self, **kwargs) -> None:
         """Parses and saves the data of the game being played.
+           If notify is false, a model update notification will not be sent.
            Raises an exception on invalid data.
         """
         try:

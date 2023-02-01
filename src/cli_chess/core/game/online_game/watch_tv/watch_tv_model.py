@@ -16,11 +16,9 @@
 from cli_chess.core.game import GameModelBase
 from cli_chess.menus.tv_channel_menu import TVChannelMenuOptions
 from cli_chess.utils.event import Event
-from cli_chess.utils.config import lichess_config
 from cli_chess.utils.logging import log
 from chess import COLOR_NAMES
 from berserk.exceptions import ResponseError
-import berserk
 from time import sleep
 import threading
 
@@ -117,17 +115,17 @@ class WatchTVModel(GameModelBase):
 
 
 class StreamTVChannel(threading.Thread):
-    def __init__(self, channel: TVChannelMenuOptions, **kwargs):
-        super().__init__(**kwargs)
-        self.daemon = True
-        self.session = berserk.TokenSession(lichess_config.get_value(lichess_config.Keys.API_TOKEN))
-        self.client = berserk.Client(self.session)
+    def __init__(self, channel: TVChannelMenuOptions):
+        super().__init__(daemon=True)
         self.channel = channel
         self.current_game = ""
         self.running = False
         self.max_retries = 10
         self.retries = 0
         self.e_tv_stream_event = Event()
+
+        from cli_chess.core.api.api_manager import api_client
+        self.api_client = api_client
 
         # Current flow that has to be followed to watch the "variant" tv channels
         # as /api/tv/feed is only for the top rated game, and doesn't allow channel specification
@@ -139,7 +137,7 @@ class StreamTVChannel(threading.Thread):
 
     def get_channel_game_id(self, channel: str) -> str:
         """Returns the game ID of the ongoing TV game of the passed in channel"""
-        channel_game_id = self.client.tv.get_current_games().get(channel, {}).get('gameId')
+        channel_game_id = self.api_client.tv.get_current_games().get(channel, {}).get('gameId')
         if not channel_game_id:
             raise ValueError(f"TV Stream: Didn't receive game ID for current {channel} TV game")
 
@@ -147,7 +145,7 @@ class StreamTVChannel(threading.Thread):
 
     def get_game_metadata(self, game_id: str):
         """Return the metadata for the passed in Game ID"""
-        game_metadata = self.client.games.export(game_id)
+        game_metadata = self.api_client.games.export(game_id)
         if not game_metadata:
             raise ValueError("TV Stream: Didn't receive game metadata for current TV game")
 
@@ -165,7 +163,7 @@ class StreamTVChannel(threading.Thread):
                     self.current_game = game_id
                     turns_behind = 0
                     game_metadata = self.get_game_metadata(game_id)
-                    stream = self.client.games.stream_game_moves(game_id)
+                    stream = self.api_client.games.stream_game_moves(game_id)
 
                     for event in stream:
                         # TODO: This does close the stream, but not until the next event comes in (which can be a while
