@@ -28,11 +28,21 @@ class GameStateDispatcher(threading.Thread):
         self.game_id = game_id
         self.e_game_state_dispatcher_event = Event()
 
+        try:
+            from cli_chess.core.api.api_manager import api_client
+            self.api_client = api_client
+        except ImportError:
+            # TODO: Clean this up so the error is displayed on the main screen
+            log.error("GameStateDispatcher: Failed to import api_client")
+            raise ImportError("API client not setup. Do you have an API token linked?")
+
     def run(self):
-        from cli_chess.core.api.api_manager import api_client
+        """This is the threads main function. It handles emitting the game state to
+           listeners (typically the OnlineGameModel).
+        """
         log.info(f"GameStateDispatcher: Started streaming game state: {self.game_id}")
 
-        for event in api_client.board.stream_game_state(self.game_id):
+        for event in self.api_client.board.stream_game_state(self.game_id):
             if event['type'] == "gameFull":
                 self.e_game_state_dispatcher_event.notify(gameFull=event)
 
@@ -46,6 +56,43 @@ class GameStateDispatcher(threading.Thread):
                 self.e_game_state_dispatcher_event.notify(chatLine=event)
 
             elif event['type'] == "opponentGone":
+                # TODO: Start countdown if opponent is gone. Automatically claim win if timer elapses.
+                #  The countdown should stop if the opponent comes back before the timer elapses.
                 self.e_game_state_dispatcher_event.notify(opponentGone=event)
 
         log.info(f"GameStateDispatcher: Completed streaming of: {self.game_id}")
+
+    def make_move(self, move: str):
+        """Sends the move to lichess. This move should have already
+           been verified as valid in the current context of the board.
+           The move must be in UCI format.
+        """
+        try:
+            log.debug(f"GameStateDispatcher: Sending move ({move}) to lichess")
+            self.api_client.board.make_move(self.game_id, move)
+        except Exception:
+            raise
+
+    def send_takeback_request(self) -> None:
+        """Sends a takeback request to our opponent"""
+        try:
+            log.debug(f"GameStateDispatcher: Sending takeback offer to opponent")
+            self.api_client.board.offer_takeback(self.game_id)
+        except Exception:
+            raise
+
+    def send_draw_offer(self) -> None:
+        """Sends a draw offer to our opponent"""
+        try:
+            log.debug(f"GameStateDispatcher: Sending draw offer to opponent")
+            self.api_client.board.offer_draw(self.game_id)
+        except Exception:
+            raise
+
+    def resign(self) -> None:
+        """Resigns the game"""
+        try:
+            log.debug(f"GameStateDispatcher: Sending resignation")
+            self.api_client.board.resign_game(self.game_id)
+        except Exception:
+            raise

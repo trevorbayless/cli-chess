@@ -44,46 +44,47 @@ class OnlineGameModel(GameModelBase):
 
     @threaded
     def start_ai_challenge(self) -> None:
+        """Sends a request to lichess to start an AI challenge using the selected game parameters"""
         self.api_client.challenges.create_ai(level=self.game_metadata['ai_level'],
                                              clock_limit=self.game_metadata['clock']['white']['time'],
                                              clock_increment=self.game_metadata['clock']['white']['increment'],
                                              color=self.game_metadata['my_color'],
                                              variant=self.game_metadata['variant'])
 
-    def send_move(self, move: str):
+    def make_move(self, move: str):
         """Sends the move to the board model for a validity check. If valid this
-           function handles sending it to lichess. Raises a ValueError if lichess
-           responds with a failure.
+           function will pass the move over to the game state dispatcher to be sent
+           Raises an exception on move or API errors.
         """
         try:
             move = self.board_model.verify_move(move)
 
             log.info(f"OnlineGameModel: Sending move ({move}) to lichess")
-            self.api_client.board.make_move(self.game_metadata['gameId'], move)
+            self.game_state_dispatcher.make_move(move)
         except Exception:
             raise
 
     def propose_takeback(self) -> None:
-        """Proposes a takeback"""
+        """Notifies the game state dispatcher to propose a takeback"""
         try:
-            # TODO: Need to handle ensuring the game is still in progress, and avoiding spams.
-            self.api_client.board.offer_takeback(self.game_metadata['gameId'])
+            # TODO: Handle ensuring the game is still in progress, and avoiding spams.
+            self.game_state_dispatcher.send_takeback_request()
         except Exception:
             raise
 
     def offer_draw(self) -> None:
-        """Offers a draw"""
+        """Notifies the game state dispatcher to offer a draw"""
         try:
-            # TODO: Need to handle ensuring the game is still in progress, and avoiding spams.
-            self.api_client.board.offer_draw(self.game_metadata['gameId'])
+            # TODO: Handle ensuring the game is still in progress, and avoiding spams.
+            self.game_state_dispatcher.send_draw_offer()
         except Exception:
             raise
 
     def resign(self) -> None:
-        """Resigns the game"""
+        """Notifies the game state dispatcher to resign the game"""
         try:
-            # TODO: Need to handle ensuring the game is still in progress, and avoiding spams.
-            self.api_client.board.resign_game(self.game_metadata['gameId'])
+            # TODO: Handle ensuring the game is still in progress, and avoiding spams.
+            self.game_state_dispatcher.resign()
         except Exception:
             raise
 

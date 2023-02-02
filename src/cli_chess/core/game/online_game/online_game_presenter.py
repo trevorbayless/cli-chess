@@ -41,22 +41,31 @@ class OnlineGamePresenter(PlayableGamePresenterBase):
                 if move == "0000":
                     raise ValueError("Null moves are not supported in online games")
                 else:
-                    self.model.send_move(move)
+                    self.model.make_move(move)
                     self.view.clear_error()
         except Exception as e:
             self.view.show_error(f"{e}")
 
     def propose_takeback(self) -> None:
         """Proposes a takeback"""
-        self.model.propose_takeback()
+        try:
+            self.model.propose_takeback()
+        except Exception as e:
+            self.view.show_error(f"{e}")
 
     def offer_draw(self) -> None:
         """Offers a draw"""
-        self.model.offer_draw()
+        try:
+            self.model.offer_draw()
+        except Exception as e:
+            self.view.show_error(f"{e}")
 
     def resign(self) -> None:
         """Resigns the game"""
-        self.model.resign()
+        try:
+            self.model.resign()
+        except Exception as e:
+            self.view.show_error(f"{e}")
 
     def user_input_received(self, inpt: str) -> None:
         """Respond to the users input. This input can either be the
@@ -64,13 +73,13 @@ class OnlineGamePresenter(PlayableGamePresenterBase):
         """
         inpt_lower = inpt.lower()
         if inpt_lower == "resign" or inpt_lower == "quit":
-            # TODO: Send back to view to show a confirmation prompt
-            pass
+            # TODO: Send back to view to show a confirmation prompt, or notification it was sent
+            self.resign()
         elif inpt_lower == "draw" or inpt_lower == "offer draw":
-            # TODO: Send back to view to show a confirmation prompt
-            pass
+            # TODO: Send back to view to show a confirmation prompt, or notification it was sent
+            self.offer_draw()
         elif inpt_lower == "takeback" or inpt_lower == "back" or inpt_lower == "undo":
-            # TODO: Send back to view to show a confirmation prompt
-            pass
+            # TODO: Send back to view to show a confirmation prompt, or notification it was sent
+            self.propose_takeback()
         else:
             self.make_move(inpt)
