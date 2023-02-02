@@ -46,6 +46,18 @@ class OnlineGamePresenter(PlayableGamePresenterBase):
         except Exception as e:
             self.view.show_error(f"{e}")
 
+    def propose_takeback(self) -> None:
+        """Proposes a takeback"""
+        self.model.propose_takeback()
+
+    def offer_draw(self) -> None:
+        """Offers a draw"""
+        self.model.offer_draw()
+
+    def resign(self) -> None:
+        """Resigns the game"""
+        self.model.resign()
+
     def user_input_received(self, inpt: str) -> None:
         """Respond to the users input. This input can either be the
            move input, or game actions (such as resign)

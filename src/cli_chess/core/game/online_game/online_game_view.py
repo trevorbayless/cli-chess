@@ -15,7 +15,11 @@
 
 from __future__ import annotations
 from cli_chess.core.game import PlayableGameViewBase
-from cli_chess.utils import log
+from cli_chess.utils.ui_common import handle_mouse_click
+from prompt_toolkit.layout import Container, Window, FormattedTextControl, VSplit, HSplit, VerticalAlign, D
+from prompt_toolkit.formatted_text import StyleAndTextTuples
+from prompt_toolkit.key_binding import KeyBindings, merge_key_bindings
+from prompt_toolkit.keys import Keys
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from cli_chess.core.game.online_game import OnlineGamePresenter
@@ -30,3 +34,48 @@ class OnlineGameView(PlayableGameViewBase):
         """Accept handler for the input field"""
         self.presenter.user_input_received(input.text)
         self.input_field_container.text = ''
+
+    def _create_function_bar(self) -> VSplit:
+        """Create the conditional function bar"""
+        def _get_function_bar_fragments() -> StyleAndTextTuples:
+            fragments = self._base_function_bar_fragments()
+            fragments.extend([
+                ("class:function-bar.key", "F2", handle_mouse_click(self.presenter.propose_takeback)),
+                ("class:function-bar.label", f"{'Takeback':<11}", handle_mouse_click(self.presenter.propose_takeback)),
+                ("class:function-bar.spacer", " "),
+                ("class:function-bar.key", "F3", handle_mouse_click(self.presenter.offer_draw)),
+                ("class:function-bar.label", f"{'Offer draw':<11}", handle_mouse_click(self.presenter.offer_draw)),
+                ("class:function-bar.spacer", " "),
+                ("class:function-bar.key", "F4", handle_mouse_click(self.presenter.resign)),
+                ("class:function-bar.label", f"{'Resign':<11}", handle_mouse_click(self.presenter.resign)),
+                ("class:function-bar.spacer", " "),
+                ("class:function-bar.key", "F10", handle_mouse_click(self.presenter.exit)),
+                ("class:function-bar.label", f"{'Exit':<11}", handle_mouse_click(self.presenter.exit))
+            ])
+            return fragments
+
+        return VSplit([
+            Window(FormattedTextControl(_get_function_bar_fragments)),
+        ], height=D(max=1, preferred=1))
+
+    def _container_key_bindings(self) -> KeyBindings:
+        """Creates the key bindings for this container"""
+        bindings = super()._container_key_bindings()
+
+        @bindings.add(Keys.F2, eager=True)
+        def _(event): # noqa
+            self.presenter.propose_takeback()
+
+        @bindings.add(Keys.F3, eager=True)
+        def _(event): # noqa
+            self.presenter.offer_draw()
+
+        @bindings.add(Keys.F4, eager=True)
+        def _(event): # noqa
+            self.presenter.resign()
+
+        @bindings.add(Keys.F10, eager=True)
+        def _(event): # noqa
+            self.presenter.exit()
+
+        return bindings

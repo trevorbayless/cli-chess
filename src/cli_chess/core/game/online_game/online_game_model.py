@@ -63,6 +63,30 @@ class OnlineGameModel(GameModelBase):
         except Exception:
             raise
 
+    def propose_takeback(self) -> None:
+        """Proposes a takeback"""
+        try:
+            # TODO: Need to handle ensuring the game is still in progress, and avoiding spams.
+            self.api_client.board.offer_takeback(self.game_metadata['gameId'])
+        except Exception:
+            raise
+
+    def offer_draw(self) -> None:
+        """Offers a draw"""
+        try:
+            # TODO: Need to handle ensuring the game is still in progress, and avoiding spams.
+            self.api_client.board.offer_draw(self.game_metadata['gameId'])
+        except Exception:
+            raise
+
+    def resign(self) -> None:
+        """Resigns the game"""
+        try:
+            # TODO: Need to handle ensuring the game is still in progress, and avoiding spams.
+            self.api_client.board.resign_game(self.game_metadata['gameId'])
+        except Exception:
+            raise
+
     def handle_iem_event(self, **kwargs) -> None:
         """Handle event from the incoming event manager"""
         # TODO: Need to ensure IEM events we are responding to in this class are specific to this game being played.
