@@ -16,7 +16,7 @@
 from __future__ import annotations
 from cli_chess.utils import log
 from cli_chess.utils.ui_common import handle_mouse_click, go_back_to_main_menu, exit_app
-from prompt_toolkit.widgets import TextArea
+from prompt_toolkit.widgets import TextArea, Box
 from prompt_toolkit.layout import Window, Container, FormattedTextControl, ConditionalContainer, HSplit, VSplit, VerticalAlign, D
 from prompt_toolkit.formatted_text import StyleAndTextTuples
 from prompt_toolkit.key_binding import KeyBindings
@@ -48,7 +48,7 @@ class GameViewBase:
         """Return the base function bar fragments"""
         return ([
             ("class:function-bar.key", "F1", handle_mouse_click(self.presenter.flip_board)),
-            ("class:function-bar.label", f"{'Flip board':<14}", handle_mouse_click(self.presenter.flip_board)),
+            ("class:function-bar.label", f"{'Flip board':<11}", handle_mouse_click(self.presenter.flip_board)),
             ("class:function-bar.spacer", " ")
         ])
 
@@ -107,23 +107,29 @@ class PlayableGameViewBase(GameViewBase):
         super().__init__(presenter)
 
     def _create_container(self) -> Container:
-        return HSplit([
-            VSplit([
-                self.board_output_container,
-                HSplit([
-                    self.player_info_upper_container,
-                    self.material_diff_upper_container,
-                    self.move_list_container,  # VSplit([self.move_list_container], align=HorizontalAlign.LEFT),
-                    self.material_diff_lower_container,
-                    self.player_info_lower_container
-                ])
-            ]),
-            self.input_field_container,
-            self.error_container,
+        main_content = Box(
             HSplit([
-                self._create_function_bar()
-            ], align=VerticalAlign.BOTTOM)
-        ], key_bindings=self._container_key_bindings())
+                VSplit([
+                    self.board_output_container,
+                    HSplit([
+                        self.player_info_upper_container,
+                        self.material_diff_upper_container,
+                        self.move_list_container,  # VSplit([self.move_list_container], align=HorizontalAlign.LEFT),
+                        self.material_diff_lower_container,
+                        self.player_info_lower_container
+                    ])
+                ]),
+                self.input_field_container,
+                self.error_container,
+            ]),
+            padding=1,
+            padding_bottom=0
+        )
+        function_bar = HSplit([
+            self._create_function_bar()
+        ], align=VerticalAlign.BOTTOM)
+
+        return HSplit([main_content, function_bar], key_bindings=self._container_key_bindings())
 
     def _create_input_field_container(self) -> TextArea:
         """Returns a TextArea to use as the input field"""
