@@ -94,9 +94,6 @@ class OnlineGameOptions(BaseGameOptions):
             GameOption.COLOR: BaseGameOptions.color_options,
         }
 
-    time_control_options_dict = dict(BaseGameOptions.time_control_options_dict)
-    time_control_options_dict["Correspondence"] = "correspondence"
-
     skill_level_options_dict = {
         "Level 1": 1,
         "Level 2": 2,
