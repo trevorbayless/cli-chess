@@ -15,7 +15,7 @@
 
 from cli_chess.core.game import GameModelBase
 from cli_chess.modules.game_options import GameOption
-from cli_chess.core.api import GameStream
+from cli_chess.core.api import GameStateDispatcher
 from cli_chess.utils import log, threaded
 from chess import Color, COLOR_NAMES, WHITE
 from typing import Optional
@@ -30,7 +30,7 @@ class OnlineGameModel(GameModelBase):
         self.my_color: Color = game_parameters[GameOption.COLOR] if not "random" else WHITE
         super().__init__(variant=game_parameters[GameOption.VARIANT], orientation=self.my_color, fen=None)
         self._save_game_metadata(game_parameters=game_parameters)
-        self.game_stream = Optional[GameStream]
+        self.game_state_dispatcher = Optional[GameStateDispatcher]
 
         try:
             from cli_chess.core.api.api_manager import api_client, api_iem
@@ -95,24 +95,24 @@ class OnlineGameModel(GameModelBase):
             event = kwargs['gameStart']['game']
             if not event['hasMoved'] and event['compat']['board']:  # TODO: There has to be a better way to ensure this is the right game...
                 self._save_game_metadata(iem_gameStart=event)
-                self._start_game_stream(event['gameId'])
+                self._start_game_state_dispatcher(event['gameId'])
 
         elif 'gameFinish' in kwargs:
             # TODO: End the streams, send data to presenter.
             # self._save_game_metadata(iem_gameFinish=event)
             pass
 
-    def _start_game_stream(self, game_id: str) -> None:
+    def _start_game_state_dispatcher(self, game_id: str) -> None:
         """Starts streaming the events of the passed in game_id"""
-        self.game_stream = GameStream(game_id)
-        self.game_stream.e_new_game_stream_event.add_listener(self.handle_game_stream_event)
-        self.game_stream.start()
+        self.game_state_dispatcher = GameStateDispatcher(game_id)
+        self.game_state_dispatcher.e_game_state_dispatcher_event.add_listener(self.handle_game_state_dispatcher_event)
+        self.game_state_dispatcher.start()
 
-    def handle_game_stream_event(self, **kwargs) -> None:
+    def handle_game_state_dispatcher_event(self, **kwargs) -> None:
         """Handle event from the game stream"""
         if 'gameFull' in kwargs:
             event = kwargs['gameFull']
-            self._save_game_metadata(gs_gameFull=event)
+            self._save_game_metadata(gsd_gameFull=event)
             self.my_color = Color(COLOR_NAMES.index(self.game_metadata['my_color']))
             self.board_model.reinitialize_board(variant=self.game_metadata['variant'],
                                                 orientation=self.my_color,
@@ -121,7 +121,7 @@ class OnlineGameModel(GameModelBase):
 
         elif 'gameState' in kwargs:
             event = kwargs['gameState']
-            self._save_game_metadata(gs_gameState=event)
+            self._save_game_metadata(gsd_gameState=event)
 
             # Resetting and replaying the moves guarantees the game between lichess
             # and our local board are in sync (eg. takebacks, moves played on website, etc)
@@ -131,12 +131,12 @@ class OnlineGameModel(GameModelBase):
 
         elif 'chatLine' in kwargs:
             event = kwargs['chatLine']
-            self._save_game_metadata(gs_chatLine=event)
+            self._save_game_metadata(gsd_chatLine=event)
 
         elif 'opponentGone' in kwargs:
-            # TODO: Start countdown if opponent is gone. Automatically claim win if timer elapses.
+            # TODO: Show alert to user
             event = kwargs['opponentGone']
-            self._save_game_metadata(gs_opponentGone=event)
+            self._save_game_metadata(gsd_opponentGone=event)
 
     def _default_game_metadata(self) -> dict:
         """Returns the default structure for game metadata"""
@@ -173,8 +173,8 @@ class OnlineGameModel(GameModelBase):
                 self.game_metadata['variant'] = data['variant']['name']
                 self.game_metadata['speed'] = data['speed']
 
-            elif 'gs_gameFull' in kwargs:
-                data = kwargs['gs_gameFull']
+            elif 'gsd_gameFull' in kwargs:
+                data = kwargs['gsd_gameFull']
 
                 for color in COLOR_NAMES:
                     if data[color].get('name'):
@@ -194,8 +194,8 @@ class OnlineGameModel(GameModelBase):
                 self.game_metadata['clock']['black']['time'] = data['state']['btime']
                 self.game_metadata['clock']['black']['increment'] = data['state']['binc']
 
-            elif 'gs_gameState' in kwargs:
-                data = kwargs['gs_gameState']
+            elif 'gsd_gameState' in kwargs:
+                data = kwargs['gsd_gameState']
                 # NOTE: Times below come from lichess in milliseconds
                 self.game_metadata['clock']['white']['time'] = data['wtime']
                 self.game_metadata['clock']['black']['time'] = data['btime']

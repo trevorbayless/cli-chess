@@ -17,35 +17,35 @@ from cli_chess.utils import Event, log
 import threading
 
 
-class GameStream(threading.Thread):
-    """Streams a game using the Board api. The game that is
-       streamed using this class must be owned by the account
-       linked to the api token.
+class GameStateDispatcher(threading.Thread):
+    """Handles streaming a game and sending game commands (make move, offer draw, etc)
+       using the Board API. The game that is streamed using this class must be owned
+       by the account linked to the api token.
     """
 
     def __init__(self, game_id=""):
         super().__init__()
         self.game_id = game_id
-        self.e_new_game_stream_event = Event()
+        self.e_game_state_dispatcher_event = Event()
 
     def run(self):
         from cli_chess.core.api.api_manager import api_client
-        log.info(f"GameStream: Started streaming game state: {self.game_id}")
+        log.info(f"GameStateDispatcher: Started streaming game state: {self.game_id}")
 
         for event in api_client.board.stream_game_state(self.game_id):
             if event['type'] == "gameFull":
-                self.e_new_game_stream_event.notify(gameFull=event)
+                self.e_game_state_dispatcher_event.notify(gameFull=event)
 
             elif event['type'] == "gameState":
-                self.e_new_game_stream_event.notify(gameState=event)
+                self.e_game_state_dispatcher_event.notify(gameState=event)
                 is_game_over = event.get('winner')
                 if is_game_over:
                     break
 
             elif event['type'] == "chatLine":
-                self.e_new_game_stream_event.notify(chatLine=event)
+                self.e_game_state_dispatcher_event.notify(chatLine=event)
 
             elif event['type'] == "opponentGone":
-                self.e_new_game_stream_event.notify(opponentGone=event)
+                self.e_game_state_dispatcher_event.notify(opponentGone=event)
 
-        log.info(f"GameStream: Completed streaming of: {self.game_id}")
+        log.info(f"GameStateDispatcher: Completed streaming of: {self.game_id}")
