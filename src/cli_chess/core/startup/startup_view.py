@@ -1,4 +1,4 @@
-# Copyright (C) 2021-2022 Trevor Bayless <trevorbayless1@gmail.com>
+# Copyright (C) 2021-2023 Trevor Bayless <trevorbayless1@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -41,7 +41,7 @@ class StartupView:
         try:
             self.app = Application(
                 layout=Layout(initial_container),
-                color_depth=ColorDepth.TRUE_COLOR,
+                color_depth=ColorDepth.DEFAULT,
                 mouse_support=True,
                 full_screen=True,
                 style=Style.from_dict(default)
