@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from cli_chess.utils.common import is_windows_system
+from cli_chess.utils.common import is_windows_os
 from cli_chess.utils.logging import log, redact_from_logs
 from cli_chess.utils.event import Event
 from os import path, makedirs
@@ -30,7 +30,7 @@ def get_config_path() -> str:
     """Returns the config filepath to use based on OS"""
     file_path = "$HOME/.config/cli-chess/"
 
-    if is_windows_system():
+    if is_windows_os():
         file_path = "$APPDATA/cli-chess/"
 
     return path.expandvars(file_path)

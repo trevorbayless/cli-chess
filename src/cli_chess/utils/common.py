@@ -14,12 +14,22 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 import threading
-from os import name as os_name
+from platform import system
 
 
-def is_windows_system() -> bool:
-    """Returns True if on a Windows system"""
-    return True if os_name == "nt" else False
+def is_linux_os() -> bool:
+    """Returns True if running on Linux"""
+    return True if system() == "Linux" else False
+
+
+def is_windows_os() -> bool:
+    """Returns True if running on Windows"""
+    return True if system() == "Windows" else False
+
+
+def is_mac_os() -> bool:
+    """Returns True if running on Mac"""
+    return True if system() == "Darwin" else False
 
 
 def str_to_bool(s: str) -> bool:

@@ -14,8 +14,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from __future__ import annotations
-from cli_chess.utils import default
-from prompt_toolkit.patch_stdout import patch_stdout
+from cli_chess.utils import is_linux_os, default
 from prompt_toolkit.layout import Layout, Container
 from prompt_toolkit.application import Application, DummyApplication, get_app
 from prompt_toolkit import print_formatted_text as pt_print, HTML
@@ -41,7 +40,7 @@ class StartupView:
         try:
             self.app = Application(
                 layout=Layout(initial_container),
-                color_depth=ColorDepth.DEFAULT,
+                color_depth=ColorDepth.TRUE_COLOR if is_linux_os() else ColorDepth.DEFAULT,
                 mouse_support=True,
                 full_screen=True,
                 style=Style.from_dict(default)
