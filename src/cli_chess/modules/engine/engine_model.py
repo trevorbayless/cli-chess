@@ -15,9 +15,9 @@
 
 from cli_chess.modules.board import BoardModel
 from cli_chess.modules.game_options import GameOption
+from cli_chess.utils.config import engine_config
 from cli_chess.utils import log, is_windows_os, is_mac_os
 import chess.engine
-from os import path
 
 
 async def create_engine_model(board_model: BoardModel, game_parameters: dict):
@@ -41,15 +41,10 @@ class EngineModel:
         """Load the chess engine"""
         # TODO: Add support for other engines. Menu logic would need to be
         #       Updated to show only valid variants for the engine, UCI Elo levels, etc.
-        dir_path = path.dirname(path.realpath(__file__)) + "/"
-        base_engine_path = dir_path + "binaries/fairy-stockfish_14_x86-64_"
-        engine_path = base_engine_path + "linux"
-        if is_windows_os():
-            engine_path = base_engine_path + "windows.exe"
-        elif is_mac_os():
-            engine_path = base_engine_path + "mac"
+        engine_path = engine_config.get_value(engine_config.Keys.ENGINE_PATH)
+        engine_binary_name = engine_config.get_value(engine_config.Keys.ENGINE_BINARY_NAME)
         try:
-            _, engine = await chess.engine.popen_uci(engine_path)
+            _, engine = await chess.engine.popen_uci(engine_path + engine_binary_name)
             return engine
         except Exception as e:
             log.critical(f"Exception caught starting engine: {e}")
@@ -62,9 +57,9 @@ class EngineModel:
         uci_elo = self.game_parameters.get(GameOption.COMPUTER_ELO)
 
         engine_cfg = {
-            'Skill Level': skill_level if skill_level else -20,
+            'Skill Level': skill_level if skill_level else 0,
             'UCI_LimitStrength': True if limit_strength else False,
-            'UCI_Elo': uci_elo if uci_elo else 500
+            'UCI_Elo': uci_elo if uci_elo else 1350
         }
 
         await self.engine.configure(engine_cfg)

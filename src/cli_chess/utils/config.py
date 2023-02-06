@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from cli_chess.utils.common import is_windows_os
+from cli_chess.utils.common import is_linux_os, is_windows_os
 from cli_chess.utils.logging import log, redact_from_logs
 from cli_chess.utils.event import Event
 from os import path, makedirs
@@ -212,7 +212,9 @@ class EngineConfig(SectionBase):
        By default, this will be appended to the default configuration.
     """
     class Keys(Enum):
-        ENGINE_PATH = {"name": "engine_path", "default": ""}
+        ENGINE_NAME = {"name": "engine_name", "default": "Fairy-Stockfish"}
+        ENGINE_PATH = {"name": "engine_path", "default": path.join(path.realpath(__file__ + "/../../modules/engine/binaries"), '')}
+        ENGINE_BINARY_NAME = {"name": "engine_binary_name", "default": "fairy-stockfish_14_x86-64_" + ("linux" if is_linux_os() else ("windows" if is_windows_os() else "mac"))}
 
     def __init__(self, filename: str = DEFAULT_CONFIG_FILENAME):
         self.e_engine_config_updated = Event()
@@ -256,4 +258,5 @@ class LichessConfig(SectionBase):
 
 board_config = BoardConfig()
 ui_config = UiConfig()
+engine_config = EngineConfig()
 lichess_config = LichessConfig()
