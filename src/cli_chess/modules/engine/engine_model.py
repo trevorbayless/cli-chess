@@ -15,9 +15,9 @@
 
 from cli_chess.modules.board import BoardModel
 from cli_chess.modules.game_options import GameOption
-from cli_chess.utils.config import engine_config
-from cli_chess.utils.logging import log
+from cli_chess.utils import log, is_windows_os, is_mac_os
 import chess.engine
+from os import path
 
 
 async def create_engine_model(board_model: BoardModel, game_parameters: dict):
@@ -39,8 +39,15 @@ class EngineModel:
     @staticmethod
     async def load_engine() -> chess.engine.UciProtocol:
         """Load the chess engine"""
-        # TODO: Assert for the time being that the engine name matches "Fairy-Stockfish"
-        engine_path = engine_config.get_value(engine_config.Keys.ENGINE_PATH)
+        # TODO: Add support for other engines. Menu logic would need to be
+        #       Updated to show only valid variants for the engine, UCI Elo levels, etc.
+        dir_path = path.dirname(path.realpath(__file__)) + "/"
+        base_engine_path = dir_path + "binaries/fairy-stockfish_14_x86-64_"
+        engine_path = base_engine_path + "linux"
+        if is_windows_os():
+            engine_path = base_engine_path + "windows.exe"
+        elif is_mac_os():
+            engine_path = base_engine_path + "mac"
         try:
             _, engine = await chess.engine.popen_uci(engine_path)
             return engine
