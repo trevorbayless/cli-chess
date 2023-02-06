@@ -17,6 +17,7 @@ from cli_chess.utils.common import is_linux_os, is_windows_os
 from cli_chess.utils.logging import log, redact_from_logs
 from cli_chess.utils.event import Event
 from os import path, makedirs
+from getpass import getuser
 from enum import Enum
 import configparser
 
@@ -155,6 +156,25 @@ class SectionBase(BaseConfig):
         return super().get_key_boolean_value(self.section_name, key.name)
 
 
+class PlayerInfoConfig(SectionBase):
+    """Creates and manages the "player info" configuration. This configuration can
+       either live in its own file, or be appended as a section by using a
+       configuration filename that already exists (such as DEFAULT_CONFIG_FILENAME).
+       By default, this will be appended to the default configuration.
+    """
+    class Keys(Enum):
+        OFFLINE_PLAYER_NAME = {"name": "offline_player_name", "default": getuser() if getuser() else "You"}
+
+    def __init__(self, filename: str = DEFAULT_CONFIG_FILENAME):
+        self.e_player_info_config_updated = Event()
+        super().__init__(section_name="player_info", section_keys=self.Keys, filename=filename)
+
+    def write_config(self) -> None:
+        """Writes to the configuration file"""
+        super().write_config()
+        self.e_player_info_config_updated.notify()
+
+
 class BoardConfig(SectionBase):
     """Creates and manages the "board" configuration. This configuration can
        either live in its own file, or be appended as a section by using a
@@ -256,6 +276,7 @@ class LichessConfig(SectionBase):
         super().set_key_value(self.section_name, key.name, value)
 
 
+player_info_config = PlayerInfoConfig()
 board_config = BoardConfig()
 ui_config = UiConfig()
 engine_config = EngineConfig()
