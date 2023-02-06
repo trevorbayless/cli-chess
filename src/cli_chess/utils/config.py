@@ -225,8 +225,7 @@ class UiConfig(SectionBase):
 
 
 class EngineConfig(SectionBase):
-    """NOTE: This is not used currently as cli-chess for the time being only directly supports Fairy-Stockfish.
-       Creates and manages the "engine" configuration. This configuration can
+    """Creates and manages the "engine" configuration. This configuration can
        either live in its own file, or be appended as a section by using a
        configuration filename that already exists (such as DEFAULT_CONFIG_FILENAME).
        By default, this will be appended to the default configuration.
