@@ -1,4 +1,4 @@
-# Copyright (C) 2021-2022 Trevor Bayless <trevorbayless1@gmail.com>
+# Copyright (C) 2021-2023 Trevor Bayless <trevorbayless1@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,7 +15,7 @@
 
 import argparse
 from cli_chess.__metadata__ import __version__
-from cli_chess.utils.logging import redact_from_logs, log
+from cli_chess.utils.logging import log, redact_from_logs
 from cli_chess.core.api import required_token_scopes
 
 
@@ -43,6 +43,11 @@ def setup_argparse() -> ArgumentParser:
         "--token",
         metavar="API_TOKEN",
         type=str, help=f"The API token associated to your Lichess account. Scopes required: {required_token_scopes}"
+    )
+    parser.add_argument(
+        "--reset",
+        help="Force resets the cli-chess configuration. Reverts the program to its default state.",
+        action="store_true"
     )
     parser.add_argument(
         "-v", "--version",

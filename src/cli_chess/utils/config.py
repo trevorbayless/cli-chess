@@ -1,4 +1,4 @@
-# Copyright (C) 2021-2022 Trevor Bayless <trevorbayless1@gmail.com>
+# Copyright (C) 2021-2023 Trevor Bayless <trevorbayless1@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,14 +16,13 @@
 from cli_chess.utils.common import is_linux_os, is_windows_os
 from cli_chess.utils.logging import log, redact_from_logs
 from cli_chess.utils.event import Event
-from os import path, makedirs
 from getpass import getuser
 from enum import Enum
 import configparser
+import os
+from typing import List
 
-# TODO: Handle exceptions
-# TODO: Handle new config options on updates (do not overwrite full config)
-# TODO: Add a "force_update" to pull new values if they have been changed during runtime
+all_configs: List["SectionBase"] = []
 DEFAULT_CONFIG_FILENAME = "config.ini"
 
 
@@ -34,7 +33,21 @@ def get_config_path() -> str:
     if is_windows_os():
         file_path = "$APPDATA/cli-chess/"
 
-    return path.expandvars(file_path)
+    return os.path.expandvars(file_path)
+
+
+def force_recreate_configs() -> None:
+    """Forces a clean recreation of all configs"""
+    # Handle deletion first as configs can exist in the same file
+    # and we don't want to delete a newly created config/section
+    for config in all_configs:
+        if os.path.exists(config.full_filename):
+            os.remove(config.full_filename)
+
+    # second loop to handle recreation
+    for config in all_configs:
+        config.parser = config._get_parser() # noqa
+        config.create_section()
 
 
 class BaseConfig:
@@ -42,16 +55,21 @@ class BaseConfig:
         """Default base class constructor"""
         self.file_path = get_config_path()
         self.full_filename = self.file_path + filename
-        self.parser = configparser.ConfigParser()
-        self.parser.read(self.full_filename)
+        self.parser = self._get_parser()
 
-        # Event called on any configuration write event
+        # Event called on any configuration write event (across sections)
         self.e_config_updated = Event()
+
+    def _get_parser(self) -> "ConfigParser":
+        """Returns the config parser object"""
+        parser = configparser.ConfigParser()
+        parser.read(self.full_filename)
+        return parser
 
     def write_config(self) -> None:
         """Writes to the configuration file"""
-        if not path.exists(self.file_path):
-            makedirs(self.file_path)
+        if not os.path.exists(self.file_path):
+            os.makedirs(self.file_path)
 
         with open(self.full_filename, 'w') as config_file:
             self.parser.write(config_file)
@@ -59,16 +77,12 @@ class BaseConfig:
 
     def config_exists(self) -> bool:
         """Returns True if the configuration file exists"""
-        return path.isfile(self.full_filename)
+        return os.path.isfile(self.full_filename)
 
     def add_section(self, section: str) -> None:
         """Add a section to the configuration file"""
         self.parser[section] = {}
         self.write_config()
-
-    def has_section(self, section: str) -> bool:
-        """Returns true if the section passed in exists in the configuration file"""
-        return self.parser.has_section(section)
 
     def set_key_value(self, section: str, key: str, value: str) -> None:
         """Set (or add) a key/value to a section in the configuration file"""
@@ -126,15 +140,23 @@ class SectionBase(BaseConfig):
         self.section_keys = section_keys
         self._verify_section_integrity()
 
-    def _verify_section_integrity(self):
-        # Todo: Update this to verify this section and all keys (has_option, has_section)
-        if super().has_section(self.section_name):
-            pass
-        else:
-            self._rebuild_section()
+        # Keep track of all config sections (used on recreation)
+        all_configs.append(self)
 
-    def _rebuild_section(self) -> None:
-        """Rebuild this section using key value defaults"""
+    def _verify_section_integrity(self):
+        """Verifies a config sections integrity by validating the section exists as well
+           as all expected keys. If the section is missing, the entire section is recreated.
+           If a key is missing from the section, the key will be re-added with its default value.
+        """
+        if self._section_exists():
+            for key in self.section_keys:
+                if not self._section_has_key(key):
+                    super().set_key_value(self.section_name, key.name, key.value["default"])
+        else:
+            self.create_section()
+
+    def create_section(self) -> None:
+        """Creates this section using key value defaults"""
         super().add_section(self.section_name)
         for key in self.section_keys:
             super().set_key_value(self.section_name, key.name, key.value["default"])
@@ -147,13 +169,21 @@ class SectionBase(BaseConfig):
         """Get the value of the key passed in from the configuration file"""
         return super().get_key_value(self.section_name, key.name, False)
 
-    def set_value(self, key, value: str) -> None:
+    def set_value(self, key: Enum, value: str) -> None:
         """Set a keys value in the configuration file"""
         super().set_key_value(self.section_name, key.name, value)
 
-    def get_boolean(self, key) -> bool:
+    def get_boolean(self, key: Enum) -> bool:
         """Retrieve the boolean value at the passed in section/key pair"""
         return super().get_key_boolean_value(self.section_name, key.name)
+
+    def _section_exists(self) -> bool:
+        """Returns true if this section exists in the configuration file"""
+        return self.parser.has_section(self.section_name)
+
+    def _section_has_key(self, key: Enum) -> bool:
+        """Returns true if the passed in key exists in the supplied section"""
+        return self.parser.has_option(self.section_name, key.name)
 
 
 class PlayerInfoConfig(SectionBase):
@@ -232,8 +262,10 @@ class EngineConfig(SectionBase):
     """
     class Keys(Enum):
         ENGINE_NAME = {"name": "engine_name", "default": "Fairy-Stockfish"}
-        ENGINE_PATH = {"name": "engine_path", "default": path.join(path.realpath(__file__ + "/../../modules/engine/binaries"), '')}
-        ENGINE_BINARY_NAME = {"name": "engine_binary_name", "default": "fairy-stockfish_14_x86-64_" + ("linux" if is_linux_os() else ("windows" if is_windows_os() else "mac"))}
+        ENGINE_PATH = {"name": "engine_path",
+                       "default": os.path.join(os.path.realpath(__file__ + "/../../modules/engine/binaries"), '')}
+        ENGINE_BINARY_NAME = {"name": "engine_binary_name", "default": "fairy-stockfish_14_x86-64_" + (
+            "linux" if is_linux_os() else ("windows" if is_windows_os() else "mac"))}
 
     def __init__(self, filename: str = DEFAULT_CONFIG_FILENAME):
         self.e_engine_config_updated = Event()
