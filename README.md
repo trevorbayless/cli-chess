@@ -26,7 +26,7 @@ offline play against the Fairy-Stockfish engine. All Lichess variants are suppor
 
 ## Playing Online
 In order to play online using your Lichess account you will need to create an API token for cli-chess to
-authenticate with. Follow the steps below to create the token and register it with cli-chess. Generally, this
+authenticate with. Follow the steps below to create the token and register it with cli-chess. Generally, these
 steps will only need to be run once as cli-chess will remember the API token.
 
 1. Open your browser and login to your Lichess account
