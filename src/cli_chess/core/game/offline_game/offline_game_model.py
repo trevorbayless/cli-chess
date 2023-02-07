@@ -16,6 +16,7 @@
 from cli_chess.core.game import GameModelBase
 from cli_chess.modules.game_options import GameOption
 from cli_chess.utils.logging import log
+from cli_chess.utils.config import player_info_config, engine_config
 from random import getrandbits
 import chess
 
@@ -55,12 +56,24 @@ class OfflineGameModel(GameModelBase):
                 data = kwargs['game_parameters']
                 self.game_metadata['my_color'] = self.my_color
                 self.game_metadata['variant'] = data[GameOption.VARIANT]
-                #self.game_metadata['players']['white'] =  # TODO: Need to set player names in offline games
-                #self.game_metadata['players']['black'] =
                 self.game_metadata['clock']['white']['time'] = data[GameOption.TIME_CONTROL][0]
                 self.game_metadata['clock']['white']['increment'] = data[GameOption.TIME_CONTROL][1]
                 self.game_metadata['clock']['black'] = self.game_metadata['clock']['white']
 
-            self.e_game_model_updated.notify()
+                # My player information
+                my_name = player_info_config.get_value(player_info_config.Keys.OFFLINE_PLAYER_NAME)
+                self.game_metadata['players'][chess.COLOR_NAMES[self.my_color]]['title'] = ""
+                self.game_metadata['players'][chess.COLOR_NAMES[self.my_color]]['name'] = my_name
+                self.game_metadata['players'][chess.COLOR_NAMES[self.my_color]]['rating'] = ""
+
+                # Engine information
+                engine_name = engine_config.get_value(engine_config.Keys.ENGINE_NAME)
+                engine_name = engine_name + f" Lvl {data.get(GameOption.COMPUTER_SKILL_LEVEL)}" if not data.get(GameOption.SPECIFY_ELO) else engine_name
+                engine_rating = data.get(GameOption.COMPUTER_ELO, "")
+                self.game_metadata['players'][chess.COLOR_NAMES[not self.my_color]]['title'] = ""
+                self.game_metadata['players'][chess.COLOR_NAMES[not self.my_color]]['name'] = engine_name
+                self.game_metadata['players'][chess.COLOR_NAMES[not self.my_color]]['rating'] = engine_rating
+
+            self._notify_game_model_updated()
         except KeyError as e:
             log.error(f"Error saving offline game metadata: {e}")

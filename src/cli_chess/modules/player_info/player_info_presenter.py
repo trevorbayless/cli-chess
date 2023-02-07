@@ -33,7 +33,7 @@ class PlayerInfoPresenter:
 
     def update(self, **kwargs) -> None:
         """Updates the view based on orientation changes"""
-        #TODO: Only respond to updated here if required (eg. based on kwarg)
+        # TODO: Only respond to updated here if required (eg. based on kwarg)
         if 'board_orientation' in kwargs:
             pass
 

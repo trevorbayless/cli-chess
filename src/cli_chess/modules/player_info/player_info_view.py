@@ -25,9 +25,11 @@ if TYPE_CHECKING:
 class PlayerInfoView:
     def __init__(self, presenter: PlayerInfoPresenter, player_info: dict):
         self.presenter = presenter
-        self.player_title = player_info.get('title', "")
-        self.player_name = player_info.get('name', "Unknown")
-        self.player_rating = str(player_info.get('rating', ""))
+        self.player_title = ""
+        self.player_name = ""
+        self.player_rating = ""
+        self.update(player_info)
+
         self._player_title_control = FormattedTextControl(text=lambda: self.player_title, style="class:player-info.title")
         self._player_name_control = FormattedTextControl(text=lambda: self.player_name, style="class:player-info")
         self._player_rating_control = FormattedTextControl(text=lambda: self.player_rating, style="class:player-info")
@@ -37,7 +39,7 @@ class PlayerInfoView:
         return VSplit([
             ConditionalContainer(
                 Box(Window(self._player_title_control, align=WindowAlign.LEFT, dont_extend_width=True), padding=0, padding_right=1),
-                Condition(lambda: self.player_title)
+                Condition(lambda: self.player_title != "")
             ),
             Box(Window(self._player_name_control, align=WindowAlign.LEFT, dont_extend_width=True), padding=0, padding_right=1),
             Box(Window(self._player_rating_control, align=WindowAlign.RIGHT, dont_extend_width=True), padding=0, padding_right=1),
