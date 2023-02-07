@@ -52,12 +52,16 @@ class StartupView:
             exit(1)
 
     @staticmethod
-    def in_terminal_error(msg: str, title: str = "Error"):
-        """Print an in terminal error. This is only to be used
-           when the main application is not running yet
+    def print_in_terminal_msg(msg: str, error=False):
+        """Print an in terminal message. This is only to be used
+           when the main application is not running yet. Set error
+           parameter to True to highlight error messages.
         """
         if not get_app().is_running:
-            pt_print(HTML(f"<red>{title}:</red> {msg}"))
+            if not error:
+                pt_print(f"{msg}")
+            else:
+                pt_print(HTML(f"<red>Error:</red> {msg}"))
 
     def run(self) -> None:
         """Runs the main application"""

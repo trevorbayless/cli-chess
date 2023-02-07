@@ -37,7 +37,7 @@ class StartupPresenter:
 
         if args.token:
             if not TokenManagerModel().update_linked_account(args.token):
-                self.view.in_terminal_error(f"Invalid API token or missing required scopes. Scopes required: {required_token_scopes}")
+                self.view.print_in_terminal_msg(f"Invalid API token or missing required scopes. Scopes required: {required_token_scopes}", error=True)
                 exit(1)
 
         # EXAMPLE: Starting up with the Main layout
