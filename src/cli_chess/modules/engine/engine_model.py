@@ -16,8 +16,22 @@
 from cli_chess.modules.board import BoardModel
 from cli_chess.modules.game_options import GameOption
 from cli_chess.utils.config import engine_config
-from cli_chess.utils import log, is_windows_os, is_mac_os
+from cli_chess.utils import log
 import chess.engine
+
+fairy_stockfish_mapped_skill_levels = {
+    # These defaults are for the Fairy Stockfish engine
+    # correlates levels 1-8 to a fairy-stockfish "equivalent"
+    # This skill level mapping is to match Lichess' implementation
+    1: -9,
+    2: -5,
+    3: -1,
+    4: 3,
+    5: 7,
+    6: 11,
+    7: 16,
+    8: 20,
+}
 
 
 async def create_engine_model(board_model: BoardModel, game_parameters: dict):
@@ -52,7 +66,7 @@ class EngineModel:
 
     async def configure_engine(self) -> None:
         """Configure the engine with the passed in options"""
-        skill_level = self.game_parameters.get(GameOption.COMPUTER_SKILL_LEVEL)
+        skill_level = fairy_stockfish_mapped_skill_levels.get(self.game_parameters.get(GameOption.COMPUTER_SKILL_LEVEL))
         limit_strength = self.game_parameters.get(GameOption.SPECIFY_ELO)
         uci_elo = self.game_parameters.get(GameOption.COMPUTER_ELO)
 

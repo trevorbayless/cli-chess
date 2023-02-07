@@ -75,6 +75,17 @@ class BaseGameOptions:
         "10+0 (Rapid)": (10, 0)
     })
 
+    skill_level_options_dict = MappingProxyType({
+        "Level 1": 1,
+        "Level 2": 2,
+        "Level 3": 3,
+        "Level 4": 4,
+        "Level 5": 5,
+        "Level 6": 6,
+        "Level 7": 7,
+        "Level 8": 8
+    })
+
     color_options = MappingProxyType({
         "Random": "random",
         "White": "white",
@@ -88,22 +99,11 @@ class OnlineGameOptions(BaseGameOptions):
         self.dict_map = {
             GameOption.VARIANT: BaseGameOptions.variant_options_dict,
             GameOption.TIME_CONTROL: self.time_control_options_dict,
-            GameOption.COMPUTER_SKILL_LEVEL: self.skill_level_options_dict,
+            GameOption.COMPUTER_SKILL_LEVEL: BaseGameOptions.skill_level_options_dict,
             GameOption.RATED: self.mode_options_dict,
             GameOption.RATING_RANGE: None,
             GameOption.COLOR: BaseGameOptions.color_options,
         }
-
-    skill_level_options_dict = {
-        "Level 1": 1,
-        "Level 2": 2,
-        "Level 3": 3,
-        "Level 4": 4,
-        "Level 5": 5,
-        "Level 6": 6,
-        "Level 7": 7,
-        "Level 8": 8
-    }
 
     mode_options_dict = {
         "Rated": True,
@@ -117,7 +117,7 @@ class OfflineGameOptions(BaseGameOptions):
         self.dict_map = {
             GameOption.VARIANT: BaseGameOptions.variant_options_dict,
             GameOption.TIME_CONTROL: self.time_control_options_dict,
-            GameOption.COMPUTER_SKILL_LEVEL: self.skill_level_options_dict,
+            GameOption.COMPUTER_SKILL_LEVEL: BaseGameOptions.skill_level_options_dict,
             GameOption.SPECIFY_ELO: None,
             GameOption.COMPUTER_ELO: None,
             GameOption.COLOR: BaseGameOptions.color_options,
@@ -134,18 +134,3 @@ class OfflineGameOptions(BaseGameOptions):
         "Unlimited": ("unlimited", 0)
     }
     time_control_options_dict.update(additional_time_controls)
-
-    skill_level_options_dict = {
-        # These defaults are for the Fairy Stockfish engine
-        # and match what Lichess uses for their computer level settings
-        "Level 1": -9,
-        "Level 2": -5,
-        "Level 3": -1,
-        "Level 4": 3,
-        "Level 5": 7,
-        "Level 6": 11,
-        "Level 7": 16,
-        "Level 8": 20,
-        "Custom Level": "custom",
-        "Specify Elo": "elo"
-    }
