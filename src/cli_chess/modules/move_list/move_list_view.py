@@ -30,14 +30,14 @@ class MoveListView:
                                           multiline=True,
                                           wrap_lines=False,
                                           focus_on_click=False,
-                                          scrollbar=True,
+                                          scrollbar=False,
                                           read_only=True)
         self._container = self._create_container()
 
     def _create_container(self) -> Box:
         """Create the move list container"""
         return Box(self._move_list_output,
-                   width=D(min=1, max=20),
+                   width=D(min=1),
                    height=D(min=1, max=4, preferred=4),
                    padding=0)
 
