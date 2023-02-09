@@ -46,7 +46,7 @@ class MaterialDifferencePresenter:
         output = ""
         material_difference = self.model.get_material_difference(color)
         score = self.model.get_score(color)
-        use_unicode = board_config.get_boolean(board_config.Keys.USE_UNICODE_PIECES)
+        use_unicode = board_config.get_boolean(board_config.Keys.SHOW_MATERIAL_DIFF_IN_UNICODE)
 
         for piece_type in PIECE_TYPES:
             for count in range(material_difference[piece_type]):

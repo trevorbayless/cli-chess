@@ -215,8 +215,9 @@ class BoardConfig(SectionBase):
         SHOW_BOARD_COORDINATES = {"name": "show_board_coordinates", "default": True}
         SHOW_BOARD_HIGHLIGHTS = {"name": "show_board_highlights", "default": True}
         BLINDFOLD_CHESS = {"name": "blindfold_chess", "default": False}
-        USE_UNICODE_PIECES = {"name": "use_unicode_pieces", "default": True}
+        USE_UNICODE_PIECES = {"name": "use_unicode_pieces", "default": False if is_windows_os() else True}
         SHOW_MOVE_LIST_IN_UNICODE = {"name": "show_move_list_in_unicode", "default": False}
+        SHOW_MATERIAL_DIFF_IN_UNICODE = {"name": "show_material_diff_in_unicode", "default": False if is_windows_os() else True}
         RANK_LABEL_COLOR = {"name": "rank_label_color", "default": "gray"}
         FILE_LABEL_COLOR = {"name": "file_label_color", "default": "gray"}
         LAST_MOVE_COLOR = {"name": "last_move_color", "default": "yellowgreen"}
