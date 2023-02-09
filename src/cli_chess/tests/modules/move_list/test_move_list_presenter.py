@@ -63,18 +63,18 @@ def test_get_formatted_move_list(presenter: MoveListPresenter, board_config: Boa
     assert presenter.get_formatted_move_list() == []
 
     # Test unicode move list formatting
-    board_config.set_value(board_config.Keys.USE_UNICODE_PIECES, "yes")
+    board_config.set_value(board_config.Keys.SHOW_MOVE_LIST_IN_UNICODE, "yes")
     moves = ["d4", "f5", "Nc3", "Bd6"]
     for move in moves:
         model.board_model.make_move(move)
     assert presenter.get_formatted_move_list() == ["d4", "f5", "♞c3", "♝d6"]
 
     # Test non-unicode move list formatting
-    board_config.set_value(board_config.Keys.USE_UNICODE_PIECES, "no")
+    board_config.set_value(board_config.Keys.SHOW_MOVE_LIST_IN_UNICODE, "no")
     assert presenter.get_formatted_move_list() == ["d4", "f5", "Nc3", "Bd6"]
 
     # Test move promotion formatting
-    board_config.set_value(board_config.Keys.USE_UNICODE_PIECES, "yes")
+    board_config.set_value(board_config.Keys.SHOW_MOVE_LIST_IN_UNICODE, "yes")
     model.board_model.make_move("a8=N")
     model.board_model.make_move("h2h1Q")
     assert presenter.get_formatted_move_list() == ["d4", "f5", "♞c3", "♝d6", "a8=♞", "h1=♛"]
@@ -85,7 +85,7 @@ def test_get_formatted_move_list(presenter: MoveListPresenter, board_config: Boa
     assert presenter.get_formatted_move_list() == ["d4", "f5", "♞c3", "♝d6", "a8=♞", "h1=♛", "O-O-O", "O-O"]
 
     # Test move list formatting when the first move is black
-    board_config.set_value(board_config.Keys.USE_UNICODE_PIECES, "no")
+    board_config.set_value(board_config.Keys.SHOW_MOVE_LIST_IN_UNICODE, "no")
     model = MoveListModel(BoardModel(fen="8/1PK5/8/8/8/8/4kp2/8 b - - 2 70"))
     presenter.model = model
     model.board_model.make_move("f1Q")
@@ -97,7 +97,7 @@ def test_get_formatted_move_list(presenter: MoveListPresenter, board_config: Boa
 
 
 def test_get_move_as_unicode(presenter: MoveListPresenter, board_config: BoardConfig):
-    board_config.set_value(board_config.Keys.USE_UNICODE_PIECES, "yes")
+    board_config.set_value(board_config.Keys.SHOW_MOVE_LIST_IN_UNICODE, "yes")
     model = MoveListModel(BoardModel(fen="r3kbn1/p2p3P/8/8/5p2/8/p3P3/RNBQK2R w KQq - 0 1"))
     presenter.model = model
 

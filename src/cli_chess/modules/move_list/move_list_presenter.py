@@ -39,7 +39,7 @@ class MoveListPresenter:
         """Returns a list containing the formatted moves"""
         formatted_move_list = []
         move_list_data = self.model.get_move_list_data()
-        use_unicode = board_config.get_boolean(board_config.Keys.USE_UNICODE_PIECES)
+        use_unicode = board_config.get_boolean(board_config.Keys.SHOW_MOVE_LIST_IN_UNICODE)
 
         for entry in move_list_data:
             move = self.get_move_as_unicode(entry) if use_unicode else (entry['move'])
