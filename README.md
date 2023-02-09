@@ -3,25 +3,24 @@
 </p>
 
 <p align="center">
-A highly customizable way to play chess in your terminal! Supports online play (via Lichess.org) and
-offline play against the Fairy-Stockfish engine. All Lichess variants are supported!
+A highly customizable way to play chess in your terminal. Supports online play (via Lichess.org) and
+offline play against the Fairy-Stockfish engine. All Lichess variants are supported.
 </p>
 
 ## Main Features
 - Play online using your Lichess.org account
 - Play offline against the Fairy-Stockfish engine
-- Supports all Lichess [variants](https://lichess.org/variant)
+- Supports playing all Lichess [variants](https://lichess.org/variant)
 - Theme the chess board and pieces to the colors of your choice
-- Watch Lichess TV from the comfort of your terminal
-- Supports SAN and UCI notation
+- Supports making moves in UCI, SAN, or LAN
 - Play blindfold chess
-- And more!
+- Watch Lichess TV
 
 ## Getting started
 1. Open your terminal and run `pip install cli-chess`
 2. Type `cli-chess` to start cli-chess
 3. Use your keyboard arrows, tab, or click to navigate the menus. Multi value menu options
-   (eg. changing the variant) can be cycled by pressing spacebar, enter, or by clicking
+   (e.g. changing the variant) can be cycled by pressing spacebar, enter, or by clicking
    on the value.
 
 ## Playing Online
@@ -39,8 +38,8 @@ steps will only need to be run once as cli-chess will remember the API token.
 
 ## Questions
 #### 1. How do I make a move?
-Moves in cli-chess must be made with SAN or UCI notation (eg. `e2e4` or `Nf3`).
-Moves cannot be made using the mouse cursor.
+Moves must be made in UCI, SAN, or LAN. Moves are case-sensitive and cannot be made using the mouse.
+Pawn promotions must specify the promotion piece type (e.g. `e8=Q` or `e7e8q`).
 
 #### 2. How do I increase the size of the board?
 The only way to increase the size of the board is to increase the size of the
@@ -54,15 +53,15 @@ drastically depending on the font being used, so it's important to choose a mono
 type font that works best for your terminal and display preferences. The monospace fonts
 that I have found to work best with cli-chess for piece alignment are `Ubuntu Mono` and `MS Gothic`.
 
-#### 4. What operating systems does cli-chess support?
-cli-chess development is mainly focused to support Linux. While cli-chess will work on
+#### 4. What operating systems are supported?
+Development is mainly focused to support Linux. While cli-chess will work on
 other operating systems (such as Windows and macOS) the support priority will
 be directed towards Linux. Regardless of operating system please report any issues
 found, and I will do my best to support.
 
-#### 5. What versions of Python are supported?
-cli-chess supports Python >= 3.7
-
-#### 5. Does cli-chess support other chess engines?
+#### 5. Can I use a different chess engine?
 Playing offline vs the computer is _currently_ only directly compatible with the [Fairy-Stockfish](<https://fairy-stockfish.github.io/>) engine.
 For simplicity, the Fairy-Stockfish binaries come pre-built with cli-chess for Linux, Windows, and macOS _(x86_64 architecture)_.
+
+#### 6. What versions of Python are supported?
+Python >= 3.7
