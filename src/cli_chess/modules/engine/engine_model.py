@@ -15,9 +15,12 @@
 
 from cli_chess.modules.board import BoardModel
 from cli_chess.modules.game_options import GameOption
-from cli_chess.utils.config import engine_config
-from cli_chess.utils import log
+from cli_chess.utils import log, is_linux_os, is_windows_os
 import chess.engine
+from os import path
+
+ENGINE_PATH = path.dirname(path.realpath(__file__)) + "/binaries/"
+ENGINE_BINARY_NAME = "fairy-stockfish_14_x86-64_" + ("linux" if is_linux_os() else ("windows" if is_windows_os() else "mac"))
 
 fairy_stockfish_mapped_skill_levels = {
     # These defaults are for the Fairy Stockfish engine
@@ -55,10 +58,8 @@ class EngineModel:
         """Load the chess engine"""
         # TODO: Add support for other engines. Menu logic would need to be
         #       Updated to show only valid variants for the engine, UCI Elo levels, etc.
-        engine_path = engine_config.get_value(engine_config.Keys.ENGINE_PATH)
-        engine_binary_name = engine_config.get_value(engine_config.Keys.ENGINE_BINARY_NAME)
         try:
-            _, engine = await chess.engine.popen_uci(engine_path + engine_binary_name)
+            _, engine = await chess.engine.popen_uci(ENGINE_PATH + ENGINE_BINARY_NAME)
             return engine
         except Exception as e:
             log.critical(f"Exception caught starting engine: {e}")

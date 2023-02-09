@@ -254,29 +254,6 @@ class UiConfig(SectionBase):
         self.e_ui_config_updated.notify()
 
 
-class EngineConfig(SectionBase):
-    """Creates and manages the "engine" configuration. This configuration can
-       either live in its own file, or be appended as a section by using a
-       configuration filename that already exists (such as DEFAULT_CONFIG_FILENAME).
-       By default, this will be appended to the default configuration.
-    """
-    class Keys(Enum):
-        ENGINE_NAME = {"name": "engine_name", "default": "Fairy-Stockfish"}
-        ENGINE_PATH = {"name": "engine_path",
-                       "default": os.path.join(os.path.realpath(__file__ + "/../../modules/engine/binaries"), '')}
-        ENGINE_BINARY_NAME = {"name": "engine_binary_name", "default": "fairy-stockfish_14_x86-64_" + (
-            "linux" if is_linux_os() else ("windows" if is_windows_os() else "mac"))}
-
-    def __init__(self, filename: str = DEFAULT_CONFIG_FILENAME):
-        self.e_engine_config_updated = Event()
-        super().__init__(section_name="engine", section_keys=self.Keys, filename=filename)
-
-    def write_config(self) -> None:
-        """Writes to the configuration file"""
-        super().write_config()
-        self.e_engine_config_updated.notify()
-
-
 class LichessConfig(SectionBase):
     """Creates and manages the "lichess" configuration. This configuration can
        either live in its own file, or be appended as a section by using a
@@ -310,5 +287,4 @@ class LichessConfig(SectionBase):
 player_info_config = PlayerInfoConfig()
 board_config = BoardConfig()
 ui_config = UiConfig()
-engine_config = EngineConfig()
 lichess_config = LichessConfig()
