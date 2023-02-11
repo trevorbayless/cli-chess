@@ -80,6 +80,14 @@ class WatchTVModel(GameModelBase):
                 self.game_metadata['status'] = data['status']
                 self.game_metadata['winner'] = data.get('winner')  # Not included on draws
 
+                for color in COLOR_NAMES:
+                    if data['players'][color].get('user'):
+                        self.game_metadata['players'][color] = data['players'][color]['user']
+                        self.game_metadata['players'][color]['rating'] = data['players'][color]['rating']
+                        self.game_metadata['players'][color]['ratingDiff'] = data.get('players', {}).get(color, {}).get('ratingDiff', "")  # NOTE: Not included on aborted games
+                    elif data['players'][color].get('aiLevel'):
+                        self.game_metadata['players'][color]['name'] = f"Stockfish level {data['players'][color]['aiLevel']}"
+
             self.e_game_model_updated.notify()
         except Exception as e:
             log.error(f"TV Model: Error saving game metadata: {e}")

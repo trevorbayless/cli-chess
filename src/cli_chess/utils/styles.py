@@ -46,7 +46,10 @@ default = {
 
     "player-info": "fg:white",
     "player-info.title": "fg:darkorange bold",
-    "player-info.title.bot": "fg:darkmagenta"
+    "player-info.title.bot": "fg:darkmagenta",
+    "player-info.pos-rating-diff": "fg:darkgreen",
+    "player-info.neg-rating-diff": "fg:darkred",
+
 }
 
 twilight = {
@@ -82,5 +85,7 @@ twilight = {
 
     "player-info": "fg:white",
     "player-info.title": "fg:darkorange bold",
-    "player-info.title.bot": "fg:darkmagenta"
+    "player-info.title.bot": "fg:darkmagenta",
+    "player-info.pos-rating-diff": "fg:skyblue",
+    "player-info.neg-rating-diff": "fg:crimson",
 }
