@@ -18,7 +18,7 @@ from cli_chess.core.startup import StartupView
 from cli_chess.core.main import MainModel, MainPresenter
 from cli_chess.core.api import required_token_scopes
 from cli_chess.modules.token_manager import TokenManagerModel
-from cli_chess.utils import force_recreate_configs
+from cli_chess.utils import force_recreate_configs, print_program_config
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from cli_chess.core.startup import StartupModel
@@ -36,7 +36,11 @@ class StartupPresenter:
         """Handles the arguments passed in at startup to determine entrypoint"""
         args = self.model.startup_args
 
-        if args.reset:
+        if args.print_config:
+            print_program_config()
+            exit(0)
+
+        if args.reset_config:
             force_recreate_configs()
 
         if args.token:

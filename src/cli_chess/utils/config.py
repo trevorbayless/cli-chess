@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from cli_chess.utils.common import is_linux_os, is_windows_os
+from cli_chess.utils.common import is_windows_os
 from cli_chess.utils.logging import log, redact_from_logs
 from cli_chess.utils.event import Event
 from getpass import getuser
@@ -48,6 +48,24 @@ def force_recreate_configs() -> None:
     for config in all_configs:
         config.parser = config._get_parser() # noqa
         config.create_section()
+
+
+def print_program_config() -> None:
+    """Prints the configuration files for debugging purposes"""
+    filenames = []  # Keep track of filenames printed so it's not duplicated
+    api_token = lichess_config.get_value(lichess_config.Keys.API_TOKEN).strip()
+    for config in all_configs:
+        if config.full_filename not in filenames:
+            filenames.append(config.full_filename)
+            try:
+                with open(config.full_filename, 'r') as config_file:
+                    config_output = config_file.read()
+                    if api_token:
+                        config_output = config_output.replace(api_token, "**REDACTED**")
+
+                    print(config_output)
+            except OSError as e:
+                print(e)
 
 
 class BaseConfig:
