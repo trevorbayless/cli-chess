@@ -19,12 +19,6 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from cli_chess.modules.token_manager import TokenManagerModel
 
-API_TOKEN_CREATION_URL = ("https://lichess.org/account/oauth/token/create?" +
-                          "scopes[]=challenge:read&" +   # Used for reading and accepting challenges
-                          "scopes[]=challenge:write&" +  # Used for creating challenges
-                          "scopes[]=board:play&" +       # Used for playing games
-                          "description=cli-chess+token")
-
 
 class TokenManagerPresenter:
     def __init__(self, model: TokenManagerModel):
