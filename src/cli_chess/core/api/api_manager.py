@@ -14,6 +14,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from cli_chess.core.api.incoming_event_manger import IncomingEventManager
+from cli_chess.modules.token_manager import TokenManagerModel
 from cli_chess.utils.logging import log
 from berserk import Client, TokenSession
 from typing import Optional

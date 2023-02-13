@@ -29,7 +29,7 @@ class TokenManagerPresenter:
 
     def update(self):
         """Updates the token manager view"""
-        self.view.lichess_username = self.model.get_linked_account_name()
+        self.view.lichess_username = self.model.linked_account
 
     def update_linked_account(self, api_token: str) -> bool:
         """Calls the model to test api token validity. If the token is

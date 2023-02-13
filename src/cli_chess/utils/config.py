@@ -286,7 +286,6 @@ class LichessConfig(SectionBase):
     """
     class Keys(Enum):
         API_TOKEN = {"name": "api_token", "default": ""}
-        USERNAME = {"name": "username", "default": ""}
 
     def __init__(self, filename: str = DEFAULT_CONFIG_FILENAME):
         self.e_lichess_config_updated = Event()
