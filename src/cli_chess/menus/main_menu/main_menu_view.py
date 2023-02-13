@@ -16,13 +16,14 @@
 from __future__ import annotations
 from cli_chess.menus import MenuView
 from cli_chess.menus.main_menu import MainMenuOptions
+from cli_chess.core.api.api_manager import api_is_ready
 from prompt_toolkit.layout import Container, Window, FormattedTextControl, ConditionalContainer, VSplit, HSplit
 from prompt_toolkit.key_binding import KeyBindings, ConditionalKeyBindings, merge_key_bindings
 from prompt_toolkit.keys import Keys
 from prompt_toolkit.formatted_text import StyleAndTextTuples
 from prompt_toolkit.key_binding.bindings.focus import focus_next, focus_previous
 from prompt_toolkit.filters import Condition, is_done
-from prompt_toolkit.widgets import Box
+from prompt_toolkit.widgets import Box, TextArea
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from cli_chess.menus.main_menu import MainMenuPresenter
@@ -40,14 +41,27 @@ class MainMenuView(MenuView):
             VSplit([
                 Box(self._container, padding=0, padding_right=1),
                 ConditionalContainer(
-                    Box(self.presenter.online_games_menu_presenter.view, padding=0, padding_right=1),
-                    filter=~is_done
-                    & Condition(lambda: self.presenter.selection == MainMenuOptions.ONLINE_GAMES)
-                ),
-                ConditionalContainer(
                     Box(self.presenter.offline_games_menu_presenter.view, padding=0, padding_right=1),
                     filter=~is_done
                     & Condition(lambda: self.presenter.selection == MainMenuOptions.OFFLINE_GAMES)
+                ),
+                ConditionalContainer(
+                    TextArea(
+                        "Missing API Token or API client unavailable.\n"
+                        "Go to 'Settings' to link your Lichess API token.\n\n"
+                        "For further assistance check out the Github page:\n"
+                        "github.com/trevorbayless/cli-chess",
+                        wrap_lines=True, read_only=True, focusable=False
+                    ),
+                    filter=~is_done
+                    & Condition(lambda: self.presenter.selection == MainMenuOptions.ONLINE_GAMES)
+                    & ~Condition(api_is_ready)
+                ),
+                ConditionalContainer(
+                    Box(self.presenter.online_games_menu_presenter.view, padding=0, padding_right=1),
+                    filter=~is_done
+                    & Condition(lambda: self.presenter.selection == MainMenuOptions.ONLINE_GAMES)
+                    & Condition(api_is_ready)
                 ),
                 ConditionalContainer(
                     Box(self.presenter.settings_menu_presenter.view, padding=0, padding_right=1),
