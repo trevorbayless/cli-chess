@@ -17,7 +17,7 @@ from cli_chess.core.api.incoming_event_manger import IncomingEventManager
 from berserk import Client, TokenSession
 from typing import Optional
 
-required_token_scopes: set = {"board:play"}
+required_token_scopes: set = {"board:play", "challenge:read", "challenge:write"}
 
 api_session: Optional[TokenSession]
 api_client: Optional[Client]
