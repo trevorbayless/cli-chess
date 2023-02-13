@@ -98,17 +98,30 @@ class WatchTVModel(GameModelBase):
         try:
             # TODO: Data needs to be organized and sent to presenter to handle display
             if 'startGameEvent' in kwargs:
+                # NOTE: If the variant is 3check the initial export fen will include the check counts
+                #       but follow up game stream FENs will not. Lila GH issue #: 12357
                 event = kwargs['startGameEvent']
+                variant = event['variant']['key']
                 white_rating = int(event['players']['white'].get('rating') or 0)
                 black_rating = int(event['players']['black'].get('rating') or 0)
                 orientation = True if ((white_rating >= black_rating) or self.channel.variant.lower() == "racingkings") else False
 
                 self._save_game_metadata(tv_gameStartEvent=event)
-                # TODO: If the variant is 3check the initial export fen will include the check counts
-                #       but follow up game stream FENs will not. Lila GH issue #: 12357
-                self.board_model.reinitialize_board(event['variant']['key'], orientation, event.get('fen'), event.get('lastMove'))
+                last_move = event.get('lastMove', "")
+                if variant == "crazyhouse" and len(last_move) == 4 and last_move[:2] == last_move[2:]:
+                    # NOTE: This is a dirty fix. When streaming a crazyhouse game from lichess, if the
+                    #   last move field in the initial stream output is a drop, lichess sends this as
+                    #   e.g. e2e2 instead of N@e2. This causes issues parsing the UCI as e2e2 is invalid.
+                    #   Considering we only use `lm` and `lastMove` for highlighting squares, this fix
+                    #   changes this to a valid UCI string to still allow the square to be highlighted.
+                    #   Without this, an exception will occur and we will call the API again, which is unnecessary.
+                    last_move = "k@" + last_move[2:]
+
+                self.board_model.reinitialize_board(variant, orientation, event.get('fen'), last_move)
 
             if 'coreGameEvent' in kwargs:
+                # NOTE: the `lm` field that lichess sends is not valid UCI. It should only be used
+                #       for highlighting move squares (invalid castle notation, missing promotion piece, etc).
                 event = kwargs['coreGameEvent']
                 self._save_game_metadata(tv_coreGameEvent=event)
                 self.board_model.set_board_position(event.get('fen'), uci_last_move=event.get('lm'))
