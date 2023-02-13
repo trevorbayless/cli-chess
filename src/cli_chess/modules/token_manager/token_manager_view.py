@@ -45,6 +45,7 @@ class TokenManagerView:
         return TextArea(
             validator=validator,
             accept_handler=lambda x: True,
+            style="class:text-area.input",
             focus_on_click=True,
             wrap_lines=True,
             multiline=False,
@@ -59,7 +60,7 @@ class TokenManagerView:
             VSplit([
                 Label("API Token: ", style="bold", dont_extend_width=True),
                 ConditionalContainer(
-                    TextArea("Input token and press enter", style="class:text-area-placeholder", focus_on_click=True),
+                    TextArea("Input token and press enter", style="class:text-area.input.placeholder", focus_on_click=True),
                     filter=Condition(lambda: not self.has_focus()) & Condition(lambda: len(self._text_input.text) == 0)
                 ),
                 ConditionalContainer(self._text_input, Condition(lambda: self.has_focus()) | Condition(lambda: len(self._text_input.text) > 0)),
