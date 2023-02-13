@@ -79,6 +79,11 @@ def test_get_formatted_move_list(presenter: MoveListPresenter, board_config: Boa
     model.board_model.make_move("h2h1Q")
     assert presenter.get_formatted_move_list() == ["d4", "f5", "♞c3", "♝d6", "a8=♞", "h1=♛"]
 
+    # Test unicode padding
+    board_config.set_value(board_config.Keys.PAD_UNICODE, "yes")
+    assert presenter.get_formatted_move_list() == ["d4", "f5", "♞ c3", "♝ d6", "a8=♞", "h1=♛"]
+    board_config.set_value(board_config.Keys.PAD_UNICODE, "no")
+
     # Test castling output
     model.board_model.make_move("e1c1")
     model.board_model.make_move("O-O")

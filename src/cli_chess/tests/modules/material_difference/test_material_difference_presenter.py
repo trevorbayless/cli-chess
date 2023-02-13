@@ -107,3 +107,9 @@ def test_format_diff_output(model: MaterialDifferenceModel, presenter: MaterialD
     board_config.set_value(board_config.Keys.SHOW_MATERIAL_DIFF_IN_UNICODE, "no")
     assert presenter.format_diff_output(WHITE) == "BNPP+8"
     assert presenter.format_diff_output(BLACK) == "K"
+
+    # Test unicode padding
+    board_config.set_value(board_config.Keys.SHOW_MATERIAL_DIFF_IN_UNICODE, "yes")
+    board_config.set_value(board_config.Keys.PAD_UNICODE, "yes")
+    assert presenter.format_diff_output(WHITE) == "♝ ♞ ♙ ♙ +8"
+    assert presenter.format_diff_output(BLACK) == "♚ "
