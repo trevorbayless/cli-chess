@@ -15,7 +15,7 @@
 
 default = {
     "menu": "bg:",
-    "menu.category-title": "fg:black bg:limegreen underline",
+    "menu.category-title": "fg:black bg:limegreen",
     "menu.option": "fg:white",
     "menu.multi-value": "fg:orangered",
     "focused-selected": "fg:black bg:mediumturquoise noinherit",
@@ -54,7 +54,7 @@ default = {
 
 twilight = {
     "menu": "bg:",
-    "menu.category-title": "fg:black bg:darkseagreen underline",
+    "menu.category-title": "fg:black bg:darkseagreen",
     "menu.option": "fg:white",
     "menu.multi-value": "fg:tomato",
     "focused-selected": "fg:black bg:plum noinherit",
