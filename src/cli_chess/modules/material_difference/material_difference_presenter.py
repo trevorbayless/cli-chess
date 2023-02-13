@@ -16,7 +16,7 @@
 from __future__ import annotations
 from cli_chess.modules.material_difference import MaterialDifferenceView
 from cli_chess.modules.common import get_piece_unicode_symbol
-from cli_chess.utils.config import board_config
+from cli_chess.utils.config import board_config, ui_config
 from chess import Color, PIECE_TYPES, PIECE_SYMBOLS, KING
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -66,6 +66,7 @@ class MaterialDifferencePresenter:
         """Returns the formatted crazyhouse pocket for the color passed in as a string"""
         output = ""
         material_difference = self.model.get_material_difference(color)
+        pad_unicode = ui_config.get_boolean(ui_config.Keys.PAD_UNICODE)
 
         for piece_type in PIECE_TYPES:
             if piece_type == KING:
@@ -73,8 +74,12 @@ class MaterialDifferencePresenter:
 
             piece_count = material_difference[piece_type]
             if piece_count > 0:
-                symbol = get_piece_unicode_symbol(PIECE_SYMBOLS[piece_type]) if use_unicode else PIECE_SYMBOLS[
-                    piece_type].upper()
+                symbol = get_piece_unicode_symbol(PIECE_SYMBOLS[piece_type]) if use_unicode else PIECE_SYMBOLS[piece_type].upper()
+
+                if symbol and use_unicode and pad_unicode:
+                    # Pad unicode symbol with a space (if pad_unicode is true) to help unicode/ascii character overlap
+                    symbol = symbol + " "
+
                 output = output + symbol + f"({piece_count}) "
 
         return output

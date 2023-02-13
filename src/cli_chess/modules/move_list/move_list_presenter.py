@@ -16,7 +16,7 @@
 from __future__ import annotations
 from cli_chess.modules.move_list import MoveListView
 from cli_chess.modules.common import get_piece_unicode_symbol
-from cli_chess.utils.config import board_config
+from cli_chess.utils.config import board_config, ui_config
 from chess import BLACK, PAWN
 from typing import TYPE_CHECKING, List
 if TYPE_CHECKING:
@@ -40,9 +40,10 @@ class MoveListPresenter:
         formatted_move_list = []
         move_list_data = self.model.get_move_list_data()
         use_unicode = board_config.get_boolean(board_config.Keys.SHOW_MOVE_LIST_IN_UNICODE)
+        pad_unicode = ui_config.get_boolean(ui_config.Keys.PAD_UNICODE)
 
         for entry in move_list_data:
-            move = self.get_move_as_unicode(entry) if use_unicode else (entry['move'])
+            move = self.get_move_as_unicode(entry, pad_unicode) if use_unicode else (entry['move'])
 
             if entry['turn'] == BLACK:
                 if not formatted_move_list:  # The list starts with a move from black
@@ -52,7 +53,7 @@ class MoveListPresenter:
         return formatted_move_list
 
     @staticmethod
-    def get_move_as_unicode(move_data: dict) -> str:
+    def get_move_as_unicode(move_data: dict, pad_unicode=False) -> str:
         """Returns the passed in move data in unicode representation"""
         output = ""
         move = move_data.get('move')
@@ -60,6 +61,11 @@ class MoveListPresenter:
             output = move
             if move_data['piece_type'] and move_data['piece_type'] != PAWN and not move_data['is_castling']:
                 piece_unicode_symbol = get_piece_unicode_symbol(move_data['piece_symbol'])
+
+                if piece_unicode_symbol and pad_unicode:
+                    # Pad unicode symbol with a space (if pad_unicode is true) to help unicode/ascii character overlap
+                    piece_unicode_symbol = piece_unicode_symbol + " "
+
                 output = piece_unicode_symbol + move[1:]
 
             if move_data['is_promotion']:

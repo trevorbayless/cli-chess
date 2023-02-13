@@ -244,6 +244,10 @@ class UiConfig(SectionBase):
        By default, this will be appended to the default configuration.
     """
     class Keys(Enum):
+        # NOTE: If PAD_UNICODE is set to True, add a space after the move list/material diff
+        #  when using unicode characters. This helps if character overlap is occurring
+        #  when mixing unicode/ascii (e.g. ♞f3)
+        PAD_UNICODE = {"name": "pad_unicode", "default": True if is_windows_os() else False}
         ZEN_MODE = {"name": "zen_mode", "default": False}
 
     def __init__(self, filename: str = DEFAULT_CONFIG_FILENAME):

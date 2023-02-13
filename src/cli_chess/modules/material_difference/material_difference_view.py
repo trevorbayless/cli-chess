@@ -29,7 +29,7 @@ class MaterialDifferenceView:
         self._diff_text_area = TextArea(text=initial_diff,
                                         style="class:material-difference",
                                         width=D(min=1),
-                                        height=D(min=1, max=1),
+                                        height=D(max=1),
                                         read_only=True,
                                         focusable=False,
                                         multiline=False,
