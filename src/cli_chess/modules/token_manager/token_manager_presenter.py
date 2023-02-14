@@ -15,6 +15,8 @@
 
 from __future__ import annotations
 from cli_chess.modules.token_manager import TokenManagerView
+from cli_chess.utils.common import open_url_in_browser
+from cli_chess.core.api.api_manager import API_TOKEN_CREATION_URL
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from cli_chess.modules.token_manager import TokenManagerModel
@@ -36,3 +38,8 @@ class TokenManagerPresenter:
            deemed valid, it is saved to the configuration file
         """
         return self.model.update_linked_account(api_token)
+
+    @staticmethod
+    def open_token_creation_url() -> None:
+        """Open the URL to create a Lichess API token"""
+        open_url_in_browser(API_TOKEN_CREATION_URL)

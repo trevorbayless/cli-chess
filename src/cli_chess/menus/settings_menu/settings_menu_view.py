@@ -18,6 +18,8 @@ from cli_chess.menus import MenuView
 from cli_chess.menus.settings_menu import SettingsMenuOptions
 from prompt_toolkit.layout import Container, ConditionalContainer, VSplit, HSplit
 from prompt_toolkit.filters import Condition, is_done
+from prompt_toolkit.key_binding import ConditionalKeyBindings
+from prompt_toolkit.formatted_text import StyleAndTextTuples
 from prompt_toolkit.widgets import Box
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -42,6 +44,22 @@ class SettingsMenuView(MenuView):
                 ),
             ]),
         ])
+
+    def get_function_bar_fragments(self) -> StyleAndTextTuples:
+        """Returns the appropriate function bar fragments based on menu item selection"""
+        fragments: StyleAndTextTuples = []
+        if self.presenter.selection == SettingsMenuOptions.LICHESS_AUTHENTICATION:
+            fragments = self.presenter.token_manger_presenter.view.get_function_bar_fragments()
+        return fragments
+
+    def get_function_bar_key_bindings(self) -> ConditionalKeyBindings:
+        """Returns the appropriate function bar key bindings based on menu item selection"""
+        lichess_auth_kb = ConditionalKeyBindings(
+            self.presenter.token_manger_presenter.view.get_function_bar_key_bindings(),
+            filter=Condition(lambda: self.presenter.selection == SettingsMenuOptions.LICHESS_AUTHENTICATION)
+        )
+
+        return lichess_auth_kb
 
     def __pt_container__(self) -> Container:
         return self._settings_menu_container

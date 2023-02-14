@@ -17,6 +17,7 @@ from __future__ import annotations
 from cli_chess.menus import MenuView
 from cli_chess.menus.main_menu import MainMenuOptions
 from cli_chess.core.api.api_manager import api_is_ready
+from cli_chess.__metadata__ import __url__
 from prompt_toolkit.layout import Container, Window, FormattedTextControl, ConditionalContainer, VSplit, HSplit
 from prompt_toolkit.key_binding import KeyBindings, ConditionalKeyBindings, merge_key_bindings
 from prompt_toolkit.keys import Keys
@@ -50,7 +51,7 @@ class MainMenuView(MenuView):
                         "Missing API Token or API client unavailable.\n"
                         "Go to 'Settings' to link your Lichess API token.\n\n"
                         "For further assistance check out the Github page:\n"
-                        "github.com/trevorbayless/cli-chess",
+                        f"{__url__}",
                         wrap_lines=True, read_only=True, focusable=False
                     ),
                     filter=~is_done
@@ -95,6 +96,8 @@ class MainMenuView(MenuView):
             fragments = self.presenter.online_games_menu_presenter.view.get_function_bar_fragments()
         elif self.presenter.selection == MainMenuOptions.OFFLINE_GAMES:
             fragments = self.presenter.offline_games_menu_presenter.view.get_function_bar_fragments()
+        elif self.presenter.selection == MainMenuOptions.SETTINGS:
+            fragments = self.presenter.settings_menu_presenter.view.get_function_bar_fragments()
         return fragments
 
     def get_function_bar_key_bindings(self) -> "_MergedKeyBindings":
@@ -108,7 +111,12 @@ class MainMenuView(MenuView):
             self.presenter.offline_games_menu_presenter.view.get_function_bar_key_bindings(),
             filter=Condition(lambda: self.presenter.selection == MainMenuOptions.OFFLINE_GAMES)
         )
-        return merge_key_bindings([online_games_kb, offline_games_kb])
+
+        settings_kb = ConditionalKeyBindings(
+            self.presenter.settings_menu_presenter.view.get_function_bar_key_bindings(),
+            filter=Condition(lambda: self.presenter.selection == MainMenuOptions.SETTINGS)
+        )
+        return merge_key_bindings([online_games_kb, offline_games_kb, settings_kb])
 
     def __pt_container__(self) -> Container:
         return self.main_menu_container

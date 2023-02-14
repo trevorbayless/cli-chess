@@ -24,7 +24,7 @@ linked_token_scopes = set()
 
 class TokenManagerModel:
     def __init__(self):
-        self.linked_account = "None"
+        self.linked_account = ""
         self.e_token_manager_model_updated = Event()
 
     def validate_existing_linked_account(self) -> None:
