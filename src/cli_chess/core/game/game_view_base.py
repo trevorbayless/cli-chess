@@ -131,6 +131,20 @@ class PlayableGameViewBase(GameViewBase):
 
         return HSplit([main_content, function_bar], key_bindings=self._container_key_bindings())
 
+    def _container_key_bindings(self) -> KeyBindings:
+        """Creates the key bindings for this container"""
+        bindings = super()._container_key_bindings()
+
+        @bindings.add(Keys.Up, eager=True)
+        def _(event):  # noqa
+            self.presenter.move_list_presenter.scroll_up()
+
+        @bindings.add(Keys.Down, eager=True)
+        def _(event):  # noqa
+            self.presenter.move_list_presenter.scroll_down()
+
+        return bindings
+
     def _create_input_field_container(self) -> TextArea:
         """Returns a TextArea to use as the input field"""
         input_field = TextArea(height=D(max=1),

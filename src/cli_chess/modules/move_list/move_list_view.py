@@ -61,6 +61,14 @@ class MoveListView:
             self._move_list_output.buffer.preferred_column = 0
             self._move_list_output.buffer.cursor_down(line_count)
 
+    def scroll_up(self) -> None:
+        """Scroll up on the move list"""
+        self._move_list_output.buffer.cursor_up()
+
+    def scroll_down(self) -> None:
+        """Scroll down on the move list"""
+        self._move_list_output.buffer.cursor_down()
+
     def __pt_container__(self) -> Box:
         """Returns the move_list container"""
         return self._container
