@@ -96,3 +96,7 @@ class GameStateDispatcher(threading.Thread):
             self.api_client.board.resign_game(self.game_id)
         except Exception:
             raise
+
+    def clear_listeners(self) -> None:
+        """Remove all event listeners"""
+        self.e_game_state_dispatcher_event.listeners.clear()
