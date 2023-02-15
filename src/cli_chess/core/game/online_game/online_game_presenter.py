@@ -22,7 +22,7 @@ def start_online_game_vs_ai(game_parameters: dict) -> None:
     """Start a game vs the lichess ai"""
     model = OnlineGameModel(game_parameters)
     presenter = OnlineGamePresenter(model)
-    change_views(presenter.view, presenter.view.input_field_container)
+    change_views(presenter.view, presenter.view.input_field_container) # noqa
     model.start_ai_challenge()
 
 
@@ -34,21 +34,19 @@ class OnlineGamePresenter(PlayableGamePresenterBase):
         self.view = OnlineGameView(self)
 
     def make_move(self, move: str) -> None:
-        """Make the move on the board"""
+        """Make the passed in move on the board"""
         try:
             move = move.strip()
             if move:
-                if move == "0000":
-                    raise ValueError("Null moves are not supported in online games")
-                else:
-                    self.model.make_move(move)
-                    self.view.clear_error()
+                self.model.make_move(move)
+                self.view.clear_error()
         except Exception as e:
             self.view.show_error(f"{e}")
 
     def propose_takeback(self) -> None:
         """Proposes a takeback"""
         try:
+            # TODO: Add some logic here (or model) to avoid spamming
             self.model.propose_takeback()
         except Exception as e:
             self.view.show_error(f"{e}")
@@ -56,6 +54,7 @@ class OnlineGamePresenter(PlayableGamePresenterBase):
     def offer_draw(self) -> None:
         """Offers a draw"""
         try:
+            # TODO: Add some logic here (or model) to avoid spamming
             self.model.offer_draw()
         except Exception as e:
             self.view.show_error(f"{e}")
@@ -63,7 +62,10 @@ class OnlineGamePresenter(PlayableGamePresenterBase):
     def resign(self) -> None:
         """Resigns the game"""
         try:
-            self.model.resign()
+            if self.model.game_in_progress:
+                self.model.resign()
+            else:
+                self.exit()
         except Exception as e:
             self.view.show_error(f"{e}")
 
@@ -72,7 +74,7 @@ class OnlineGamePresenter(PlayableGamePresenterBase):
            move input, or game actions (such as resign)
         """
         inpt_lower = inpt.lower()
-        if inpt_lower == "resign" or inpt_lower == "quit":
+        if inpt_lower == "resign" or inpt_lower == "quit" or inpt_lower == "exit":
             # TODO: Send back to view to show a confirmation prompt, or notification it was sent
             self.resign()
         elif inpt_lower == "draw" or inpt_lower == "offer draw":
@@ -83,3 +85,6 @@ class OnlineGamePresenter(PlayableGamePresenterBase):
             self.propose_takeback()
         else:
             self.make_move(inpt)
+
+    def is_game_in_progress(self) -> bool:
+        return self.model.game_in_progress
