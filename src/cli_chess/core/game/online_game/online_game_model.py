@@ -192,9 +192,12 @@ class OnlineGameModel(GameModelBase):
                 self.game_metadata['clock']['black'] = self.game_metadata['clock']['white']
 
             elif 'iem_gameStart' in kwargs:
+                # Reset game metadata
+                self.game_metadata = self._default_game_metadata()
+
                 data = kwargs['iem_gameStart']
                 self.game_metadata['gameId'] = data['gameId']
-                self.game_metadata['my_color'] = data['color']  # TODO: Update to use bool instead? Color(data['color')
+                self.game_metadata['my_color'] = data['color']
                 self.game_metadata['rated'] = data['rated']
                 self.game_metadata['variant'] = data['variant']['name']
                 self.game_metadata['speed'] = data['speed']
@@ -204,15 +207,12 @@ class OnlineGameModel(GameModelBase):
 
                 for color in COLOR_NAMES:
                     if data[color].get('name'):
-                        self.game_metadata['players'][color]['title'] = data[color]['title']
+                        self.game_metadata['players'][color]['title'] = data.get('color', {}).get('title', "")
                         self.game_metadata['players'][color]['name'] = data[color]['name']
                         self.game_metadata['players'][color]['rating'] = data[color]['rating']
                         self.game_metadata['players'][color]['provisional'] = data[color]['provisional']
                     elif data[color].get('aiLevel'):
-                        self.game_metadata['players'][color]['title'] = ""
                         self.game_metadata['players'][color]['name'] = f"Stockfish level {data[color]['aiLevel']}"
-                        self.game_metadata['players'][color]['rating'] = ""
-                        self.game_metadata['players'][color]['provisional'] = False
 
                 # NOTE: Times below come from lichess in milliseconds
                 self.game_metadata['clock']['white']['time'] = data['state']['wtime']
