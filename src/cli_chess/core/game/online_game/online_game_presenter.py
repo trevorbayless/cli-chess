@@ -46,7 +46,6 @@ class OnlineGamePresenter(PlayableGamePresenterBase):
     def propose_takeback(self) -> None:
         """Proposes a takeback"""
         try:
-            # TODO: Add some logic here (or model) to avoid spamming
             self.model.propose_takeback()
         except Exception as e:
             self.view.show_error(f"{e}")
@@ -54,7 +53,6 @@ class OnlineGamePresenter(PlayableGamePresenterBase):
     def offer_draw(self) -> None:
         """Offers a draw"""
         try:
-            # TODO: Add some logic here (or model) to avoid spamming
             self.model.offer_draw()
         except Exception as e:
             self.view.show_error(f"{e}")

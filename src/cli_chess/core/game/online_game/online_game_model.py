@@ -80,11 +80,9 @@ class OnlineGameModel(GameModelBase):
         #  Eg. We don't want to end the current game in progress, because one of our other correspondence games ended.
         if 'gameStart' in kwargs:
             event = kwargs['gameStart']['game']
-            log.info("IEM: got a game start event")
             # TODO: There has to be a better way to ensure this is the right game...
             #  add some further specific clauses like color, time control, date, etc?
             if not self.game_in_progress and not event['hasMoved'] and event['compat']['board']:
-                log.info("IEM: PICKED UP AND STARTED GAME")
                 self._save_game_metadata(iem_gameStart=event)
                 self._start_game(event['gameId'])
 
@@ -148,7 +146,6 @@ class OnlineGameModel(GameModelBase):
         """Notifies the game state dispatcher to propose a takeback"""
         if self.game_in_progress:
             try:
-                # TODO: Handle repeat spams
                 self.game_state_dispatcher.send_takeback_request()
             except Exception:
                 raise
@@ -160,7 +157,6 @@ class OnlineGameModel(GameModelBase):
         """Notifies the game state dispatcher to offer a draw"""
         if self.game_in_progress:
             try:
-                # TODO: Handle repeat spams
                 self.game_state_dispatcher.send_draw_offer()
             except Exception:
                 raise

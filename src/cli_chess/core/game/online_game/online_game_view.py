@@ -18,7 +18,7 @@ from cli_chess.core.game import PlayableGameViewBase
 from cli_chess.utils.ui_common import handle_mouse_click
 from prompt_toolkit.layout import Window, FormattedTextControl, VSplit, D
 from prompt_toolkit.formatted_text import StyleAndTextTuples
-from prompt_toolkit.key_binding import KeyBindings, ConditionalKeyBindings, merge_key_bindings
+from prompt_toolkit.key_binding import KeyBindings
 from prompt_toolkit.keys import Keys
 from prompt_toolkit.filters import Condition
 from typing import TYPE_CHECKING
@@ -74,12 +74,14 @@ class OnlineGameView(PlayableGameViewBase):
             self.presenter.propose_takeback()
 
         @bindings.add(Keys.F3, filter=Condition(self.presenter.is_game_in_progress), eager=True)
-        def _(event): # noqa
-            self.presenter.offer_draw()
+        def _(event):
+            if not event.is_repeat:
+                self.presenter.offer_draw()
 
         @bindings.add(Keys.F4, filter=Condition(self.presenter.is_game_in_progress), eager=True)
-        def _(event): # noqa
-            self.presenter.resign()
+        def _(event):
+            if not event.is_repeat:
+                self.presenter.resign()
 
         @bindings.add(Keys.F10, filter=~Condition(self.presenter.is_game_in_progress), eager=True)
         def _(event): # noqa
