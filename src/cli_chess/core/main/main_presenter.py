@@ -13,16 +13,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from __future__ import annotations
 from cli_chess.core.main.main_view import MainView
 from cli_chess.menus.main_menu import MainMenuModel, MainMenuPresenter
-from typing import TYPE_CHECKING
-if TYPE_CHECKING:
-    from cli_chess.core.main.main_model import MainModel
 
 
 class MainPresenter:
-    def __init__(self, model: MainModel):
-        self.model = model
+    def __init__(self):
         self.main_menu_presenter = MainMenuPresenter(MainMenuModel())
         self.view = MainView(self)
