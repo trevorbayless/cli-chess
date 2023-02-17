@@ -38,9 +38,6 @@ class OnlineGamePresenter(PlayableGamePresenterBase):
         try:
             move = move.strip()
             if move:
-                if not self.model.is_my_turn():
-                    raise ValueError("Not your turn")
-
                 self.model.make_move(move)
                 self.view.clear_error()
         except Exception as e:

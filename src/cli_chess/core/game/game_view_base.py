@@ -14,8 +14,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from __future__ import annotations
-from cli_chess.utils import log
-from cli_chess.utils.ui_common import handle_mouse_click, go_back_to_main_menu, exit_app
+from cli_chess.utils.ui_common import handle_mouse_click, go_back_to_main_menu
 from prompt_toolkit.widgets import TextArea, Box
 from prompt_toolkit.layout import Window, Container, FormattedTextControl, ConditionalContainer, HSplit, VSplit, VerticalAlign, D
 from prompt_toolkit.formatted_text import StyleAndTextTuples
@@ -159,10 +158,5 @@ class PlayableGameViewBase(GameViewBase):
 
     def _accept_input(self, input: Buffer) -> None: # noqa
         """Accept handler for the input field"""
-        # TODO: Remove this as it's for testing only
-        if input.text == "quit":
-            log.debug("User quit")
-            exit_app()
-        else:
-            self.presenter.user_input_received(input.text)
-            self.input_field_container.text = ''
+        self.presenter.user_input_received(input.text)
+        self.input_field_container.text = ''

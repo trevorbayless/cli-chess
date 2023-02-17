@@ -23,9 +23,28 @@ from chess import COLOR_NAMES
 class OfflineGameModel(PlayableGameModelBase):
     def __init__(self, game_parameters: dict):
         super().__init__(play_as_color=game_parameters[GameOption.COLOR],
-                         variant=game_parameters[GameOption.VARIANT],
-                         fen="")
+                         variant=game_parameters[GameOption.VARIANT])
+
+        self.game_in_progress = True
         self._save_game_metadata(game_parameters=game_parameters)
+
+    def make_move(self, move: str):
+        """Sends the move to the board model for it to be made"""
+        if self.game_in_progress and move:
+            try:
+                if self.board_model.board.is_game_over():
+                    self.game_in_progress = False
+                    raise Exception("Game has already ended")
+
+                if not self.is_my_turn():
+                    raise Exception("Not your turn")
+
+                self.board_model.make_move(move, human=True)
+            except Exception:
+                raise
+        else:
+            log.error("OfflineGameModel: Attempted to make a move in a game that's not in progress")
+            raise Exception("Game has already ended")
 
     def _default_game_metadata(self) -> dict:
         """Returns the default structure for game metadata"""

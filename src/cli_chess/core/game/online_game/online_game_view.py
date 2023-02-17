@@ -31,11 +31,6 @@ class OnlineGameView(PlayableGameViewBase):
         self.presenter = presenter
         super().__init__(presenter)
 
-    def _accept_input(self, input: Buffer) -> None: # noqa
-        """Accept handler for the input field"""
-        self.presenter.user_input_received(input.text)
-        self.input_field_container.text = ''
-
     def _create_function_bar(self) -> VSplit:
         """Create the conditional function bar"""
         def _get_function_bar_fragments() -> StyleAndTextTuples:

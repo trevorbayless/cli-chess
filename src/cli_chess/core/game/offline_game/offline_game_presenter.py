@@ -35,7 +35,7 @@ async def _play_offline(game_parameters: dict) -> None:
         change_views(presenter.view, presenter.view.input_field_container)
     except Exception as e:
         log.error(f"Error starting engine: {e}")
-        print(e)
+        raise e
 
 
 class OfflineGamePresenter(PlayableGamePresenterBase):
@@ -50,11 +50,9 @@ class OfflineGamePresenter(PlayableGamePresenterBase):
 
     def make_move(self, move: str) -> None:
         """Make the users move on the board"""
-        try:
-            if not self.model.is_my_turn():
-                raise ValueError("Not your turn")
 
-            self.board_presenter.make_move(move, human=True)
+        try:
+            self.model.make_move(move)
             asyncio.create_task(self.make_engine_move())
         except Exception as e:
             self.view.show_error(f"{e}")
@@ -63,7 +61,9 @@ class OfflineGamePresenter(PlayableGamePresenterBase):
         """Get the best move from the engine and make it"""
         try:
             engine_move = await self.engine_presenter.get_best_move()
-            self.board_presenter.make_move(engine_move.move.uci(), human=False)
+
+            if engine_move.move:
+                self.board_presenter.make_move(engine_move.move.uci(), human=False)
         except Exception as e:
             log.critical(f"Received an invalid move from the engine: {e}")
             self.view.show_error(f"Invalid move received from engine - inspect logs")

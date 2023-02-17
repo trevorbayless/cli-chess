@@ -126,6 +126,9 @@ class OnlineGameModel(PlayableGameModelBase):
         """
         if self.game_in_progress and move:
             try:
+                if not self.is_my_turn():
+                    raise ValueError("Not your turn")
+
                 if move == "0000":
                     raise ValueError("Null moves are not supported in online games")
 
