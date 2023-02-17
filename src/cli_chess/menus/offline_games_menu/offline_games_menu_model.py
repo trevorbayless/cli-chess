@@ -19,7 +19,6 @@ from enum import Enum
 
 class OfflineGamesMenuOptions(Enum):
     VS_COMPUTER = "Play vs Computer"
-    PLAY_BOTH_SIDES = "Play both sides"
 
 
 class OfflineGamesMenuModel(MenuModel):
@@ -31,8 +30,7 @@ class OfflineGamesMenuModel(MenuModel):
     def _create_menu() -> MenuCategory:
         """Create the menu options"""
         menu_options = [
-            MenuOption(OfflineGamesMenuOptions.VS_COMPUTER, "Play offline against the computer"),
-            MenuOption(OfflineGamesMenuOptions.PLAY_BOTH_SIDES, "You play both sides"),
+            MenuOption(OfflineGamesMenuOptions.VS_COMPUTER, "Play offline against the computer")
         ]
 
         return MenuCategory("Offline Games", menu_options)
