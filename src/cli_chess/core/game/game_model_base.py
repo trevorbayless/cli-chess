@@ -19,6 +19,7 @@ from cli_chess.modules.material_difference import MaterialDifferenceModel
 from cli_chess.utils.event import Event
 from chess import Color, WHITE, COLOR_NAMES
 from random import getrandbits
+from abc import ABC, abstractmethod
 
 
 class GameModelBase:
@@ -81,7 +82,7 @@ class GameModelBase:
         }
 
 
-class PlayableGameModelBase(GameModelBase):
+class PlayableGameModelBase(GameModelBase, ABC):
     def __init__(self, play_as_color: str, variant="standard", fen=""):
         self.my_color = self._get_side_to_play_as(play_as_color)
         self.game_in_progress = False
@@ -100,3 +101,19 @@ class PlayableGameModelBase(GameModelBase):
             return Color(COLOR_NAMES.index(color))
         else:  # Get random color to play as
             return Color(getrandbits(1))
+
+    @abstractmethod
+    def make_move(self, move: str) -> None:
+        pass
+
+    @abstractmethod
+    def propose_takeback(self) -> None:
+        pass
+
+    @abstractmethod
+    def offer_draw(self) -> None:
+        pass
+
+    @abstractmethod
+    def resign(self) -> None:
+        pass

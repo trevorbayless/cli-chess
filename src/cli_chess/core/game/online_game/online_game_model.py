@@ -144,6 +144,7 @@ class OnlineGameModel(PlayableGameModelBase):
 
     def propose_takeback(self) -> None:
         """Notifies the game state dispatcher to propose a takeback"""
+        # TODO: Send back to view to show a confirmation prompt, or notification it was sent
         if self.game_in_progress:
             try:
                 self.game_state_dispatcher.send_takeback_request()
@@ -155,6 +156,7 @@ class OnlineGameModel(PlayableGameModelBase):
 
     def offer_draw(self) -> None:
         """Notifies the game state dispatcher to offer a draw"""
+        # TODO: Send back to view to show a confirmation prompt, or notification it was sent
         if self.game_in_progress:
             try:
                 self.game_state_dispatcher.send_draw_offer()
@@ -166,6 +168,7 @@ class OnlineGameModel(PlayableGameModelBase):
 
     def resign(self) -> None:
         """Notifies the game state dispatcher to resign the game"""
+        # TODO: Send back to view to show a confirmation prompt, or notification it was sent
         if self.game_in_progress:
             try:
                 self.game_state_dispatcher.resign()

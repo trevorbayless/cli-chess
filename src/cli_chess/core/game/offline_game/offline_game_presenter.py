@@ -50,7 +50,6 @@ class OfflineGamePresenter(PlayableGamePresenterBase):
 
     def make_move(self, move: str) -> None:
         """Make the users move on the board"""
-
         try:
             self.model.make_move(move)
             asyncio.create_task(self.make_engine_move())

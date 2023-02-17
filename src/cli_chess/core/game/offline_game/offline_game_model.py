@@ -46,6 +46,19 @@ class OfflineGameModel(PlayableGameModelBase):
             log.error("OfflineGameModel: Attempted to make a move in a game that's not in progress")
             raise Exception("Game has already ended")
 
+    def propose_takeback(self) -> None:
+        # TODO: Handle implementing this logic
+        pass
+
+    def offer_draw(self) -> None:
+        raise Exception("Engines do not accept draw offers")
+
+    def resign(self) -> None:
+        """Handle game resignation. Since this is against an engine, the presenter
+           will handle calling the engine model to report resignation
+        """
+        self.game_in_progress = False
+
     def _default_game_metadata(self) -> dict:
         """Returns the default structure for game metadata"""
         game_metadata = super()._default_game_metadata()
