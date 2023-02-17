@@ -13,35 +13,19 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from cli_chess.core.game import GameModelBase
+from cli_chess.core.game import PlayableGameModelBase
 from cli_chess.modules.game_options import GameOption
 from cli_chess.utils.logging import log
 from cli_chess.utils.config import player_info_config
-from random import getrandbits
-import chess
+from chess import COLOR_NAMES
 
 
-def get_player_color(color: str) -> chess.Color:
-    """Returns a chess.Color based on the color string passed in. If the color string
-       is unmatched, a random value of chess.WHITE or chess.BLACK will be returned
-    """
-    if color.lower() in chess.COLOR_NAMES:
-        return chess.Color(chess.COLOR_NAMES.index(color))
-    else:  # Get random color to play as
-        return chess.Color(getrandbits(1))
-
-
-class OfflineGameModel(GameModelBase):
+class OfflineGameModel(PlayableGameModelBase):
     def __init__(self, game_parameters: dict):
-        self.my_color = get_player_color(game_parameters[GameOption.COLOR])
-        super().__init__(orientation=self.my_color,
+        super().__init__(play_as_color=game_parameters[GameOption.COLOR],
                          variant=game_parameters[GameOption.VARIANT],
                          fen="")
         self._save_game_metadata(game_parameters=game_parameters)
-
-    def is_my_turn(self) -> bool:
-        """Return True if it's our turn"""
-        return self.board_model.get_turn() == self.my_color
 
     def _default_game_metadata(self) -> dict:
         """Returns the default structure for game metadata"""
@@ -58,7 +42,7 @@ class OfflineGameModel(GameModelBase):
         try:
             if 'game_parameters' in kwargs:
                 data = kwargs['game_parameters']
-                self.game_metadata['my_color'] = self.my_color
+                self.game_metadata['my_color'] = COLOR_NAMES[self.my_color]
                 self.game_metadata['variant'] = data[GameOption.VARIANT]
                 self.game_metadata['clock']['white']['time'] = data[GameOption.TIME_CONTROL][0]
                 self.game_metadata['clock']['white']['increment'] = data[GameOption.TIME_CONTROL][1]
@@ -66,16 +50,16 @@ class OfflineGameModel(GameModelBase):
 
                 # My player information
                 my_name = player_info_config.get_value(player_info_config.Keys.OFFLINE_PLAYER_NAME)
-                self.game_metadata['players'][chess.COLOR_NAMES[self.my_color]]['title'] = ""
-                self.game_metadata['players'][chess.COLOR_NAMES[self.my_color]]['name'] = my_name
-                self.game_metadata['players'][chess.COLOR_NAMES[self.my_color]]['rating'] = ""
+                self.game_metadata['players'][COLOR_NAMES[self.my_color]]['title'] = ""
+                self.game_metadata['players'][COLOR_NAMES[self.my_color]]['name'] = my_name
+                self.game_metadata['players'][COLOR_NAMES[self.my_color]]['rating'] = ""
 
                 # Engine information
                 engine_name = "Fairy-Stockfish"  # TODO: Implement a better solution for when other engines are supported
                 engine_name = engine_name + f" Lvl {data.get(GameOption.COMPUTER_SKILL_LEVEL)}" if not data.get(GameOption.SPECIFY_ELO) else engine_name
-                self.game_metadata['players'][chess.COLOR_NAMES[not self.my_color]]['title'] = ""
-                self.game_metadata['players'][chess.COLOR_NAMES[not self.my_color]]['name'] = engine_name
-                self.game_metadata['players'][chess.COLOR_NAMES[not self.my_color]]['rating'] = data.get(GameOption.COMPUTER_ELO, "")
+                self.game_metadata['players'][COLOR_NAMES[not self.my_color]]['title'] = ""
+                self.game_metadata['players'][COLOR_NAMES[not self.my_color]]['name'] = engine_name
+                self.game_metadata['players'][COLOR_NAMES[not self.my_color]]['rating'] = data.get(GameOption.COMPUTER_ELO, "")
 
             self._notify_game_model_updated()
         except KeyError as e:

@@ -1,4 +1,4 @@
-from .game_model_base import GameModelBase
+from .game_model_base import GameModelBase, PlayableGameModelBase
 from .game_view_base import GameViewBase, PlayableGameViewBase
 from .game_presenter_base import GamePresenterBase, PlayableGamePresenterBase
 from .online_game.online_game_presenter import start_online_game_vs_ai

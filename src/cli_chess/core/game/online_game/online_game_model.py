@@ -13,26 +13,23 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from cli_chess.core.game import GameModelBase
+from cli_chess.core.game import PlayableGameModelBase
 from cli_chess.modules.game_options import GameOption
 from cli_chess.core.api import GameStateDispatcher
 from cli_chess.utils import log, threaded
-from chess import Color, COLOR_NAMES, WHITE
+from chess import Color, COLOR_NAMES
 from typing import Optional
 
 
-class OnlineGameModel(GameModelBase):
+class OnlineGameModel(PlayableGameModelBase):
     """This model must only be used for games owned by the linked lichess user.
        Games not owned by this account must directly use the base model instead.
     """
     def __init__(self, game_parameters: dict):
-        # TODO: Send None here instead on random (need to update board model logic if so)?
-        self.my_color: Color = game_parameters[GameOption.COLOR] if not "random" else WHITE
-        super().__init__(variant=game_parameters[GameOption.VARIANT], orientation=self.my_color, fen=None)
+        super().__init__(play_as_color=game_parameters[GameOption.COLOR], variant=game_parameters[GameOption.VARIANT], fen=None)
         self._save_game_metadata(game_parameters=game_parameters)
 
         self.game_state_dispatcher = Optional[GameStateDispatcher]
-        self.game_in_progress = False
         self.playing_game_id = None
 
         try:
@@ -43,10 +40,6 @@ class OnlineGameModel(GameModelBase):
             # TODO: Clean this up so the error is displayed on the main screen
             log.error("OnlineGameModel: Failed to import api_iem and api_client")
             raise ImportError("API client not setup. Do you have an API token linked?")
-
-    def is_my_turn(self) -> bool:
-        """Return True if it's our turn"""
-        return self.board_model.get_turn() == self.my_color
 
     @threaded
     def start_ai_challenge(self) -> None:
@@ -144,7 +137,7 @@ class OnlineGameModel(GameModelBase):
                 raise
         else:
             log.error("OnlineGameModel: Attempted to make a move in a game that's not in progress")
-            raise Exception("Game is not in progress")
+            raise Exception("Game has already ended")
 
     def propose_takeback(self) -> None:
         """Notifies the game state dispatcher to propose a takeback"""
@@ -155,7 +148,7 @@ class OnlineGameModel(GameModelBase):
                 raise
         else:
             log.error("OnlineGameModel: Attempted to propose a takeback in a game that's not in progress")
-            raise Exception("Game is not in progress")
+            raise Exception("Game has already ended")
 
     def offer_draw(self) -> None:
         """Notifies the game state dispatcher to offer a draw"""
@@ -166,7 +159,7 @@ class OnlineGameModel(GameModelBase):
                 raise
         else:
             log.error("OnlineGameModel: Attempted to offer a draw to a game that's not in progress")
-            raise Exception("Game is not in progress")
+            raise Exception("Game has already ended")
 
     def resign(self) -> None:
         """Notifies the game state dispatcher to resign the game"""
@@ -177,7 +170,7 @@ class OnlineGameModel(GameModelBase):
                 raise
         else:
             log.error("OnlineGameModel: Attempted to resign a game that's not in progress")
-            raise Exception("Game is not in progress")
+            raise Exception("Game has already ended")
 
     def _save_game_metadata(self, **kwargs) -> None:
         """Parses and saves the data of the game being played.

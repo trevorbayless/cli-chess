@@ -22,7 +22,7 @@ from cli_chess.modules.player_info import PlayerInfoPresenter
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from cli_chess.core.game import GameModelBase
+    from cli_chess.core.game import GameModelBase, PlayableGameModelBase
 
 
 class GamePresenterBase:
@@ -53,7 +53,7 @@ class GamePresenterBase:
 
 
 class PlayableGamePresenterBase(GamePresenterBase):
-    def __init__(self, model: GameModelBase):
+    def __init__(self, model: PlayableGameModelBase):
         # NOTE: Base Model subscriptions are currently handled in parent.
         #  Override the update function here if needed.
         self.model = model
