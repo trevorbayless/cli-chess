@@ -44,6 +44,10 @@ class OnlineGameModel(GameModelBase):
             log.error("OnlineGameModel: Failed to import api_iem and api_client")
             raise ImportError("API client not setup. Do you have an API token linked?")
 
+    def is_my_turn(self) -> bool:
+        """Return True if it's our turn"""
+        return self.board_model.get_turn() == self.my_color
+
     @threaded
     def start_ai_challenge(self) -> None:
         """Sends a request to lichess to start an AI challenge using the selected game parameters"""

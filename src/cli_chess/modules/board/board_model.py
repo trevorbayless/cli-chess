@@ -131,6 +131,7 @@ class BoardModel:
                 log.error(f"BoardModel: Invalid move while making moves from list: {e}")
                 raise e
 
+        self._notify_successful_move_made()
         self._notify_board_model_updated()
 
     def takeback(self):

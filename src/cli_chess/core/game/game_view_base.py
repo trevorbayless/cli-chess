@@ -166,11 +166,3 @@ class PlayableGameViewBase(GameViewBase):
         else:
             self.presenter.user_input_received(input.text)
             self.input_field_container.text = ''
-
-    def lock_input(self) -> None:
-        """Sets the input field to read only"""
-        self.input_field_container.read_only = True
-
-    def unlock_input(self) -> None:
-        """Removes the read-only flag from the input field"""
-        self.input_field_container.read_only = False

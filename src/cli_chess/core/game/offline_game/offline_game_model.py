@@ -39,6 +39,10 @@ class OfflineGameModel(GameModelBase):
                          fen="")
         self._save_game_metadata(game_parameters=game_parameters)
 
+    def is_my_turn(self) -> bool:
+        """Return True if it's our turn"""
+        return self.board_model.get_turn() == self.my_color
+
     def _default_game_metadata(self) -> dict:
         """Returns the default structure for game metadata"""
         game_metadata = super()._default_game_metadata()
