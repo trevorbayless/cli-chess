@@ -135,8 +135,8 @@ class BoardModel:
         self._notify_board_model_updated()
 
     def takeback(self, caller_color: chess.Color):
-        """Issues a takeback, so it's the callers move again. Raises a Warning if less than
-           two moves have been made. Raises IndexError if the move stack is empty
+        """Issues a takeback, so it's the callers move again. Raises a Warning if the move
+           stack is empty or takeback of opponents move is attempted.
         """
         try:
             if len(self.board.move_stack) == 0:
