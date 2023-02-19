@@ -43,7 +43,8 @@ class StartupView:
                 color_depth=ColorDepth.TRUE_COLOR if is_linux_os() else ColorDepth.DEFAULT,
                 mouse_support=True,
                 full_screen=True,
-                style=Style.from_dict(default)
+                style=Style.from_dict(default),
+                refresh_interval=0.5
             )
         except NoConsoleScreenBufferError:
             print("Error starting cli-chess:\n"
