@@ -81,5 +81,15 @@ class EngineModel:
 
     async def get_best_move(self) -> chess.engine.PlayResult:
         """Query the engine to get the best move"""
-        return await self.engine.play(self.board_model.board,
-                                      chess.engine.Limit(2))
+        # Keep track of the last move that was made. This allows checking
+        # for if a takeback happened while the engine has been thinking
+        # TODO: look into ways to cancel thinking if a takeback occurred
+        last_move = (self.board_model.get_move_stack() or [None])[-1]
+        result = await self.engine.play(self.board_model.board,
+                                        chess.engine.Limit(2))
+
+        # Check if the move stack has been altered, if so void this move
+        if last_move != (self.board_model.get_move_stack() or [None])[-1]:
+            result.move = None
+
+        return result

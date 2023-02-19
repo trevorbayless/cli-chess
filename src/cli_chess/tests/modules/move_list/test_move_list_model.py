@@ -120,7 +120,7 @@ def test_get_move_list_data(model: MoveListModel):
         'is_promotion': False
     }]
     assert model.get_move_list_data() == model.move_list_data
-    model.board_model.takeback()
+    model.board_model.takeback(BLACK)
     assert model.get_move_list_data() == []
 
 

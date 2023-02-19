@@ -34,24 +34,31 @@ class OfflineGameModel(PlayableGameModelBase):
             try:
                 if self.board_model.board.is_game_over():
                     self.game_in_progress = False
-                    raise Exception("Game has already ended")
+                    raise Warning("Game has already ended")
 
                 if not self.is_my_turn():
-                    raise Exception("Not your turn")
+                    raise Warning("Not your turn")
 
                 self.board_model.make_move(move, human=True)
             except Exception:
                 raise
         else:
-            log.error("OfflineGameModel: Attempted to make a move in a game that's not in progress")
-            raise Exception("Game has already ended")
+            log.warning("OfflineGameModel: Attempted to make a move in a game that's not in progress")
+            raise Warning("Game has already ended")
 
     def propose_takeback(self) -> None:
-        # TODO: Handle implementing this logic
-        pass
+        """Take back the previous move"""
+        try:
+            if self.board_model.board.is_game_over():
+                raise Warning("Game has already ended")
+
+            self.board_model.takeback(self.my_color)
+        except Exception as e:
+            log.error(f"OfflineGameModel: Takeback failed - {e}")
+            raise
 
     def offer_draw(self) -> None:
-        raise Exception("Engines do not accept draw offers")
+        raise Warning("Engines do not accept draw offers")
 
     def resign(self) -> None:
         """Handle game resignation. Since this is against an engine, the presenter

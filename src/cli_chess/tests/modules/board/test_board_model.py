@@ -142,29 +142,47 @@ def test_make_moves_from_list(model: BoardModel, board_updated_listener: Mock):
 
 
 def test_takeback(model: BoardModel, board_updated_listener: Mock, successful_move_listener: Mock):
-    model.make_moves_from_list(["e4", "e5", "Nf3"])
-    assert model.get_turn() == chess.BLACK
-    assert len(model.get_move_stack()) == 3
-
-    # Test a valid takeback
-    model.takeback()
-    assert len(model.get_move_stack()) == 2
-    assert model.get_turn() == chess.WHITE
-    assert model.get_highlight_move() == model.board.peek()
-    board_updated_listener.assert_called()
-    successful_move_listener.assert_called()
-
     # Test empty move stack
-    board_updated_listener.reset_mock()
-    successful_move_listener.reset_mock()
     model.board.reset()
-    with pytest.raises(IndexError):
-        model.takeback()
+    with pytest.raises(Warning):
+        model.takeback(chess.WHITE)
 
     assert model.get_turn() == chess.WHITE
     assert model.get_highlight_move() == chess.Move.null()
     board_updated_listener.assert_not_called()
     successful_move_listener.assert_not_called()
+
+    # Ensure callbacks are called on successful takeback
+    model.make_move("e4")
+    model.takeback(chess.WHITE)
+    assert model.get_turn() == chess.WHITE
+    assert len(model.get_move_stack()) == 0
+    board_updated_listener.assert_called()
+    successful_move_listener.assert_called()
+
+    # Ensure callbacks are not called on unsuccessful takebacks
+    model.make_move("e4")
+    board_updated_listener.reset_mock()
+    successful_move_listener.reset_mock()
+    with pytest.raises(Warning):
+        model.takeback(chess.BLACK)
+    board_updated_listener.assert_not_called()
+    successful_move_listener.assert_not_called()
+
+    # Test a valid black takeback
+    model.board.reset()
+    model.make_moves_from_list(["e4", "e5"])
+    model.takeback(chess.BLACK)
+    assert len(model.get_move_stack()) == 1
+    assert model.get_turn() == chess.BLACK
+    assert model.get_highlight_move() == model.board.peek()
+
+    # Test takebacks can occur even if the opponent has moved since
+    model.board.reset()
+    model.make_moves_from_list(["e4", "e5", "Nf3", "Nf6"])
+    model.takeback(chess.WHITE)
+    assert len(model.get_move_stack()) == 2
+    assert model.get_turn() == chess.WHITE
 
 
 def test_get_move_stack(model: BoardModel):
@@ -177,7 +195,7 @@ def test_get_move_stack(model: BoardModel):
     assert model.get_move_stack() == model.board.move_stack
 
     # Take back the last move
-    model.takeback()
+    model.takeback(chess.WHITE)
     assert model.get_move_stack() == model.board.move_stack
 
 
@@ -215,11 +233,6 @@ def test_get_turn():
 
     # Test board initialization with black to play FEN
     model = BoardModel(fen="r1bq1rk1/2p1bppp/p1n2n2/1p1pp3/4P3/1BP2N2/PP1P1PPP/RNBQR1K1 b - - 0 9")
-    assert model.get_turn() == chess.BLACK
-
-    # Test taking back a move
-    model.make_move("d4")
-    model.takeback()
     assert model.get_turn() == chess.BLACK
 
 

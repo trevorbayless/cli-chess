@@ -134,19 +134,31 @@ class BoardModel:
         self._notify_successful_move_made()
         self._notify_board_model_updated()
 
-    def takeback(self):
-        """Takes back the last played move. Raises
-           IndexError if the move stack is empty
+    def takeback(self, caller_color: chess.Color):
+        """Issues a takeback, so it's the callers move again. Raises a Warning if less than
+           two moves have been made. Raises IndexError if the move stack is empty
         """
         try:
+            if len(self.board.move_stack) == 0:
+                raise Warning("No moves have been played yet")
+
+            if len(self.board.move_stack) == 1 and not self.board.turn != caller_color:
+                raise Warning("Cannot take back opponents move")
+
             self.board.pop()
+            if self.board.turn != caller_color:
+                self.board.pop()
+
             self.highlight_move = self.board.peek() if len(self.board.move_stack) > 0 else chess.Move.null()
             self._notify_board_model_updated()
             self._notify_successful_move_made()
-        except IndexError as e:
-            log.error(f"BoardModel: Error attempting takeback: {e}")
-            self.highlight_move = chess.Move.null()
-            raise e
+
+        except Exception as e:
+            if isinstance(e, Warning):
+                log.warning(f"BoardModel: {e}")
+            else:
+                log.error(f"BoardModel: {e}")
+            raise
 
     def get_move_stack(self) -> List[chess.Move]:
         """Returns the boards move stack"""

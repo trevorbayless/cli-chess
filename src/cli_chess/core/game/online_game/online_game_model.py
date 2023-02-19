@@ -139,20 +139,22 @@ class OnlineGameModel(PlayableGameModelBase):
             except Exception:
                 raise
         else:
-            log.error("OnlineGameModel: Attempted to make a move in a game that's not in progress")
-            raise Exception("Game has already ended")
+            log.warning("OnlineGameModel: Attempted to make a move in a game that's not in progress")
+            raise Warning("Game has already ended")
 
     def propose_takeback(self) -> None:
         """Notifies the game state dispatcher to propose a takeback"""
         # TODO: Send back to view to show a confirmation prompt, or notification it was sent
         if self.game_in_progress:
             try:
+                if len(self.board_model.get_move_stack()) < 2:
+                    raise Warning("Cannot send takeback with less than two moves")
                 self.game_state_dispatcher.send_takeback_request()
             except Exception:
                 raise
         else:
-            log.error("OnlineGameModel: Attempted to propose a takeback in a game that's not in progress")
-            raise Exception("Game has already ended")
+            log.warning("OnlineGameModel: Attempted to propose a takeback in a game that's not in progress")
+            raise Warning("Game has already ended")
 
     def offer_draw(self) -> None:
         """Notifies the game state dispatcher to offer a draw"""
@@ -163,8 +165,8 @@ class OnlineGameModel(PlayableGameModelBase):
             except Exception:
                 raise
         else:
-            log.error("OnlineGameModel: Attempted to offer a draw to a game that's not in progress")
-            raise Exception("Game has already ended")
+            log.warning("OnlineGameModel: Attempted to offer a draw to a game that's not in progress")
+            raise Warning("Game has already ended")
 
     def resign(self) -> None:
         """Notifies the game state dispatcher to resign the game"""
@@ -175,8 +177,8 @@ class OnlineGameModel(PlayableGameModelBase):
             except Exception:
                 raise
         else:
-            log.error("OnlineGameModel: Attempted to resign a game that's not in progress")
-            raise Exception("Game has already ended")
+            log.warning("OnlineGameModel: Attempted to resign a game that's not in progress")
+            raise Warning("Game has already ended")
 
     def _save_game_metadata(self, **kwargs) -> None:
         """Parses and saves the data of the game being played.
