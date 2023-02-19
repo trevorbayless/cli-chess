@@ -54,12 +54,11 @@ class MoveListView:
                 output += "\n"
             output += move.ljust(8)
 
-        if output:
-            self._move_list_output.text = output
+        self._move_list_output.text = output if output else "No moves..."
 
-            line_count = self._move_list_output.buffer.document.line_count
-            self._move_list_output.buffer.preferred_column = 0
-            self._move_list_output.buffer.cursor_down(line_count)
+        line_count = self._move_list_output.buffer.document.line_count
+        self._move_list_output.buffer.preferred_column = 0
+        self._move_list_output.buffer.cursor_down(line_count)
 
     def scroll_up(self) -> None:
         """Scroll up on the move list"""
