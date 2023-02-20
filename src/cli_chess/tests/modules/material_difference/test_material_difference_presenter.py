@@ -62,6 +62,7 @@ def test_update(model: MaterialDifferenceModel, presenter: MaterialDifferencePre
 def test_format_diff_output(model: MaterialDifferenceModel, presenter: MaterialDifferencePresenter, board_config: BoardConfig):
     assert presenter.format_diff_output(WHITE) == ""
     assert presenter.format_diff_output(BLACK) == ""
+    board_config.set_value(board_config.Keys.PAD_UNICODE, "no")
 
     # Test white advantage
     board_config.set_value(board_config.Keys.SHOW_MATERIAL_DIFF_IN_UNICODE, "yes")

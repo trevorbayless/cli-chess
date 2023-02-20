@@ -58,6 +58,7 @@ def test_update(model: MoveListModel, presenter: MoveListPresenter, board_config
 def test_get_formatted_move_list(presenter: MoveListPresenter, board_config: BoardConfig):
     model = MoveListModel(BoardModel(fen="3pkb1r/P4pp1/8/8/8/8/1PPP3p/R2NKP2 w Qk - 0 40"))
     presenter.model = model
+    board_config.set_value(board_config.Keys.PAD_UNICODE, "no")
 
     # Test empty move list
     assert presenter.get_formatted_move_list() == []
