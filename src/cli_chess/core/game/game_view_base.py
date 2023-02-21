@@ -14,15 +14,14 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from __future__ import annotations
-from cli_chess.utils import log
-from cli_chess.utils.ui_common import handle_mouse_click, go_back_to_main_menu, exit_app
-from prompt_toolkit.widgets import TextArea
+from cli_chess.utils.ui_common import handle_mouse_click, go_back_to_main_menu
+from prompt_toolkit.widgets import TextArea, Box
 from prompt_toolkit.layout import Window, Container, FormattedTextControl, ConditionalContainer, HSplit, VSplit, VerticalAlign, D
 from prompt_toolkit.formatted_text import StyleAndTextTuples
 from prompt_toolkit.key_binding import KeyBindings
 from prompt_toolkit.keys import Keys
 from prompt_toolkit.buffer import Buffer
-from prompt_toolkit.filters import to_filter
+from prompt_toolkit.filters import to_filter, Condition
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from cli_chess.core.game import GamePresenterBase, PlayableGamePresenterBase
@@ -48,7 +47,7 @@ class GameViewBase:
         """Return the base function bar fragments"""
         return ([
             ("class:function-bar.key", "F1", handle_mouse_click(self.presenter.flip_board)),
-            ("class:function-bar.label", f"{'Flip board':<14}", handle_mouse_click(self.presenter.flip_board)),
+            ("class:function-bar.label", f"{'Flip board':<11}", handle_mouse_click(self.presenter.flip_board)),
             ("class:function-bar.spacer", " ")
         ])
 
@@ -107,23 +106,90 @@ class PlayableGameViewBase(GameViewBase):
         super().__init__(presenter)
 
     def _create_container(self) -> Container:
-        return HSplit([
-            VSplit([
-                self.board_output_container,
-                HSplit([
-                    self.material_diff_upper_container,
-                    self.player_info_upper_container,
-                    self.move_list_container,  # VSplit([self.move_list_container], align=HorizontalAlign.LEFT),
-                    self.player_info_lower_container,
-                    self.material_diff_lower_container
-                ])
-            ]),
-            self.input_field_container,
-            self.error_container,
+        main_content = Box(
             HSplit([
-                self._create_function_bar()
-            ], align=VerticalAlign.BOTTOM)
-        ], key_bindings=self._container_key_bindings())
+                VSplit([
+                    self.board_output_container,
+                    HSplit([
+                        self.player_info_upper_container,
+                        self.material_diff_upper_container,
+                        self.move_list_container,
+                        self.material_diff_lower_container,
+                        self.player_info_lower_container
+                    ])
+                ]),
+                self.input_field_container,
+                self.error_container,
+            ]),
+            padding=1,
+            padding_bottom=0
+        )
+        function_bar = HSplit([
+            self._create_function_bar()
+        ], align=VerticalAlign.BOTTOM)
+
+        return HSplit([main_content, function_bar], key_bindings=self._container_key_bindings())
+
+    def _create_function_bar(self) -> VSplit:
+        """Create the conditional function bar"""
+        def _get_function_bar_fragments() -> StyleAndTextTuples:
+            fragments = self._base_function_bar_fragments()
+            game_in_progress_fragments = ([
+                ("class:function-bar.key", "F2", handle_mouse_click(self.presenter.propose_takeback)),
+                ("class:function-bar.label", f"{'Takeback':<11}", handle_mouse_click(self.presenter.propose_takeback)),
+                ("class:function-bar.spacer", " "),
+                ("class:function-bar.key", "F3", handle_mouse_click(self.presenter.offer_draw)),
+                ("class:function-bar.label", f"{'Offer draw':<11}", handle_mouse_click(self.presenter.offer_draw)),
+                ("class:function-bar.spacer", " "),
+                ("class:function-bar.key", "F4", handle_mouse_click(self.presenter.resign)),
+                ("class:function-bar.label", f"{'Resign':<11}", handle_mouse_click(self.presenter.resign)),
+                ("class:function-bar.spacer", " ")
+            ])
+
+            if self.presenter.is_game_in_progress():
+                fragments.extend(game_in_progress_fragments)
+            else:
+                fragments.extend([
+                    ("class:function-bar.key", "F10", handle_mouse_click(self.presenter.exit)),
+                    ("class:function-bar.label", f"{'Exit':<11}", handle_mouse_click(self.presenter.exit))
+                ])
+            return fragments
+
+        return VSplit([
+            Window(FormattedTextControl(_get_function_bar_fragments)),
+        ], height=D(max=1, preferred=1))
+
+    def _container_key_bindings(self) -> KeyBindings:
+        """Creates the key bindings for this container"""
+        bindings = super()._container_key_bindings()
+
+        @bindings.add(Keys.F2, filter=Condition(self.presenter.is_game_in_progress), eager=True)
+        def _(event): # noqa
+            self.presenter.propose_takeback()
+
+        @bindings.add(Keys.F3, filter=Condition(self.presenter.is_game_in_progress), eager=True)
+        def _(event):
+            if not event.is_repeat:
+                self.presenter.offer_draw()
+
+        @bindings.add(Keys.F4, filter=Condition(self.presenter.is_game_in_progress), eager=True)
+        def _(event):
+            if not event.is_repeat:
+                self.presenter.resign()
+
+        @bindings.add(Keys.F10, filter=~Condition(self.presenter.is_game_in_progress), eager=True)
+        def _(event): # noqa
+            self.presenter.exit()
+
+        @bindings.add(Keys.Up, eager=True)
+        def _(event):  # noqa
+            self.presenter.move_list_presenter.scroll_up()
+
+        @bindings.add(Keys.Down, eager=True)
+        def _(event):  # noqa
+            self.presenter.move_list_presenter.scroll_down()
+
+        return bindings
 
     def _create_input_field_container(self) -> TextArea:
         """Returns a TextArea to use as the input field"""
@@ -137,20 +203,7 @@ class PlayableGameViewBase(GameViewBase):
         input_field.accept_handler = self._accept_input
         return input_field
 
-    def _accept_input(self, input: Buffer) -> None:
+    def _accept_input(self, input: Buffer) -> None: # noqa
         """Accept handler for the input field"""
-        # TODO: Remove this as it's for testing only
-        if input.text == "quit":
-            log.debug("User quit")
-            exit_app()
-        else:
-            self.presenter.user_input_received(input.text)
-            self.input_field_container.text = ''
-
-    def lock_input(self) -> None:
-        """Sets the input field to read only"""
-        self.input_field_container.read_only = True
-
-    def unlock_input(self) -> None:
-        """Removes the read-only flag from the input field"""
-        self.input_field_container.read_only = False
+        self.presenter.user_input_received(input.text)
+        self.input_field_container.text = ''

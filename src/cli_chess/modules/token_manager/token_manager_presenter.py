@@ -15,15 +15,11 @@
 
 from __future__ import annotations
 from cli_chess.modules.token_manager import TokenManagerView
+from cli_chess.utils.common import open_url_in_browser
+from cli_chess.core.api.api_manager import API_TOKEN_CREATION_URL
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from cli_chess.modules.token_manager import TokenManagerModel
-
-API_TOKEN_CREATION_URL = ("https://lichess.org/account/oauth/token/create?" +
-                          "scopes[]=challenge:read&" +   # Used for reading and accepting challenges
-                          "scopes[]=challenge:write&" +  # Used for creating challenges
-                          "scopes[]=board:play&" +       # Used for playing games
-                          "description=cli-chess+token")
 
 
 class TokenManagerPresenter:
@@ -31,14 +27,19 @@ class TokenManagerPresenter:
         self.model = model
         self.view = TokenManagerView(self)
         self.model.e_token_manager_model_updated.add_listener(self.update)
-        self.model.validate_existing_account_data()
+        self.model.validate_existing_linked_account()
 
     def update(self):
         """Updates the token manager view"""
-        self.view.lichess_username = self.model.get_linked_account_name()
+        self.view.lichess_username = self.model.linked_account
 
     def update_linked_account(self, api_token: str) -> bool:
         """Calls the model to test api token validity. If the token is
            deemed valid, it is saved to the configuration file
         """
         return self.model.update_linked_account(api_token)
+
+    @staticmethod
+    def open_token_creation_url() -> None:
+        """Open the URL to create a Lichess API token"""
+        open_url_in_browser(API_TOKEN_CREATION_URL)

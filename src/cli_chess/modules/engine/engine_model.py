@@ -15,9 +15,26 @@
 
 from cli_chess.modules.board import BoardModel
 from cli_chess.modules.game_options import GameOption
-from cli_chess.utils.config import engine_config
-from cli_chess.utils.logging import log
+from cli_chess.utils import log, is_linux_os, is_windows_os
 import chess.engine
+from os import path
+
+ENGINE_PATH = path.dirname(path.realpath(__file__)) + "/binaries/"
+ENGINE_BINARY_NAME = "fairy-stockfish_14_x86-64_" + ("linux" if is_linux_os() else ("windows" if is_windows_os() else "mac"))
+
+fairy_stockfish_mapped_skill_levels = {
+    # These defaults are for the Fairy Stockfish engine
+    # correlates levels 1-8 to a fairy-stockfish "equivalent"
+    # This skill level mapping is to match Lichess' implementation
+    1: -9,
+    2: -5,
+    3: -1,
+    4: 3,
+    5: 7,
+    6: 11,
+    7: 16,
+    8: 20,
+}
 
 
 async def create_engine_model(board_model: BoardModel, game_parameters: dict):
@@ -39,10 +56,10 @@ class EngineModel:
     @staticmethod
     async def load_engine() -> chess.engine.UciProtocol:
         """Load the chess engine"""
-        # TODO: Assert for the time being that the engine name matches "Fairy-Stockfish"
-        engine_path = engine_config.get_value(engine_config.Keys.ENGINE_PATH)
+        # TODO: Add support for other engines. Menu logic would need to be
+        #       Updated to show only valid variants for the engine, UCI Elo levels, etc.
         try:
-            _, engine = await chess.engine.popen_uci(engine_path)
+            _, engine = await chess.engine.popen_uci(ENGINE_PATH + ENGINE_BINARY_NAME)
             return engine
         except Exception as e:
             log.critical(f"Exception caught starting engine: {e}")
@@ -50,19 +67,29 @@ class EngineModel:
 
     async def configure_engine(self) -> None:
         """Configure the engine with the passed in options"""
-        skill_level = self.game_parameters.get(GameOption.COMPUTER_SKILL_LEVEL)
+        skill_level = fairy_stockfish_mapped_skill_levels.get(self.game_parameters.get(GameOption.COMPUTER_SKILL_LEVEL))
         limit_strength = self.game_parameters.get(GameOption.SPECIFY_ELO)
         uci_elo = self.game_parameters.get(GameOption.COMPUTER_ELO)
 
         engine_cfg = {
-            'Skill Level': skill_level if skill_level else -20,
+            'Skill Level': skill_level if skill_level else 0,
             'UCI_LimitStrength': True if limit_strength else False,
-            'UCI_Elo': uci_elo if uci_elo else 500
+            'UCI_Elo': uci_elo if uci_elo else 1350
         }
 
         await self.engine.configure(engine_cfg)
 
     async def get_best_move(self) -> chess.engine.PlayResult:
         """Query the engine to get the best move"""
-        return await self.engine.play(self.board_model.board,
-                                      chess.engine.Limit(2))
+        # Keep track of the last move that was made. This allows checking
+        # for if a takeback happened while the engine has been thinking
+        # TODO: look into ways to cancel thinking if a takeback occurred
+        last_move = (self.board_model.get_move_stack() or [None])[-1]
+        result = await self.engine.play(self.board_model.board,
+                                        chess.engine.Limit(2))
+
+        # Check if the move stack has been altered, if so void this move
+        if last_move != (self.board_model.get_move_stack() or [None])[-1]:
+            result.move = None
+
+        return result

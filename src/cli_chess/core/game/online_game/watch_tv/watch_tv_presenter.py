@@ -21,7 +21,7 @@ from cli_chess.utils.ui_common import change_views
 
 def start_watching_tv(channel: TVChannelMenuOptions) -> None:
     presenter = WatchTVPresenter(WatchTVModel(channel))
-    change_views(presenter.view) # noqa
+    change_views(presenter.view, presenter.view.move_list_placeholder) # noqa
 
 
 class WatchTVPresenter(GamePresenterBase):

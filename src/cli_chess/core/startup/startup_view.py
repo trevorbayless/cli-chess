@@ -1,4 +1,4 @@
-# Copyright (C) 2021-2022 Trevor Bayless <trevorbayless1@gmail.com>
+# Copyright (C) 2021-2023 Trevor Bayless <trevorbayless1@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -14,8 +14,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from __future__ import annotations
-from cli_chess.utils import default
-from prompt_toolkit.patch_stdout import patch_stdout
+from cli_chess.utils import is_linux_os, default
 from prompt_toolkit.layout import Layout, Container
 from prompt_toolkit.application import Application, DummyApplication, get_app
 from prompt_toolkit import print_formatted_text as pt_print, HTML
@@ -41,10 +40,11 @@ class StartupView:
         try:
             self.app = Application(
                 layout=Layout(initial_container),
-                color_depth=ColorDepth.TRUE_COLOR,
+                color_depth=ColorDepth.TRUE_COLOR if is_linux_os() else ColorDepth.DEFAULT,
                 mouse_support=True,
                 full_screen=True,
-                style=Style.from_dict(default)
+                style=Style.from_dict(default),
+                refresh_interval=0.5
             )
         except NoConsoleScreenBufferError:
             print("Error starting cli-chess:\n"
@@ -53,14 +53,17 @@ class StartupView:
             exit(1)
 
     @staticmethod
-    def in_terminal_error(msg: str, title: str = "Error"):
-        """Print an in terminal error. This is only to be used
-           when the main application is not running yet
+    def print_in_terminal_msg(msg: str, error=False):
+        """Print an in terminal message. This is only to be used
+           when the main application is not running yet. Set error
+           parameter to True to highlight error messages.
         """
         if not get_app().is_running:
-            pt_print(HTML(f"<red>{title}:</red> {msg}"))
+            if not error:
+                pt_print(f"{msg}")
+            else:
+                pt_print(HTML(f"<red>Error:</red> {msg}"))
 
     def run(self) -> None:
         """Runs the main application"""
-        with patch_stdout():
-            self.app.run()
+        self.app.run()

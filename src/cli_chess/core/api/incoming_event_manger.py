@@ -13,7 +13,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from cli_chess.modules.token_manager import TokenManagerModel
 from cli_chess.utils.event import Event
 from cli_chess.utils.logging import log
 import threading
@@ -24,15 +23,21 @@ class IncomingEventManager(threading.Thread):
        events (such as game start, game finish).
     """
     def __init__(self):
-        super().__init__()
+        super().__init__(daemon=True)
         self.e_new_event_received = Event()
         self.my_games = []
 
     def run(self) -> None:
-        client = TokenManagerModel().get_validated_client()
+        try:
+            from cli_chess.core.api.api_manager import api_client
+        except ImportError:
+            # TODO: Clean this up so the error is displayed on the main screen
+            log.error("IEM: Failed to import api_client")
+            raise ImportError("API client not setup. Do you have an API token linked?")
+
         log.info("IEM: Started listening to Lichess incoming events")
 
-        for event in client.board.stream_incoming_events():
+        for event in api_client.board.stream_incoming_events():
             if event['type'] == 'gameStart':
                 game_id = event['game']['gameId']
                 log.info(f"IEM: Received gameStart for: {game_id}")

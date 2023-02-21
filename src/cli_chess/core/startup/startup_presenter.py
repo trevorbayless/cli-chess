@@ -15,13 +15,15 @@
 
 from __future__ import annotations
 from cli_chess.core.startup import StartupView
-from cli_chess.core.main import MainModel, MainPresenter
-from cli_chess.modules.token_manager import TokenManagerModel
+from cli_chess.core.main import MainPresenter
+from cli_chess.core.api.api_manager import required_token_scopes
+from cli_chess.modules.token_manager.token_manager_model import g_token_manager_model
+from cli_chess.utils import force_recreate_configs, print_program_config
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from cli_chess.core.startup import StartupModel
 
-main_presenter = MainPresenter(MainModel())
+main_presenter = MainPresenter()
 
 
 class StartupPresenter:
@@ -34,12 +36,18 @@ class StartupPresenter:
         """Handles the arguments passed in at startup to determine entrypoint"""
         args = self.model.startup_args
 
-        if args.api_token:
-            if not TokenManagerModel().update_linked_account(args.api_token):
-                self.view.in_terminal_error("Authentication to Lichess failed")
+        if args.print_config:
+            print_program_config()
+            exit(0)
+
+        if args.reset_config:
+            force_recreate_configs()
+
+        if args.token:
+            if not g_token_manager_model.update_linked_account(args.token):
+                self.view.print_in_terminal_msg(f"Invalid API token or missing required scopes. Scopes required: {required_token_scopes}", error=True)
                 exit(1)
 
-        # EXAMPLE: Starting up with the Main layout
         self.view.create_app(main_presenter.view)
 
     def run(self):

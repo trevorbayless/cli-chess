@@ -22,7 +22,7 @@ from cli_chess.modules.player_info import PlayerInfoPresenter
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from cli_chess.core.game import GameModelBase
+    from cli_chess.core.game import GameModelBase, PlayableGameModelBase
 
 
 class GamePresenterBase:
@@ -53,7 +53,7 @@ class GamePresenterBase:
 
 
 class PlayableGamePresenterBase(GamePresenterBase):
-    def __init__(self, model: GameModelBase):
+    def __init__(self, model: PlayableGameModelBase):
         # NOTE: Base Model subscriptions are currently handled in parent.
         #  Override the update function here if needed.
         self.model = model
@@ -63,7 +63,52 @@ class PlayableGamePresenterBase(GamePresenterBase):
         self.model.board_model.e_successful_move_made.add_listener(self.view.clear_error)
 
     def user_input_received(self, inpt: str) -> None:
-        self.make_move(inpt)
+        """Respond to the users input. This input can either be the
+           move input, or game actions (such as resign)
+        """
+        inpt_lower = inpt.lower()
+        if inpt_lower == "resign" or inpt_lower == "quit" or inpt_lower == "exit":
+            self.resign()
+        elif inpt_lower == "draw" or inpt_lower == "offer draw":
+            self.offer_draw()
+        elif inpt_lower == "takeback" or inpt_lower == "back" or inpt_lower == "undo":
+            self.propose_takeback()
+        else:
+            self.make_move(inpt)
 
     def make_move(self, move: str) -> None:
-        raise NotImplementedError
+        """Make the passed in move on the board"""
+        try:
+            move = move.strip()
+            if move:
+                self.model.make_move(move)
+                self.view.clear_error()
+        except Exception as e:
+            self.view.show_error(f"{e}")
+
+    def propose_takeback(self) -> None:
+        """Proposes a takeback"""
+        try:
+            self.model.propose_takeback()
+        except Exception as e:
+            self.view.show_error(f"{e}")
+
+    def offer_draw(self) -> None:
+        """Offers a draw"""
+        try:
+            self.model.offer_draw()
+        except Exception as e:
+            self.view.show_error(f"{e}")
+
+    def resign(self) -> None:
+        """Resigns the game"""
+        try:
+            if self.model.game_in_progress:
+                self.model.resign()
+            else:
+                self.exit()
+        except Exception as e:
+            self.view.show_error(f"{e}")
+
+    def is_game_in_progress(self) -> bool:
+        return self.model.game_in_progress

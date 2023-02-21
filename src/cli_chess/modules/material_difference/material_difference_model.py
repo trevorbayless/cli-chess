@@ -16,7 +16,7 @@
 from cli_chess.modules.board import BoardModel
 from cli_chess.utils import Event
 from typing import Dict
-from chess import PIECE_SYMBOLS, PIECE_TYPES, PieceType, Color, WHITE, BLACK, PAWN, KNIGHT, BISHOP, ROOK, QUEEN, KING
+from chess import PIECE_SYMBOLS, PIECE_TYPES, PieceType, Color, COLORS, WHITE, BLACK, PAWN, KNIGHT, BISHOP, ROOK, QUEEN, KING
 import re
 
 PIECE_VALUE: Dict[PieceType, int] = {
@@ -69,25 +69,29 @@ class MaterialDifferenceModel:
         self.material_difference = self.default_material_difference()
         self.score = self.default_score()
 
-    def update(self, **kwargs) -> None:
+    def update(self, **kwargs) -> None: # noqa
         """Update the material difference using the latest board FEN"""
         variant = self.board_model.get_variant_name()
 
         if variant != "horde":
             self._reset_all()
-            pieces_fen = self.generate_pieces_fen(self.board_model.board.board_fen())
 
-            # Todo: Update to use chess.Piece()?
-            for piece in pieces_fen:
-                color = WHITE if piece.isupper() else BLACK
-                piece_type = PIECE_SYMBOLS.index(piece.lower())
+            if variant == "crazyhouse":  # Show material difference in pocket format
+                self._update_material_difference_crazyhouse(variant)
+            else:
+                pieces_fen = self.generate_pieces_fen(self.board_model.board.board_fen())
 
-                self._update_material_difference(color, piece_type)
-                self._update_score(color, piece_type)
+                # Todo: Update to use chess.Piece()?
+                for piece in pieces_fen:
+                    color = WHITE if piece.isupper() else BLACK
+                    piece_type = PIECE_SYMBOLS.index(piece.lower())
 
-            if variant == "3check":
-                self.material_difference[WHITE][KING] = 3 - self.board_model.board.remaining_checks[WHITE]
-                self.material_difference[BLACK][KING] = 3 - self.board_model.board.remaining_checks[BLACK]
+                    self._update_material_difference(color, piece_type)
+                    self._update_score(color, piece_type)
+
+                if variant == "3check":
+                    self.material_difference[WHITE][KING] = 3 - self.board_model.board.remaining_checks[WHITE]
+                    self.material_difference[BLACK][KING] = 3 - self.board_model.board.remaining_checks[BLACK]
 
             self._notify_material_difference_model_updated()
 
@@ -100,6 +104,16 @@ class MaterialDifferenceModel:
                 self.material_difference[not color][piece_type] -= 1
             else:
                 self.material_difference[color][piece_type] += 1
+
+    def _update_material_difference_crazyhouse(self, variant: str) -> None:
+        """Updates the material difference to represent the crazyhouse pocket data.
+           This function should only ever be called on confirmed crazyhouse games.
+        """
+        if variant == "crazyhouse":
+            for color in COLORS:
+                for _, piece in enumerate(str(self.board_model.board.pockets[color])):
+                    piece_type = PIECE_SYMBOLS.index(piece.lower())
+                    self.material_difference[color][piece_type] += 1
 
     def _update_score(self, color: Color, piece_type: PieceType) -> None:
         """Uses the material difference to

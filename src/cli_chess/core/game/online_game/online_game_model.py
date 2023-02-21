@@ -13,38 +13,63 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from cli_chess.core.game import GameModelBase
+from cli_chess.core.game import PlayableGameModelBase
 from cli_chess.modules.game_options import GameOption
-from cli_chess.core.api import IncomingEventManager, GameStream
-from cli_chess.utils import log
-from cli_chess.modules.token_manager import TokenManagerModel
-from chess import Color, COLOR_NAMES, WHITE
+from cli_chess.core.api import GameStateDispatcher
+from cli_chess.utils import log, threaded
+from chess import Color, COLOR_NAMES
 from typing import Optional
 
 
-class OnlineGameModel(GameModelBase):
+class OnlineGameModel(PlayableGameModelBase):
     """This model must only be used for games owned by the linked lichess user.
        Games not owned by this account must directly use the base model instead.
     """
-    def __init__(self, game_parameters: dict, iem: IncomingEventManager):
-        # TODO: Send None here instead on random (need to update board model logic if so)?
-        self.my_color: Color = game_parameters[GameOption.COLOR] if not "random" else WHITE
-        super().__init__(variant=game_parameters[GameOption.VARIANT], orientation=self.my_color, fen=None)
-
+    def __init__(self, game_parameters: dict):
+        super().__init__(play_as_color=game_parameters[GameOption.COLOR], variant=game_parameters[GameOption.VARIANT], fen=None)
         self._save_game_metadata(game_parameters=game_parameters)
-        self.incoming_event_manager = iem
-        self.game_stream = Optional[GameStream]
 
-        self.incoming_event_manager.e_new_event_received.add_listener(self.handle_iem_event)
+        self.game_state_dispatcher = Optional[GameStateDispatcher]
+        self.playing_game_id = None
 
+        try:
+            from cli_chess.core.api.api_manager import api_client, api_iem
+            self.api_iem = api_iem
+            self.api_client = api_client
+        except ImportError:
+            # TODO: Clean this up so the error is displayed on the main screen
+            log.error("OnlineGameModel: Failed to import api_iem and api_client")
+            raise ImportError("API client not setup. Do you have an API token linked?")
+
+    @threaded
     def start_ai_challenge(self) -> None:
-        # TODO: This should probably be pushed over to the GameStream to handle
-        client = TokenManagerModel().get_validated_client()
-        client.challenges.create_ai(level=self.game_metadata['ai_level'],
-                                    clock_limit=self.game_metadata['clock']['white']['time'],
-                                    clock_increment=self.game_metadata['clock']['white']['increment'],
-                                    color=self.game_metadata['my_color'],
-                                    variant=self.game_metadata['variant'])
+        """Sends a request to lichess to start an AI challenge using the selected game parameters"""
+        # Note: Only add IEM listener right before creating event to lessen chance of grabbing another game
+        self._subscribe_to_iem_events()
+        self.api_client.challenges.create_ai(level=self.game_metadata['ai_level'],
+                                             clock_limit=self.game_metadata['clock']['white']['time'],
+                                             clock_increment=self.game_metadata['clock']['white']['increment'],
+                                             color=self.game_metadata['my_color'],
+                                             variant=self.game_metadata['variant'])
+
+    def _start_game(self, game_id: str) -> None:
+        """Called when a game is started. Sets proper class variables
+           and starts and registers game stream event callback
+        """
+        if game_id and not self.game_in_progress:
+            self.game_in_progress = True
+            self.playing_game_id = game_id
+
+            self.game_state_dispatcher = GameStateDispatcher(game_id)
+            self.game_state_dispatcher.e_game_state_dispatcher_event.add_listener(self.handle_game_state_dispatcher_event)
+            self.game_state_dispatcher.start()
+
+    def _game_end(self) -> None:
+        """The game we are playing has ended. Handle cleaning up."""
+        self.game_in_progress = False
+        self.playing_game_id = None
+        self._unsubscribe_from_iem_events()
+        self.game_state_dispatcher.clear_listeners()
 
     def handle_iem_event(self, **kwargs) -> None:
         """Handle event from the incoming event manager"""
@@ -52,26 +77,23 @@ class OnlineGameModel(GameModelBase):
         #  Eg. We don't want to end the current game in progress, because one of our other correspondence games ended.
         if 'gameStart' in kwargs:
             event = kwargs['gameStart']['game']
-            if not event['hasMoved'] and event['compat']['board']:  # TODO: There has to be a better way to ensure this is the right game...
+            # TODO: There has to be a better way to ensure this is the right game...
+            #  add some further specific clauses like color, time control, date, etc?
+            if not self.game_in_progress and not event['hasMoved'] and event['compat']['board']:
                 self._save_game_metadata(iem_gameStart=event)
-                self._start_game_stream(event['gameId'])
+                self._start_game(event['gameId'])
 
         elif 'gameFinish' in kwargs:
-            # TODO: End the streams, send data to presenter.
-            # self._save_game_metadata(iem_gameFinish=event)
-            pass
+            event = kwargs['gameFinish']['game']
+            if self.game_in_progress and self.playing_game_id == event['gameId']:
+                self._save_game_metadata(iem_gameFinish=event)
+                self._game_end()
 
-    def _start_game_stream(self, game_id: str) -> None:
-        """Starts streaming the events of the passed in game_id"""
-        self.game_stream = GameStream(game_id)
-        self.game_stream.e_new_game_stream_event.add_listener(self.handle_game_stream_event)
-        self.game_stream.start()
-
-    def handle_game_stream_event(self, **kwargs) -> None:
+    def handle_game_state_dispatcher_event(self, **kwargs) -> None:
         """Handle event from the game stream"""
         if 'gameFull' in kwargs:
             event = kwargs['gameFull']
-            self._save_game_metadata(gs_gameFull=event)
+            self._save_game_metadata(gsd_gameFull=event)
             self.my_color = Color(COLOR_NAMES.index(self.game_metadata['my_color']))
             self.board_model.reinitialize_board(variant=self.game_metadata['variant'],
                                                 orientation=self.my_color,
@@ -80,18 +102,150 @@ class OnlineGameModel(GameModelBase):
 
         elif 'gameState' in kwargs:
             event = kwargs['gameState']
-            self._save_game_metadata(gs_gameState=event)
-            # moves = event['moves'].split()
-            # self.board_model.make_move(moves[-1])
+            self._save_game_metadata(gsd_gameState=event)
+
+            # TODO: Take some time measurements to see how much of an impact this approach is
+            # Resetting and replaying the moves guarantees the game between lichess
+            # and our local board are in sync (eg. takebacks, moves played on website, etc)
+            self.board_model.reset(notify=False)
+            self.board_model.make_moves_from_list(event['moves'].split())
 
         elif 'chatLine' in kwargs:
             event = kwargs['chatLine']
-            self._save_game_metadata(gs_chatLine=event)
+            self._save_game_metadata(gsd_chatLine=event)
 
         elif 'opponentGone' in kwargs:
-            # TODO: Start countdown if opponent is gone. Automatically claim win if timer elapses.
+            # TODO: Show alert to user
             event = kwargs['opponentGone']
-            self._save_game_metadata(gs_opponentGone=event)
+            self._save_game_metadata(gsd_opponentGone=event)
+
+    def make_move(self, move: str):
+        """Sends the move to the board model for a validity check. If valid this
+           function will pass the move over to the game state dispatcher to be sent
+           Raises an exception on move or API errors.
+        """
+        if self.game_in_progress and move:
+            try:
+                if not self.is_my_turn():
+                    raise ValueError("Not your turn")
+
+                if move == "0000":
+                    raise ValueError("Null moves are not supported in online games")
+
+                move = self.board_model.verify_move(move)
+
+                log.info(f"OnlineGameModel: Sending move ({move}) to lichess")
+                self.game_state_dispatcher.make_move(move)
+            except Exception:
+                raise
+        else:
+            log.warning("OnlineGameModel: Attempted to make a move in a game that's not in progress")
+            raise Warning("Game has already ended")
+
+    def propose_takeback(self) -> None:
+        """Notifies the game state dispatcher to propose a takeback"""
+        # TODO: Send back to view to show a confirmation prompt, or notification it was sent
+        if self.game_in_progress:
+            try:
+                if len(self.board_model.get_move_stack()) < 2:
+                    raise Warning("Cannot send takeback with less than two moves")
+                self.game_state_dispatcher.send_takeback_request()
+            except Exception:
+                raise
+        else:
+            log.warning("OnlineGameModel: Attempted to propose a takeback in a game that's not in progress")
+            raise Warning("Game has already ended")
+
+    def offer_draw(self) -> None:
+        """Notifies the game state dispatcher to offer a draw"""
+        # TODO: Send back to view to show a confirmation prompt, or notification it was sent
+        if self.game_in_progress:
+            try:
+                self.game_state_dispatcher.send_draw_offer()
+            except Exception:
+                raise
+        else:
+            log.warning("OnlineGameModel: Attempted to offer a draw to a game that's not in progress")
+            raise Warning("Game has already ended")
+
+    def resign(self) -> None:
+        """Notifies the game state dispatcher to resign the game"""
+        # TODO: Send back to view to show a confirmation prompt, or notification it was sent
+        if self.game_in_progress:
+            try:
+                self.game_state_dispatcher.resign()
+            except Exception:
+                raise
+        else:
+            log.warning("OnlineGameModel: Attempted to resign a game that's not in progress")
+            raise Warning("Game has already ended")
+
+    def _save_game_metadata(self, **kwargs) -> None:
+        """Parses and saves the data of the game being played.
+           If notify is false, a model update notification will not be sent.
+           Raises an exception on invalid data.
+        """
+        try:
+            if 'game_parameters' in kwargs:  # This is the data that came from the menu selections
+                data = kwargs['game_parameters']
+                self.game_metadata['my_color'] = data[GameOption.COLOR]
+                self.game_metadata['variant'] = data[GameOption.VARIANT]
+                self.game_metadata['rated'] = data.get(GameOption.RATED, False)  # Games against ai will not have this data
+                self.game_metadata['ai_level'] = data.get(GameOption.COMPUTER_SKILL_LEVEL)  # Only games against ai will have this data
+                self.game_metadata['clock']['white']['time'] = data[GameOption.TIME_CONTROL][0] * 60  # secs
+                self.game_metadata['clock']['white']['increment'] = data[GameOption.TIME_CONTROL][1]  # secs
+                self.game_metadata['clock']['black'] = self.game_metadata['clock']['white']
+
+            elif 'iem_gameStart' in kwargs:
+                # Reset game metadata
+                self.game_metadata = self._default_game_metadata()
+
+                data = kwargs['iem_gameStart']
+                self.game_metadata['gameId'] = data['gameId']
+                self.game_metadata['my_color'] = data['color']
+                self.game_metadata['rated'] = data['rated']
+                self.game_metadata['variant'] = data['variant']['name']
+                self.game_metadata['speed'] = data['speed']
+
+            elif 'gsd_gameFull' in kwargs:
+                data = kwargs['gsd_gameFull']
+
+                for color in COLOR_NAMES:
+                    if data[color].get('name'):
+                        self.game_metadata['players'][color]['title'] = data.get('color', {}).get('title', "")
+                        self.game_metadata['players'][color]['name'] = data[color]['name']
+                        self.game_metadata['players'][color]['rating'] = data[color]['rating']
+                        self.game_metadata['players'][color]['provisional'] = data[color]['provisional']
+                    elif data[color].get('aiLevel'):
+                        self.game_metadata['players'][color]['name'] = f"Stockfish level {data[color]['aiLevel']}"
+
+                # NOTE: Times below come from lichess in milliseconds
+                self.game_metadata['clock']['white']['time'] = data['state']['wtime']
+                self.game_metadata['clock']['white']['increment'] = data['state']['winc']
+                self.game_metadata['clock']['black']['time'] = data['state']['btime']
+                self.game_metadata['clock']['black']['increment'] = data['state']['binc']
+
+            elif 'gsd_gameState' in kwargs:
+                data = kwargs['gsd_gameState']
+                # NOTE: Times below come from lichess in milliseconds
+                self.game_metadata['clock']['white']['time'] = data['wtime']
+                self.game_metadata['clock']['black']['time'] = data['btime']
+                self.game_metadata['status'] = data['status']
+
+            self._notify_game_model_updated()
+        except Exception as e:
+            log.exception(f"Error saving online game metadata: {e}")
+            raise
+
+    def _subscribe_to_iem_events(self) -> None:
+        """Subscribe to IEM events by adding a handler"""
+        self.api_iem.e_new_event_received.add_listener(self.handle_iem_event)
+
+    def _unsubscribe_from_iem_events(self) -> None:
+        """Unsubscribe from IEM events. It's important that this happens after a game
+           completes, or the user quits otherwise IEM subscriptions will build up.
+        """
+        self.api_iem.e_new_event_received.remove_listener(self.handle_iem_event)
 
     def _default_game_metadata(self) -> dict:
         """Returns the default structure for game metadata"""
@@ -103,59 +257,3 @@ class OnlineGameModel(GameModelBase):
             'speed': None,
         })
         return game_metadata
-
-    def _save_game_metadata(self, **kwargs) -> None:
-        """Parses and saves the data of the game being played.
-           Raises an exception on invalid data.
-        """
-        try:
-            if 'game_parameters' in kwargs:  # This is the data that came from the menu selections
-                data = kwargs['game_parameters']
-                self.game_metadata['my_color'] = data[GameOption.COLOR]
-                self.game_metadata['variant'] = data[GameOption.VARIANT]
-                self.game_metadata['rated'] = data.get(GameOption.RATED, False)  # Games against ai will not have this data
-                self.game_metadata['ai_level'] = data.get(GameOption.COMPUTER_SKILL_LEVEL)  # Online games will not have this data
-                self.game_metadata['clock']['white']['time'] = data[GameOption.TIME_CONTROL][0] * 60  # secs
-                self.game_metadata['clock']['white']['increment'] = data[GameOption.TIME_CONTROL][1]  # secs
-                self.game_metadata['clock']['black'] = self.game_metadata['clock']['white']
-
-            elif 'iem_gameStart' in kwargs:
-                data = kwargs['iem_gameStart']
-                self.game_metadata['gameId'] = data['gameId']
-                self.game_metadata['my_color'] = data['color']  # TODO: Update to use bool instead? Color(data['color')
-                self.game_metadata['rated'] = data['rated']
-                self.game_metadata['variant'] = data['variant']['name']
-                self.game_metadata['speed'] = data['speed']
-
-            elif 'gs_gameFull' in kwargs:
-                data = kwargs['gs_gameFull']
-
-                for color in COLOR_NAMES:
-                    if data[color].get('name'):
-                        self.game_metadata['players'][color]['title'] = data[color]['title']
-                        self.game_metadata['players'][color]['name'] = data[color]['name']
-                        self.game_metadata['players'][color]['rating'] = data[color]['rating']
-                        self.game_metadata['players'][color]['provisional'] = data[color]['provisional']
-                    elif data[color].get('aiLevel'):
-                        self.game_metadata['players'][color]['title'] = ""
-                        self.game_metadata['players'][color]['name'] = f"Stockfish level {data[color]['aiLevel']}"
-                        self.game_metadata['players'][color]['rating'] = ""
-                        self.game_metadata['players'][color]['provisional'] = False
-
-                # NOTE: Times below come from lichess in milliseconds
-                self.game_metadata['clock']['white']['time'] = data['state']['wtime']
-                self.game_metadata['clock']['white']['increment'] = data['state']['winc']
-                self.game_metadata['clock']['black']['time'] = data['state']['btime']
-                self.game_metadata['clock']['black']['increment'] = data['state']['binc']
-
-            elif 'gs_gameState' in kwargs:
-                data = kwargs['gs_gameState']
-                # NOTE: Times below come from lichess in milliseconds
-                self.game_metadata['clock']['white']['time'] = data['wtime']
-                self.game_metadata['clock']['black']['time'] = data['btime']
-                self.game_metadata['status'] = data['status']
-
-            self._notify_game_model_updated()
-        except Exception as e:
-            log.exception(f"Error saving online game metadata: {e}")
-            raise

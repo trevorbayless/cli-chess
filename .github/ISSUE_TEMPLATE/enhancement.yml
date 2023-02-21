@@ -1,0 +1,13 @@
+name: Feature request
+description: Suggest an idea for cli-chess
+labels: ['enhancement']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        <b>Thank you for your ideas to further improve cli-chess! Before submitting, please [search existing enhancements](https://github.com/trevorbayless/cli-chess/issues?q=is%3Aissue+is%3Aopen+label%3Aenhancement) to confirm this is not a duplicate enhancement request.</b>
+  - type: textarea
+    attributes:
+      label: What feature would you like to see in cli-chess?
+    validations:
+      required: true

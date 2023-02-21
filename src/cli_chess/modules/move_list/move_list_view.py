@@ -30,14 +30,14 @@ class MoveListView:
                                           multiline=True,
                                           wrap_lines=False,
                                           focus_on_click=False,
-                                          scrollbar=True,
+                                          scrollbar=False,
                                           read_only=True)
         self._container = self._create_container()
 
     def _create_container(self) -> Box:
         """Create the move list container"""
         return Box(self._move_list_output,
-                   width=D(min=1, max=20),
+                   width=D(min=1),
                    height=D(min=1, max=4, preferred=4),
                    padding=0)
 
@@ -45,18 +45,28 @@ class MoveListView:
         """Loops through the passed in move list
            and updates the move list display
         """
+        # TODO: When the move list is displayed as unicode, frequently the
+        #       moves do not line up. Need to rework how the container handles
+        #       the text with (hopefully) not losing the ability to scroll the list
         output = ""
         for i, move in enumerate(formatted_move_list):
             if i % 2 == 0 and i != 0:
                 output += "\n"
             output += move.ljust(8)
 
-        if output:
-            self._move_list_output.text = output
+        self._move_list_output.text = output if output else "No moves..."
 
-            line_count = self._move_list_output.buffer.document.line_count
-            self._move_list_output.buffer.preferred_column = 0
-            self._move_list_output.buffer.cursor_down(line_count)
+        line_count = self._move_list_output.buffer.document.line_count
+        self._move_list_output.buffer.preferred_column = 0
+        self._move_list_output.buffer.cursor_down(line_count)
+
+    def scroll_up(self) -> None:
+        """Scroll up on the move list"""
+        self._move_list_output.buffer.cursor_up()
+
+    def scroll_down(self) -> None:
+        """Scroll down on the move list"""
+        self._move_list_output.buffer.cursor_down()
 
     def __pt_container__(self) -> Box:
         """Returns the move_list container"""

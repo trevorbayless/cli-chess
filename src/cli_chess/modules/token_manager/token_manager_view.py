@@ -14,8 +14,10 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from __future__ import annotations
+from cli_chess.utils.ui_common import handle_mouse_click, handle_bound_key_pressed
 from prompt_toolkit.layout import Window, ConditionalContainer, VSplit, HSplit, D
-from prompt_toolkit.key_binding import KeyBindings, ConditionalKeyBindings
+from prompt_toolkit.key_binding import KeyBindings
+from prompt_toolkit.keys import Keys
 from prompt_toolkit.formatted_text import StyleAndTextTuples
 from prompt_toolkit.widgets import Label, Box, TextArea, ValidationToolbar
 from prompt_toolkit.validation import Validator
@@ -31,20 +33,21 @@ class TokenManagerView:
         self.presenter = presenter
         self.container_width = 40
         self.lichess_username = ""
-        self._text_input = self._create_text_input_area()
+        self._token_input = self._create_token_input_area()
         self._container = self._create_container()
 
-    def _create_text_input_area(self):
+    def _create_token_input_area(self):
         """Creates and returns the TextArea used for token input"""
         validator = Validator.from_callable(
             self.presenter.update_linked_account,
-            error_message="Invalid Lichess API token",
+            error_message="Invalid token or missing scopes",
             move_cursor_to_end=True,
         )
 
         return TextArea(
             validator=validator,
             accept_handler=lambda x: True,
+            style="class:text-area.input",
             focus_on_click=True,
             wrap_lines=True,
             multiline=False,
@@ -59,10 +62,10 @@ class TokenManagerView:
             VSplit([
                 Label("API Token: ", style="bold", dont_extend_width=True),
                 ConditionalContainer(
-                    TextArea("Input token and press enter", style="class:text-area-placeholder", focus_on_click=True),
-                    filter=Condition(lambda: not self.has_focus()) & Condition(lambda: len(self._text_input.text) == 0)
+                    TextArea("Input token and press enter", style="class:text-area.input.placeholder", focus_on_click=True),
+                    filter=Condition(lambda: not self.has_focus()) & Condition(lambda: len(self._token_input.text) == 0)
                 ),
-                ConditionalContainer(self._text_input, Condition(lambda: self.has_focus()) | Condition(lambda: len(self._text_input.text) > 0)),
+                ConditionalContainer(self._token_input, Condition(lambda: self.has_focus()) | Condition(lambda: len(self._token_input.text) > 0)),
             ], height=D(max=1)),
             ValidationToolbar(),
             Box(Window(), height=D(max=1)),
@@ -73,30 +76,28 @@ class TokenManagerView:
             ], height=D(max=1)),
         ], width=D(max=self.container_width), height=D(preferred=8))
 
-    @staticmethod
-    def get_function_bar_fragments() -> StyleAndTextTuples:
+    def get_function_bar_fragments(self) -> StyleAndTextTuples:
         """Returns a set of function bar fragments to use if
            this module is hooked up with a function bar
         """
-        fragments: StyleAndTextTuples = []
-        return fragments
+        return [
+            ("class:function-bar.key", "F1", handle_mouse_click(self.presenter.open_token_creation_url)),
+            ("class:function-bar.label", f"{'Open token creation URL':<25}", handle_mouse_click(self.presenter.open_token_creation_url)),
+        ]
 
-    def get_function_bar_key_bindings(self) -> ConditionalKeyBindings:
+    def get_function_bar_key_bindings(self) -> KeyBindings:
         """Returns a set of key bindings to use if this
            module is hooked up with a function bar
         """
         kb = KeyBindings()
-        kb = ConditionalKeyBindings(
-            kb,
-            filter=Condition(lambda: self.has_focus())
-        )
+        kb.add(Keys.F1)(handle_bound_key_pressed(self.presenter.open_token_creation_url))
         return kb
 
     def has_focus(self):
         """Returns true if this container has focus"""
         has_focus = get_app().layout.has_focus(self._container)
         if has_focus:
-            get_app().layout.focus(self._text_input)
+            get_app().layout.focus(self._token_input)
         return has_focus
 
     def __pt_container__(self) -> HSplit:

@@ -37,14 +37,18 @@ def lichess_config():
     remove(lichess_config.full_filename)
 
 
-def test_update(model: TokenManagerModel, presenter: TokenManagerPresenter, lichess_config: LichessConfig):
-    # Verify this method updates the view text
-    lichess_config.set_value(lichess_config.Keys.USERNAME, "TestUsername")
-    assert presenter.view.lichess_username == ""
-    presenter.update()
-    assert presenter.view.lichess_username == "TestUsername"
+def mock_success_test_tokens(*args): # noqa
+    return {
+        'lip_validToken': {
+            'scopes': 'board:play,challenge:read,challenge:write',
+            'userId': 'testUser',
+            'expires': None
+        }
+    }
 
+
+def test_update(model: TokenManagerModel, presenter: TokenManagerPresenter, lichess_config: LichessConfig):
     # Verify this method is listening to model updates
     assert presenter.update in model.e_token_manager_model_updated.listeners
-    model.save_account_data(api_token="ValidToken", username="TestUsername")
-    assert presenter.view.lichess_username == "TestUsername"
+    model.save_account_data(api_token="lip_validToken", account_data=mock_success_test_tokens())
+    assert presenter.view.lichess_username == model.linked_account

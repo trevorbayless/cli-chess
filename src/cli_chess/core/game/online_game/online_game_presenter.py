@@ -14,19 +14,16 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from cli_chess.core.game import PlayableGamePresenterBase
-from cli_chess.core.game.online_game import OnlineGameModel
-from cli_chess.core.api import IncomingEventManager
+from cli_chess.core.game.online_game import OnlineGameModel, OnlineGameView
 from cli_chess.utils.ui_common import change_views
 
 
 def start_online_game_vs_ai(game_parameters: dict) -> None:
     """Start a game vs the lichess ai"""
-    iem = IncomingEventManager()
-    iem.start()
-    model = OnlineGameModel(game_parameters, iem)
+    model = OnlineGameModel(game_parameters)
     presenter = OnlineGamePresenter(model)
+    change_views(presenter.view, presenter.view.input_field_container) # noqa
     model.start_ai_challenge()
-    change_views(presenter.view, presenter.view.input_field_container)
 
 
 class OnlineGamePresenter(PlayableGamePresenterBase):
@@ -34,13 +31,4 @@ class OnlineGamePresenter(PlayableGamePresenterBase):
         # NOTE: Model subscriptions are currently handled in parent. Override here if needed.
         self.model = model
         super().__init__(model)
-
-    def make_move(self, move: str) -> None:
-        """Make the move on the board"""
-        try:
-            if move == "0000":
-                raise ValueError("Null moves are not supported in online games")
-            else:
-                self.board_presenter.make_move(move, human=True)
-        except Exception as e:
-            self.view.show_error(f"{e}")
+        self.view = OnlineGameView(self)

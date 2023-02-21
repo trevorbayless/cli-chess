@@ -19,71 +19,91 @@ from cli_chess.utils.event import Event
 from berserk import Client, TokenSession
 from berserk.exceptions import BerserkError
 
+linked_token_scopes = set()
+
 
 class TokenManagerModel:
     def __init__(self):
+        self.linked_account = ""
         self.e_token_manager_model_updated = Event()
 
-    def get_validated_client(self) -> Client:
-        """Returns a validated client to make API calls against"""
-        token = lichess_config.get_value(lichess_config.Keys.API_TOKEN)
-        if self.get_account_data(token):
-            session = TokenSession(token)
-            return Client(session)
-
-    def validate_existing_account_data(self) -> None:
+    def validate_existing_linked_account(self) -> None:
         """Queries the Lichess config file for an existing token. If a token
-           exists, verification is attempted. The linked lichess username will
-           be updated depending on validation. Invalid data will be cleared.
+           exists, verification is attempted. Invalid data will be cleared.
         """
         existing_token = lichess_config.get_value(lichess_config.Keys.API_TOKEN)
-        account_data = self.get_account_data(existing_token)
-        if account_data:
-            self.save_account_data(api_token=existing_token, username=account_data['username'])
+        account = self.validate_token(existing_token)
+        if account:
+            self.save_account_data(api_token=existing_token, account_data=account, valid=True)
         else:
-            self.save_account_data(api_token="", username="")
+            self.save_account_data(api_token="", account_data={})
 
     def update_linked_account(self, api_token: str) -> bool:
         """Attempts to update the linked account using the passed in API token.
-           If the token is deemed valid, the api token and username are saved
-           to the Lichess configuration. Returns True on success. Existing
-           account data is only overwritten on success.
+           If the token is deemed valid, the api token is saved to the Lichess
+           configuration. Returns True on success. Existing account data is
+           only overwritten on success.
          """
         if api_token:
-            account_data = self.get_account_data(api_token)
-            if account_data:
-                log.info("Updating linked Lichess account")
-                self.save_account_data(api_token, account_data['username'])
+            account = self.validate_token(api_token)
+            if account:
+                log.info("TokenManager: Updating linked Lichess account")
+                self.save_account_data(api_token=api_token, account_data=account, valid=True)
                 return True
         return False
 
     @staticmethod
-    def get_account_data(api_token: str) -> dict:
-        """Returns user data when the passed in token is valid"""
-        account_data = {}
+    def validate_token(api_token: str) -> dict:
+        """Validates the proper scopes are available for the passed in token.
+           Returns the scopes and userId associated to the passed in token.
+        """
         if api_token:
             session = TokenSession(api_token)
-            account = Client(session).account
+            oauth_client = Client(session).oauth
             try:
-                account_data = account.get()
-                log.info("Successfully authenticated with Lichess")
-            except BerserkError as e:
-                log.error(f"Authentication to Lichess failed - {e.message}")
-        return account_data
+                token_data = oauth_client.test_tokens(api_token)
 
-    def save_account_data(self, api_token: str, username: str) -> None:
-        """Saves the passed in lichess api token and username to the configuration.
+                if token_data.get(api_token):
+                    found_scopes = set()
+                    for scope in token_data[api_token]['scopes'].split(sep=","):
+                        found_scopes.add(scope)
+
+                    from cli_chess.core.api.api_manager import required_token_scopes
+                    if found_scopes >= required_token_scopes:
+                        global linked_token_scopes
+                        linked_token_scopes.clear()
+                        linked_token_scopes = found_scopes
+
+                        log.info("TokenManager: Successfully authenticated with Lichess")
+                        return token_data[api_token]
+                    else:
+                        log.error("TokenManager: Valid token but missing required scopes")
+            except BerserkError as e:
+                log.error(f"TokenManager: Authentication to Lichess failed - {e.message}")
+
+    def save_account_data(self, api_token: str, account_data: dict, valid=False) -> None:
+        """Saves the passed in lichess api token to the configuration.
            It is assumed the passed in token has already been verified
         """
         lichess_config.set_value(lichess_config.Keys.API_TOKEN, api_token)
-        lichess_config.set_value(lichess_config.Keys.USERNAME, username)
+        if valid:
+            self.linked_account = account_data.get('userId', "")
+            self._handle_start_api(api_token)
+
         self._notify_token_manager_model_updated()
 
     @staticmethod
-    def get_linked_account_name() -> str:
-        """Gets the name of the linked account"""
-        return lichess_config.get_value(lichess_config.Keys.USERNAME)
+    def _handle_start_api(api_token: str) -> None:
+        """Handles starting the API using the supplied token.
+           This function should only ever be called by this model.
+        """
+        if api_token.strip():
+            from cli_chess.core.api.api_manager import _start_api  # noqa
+            _start_api(api_token)
 
     def _notify_token_manager_model_updated(self) -> None:
         """Notifies listeners of token manager model updates"""
         self.e_token_manager_model_updated.notify()
+
+
+g_token_manager_model = TokenManagerModel()

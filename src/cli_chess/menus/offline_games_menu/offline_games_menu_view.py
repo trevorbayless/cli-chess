@@ -42,11 +42,6 @@ class OfflineGamesMenuView(MenuView):
                     filter=~is_done
                     & Condition(lambda: self.presenter.selection == OfflineGamesMenuOptions.VS_COMPUTER)
                 ),
-                ConditionalContainer(
-                    Box(Window(FormattedTextControl("Play both sides settings container placeholder")), padding=0, padding_right=1),
-                    filter=~is_done
-                    & Condition(lambda: self.presenter.selection == OfflineGamesMenuOptions.PLAY_BOTH_SIDES)
-                ),
             ])
         ])
 

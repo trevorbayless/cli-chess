@@ -35,6 +35,7 @@ class BoardModel:
     @staticmethod
     def _initialize_board(variant: str, fen: str):
         """Initializes the main board object"""
+        variant = variant.lower()
         if fen == "startpos":
             fen = ""
 
@@ -42,7 +43,7 @@ class BoardModel:
             if fen:
                 return chess.Board(fen, chess960=True)
             elif fen is None:
-                return chess.Board(chess960=True)
+                return chess.Board(fen=None, chess960=True)
             else:
                 return chess.Board.from_chess960_pos(randint(0, 959))
         else:
@@ -62,10 +63,22 @@ class BoardModel:
             self.initial_fen = self.board.fen()
             self.set_board_orientation(chess.WHITE if variant.lower() == "racingkings" else orientation, notify=False)
             self.highlight_move = chess.Move.from_uci(uci_last_move) if uci_last_move else chess.Move.null()
+
+            self._log_init_info()
             self.e_board_model_updated.notify(board_orientation=self.orientation)
         except ValueError as e:
-            log.error(f"Error while trying to reinitialize the board: {e}")
+            log.error(f"BoardModel: Error while trying to reinitialize the board: {e}")
             raise
+
+    def reset(self, notify=True):
+        """Fully restores the board to it's initial starting state.
+           If notify is false, a model update notification will not be sent.
+        """
+        self.board.reset()
+        self.set_fen(self.initial_fen, notify=False)
+
+        if notify:
+            self._notify_board_model_updated()
 
     def make_move(self, move: str, human=True) -> None:
         """Attempts to make a move on the board.
@@ -77,10 +90,35 @@ class BoardModel:
             self.highlight_move = self.board.push_san(move)
             self._notify_successful_move_made()
             self._notify_board_model_updated()
-            log.info(f"make_move ({player}): {move}")
+            log.info(f"BoardModel: ({player}): {move}")
         except Exception as e:
-            log.error(f"make_move ({player}): {e}")
-            raise e
+            log.error(f"BoardModel: {e}")
+            if isinstance(e, chess.InvalidMoveError):
+                raise ValueError(f"Invalid move: {move}")
+            elif isinstance(e, chess.IllegalMoveError):
+                raise ValueError(f"Invalid move: {move}")
+            elif isinstance(e, chess.AmbiguousMoveError):
+                raise ValueError(f"Ambiguous move: {move}")
+            else:
+                raise e
+
+    def verify_move(self, move: str) -> str:
+        """Verify if the passed in move is valid in the current position.
+           Raises an exception on move errors (ambiguous, invalid, illegal).
+           Returns a string of the move in UCI format.
+        """
+        try:
+            return str(self.board.parse_san(move))
+        except Exception as e:
+            log.error(f"BoardModel: {e}")
+            if isinstance(e, chess.InvalidMoveError):
+                raise ValueError(f"Invalid move: {move}")
+            elif isinstance(e, chess.IllegalMoveError):
+                raise ValueError(f"Invalid move: {move}")
+            elif isinstance(e, chess.AmbiguousMoveError):
+                raise ValueError(f"Ambiguous move: {move}")
+            else:
+                raise e
 
     def make_moves_from_list(self, move_list: list) -> None:
         """Attempts to make all moves in the provided move list.
@@ -90,24 +128,37 @@ class BoardModel:
             try:
                 self.highlight_move = self.board.push_san(move)
             except ValueError as e:
-                log.error(f"Invalid move while making moves from list: {e}")
+                log.error(f"BoardModel: Invalid move while making moves from list: {e}")
                 raise e
 
+        self._notify_successful_move_made()
         self._notify_board_model_updated()
 
-    def takeback(self):
-        """Takes back the last played move. Raises
-           IndexError if the move stack is empty
+    def takeback(self, caller_color: chess.Color):
+        """Issues a takeback, so it's the callers move again. Raises a Warning if the move
+           stack is empty or takeback of opponents move is attempted.
         """
         try:
+            if len(self.board.move_stack) == 0:
+                raise Warning("No moves have been played yet")
+
+            if len(self.board.move_stack) == 1 and not self.board.turn != caller_color:
+                raise Warning("Cannot take back opponents move")
+
             self.board.pop()
+            if self.board.turn != caller_color:
+                self.board.pop()
+
             self.highlight_move = self.board.peek() if len(self.board.move_stack) > 0 else chess.Move.null()
             self._notify_board_model_updated()
             self._notify_successful_move_made()
-        except IndexError as e:
-            log.error(f"Error attempting takeback: {e}")
-            self.highlight_move = chess.Move.null()
-            raise e
+
+        except Exception as e:
+            if isinstance(e, Warning):
+                log.warning(f"BoardModel: {e}")
+            else:
+                log.error(f"BoardModel: {e}")
+            raise
 
     def get_move_stack(self) -> List[chess.Move]:
         """Returns the boards move stack"""
@@ -142,7 +193,7 @@ class BoardModel:
            If notify is false, a model update notification will not be sent.
         """
         self.orientation = color
-        log.debug(f"board orientation set (orientation = {color})")
+        log.debug(f"BoardModel: Board orientation set to {chess.COLOR_NAMES[self.orientation].upper()}")
 
         if notify:
             self._notify_board_model_updated(board_orientation=self.orientation)
@@ -158,7 +209,7 @@ class BoardModel:
             if notify:
                 self._notify_board_model_updated()
         except Exception as e:
-            log.error(f"Error setting FEN: {e}")
+            log.error(f"BoardModel: Error setting FEN: {e}")
             raise e
 
     def get_board_squares(self) -> list:
@@ -243,7 +294,7 @@ class BoardModel:
 
                 self.e_board_model_updated.notify(board_orientation=self.orientation)
         except Exception as e:
-            log.error(f"Error caught setting board position: {e}")
+            log.error(f"BoardModel: Error caught setting board position: {e}")
 
     def _notify_board_model_updated(self, **kwargs) -> None:
         """Notifies listeners of board model updates"""

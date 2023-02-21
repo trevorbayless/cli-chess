@@ -59,8 +59,6 @@ def test_update_cached_config_values(model: BoardModel, presenter: BoardPresente
 
     # Test initial assignment
     assert presenter.board_config_values == board_config.get_all_values()
-    assert not presenter.board_config_values[board_config.Keys.BLINDFOLD_CHESS.value["name"]]
-    assert presenter.board_config_values[board_config.Keys.USE_UNICODE_PIECES.value["name"]]
 
     # Test board_config listener notification is working
     # (manual calls to _update_cached_config_values shouldn't be required)

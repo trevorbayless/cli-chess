@@ -13,14 +13,54 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from os import name as os_name
+from cli_chess.utils.logging import log
+import threading
+import subprocess
+from platform import system
+import os
 
 
-def is_windows_system() -> bool:
-    """Returns True if on a Windows system"""
-    return True if os_name == "nt" else False
+def is_linux_os() -> bool:
+    """Returns True if running on Linux"""
+    return True if system() == "Linux" else False
+
+
+def is_windows_os() -> bool:
+    """Returns True if running on Windows"""
+    return True if system() == "Windows" else False
+
+
+def is_mac_os() -> bool:
+    """Returns True if running on Mac"""
+    return True if system() == "Darwin" else False
 
 
 def str_to_bool(s: str) -> bool:
     """Returns a boolean based on the passed in string"""
     return s.lower() in ("true", "yes", "1")
+
+
+def threaded(fn):
+    """Decorator for a threaded function"""
+    def wrapper(*args, **kwargs):
+        threading.Thread(target=fn, args=args, kwargs=kwargs).start()
+    return wrapper
+
+
+def open_url_in_browser(url: str):
+    """Open the passed in URL in the default web browser"""
+    url = url.strip()
+    if url:
+        try:
+            if is_windows_os():
+                os.startfile(url)
+            else:
+                cmd = 'open' if is_mac_os() else 'xdg-open'
+                subprocess.Popen([cmd, url],
+                                 close_fds=True,
+                                 stdin=subprocess.DEVNULL,
+                                 stdout=subprocess.DEVNULL,
+                                 stderr=subprocess.DEVNULL,
+                                 start_new_session=True)
+        except Exception as e:
+            log.error(f"Common: Error opening URL in browser: {e}")

@@ -42,56 +42,41 @@ def lichess_config():
     remove(lichess_config.full_filename)
 
 
-def mock_fail_get(*args):
+def mock_fail_test_tokens(*args): # noqa
     raise BerserkError
 
 
-def mock_success_get(*args):
-    return {'username': 'TestUsername'}
+def mock_success_test_tokens(*args): # noqa
+    return {
+        'lip_validToken': {
+            'scopes': 'board:play,challenge:read,challenge:write',
+            'userId': 'testUser',
+            'expires': None
+        }
+    }
 
 
-def test_validate_existing_account_data(model: TokenManagerModel, lichess_config: LichessConfig, model_listener: Mock, monkeypatch):
-    # Test with empty API token and username
+def test_validate_existing_linked_account(model: TokenManagerModel, lichess_config: LichessConfig, model_listener: Mock, monkeypatch):
+    # Test with empty API token
     lichess_config.set_value(lichess_config.Keys.API_TOKEN, "")
-    lichess_config.set_value(lichess_config.Keys.USERNAME, "")
-    model.validate_existing_account_data()
+    model.validate_existing_linked_account()
     assert lichess_config.get_value(lichess_config.Keys.API_TOKEN) == ""
-    assert lichess_config.get_value(lichess_config.Keys.USERNAME) == ""
-
-    # Test with existing username but missing API token
-    lichess_config.set_value(lichess_config.Keys.USERNAME, "TestUsername")
-    lichess_config.set_value(lichess_config.Keys.API_TOKEN, "")
-    model.validate_existing_account_data()
-    assert lichess_config.get_value(lichess_config.Keys.API_TOKEN) == ""
-    assert lichess_config.get_value(lichess_config.Keys.USERNAME) == ""
 
     # Test with invalid existing API token
-    monkeypatch.setattr(clients.Account, "get", mock_fail_get)
-    lichess_config.set_value(lichess_config.Keys.API_TOKEN, "InvalidToken")
-    lichess_config.set_value(lichess_config.Keys.USERNAME, "TestUsername")
-    model.validate_existing_account_data()
+    monkeypatch.setattr(clients.OAuth, "test_tokens", mock_fail_test_tokens)
+    lichess_config.set_value(lichess_config.Keys.API_TOKEN, "lip_badToken")
+    model.validate_existing_linked_account()
     assert lichess_config.get_value(lichess_config.Keys.API_TOKEN) == ""
-    assert lichess_config.get_value(lichess_config.Keys.USERNAME) == ""
 
-    # Test with valid existing API token but missing username
-    monkeypatch.setattr(clients.Account, "get", mock_success_get)
-    lichess_config.set_value(lichess_config.Keys.API_TOKEN, "ValidToken")
-    lichess_config.set_value(lichess_config.Keys.USERNAME, "")
-    model.validate_existing_account_data()
-    assert lichess_config.get_value(lichess_config.Keys.API_TOKEN) == "ValidToken"
-    assert lichess_config.get_value(lichess_config.Keys.USERNAME) == "TestUsername"
-
-    # Test with valid API token and username
-    monkeypatch.setattr(clients.Account, "get", mock_success_get)
-    lichess_config.set_value(lichess_config.Keys.API_TOKEN, "ValidToken")
-    lichess_config.set_value(lichess_config.Keys.USERNAME, "TestUsername")
-    model.validate_existing_account_data()
-    assert lichess_config.get_value(lichess_config.Keys.API_TOKEN) == "ValidToken"
-    assert lichess_config.get_value(lichess_config.Keys.USERNAME) == "TestUsername"
+    # Test with valid API token
+    monkeypatch.setattr(clients.OAuth, "test_tokens", mock_success_test_tokens)
+    lichess_config.set_value(lichess_config.Keys.API_TOKEN, "lip_validToken")
+    model.validate_existing_linked_account()
+    assert lichess_config.get_value(lichess_config.Keys.API_TOKEN) == "lip_validToken"
 
     # Verify model listener is called
     model_listener.reset_mock()
-    model.validate_existing_account_data()
+    model.validate_existing_linked_account()
     model_listener.assert_called()
 
 
@@ -102,41 +87,27 @@ def test_update_linked_account(model: TokenManagerModel, lichess_config: Lichess
 
     # Test a mocked invalid lichess api token and
     # verify existing user account data is not overwritten
-    monkeypatch.setattr(clients.Account, "get", mock_fail_get)
-    lichess_config.set_value(lichess_config.Keys.API_TOKEN, "ValidToken")
-    lichess_config.set_value(lichess_config.Keys.USERNAME, "TestUsername")
-    assert not model.update_linked_account(api_token="InvalidToken")
-    assert lichess_config.get_value(lichess_config.Keys.API_TOKEN) == "ValidToken"
-    assert lichess_config.get_value(lichess_config.Keys.USERNAME) == "TestUsername"
+    monkeypatch.setattr(clients.OAuth, "test_tokens", mock_fail_test_tokens)
+    lichess_config.set_value(lichess_config.Keys.API_TOKEN, "lip_validToken")
+    assert not model.update_linked_account(api_token="lip_badToken")
+    assert lichess_config.get_value(lichess_config.Keys.API_TOKEN) == "lip_validToken"
     model_listener.assert_not_called()
 
     # Test a mocked valid lichess api token
-    monkeypatch.setattr(clients.Account, "get", mock_success_get)
+    monkeypatch.setattr(clients.OAuth, "test_tokens", mock_success_test_tokens)
     lichess_config.set_value(lichess_config.Keys.API_TOKEN, "")
-    lichess_config.set_value(lichess_config.Keys.USERNAME, "")
-    assert model.update_linked_account(api_token="ValidToken")
-    assert lichess_config.get_value(lichess_config.Keys.API_TOKEN) == "ValidToken"
-    assert lichess_config.get_value(lichess_config.Keys.USERNAME) == "TestUsername"
+    assert model.update_linked_account(api_token="lip_validToken")
+    assert lichess_config.get_value(lichess_config.Keys.API_TOKEN) == "lip_validToken"
     model_listener.assert_called()
 
 
 def test_save_account_data(model: TokenManagerModel, lichess_config: LichessConfig, model_listener: Mock):
     assert lichess_config.get_value(lichess_config.Keys.API_TOKEN) == ""
-    assert lichess_config.get_value(lichess_config.Keys.USERNAME) == ""
     model_listener.assert_not_called()
 
-    model.save_account_data(api_token="  ValidToken  ", username="TestUsername")
-    assert lichess_config.get_value(lichess_config.Keys.API_TOKEN) == "ValidToken"
-    assert lichess_config.get_value(lichess_config.Keys.USERNAME) == "TestUsername"
+    model.save_account_data(api_token="  lip_validToken  ", account_data=mock_success_test_tokens())
+    assert lichess_config.get_value(lichess_config.Keys.API_TOKEN) == "lip_validToken"
     model_listener.assert_called()
-
-
-def test_get_linked_account_name(model: TokenManagerModel, lichess_config: LichessConfig):
-    assert lichess_config.get_value(lichess_config.Keys.USERNAME) == ""
-    assert model.get_linked_account_name() == ""
-
-    lichess_config.set_value(lichess_config.Keys.USERNAME, "TestUsername  ")
-    assert model.get_linked_account_name() == "TestUsername"
 
 
 def test_notify_token_manager_model_updated(model: TokenManagerModel, model_listener: Mock):

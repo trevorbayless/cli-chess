@@ -19,7 +19,7 @@ from cli_chess.utils.ui_common import handle_mouse_click
 from prompt_toolkit.layout import Container, Window, FormattedTextControl, VSplit, HSplit, VerticalAlign, D
 from prompt_toolkit.widgets import Box
 from prompt_toolkit.formatted_text import StyleAndTextTuples
-from prompt_toolkit.key_binding import KeyBindings, merge_key_bindings
+from prompt_toolkit.key_binding import KeyBindings
 from prompt_toolkit.keys import Keys
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -29,24 +29,32 @@ if TYPE_CHECKING:
 class WatchTVView(GameViewBase):
     def __init__(self, presenter: WatchTVPresenter):
         self.presenter = presenter
+        self.move_list_placeholder = Window(always_hide_cursor=True)
         super().__init__(presenter)
 
     def _create_container(self) -> Container:
-        return HSplit([
-            VSplit([
-                self.board_output_container,
-                HSplit([
-                    self.player_info_upper_container,
-                    self.material_diff_upper_container,
-                    Box(Window(), height=D(min=1, max=4)),
-                    self.material_diff_lower_container,
-                    self.player_info_lower_container,
-                ]),
-            ]),
+        """Creates the container for the TV view"""
+        main_content = Box(
             HSplit([
-                self._create_function_bar()
-            ], align=VerticalAlign.BOTTOM)
-        ], key_bindings=merge_key_bindings([super()._container_key_bindings(), self._container_key_bindings()]))
+                VSplit([
+                    self.board_output_container,
+                    HSplit([
+                        self.player_info_upper_container,
+                        self.material_diff_upper_container,
+                        Box(self.move_list_placeholder, height=D(min=1, max=4)),
+                        self.material_diff_lower_container,
+                        self.player_info_lower_container
+                    ]),
+                ])
+            ]),
+            padding=1,
+            padding_bottom=0
+        )
+        function_bar = HSplit([
+            self._create_function_bar()
+        ], align=VerticalAlign.BOTTOM)
+
+        return HSplit([main_content, function_bar], key_bindings=self._container_key_bindings())
 
     def _create_function_bar(self) -> VSplit:
         """Create the conditional function bar"""
@@ -64,7 +72,7 @@ class WatchTVView(GameViewBase):
 
     def _container_key_bindings(self) -> KeyBindings:
         """Creates the key bindings for this container"""
-        bindings = KeyBindings()
+        bindings = super()._container_key_bindings()
 
         @bindings.add(Keys.F10, eager=True)
         def _(event): # noqa

@@ -17,7 +17,9 @@ from cli_chess.modules.board import BoardModel
 from cli_chess.modules.move_list import MoveListModel
 from cli_chess.modules.material_difference import MaterialDifferenceModel
 from cli_chess.utils.event import Event
-from chess import Color, WHITE
+from chess import Color, WHITE, COLOR_NAMES
+from random import getrandbits
+from abc import ABC, abstractmethod
 
 
 class GameModelBase:
@@ -56,12 +58,14 @@ class GameModelBase:
                     'title': "",
                     'name': "",
                     'rating': "",
+                    'ratingDiff': "",
                     'provisional': False,
                 },
                 'black': {
                     'title': "",
                     'name': "",
                     'rating': "",
+                    'ratingDiff': "",
                     'provisional': False,
                 },
             },
@@ -76,3 +80,40 @@ class GameModelBase:
                 },
             },
         }
+
+
+class PlayableGameModelBase(GameModelBase, ABC):
+    def __init__(self, play_as_color: str, variant="standard", fen=""):
+        self.my_color = self._get_side_to_play_as(play_as_color)
+        self.game_in_progress = False
+        super().__init__(orientation=self.my_color, variant=variant, fen=fen)
+
+    def is_my_turn(self) -> bool:
+        """Return True if it's our turn"""
+        return self.board_model.get_turn() == self.my_color
+
+    @staticmethod
+    def _get_side_to_play_as(color: str) -> Color:
+        """Returns a chess.Color based on the color string passed in. If the color string
+           is unmatched, a random value of chess.WHITE or chess.BLACK will be returned
+        """
+        if color.lower() in COLOR_NAMES:
+            return Color(COLOR_NAMES.index(color))
+        else:  # Get random color to play as
+            return Color(getrandbits(1))
+
+    @abstractmethod
+    def make_move(self, move: str) -> None:
+        pass
+
+    @abstractmethod
+    def propose_takeback(self) -> None:
+        pass
+
+    @abstractmethod
+    def offer_draw(self) -> None:
+        pass
+
+    @abstractmethod
+    def resign(self) -> None:
+        pass
