@@ -72,7 +72,7 @@ class TokenManagerView:
             VSplit([
                 Label("Linked account: ", dont_extend_width=True),
                 ConditionalContainer(Label("None", style="class:label.error bold italic"), Condition(lambda: not self.lichess_username)),
-                ConditionalContainer(Label(text=lambda: self.lichess_username, style="class:label.success bold"), Condition(lambda: self.lichess_username != "")),
+                ConditionalContainer(Label(text=lambda: self.lichess_username, style="class:label.success bold"), Condition(lambda: self.lichess_username != "")),  # noqa: E501
             ], height=D(max=1)),
         ], width=D(max=self.container_width), height=D(preferred=8))
 

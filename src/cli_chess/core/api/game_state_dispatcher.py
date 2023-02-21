@@ -76,7 +76,7 @@ class GameStateDispatcher(threading.Thread):
     def send_takeback_request(self) -> None:
         """Sends a takeback request to our opponent"""
         try:
-            log.debug(f"GameStateDispatcher: Sending takeback offer to opponent")
+            log.debug("GameStateDispatcher: Sending takeback offer to opponent")
             self.api_client.board.offer_takeback(self.game_id)
         except Exception:
             raise
@@ -84,7 +84,7 @@ class GameStateDispatcher(threading.Thread):
     def send_draw_offer(self) -> None:
         """Sends a draw offer to our opponent"""
         try:
-            log.debug(f"GameStateDispatcher: Sending draw offer to opponent")
+            log.debug("GameStateDispatcher: Sending draw offer to opponent")
             self.api_client.board.offer_draw(self.game_id)
         except Exception:
             raise
@@ -92,7 +92,7 @@ class GameStateDispatcher(threading.Thread):
     def resign(self) -> None:
         """Resigns the game"""
         try:
-            log.debug(f"GameStateDispatcher: Sending resignation")
+            log.debug("GameStateDispatcher: Sending resignation")
             self.api_client.board.resign_game(self.game_id)
         except Exception:
             raise

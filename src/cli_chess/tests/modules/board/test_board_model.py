@@ -15,7 +15,6 @@
 
 from cli_chess.modules.board import BoardModel
 import chess
-from chess import variant
 from unittest.mock import Mock
 import pytest
 

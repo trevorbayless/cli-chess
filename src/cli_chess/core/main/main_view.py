@@ -74,7 +74,7 @@ class MainView:
             Window(FormattedTextControl(f"cli-chess {__version__}"), align=WindowAlign.RIGHT)
         ], height=D(max=1, preferred=1))
 
-    def _create_function_bar_key_bindings(self) -> "_MergedKeyBindings":
+    def _create_function_bar_key_bindings(self) -> "_MergedKeyBindings":  # noqa: F821
         """Creates the key bindings for the function bar"""
         main_menu_key_bindings = self.presenter.main_menu_presenter.view.get_function_bar_key_bindings()
 

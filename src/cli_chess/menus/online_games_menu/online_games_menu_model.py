@@ -28,7 +28,8 @@ class OnlineGamesMenuModel(MenuModel):
         self.menu = self._create_menu()
         super().__init__(self.menu)
 
-    def _create_menu(self) -> MenuCategory:
+    @staticmethod
+    def _create_menu() -> MenuCategory:
         """Create the menu options"""
         menu_options = [
             MenuOption(OnlineGamesMenuOptions.CREATE_GAME, "Create an online game against a random opponent"),

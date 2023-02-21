@@ -273,7 +273,7 @@ class BoardModel:
         if square in chess.SQUARES:
             return chess.BB_LIGHT_SQUARES & chess.BB_SQUARES[square]
         else:
-            raise(ValueError(f"Illegal square: {square}"))
+            raise ValueError(f"Illegal square: {square}")
 
     def is_white_orientation(self) -> bool:
         """Returns True if the board orientation is set as white"""

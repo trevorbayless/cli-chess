@@ -100,7 +100,7 @@ class MainMenuView(MenuView):
             fragments = self.presenter.settings_menu_presenter.view.get_function_bar_fragments()
         return fragments
 
-    def get_function_bar_key_bindings(self) -> "_MergedKeyBindings":
+    def get_function_bar_key_bindings(self) -> "_MergedKeyBindings":  # noqa: F821
         """Returns the appropriate function bar key bindings based on menu item selection"""
         online_games_kb = ConditionalKeyBindings(
             self.presenter.online_games_menu_presenter.view.get_function_bar_key_bindings(),

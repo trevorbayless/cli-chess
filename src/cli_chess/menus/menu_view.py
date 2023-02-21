@@ -152,7 +152,7 @@ class MultiValueMenuView(MenuView):
                 sel_class = ",focused-selected"
 
             tokens.append(("class:menu.option" + sel_class, f"{menu_option.option_name:<{self.column_width}}", label_click))
-            tokens.append(("class:menu.multi-value" + sel_class, f"{menu_option.values[menu_option.selected_value['index']]:<{self.column_width}}", value_click))
+            tokens.append(("class:menu.multi-value" + sel_class, f"{menu_option.values[menu_option.selected_value['index']]:<{self.column_width}}", value_click))  # noqa: E501
             tokens.append(("class:menu", "\n"))
 
         for i, opt in enumerate(self.presenter.get_visible_menu_options()):

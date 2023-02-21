@@ -95,7 +95,7 @@ class OfflineGameModel(PlayableGameModelBase):
 
                 # Engine information
                 engine_name = "Fairy-Stockfish"  # TODO: Implement a better solution for when other engines are supported
-                engine_name = engine_name + f" Lvl {data.get(GameOption.COMPUTER_SKILL_LEVEL)}" if not data.get(GameOption.SPECIFY_ELO) else engine_name
+                engine_name = engine_name + f" Lvl {data.get(GameOption.COMPUTER_SKILL_LEVEL)}" if not data.get(GameOption.SPECIFY_ELO) else engine_name  # noqa: E501
                 self.game_metadata['players'][COLOR_NAMES[not self.my_color]]['title'] = ""
                 self.game_metadata['players'][COLOR_NAMES[not self.my_color]]['name'] = engine_name
                 self.game_metadata['players'][COLOR_NAMES[not self.my_color]]['rating'] = data.get(GameOption.COMPUTER_ELO, "")
