@@ -47,10 +47,12 @@ class GameStateDispatcher(threading.Thread):
                 self.e_game_state_dispatcher_event.notify(gameFull=event)
 
             elif event['type'] == "gameState":
+                status = event.get('status', None)
+                is_game_over = status != None and status != "started" and status != "created"
+
                 self.e_game_state_dispatcher_event.notify(gameState=event)
-                is_game_over = event.get('winner')
                 if is_game_over:
-                    break
+                    self._game_ended()
 
             elif event['type'] == "chatLine":
                 self.e_game_state_dispatcher_event.notify(chatLine=event)
@@ -97,6 +99,6 @@ class GameStateDispatcher(threading.Thread):
         except Exception:
             raise
 
-    def clear_listeners(self) -> None:
-        """Remove all event listeners"""
+    def _game_ended(self) -> None:
+        """Handles removing all event listeners since the game has completed"""
         self.e_game_state_dispatcher_event.listeners.clear()
