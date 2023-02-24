@@ -77,8 +77,8 @@ class WatchTVModel(GameModelBase):
 
             if 'tv_endGameEvent' in kwargs:
                 data = kwargs['tv_endGameEvent']
-                self.game_metadata['status'] = data['status']
-                self.game_metadata['winner'] = data.get('winner')  # Not included on draws
+                self.game_metadata['state']['status'] = data.get('status')
+                self.game_metadata['state']['winner'] = data.get('winner')  # Not included on draws or abort
 
                 for color in COLOR_NAMES:
                     if data['players'][color].get('user'):

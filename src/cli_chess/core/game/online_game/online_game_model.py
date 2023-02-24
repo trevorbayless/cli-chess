@@ -69,12 +69,9 @@ class OnlineGameModel(PlayableGameModelBase):
         self.game_in_progress = False
         self.playing_game_id = None
         self._unsubscribe_from_iem_events()
-        self.game_state_dispatcher.clear_listeners()
 
     def handle_iem_event(self, **kwargs) -> None:
-        """Handle event from the incoming event manager"""
-        # TODO: Need to ensure IEM events we are responding to in this class are specific to this game being played.
-        #  Eg. We don't want to end the current game in progress, because one of our other correspondence games ended.
+        """Handles events received from the IncomingEventManager"""
         if 'gameStart' in kwargs:
             event = kwargs['gameStart']['game']
             # TODO: There has to be a better way to ensure this is the right game...
@@ -86,11 +83,10 @@ class OnlineGameModel(PlayableGameModelBase):
         elif 'gameFinish' in kwargs:
             event = kwargs['gameFinish']['game']
             if self.game_in_progress and self.playing_game_id == event['gameId']:
-                self._save_game_metadata(iem_gameFinish=event)
                 self._game_end()
 
     def handle_game_state_dispatcher_event(self, **kwargs) -> None:
-        """Handle event from the game stream"""
+        """Handles received from the GameStateDispatcher"""
         if 'gameFull' in kwargs:
             event = kwargs['gameFull']
             self._save_game_metadata(gsd_gameFull=event)
@@ -230,7 +226,8 @@ class OnlineGameModel(PlayableGameModelBase):
                 # NOTE: Times below come from lichess in milliseconds
                 self.game_metadata['clock']['white']['time'] = data['wtime']
                 self.game_metadata['clock']['black']['time'] = data['btime']
-                self.game_metadata['status'] = data['status']
+                self.game_metadata['state']['status'] = data.get('status')
+                self.game_metadata['state']['winner'] = data.get('winner', "")  # Not included on draws or abort
 
             self._notify_game_model_updated()
         except Exception as e:

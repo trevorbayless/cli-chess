@@ -51,8 +51,6 @@ class GameModelBase:
         return {
             'gameId': "",
             'variant': "",
-            'winner': "",
-            'status': "",
             'players': {
                 'white': {
                     'title': "",
@@ -79,6 +77,10 @@ class GameModelBase:
                     'increment': 0
                 },
             },
+            'state': {
+                'status': "",
+                'winner': ""
+            }
         }
 
 
