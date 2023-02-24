@@ -98,8 +98,6 @@ class WatchTVModel(GameModelBase):
         try:
             # TODO: Data needs to be organized and sent to presenter to handle display
             if 'startGameEvent' in kwargs:
-                # NOTE: If the variant is 3check the initial export fen will include the check counts
-                #       but follow up game stream FENs will not. Lila GH issue #: 12357
                 event = kwargs['startGameEvent']
                 variant = event['variant']['key']
                 white_rating = int(event['players']['white'].get('rating') or 0)
