@@ -37,8 +37,7 @@ class MoveListView:
     def _create_container(self) -> Box:
         """Create the move list container"""
         return Box(self._move_list_output,
-                   width=D(min=1),
-                   height=D(min=1, max=4, preferred=4),
+                   height=D(max=4),
                    padding=0)
 
     def update(self, formatted_move_list: List[str]):
