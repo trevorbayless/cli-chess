@@ -19,6 +19,8 @@ from cli_chess.modules.board import BoardPresenter
 from cli_chess.modules.move_list import MoveListPresenter
 from cli_chess.modules.material_difference import MaterialDifferencePresenter
 from cli_chess.modules.player_info import PlayerInfoPresenter
+from cli_chess.utils.logging import log
+from chess import Color, COLOR_NAMES
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -54,13 +56,54 @@ class GamePresenterBase:
 
 class PlayableGamePresenterBase(GamePresenterBase):
     def __init__(self, model: PlayableGameModelBase):
-        # NOTE: Base Model subscriptions are currently handled in parent.
-        #  Override the update function here if needed.
         self.model = model
         super().__init__(model)
         self.view = PlayableGameViewBase(self)
 
         self.model.board_model.e_successful_move_made.add_listener(self.view.clear_error)
+
+    def update(self, **kwargs) -> None:
+        """Overrides base and responds to specific model updates"""
+        if 'gameOver' in kwargs:
+            self._parse_and_present_game_over()
+
+    def _parse_and_present_game_over(self):
+        """Handles parsing and presenting the game over status"""
+        if not self.is_game_in_progress():
+            status = self.model.game_metadata['state']['status']
+            winner = self.model.game_metadata['state']['winner'].capitalize()
+
+            status_win_reasons = ['mate', 'resign', 'timeout', 'outoftime', 'cheat', 'variantEnd']
+            if winner and status in status_win_reasons:
+                output = f" • {winner} is victorious"
+                loser = COLOR_NAMES[not Color(COLOR_NAMES.index(winner.lower()))].capitalize()
+
+                if status == "mate":
+                    output = "Checkmate" + output
+                elif status == "resign":
+                    output = f"{loser} resigned" + output
+                elif status == "timeout":
+                    output = f"{loser} left the game" + output
+                elif status == "outoftime":
+                    output = f"{loser} time out" + output
+                elif status == "cheat":
+                    output = "Cheat detected"
+                else:  # TODO: Handle variantEnd (need to know variant)
+                    log.debug(f"PlayableGamePresenterBase: Received game over with uncaught status: {status} / {winner}")
+                    output = "Game over" + output
+
+            else:  # Handle other game end reasons
+                if status == "aborted":
+                    output = "Game aborted"
+                elif status == "draw":
+                    output = "Game over • Draw"
+                elif status == "stalemate":
+                    output = "Game over • Stalemate"
+                else:
+                    log.debug(f"PlayableGamePresenterBase: Received game over with uncaught status: {status}")
+                    output = "Game over"
+
+            self.view.show_error(output)
 
     def user_input_received(self, inpt: str) -> None:
         """Respond to the users input. This input can either be the
