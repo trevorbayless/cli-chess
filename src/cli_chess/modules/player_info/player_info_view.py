@@ -53,7 +53,7 @@ class PlayerInfoView:
         """Updates the player info using the data passed in"""
         self.player_title = player_info.get('title', "")
         self.player_name = player_info.get('name', "Unknown")
-        self._format_rating_diff(player_info.get('ratingDiff', None))
+        self._format_rating_diff(player_info.get('rating_diff', None))
 
         rating = player_info.get('rating', "")
         self.player_rating = (f"({rating})" if not player_info.get('provisional') else f"({rating}?)") if rating else ""

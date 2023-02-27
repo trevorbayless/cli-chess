@@ -12,7 +12,6 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
-
 from cli_chess.modules.board import BoardModel
 from cli_chess.modules.move_list import MoveListModel
 from cli_chess.modules.material_difference import MaterialDifferenceModel
@@ -56,14 +55,14 @@ class GameModelBase:
                     'title': "",
                     'name': "",
                     'rating': "",
-                    'ratingDiff': "",
+                    'rating_diff': "",
                     'provisional': False,
                 },
                 'black': {
                     'title': "",
                     'name': "",
                     'rating': "",
-                    'ratingDiff': "",
+                    'rating_diff': "",
                     'provisional': False,
                 },
             },
@@ -79,7 +78,7 @@ class GameModelBase:
             },
             'state': {
                 'status': "",
-                'winner': ""
+                'winner': "",
             }
         }
 

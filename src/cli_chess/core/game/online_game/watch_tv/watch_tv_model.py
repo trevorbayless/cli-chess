@@ -84,7 +84,7 @@ class WatchTVModel(GameModelBase):
                     if data['players'][color].get('user'):
                         self.game_metadata['players'][color] = data['players'][color]['user']
                         self.game_metadata['players'][color]['rating'] = data['players'][color]['rating']
-                        self.game_metadata['players'][color]['ratingDiff'] = data.get('players', {}).get(color, {}).get('ratingDiff', "")  # NOTE: Not included on aborted games # noqa
+                        self.game_metadata['players'][color]['rating_diff'] = data.get('players', {}).get(color, {}).get('ratingDiff', "")  # NOTE: Not included on aborted games # noqa
                     elif data['players'][color].get('aiLevel'):
                         self.game_metadata['players'][color]['name'] = f"Stockfish level {data['players'][color]['aiLevel']}"
 
