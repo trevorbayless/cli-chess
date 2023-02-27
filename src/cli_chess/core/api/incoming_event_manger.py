@@ -15,6 +15,7 @@
 
 from cli_chess.utils.event import Event
 from cli_chess.utils.logging import log
+from typing import Callable
 import threading
 
 
@@ -77,3 +78,11 @@ class IncomingEventManager(threading.Thread):
     def get_active_games(self) -> list:
         """Returns a list of games in progress for this account"""
         return self.my_games
+
+    def subscribe_to_iem_events(self, listener: Callable) -> None:
+        """Subscribes the passed in method to IEM events"""
+        self.e_new_event_received.add_listener(listener)
+
+    def unsubscribe_from_iem_events(self, listener: Callable) -> None:
+        """Unsubscribes the passed in method to IEM events"""
+        self.e_new_event_received.add_listener(listener)

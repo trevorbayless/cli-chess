@@ -14,6 +14,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from cli_chess.utils import Event, log
+from typing import Callable
 import threading
 
 
@@ -48,9 +49,9 @@ class GameStateDispatcher(threading.Thread):
 
             elif event['type'] == "gameState":
                 status = event.get('status', None)
-                is_game_over = status != None and status != "started" and status != "created"
+                is_game_over = status and status != "started" and status != "created"
 
-                self.e_game_state_dispatcher_event.notify(gameState=event)
+                self.e_game_state_dispatcher_event.notify(gameState=event, gameOver=is_game_over)
                 if is_game_over:
                     self._game_ended()
 
@@ -102,3 +103,7 @@ class GameStateDispatcher(threading.Thread):
     def _game_ended(self) -> None:
         """Handles removing all event listeners since the game has completed"""
         self.e_game_state_dispatcher_event.listeners.clear()
+
+    def subscribe_to_events(self, listener: Callable) -> None:
+        """Subscribes the passed in method to GSD events"""
+        self.e_game_state_dispatcher_event.add_listener(listener)
