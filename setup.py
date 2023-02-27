@@ -22,7 +22,9 @@ metadata = dict(findall(r'__(\w*)__\s*=\s*"([^"]+)"', metadata_file))
 dependencies = [
     "chess>=1.9.4,<2.0.0",
     "berserk-downstream>=0.11.12,<1.0.0",
-    "prompt-toolkit>=3.0.36,<4.0.0"
+    "prompt-toolkit==3.0.38" # pin as breaking changes have been
+                             # introduced in previous patch versions
+                             # read PT changelog before bumping
 ]
 
 dev_dependencies = {
