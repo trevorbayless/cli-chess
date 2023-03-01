@@ -85,4 +85,4 @@ class IncomingEventManager(threading.Thread):
 
     def unsubscribe_from_iem_events(self, listener: Callable) -> None:
         """Unsubscribes the passed in method to IEM events"""
-        self.e_new_event_received.add_listener(listener)
+        self.e_new_event_received.remove_listener(listener)
