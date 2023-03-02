@@ -59,10 +59,16 @@ class EventManager:
         self._event_list.append(e)
         return e
 
-    def purge_all_events(self) -> None:
-        """Purges all events in the event list by removing
-           all associated events/listeners
+    def purge_all_event_listeners(self) -> None:
+        """For each event associated to this event manager
+           this method will clear all listeners
         """
         for event in self._event_list:
             event.remove_all_listeners()
+
+    def purge_all_events(self) -> None:
+        """Purges all events in the event list by removing
+           all associated events and listeners
+        """
+        self.purge_all_event_listeners()
         self._event_list.clear()
