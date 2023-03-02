@@ -16,6 +16,7 @@
 from cli_chess.utils.logging import configure_logger
 from cli_chess.utils import setup_argparse
 from cli_chess.__metadata__ import __version__
+from platform import python_version
 
 
 class StartupModel:
@@ -28,7 +29,7 @@ class StartupModel:
     def _start_loggers():
         """Start the loggers"""
         log = configure_logger("cli-chess")
-        log.info(f"cli-chess v{__version__}")
+        log.info(f"cli-chess v{__version__} // python {python_version()}")
 
         configure_logger("chess.engine")
         configure_logger("berserk")
