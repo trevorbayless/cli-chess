@@ -243,4 +243,5 @@ class StreamTVChannel(threading.Thread):
         # TODO: Need to handle going back to the main menu when the TVStream
         #       connection retries are exhausted. Send event notification to model?
         log.info("TV Stream: Stopping TV stream")
+        self.e_tv_stream_event.remove_all_listeners()
         self.running = False

@@ -102,7 +102,7 @@ class GameStateDispatcher(threading.Thread):
 
     def _game_ended(self) -> None:
         """Handles removing all event listeners since the game has completed"""
-        self.e_game_state_dispatcher_event.listeners.clear()
+        self.e_game_state_dispatcher_event.remove_all_listeners()
 
     def subscribe_to_events(self, listener: Callable) -> None:
         """Subscribes the passed in method to GSD events"""

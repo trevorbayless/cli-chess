@@ -51,6 +51,7 @@ class GamePresenterBase:
 
     def exit(self) -> None:
         """Exit current presenter/view"""
+        self.model.cleanup()
         self.view.exit()
 
 

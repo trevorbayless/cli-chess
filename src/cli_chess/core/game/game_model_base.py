@@ -12,10 +12,11 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
+
 from cli_chess.modules.board import BoardModel
 from cli_chess.modules.move_list import MoveListModel
 from cli_chess.modules.material_difference import MaterialDifferenceModel
-from cli_chess.utils.event import Event
+from cli_chess.utils import EventManager, log
 from chess import Color, WHITE, COLOR_NAMES
 from random import getrandbits
 from abc import ABC, abstractmethod
@@ -29,8 +30,12 @@ class GameModelBase:
         self.move_list_model = MoveListModel(self.board_model)
         self.material_diff_model = MaterialDifferenceModel(self.board_model)
 
-        self.e_game_model_updated = Event()
+        self._event_manager = EventManager()
+        self.e_game_model_updated = self._event_manager.create_event()
         self.board_model.e_board_model_updated.add_listener(self.update)
+
+        # Keep track of all associated models to handle bulk cleanup on exit
+        self._assoc_models = [self.board_model, self.move_list_model, self.material_diff_model]
 
     def update(self, **kwargs) -> None:
         """Called automatically as part of an event listener. This function
@@ -39,6 +44,19 @@ class GameModelBase:
         """
         if 'board_orientation' in kwargs:
             self._notify_game_model_updated(**kwargs)
+
+    def cleanup(self) -> None:
+        """Cleans up after this model by clearing all associated models event listeners.
+           This should only ever be run when the models are no longer needed.
+        """
+        self._event_manager.purge_all_events()
+
+        # Notify associated models to clean up
+        for model in self._assoc_models:
+            try:
+                model.cleanup()
+            except AttributeError:
+                log.error(f"GameModelBase: {model} does not have a cleanup method")
 
     def _notify_game_model_updated(self, **kwargs) -> None:
         """Notify listeners that the model has updated"""

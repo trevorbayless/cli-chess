@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from cli_chess.utils.event import Event
+from cli_chess.utils.event import EventManager
 from cli_chess.utils.logging import log
 from random import randint
 from typing import List
@@ -27,10 +27,11 @@ class BoardModel:
         self.initial_fen = self.board.fen()
         self.orientation = chess.WHITE if variant.lower() == "racingkings" else orientation
         self.highlight_move = chess.Move.null()
-
         self._log_init_info()
-        self.e_board_model_updated = Event()
-        self.e_successful_move_made = Event()
+
+        self._event_manager = EventManager()
+        self.e_board_model_updated = self._event_manager.create_event()
+        self.e_successful_move_made = self._event_manager.create_event()
 
     @staticmethod
     def _initialize_board(variant: str, fen: str):
@@ -303,6 +304,12 @@ class BoardModel:
     def _notify_successful_move_made(self) -> None:
         """Notifies listeners that a board move has been made"""
         self.e_successful_move_made.notify()
+
+    def cleanup(self) -> None:
+        """Handles model cleanup tasks. This should only ever
+           be run when this model is no longer needed.
+        """
+        self._event_manager.purge_all_events()
 
     def _log_init_info(self):
         """Logs class initialization"""
