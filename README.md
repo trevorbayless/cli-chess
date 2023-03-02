@@ -3,16 +3,19 @@
 </p>
 
 <p align="center">
-A highly customizable way to play chess in your terminal. Supports online play (via Lichess.org) and
-offline play against the Fairy-Stockfish engine. All Lichess variants are supported.
+A highly customizable way to play chess in your terminal. Supports playing online (via Lichess.org) and
+offline against the Fairy-Stockfish engine. All Lichess variants are supported.
 </p>
 
 <p align="center">
     <a href="https://github.com/trevorbayless/cli-chess/actions/">
-        <img alt="CI Workflow" src="https://github.com/trevorbayless/cli-chess/actions/workflows/ci.yml/badge.svg?branch=master?event=push">
+        <img alt="CI Workflow" src="https://github.com/trevorbayless/cli-chess/actions/workflows/ci.yml/badge.svg?branch=master&event=push">
     </a>
     <a href="https://pypi.org/project/cli-chess/">
         <img alt="PyPI" src="https://img.shields.io/pypi/v/cli-chess?color=informational&label=PyPI&logo=PyPI">
+    </a>
+    <a href="#">
+        <img alt="Python" src="https://img.shields.io/static/v1?label=Python&message=3.7%2B&color=informational&logo=python">
     </a>
 </p>
 
@@ -75,6 +78,3 @@ found, and I will do my best to support.
 #### 5. Can I use a different chess engine?
 Playing offline vs the computer is _currently_ only directly compatible with the [Fairy-Stockfish](<https://fairy-stockfish.github.io/>) engine.
 For simplicity, the Fairy-Stockfish binaries come pre-built with cli-chess for Linux, Windows, and macOS _(x86_64 architecture)_.
-
-#### 6. What versions of Python are supported?
-Python >= 3.7
