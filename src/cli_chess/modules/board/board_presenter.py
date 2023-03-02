@@ -48,14 +48,13 @@ class BoardPresenter:
         self.board_config_values = board_config.get_all_values()
         self.update()
 
-    def make_move(self, move: str, human=True) -> None:
+    def make_move(self, move: str) -> None:
         """Sends a move to the board model to attempt to make.
-           Raises an exception on invalid moves
+           Raises a ValueError on invalid moves. See model for specifics.
         """
         try:
-            self.model.make_move(move, human=human)
-        except Exception as e:
-            # TODO: Handle specific exceptions (Invalid move, ambiguous, etc )
+            self.model.make_move(move)
+        except ValueError as e:
             raise e
 
     def get_board_display(self) -> List[Dict]:

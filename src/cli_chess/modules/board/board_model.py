@@ -81,17 +81,16 @@ class BoardModel:
         if notify:
             self._notify_board_model_updated()
 
-    def make_move(self, move: str, human=True) -> None:
+    def make_move(self, move: str) -> None:
         """Attempts to make a move on the board.
            Raises a ValueError on illegal moves.
         """
-        player = "human" if human else "engine"
         try:
             move = move.strip()
             self.highlight_move = self.board.push_san(move)
             self._notify_successful_move_made()
             self._notify_board_model_updated()
-            log.info(f"BoardModel: ({player}): {move}")
+            log.info(f"BoardModel: Made move ({move})")
         except Exception as e:
             log.error(f"BoardModel: {e}")
             if isinstance(e, chess.InvalidMoveError):

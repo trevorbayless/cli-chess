@@ -39,7 +39,7 @@ class OfflineGameModel(PlayableGameModelBase):
                 if not self.is_my_turn():
                     raise Warning("Not your turn")
 
-                self.board_model.make_move(move, human=True)
+                self.board_model.make_move(move)
             except Exception:
                 raise
         else:
