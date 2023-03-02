@@ -65,4 +65,4 @@ class OfflineGamePresenter(PlayableGamePresenterBase):
                 self.board_presenter.make_move(engine_move.move.uci(), human=False)
         except Exception as e:
             log.critical(f"Received an invalid move from the engine: {e}")
-            self.view.show_error(f"Invalid move received from engine - inspect logs")
+            self.view.show_error("Invalid move received from engine - inspect logs")

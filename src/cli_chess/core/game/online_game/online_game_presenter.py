@@ -19,7 +19,7 @@ from cli_chess.utils.ui_common import change_views
 
 
 def start_online_game_vs_ai(game_parameters: dict) -> None:
-    """Start a game vs the lichess ai"""
+    """Start a game vs the lichess AI"""
     model = OnlineGameModel(game_parameters)
     presenter = OnlineGamePresenter(model)
     change_views(presenter.view, presenter.view.input_field_container) # noqa
@@ -28,7 +28,6 @@ def start_online_game_vs_ai(game_parameters: dict) -> None:
 
 class OnlineGamePresenter(PlayableGamePresenterBase):
     def __init__(self, model: OnlineGameModel):
-        # NOTE: Model subscriptions are currently handled in parent. Override here if needed.
         self.model = model
         super().__init__(model)
         self.view = OnlineGameView(self)

@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from cli_chess.modules.common import *
+from cli_chess.modules.common import get_piece_unicode_symbol, UNICODE_PIECE_SYMBOLS
 from string import ascii_lowercase
 
 

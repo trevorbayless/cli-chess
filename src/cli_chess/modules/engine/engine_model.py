@@ -40,7 +40,7 @@ fairy_stockfish_mapped_skill_levels = {
 async def create_engine_model(board_model: BoardModel, game_parameters: dict):
     """Create an instance of the engine model with the engine loaded"""
     model = EngineModel(board_model, game_parameters)
-    await model._init()
+    await model._init()  # noqa
     return model
 
 

@@ -16,7 +16,7 @@
 from __future__ import annotations
 from cli_chess.menus import MenuView
 from cli_chess.menus.offline_games_menu import OfflineGamesMenuOptions
-from prompt_toolkit.layout import Container, Window, FormattedTextControl, ConditionalContainer, VSplit, HSplit
+from prompt_toolkit.layout import Container, ConditionalContainer, VSplit, HSplit
 from prompt_toolkit.filters import Condition, is_done
 from prompt_toolkit.widgets import Box
 from prompt_toolkit.formatted_text import StyleAndTextTuples

@@ -32,7 +32,7 @@ class SettingsMenuModel(MenuModel):
     def _create_menu() -> MenuCategory:
         """Create the menu options"""
         menu_options = [
-            MenuOption(SettingsMenuOptions.LICHESS_AUTHENTICATION, "Authenticate with Lichess by adding your API access token (required for playing online)"),
+            MenuOption(SettingsMenuOptions.LICHESS_AUTHENTICATION, "Authenticate with Lichess by adding your API access token (required for playing online)"),  # noqa: E501
             MenuOption(SettingsMenuOptions.GAME_SETTINGS, "Customize the look and feel when playing games"),
             MenuOption(SettingsMenuOptions.PROGRAM_SETTINGS, "Customize the look and feel of cli-chess"),
         ]

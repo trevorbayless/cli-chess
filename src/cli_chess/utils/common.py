@@ -43,7 +43,7 @@ def str_to_bool(s: str) -> bool:
 def threaded(fn):
     """Decorator for a threaded function"""
     def wrapper(*args, **kwargs):
-        threading.Thread(target=fn, args=args, kwargs=kwargs).start()
+        threading.Thread(target=fn, args=args, kwargs=kwargs, daemon=True).start()
     return wrapper
 
 

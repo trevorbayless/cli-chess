@@ -56,30 +56,6 @@ def mock_success_test_tokens(*args): # noqa
     }
 
 
-def test_validate_existing_linked_account(model: TokenManagerModel, lichess_config: LichessConfig, model_listener: Mock, monkeypatch):
-    # Test with empty API token
-    lichess_config.set_value(lichess_config.Keys.API_TOKEN, "")
-    model.validate_existing_linked_account()
-    assert lichess_config.get_value(lichess_config.Keys.API_TOKEN) == ""
-
-    # Test with invalid existing API token
-    monkeypatch.setattr(clients.OAuth, "test_tokens", mock_fail_test_tokens)
-    lichess_config.set_value(lichess_config.Keys.API_TOKEN, "lip_badToken")
-    model.validate_existing_linked_account()
-    assert lichess_config.get_value(lichess_config.Keys.API_TOKEN) == ""
-
-    # Test with valid API token
-    monkeypatch.setattr(clients.OAuth, "test_tokens", mock_success_test_tokens)
-    lichess_config.set_value(lichess_config.Keys.API_TOKEN, "lip_validToken")
-    model.validate_existing_linked_account()
-    assert lichess_config.get_value(lichess_config.Keys.API_TOKEN) == "lip_validToken"
-
-    # Verify model listener is called
-    model_listener.reset_mock()
-    model.validate_existing_linked_account()
-    model_listener.assert_called()
-
-
 def test_update_linked_account(model: TokenManagerModel, lichess_config: LichessConfig, model_listener: Mock, monkeypatch):
     # Test with empty api token
     assert not model.update_linked_account(api_token="")

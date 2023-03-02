@@ -14,7 +14,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from cli_chess.modules.board import BoardModel
-from cli_chess.utils import Event, log
+from cli_chess.utils import EventManager, log
 from chess import piece_symbol
 from typing import List
 
@@ -25,7 +25,8 @@ class MoveListModel:
         self.board_model.e_board_model_updated.add_listener(self.update)
         self.move_list_data = []
 
-        self.e_move_list_model_updated = Event()
+        self._event_manager = EventManager()
+        self.e_move_list_model_updated = self._event_manager.create_event()
         self.update()
 
     def update(self, **kwargs) -> None: # noqa
@@ -68,3 +69,9 @@ class MoveListModel:
     def _notify_move_list_model_updated(self) -> None:
         """Notifies listeners of move list model updates"""
         self.e_move_list_model_updated.notify()
+
+    def cleanup(self) -> None:
+        """Handles model cleanup tasks. This should only ever
+           be run when this model is no longer needed.
+        """
+        self._event_manager.purge_all_events()

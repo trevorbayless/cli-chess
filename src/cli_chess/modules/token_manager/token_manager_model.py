@@ -13,11 +13,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from cli_chess.utils.logging import log
 from cli_chess.utils.config import lichess_config
-from cli_chess.utils.event import Event
+from cli_chess.utils import Event, log, threaded
 from berserk import Client, TokenSession
-from berserk.exceptions import BerserkError
 
 linked_token_scopes = set()
 
@@ -27,6 +25,7 @@ class TokenManagerModel:
         self.linked_account = ""
         self.e_token_manager_model_updated = Event()
 
+    @threaded
     def validate_existing_linked_account(self) -> None:
         """Queries the Lichess config file for an existing token. If a token
            exists, verification is attempted. Invalid data will be cleared.
@@ -78,8 +77,9 @@ class TokenManagerModel:
                         return token_data[api_token]
                     else:
                         log.error("TokenManager: Valid token but missing required scopes")
-            except BerserkError as e:
-                log.error(f"TokenManager: Authentication to Lichess failed - {e.message}")
+
+            except Exception as e:
+                log.error(f"TokenManager: Authentication to Lichess failed - {e}")
 
     def save_account_data(self, api_token: str, account_data: dict, valid=False) -> None:
         """Saves the passed in lichess api token to the configuration.

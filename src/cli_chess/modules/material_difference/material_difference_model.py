@@ -14,7 +14,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from cli_chess.modules.board import BoardModel
-from cli_chess.utils import Event
+from cli_chess.utils import EventManager
 from typing import Dict
 from chess import PIECE_SYMBOLS, PIECE_TYPES, PieceType, Color, COLORS, WHITE, BLACK, PAWN, KNIGHT, BISHOP, ROOK, QUEEN, KING
 import re
@@ -37,7 +37,8 @@ class MaterialDifferenceModel:
         self.material_difference: Dict[Color, Dict[PieceType, int]] = self.default_material_difference()
         self.score: Dict[Color, int] = self.default_score()
 
-        self.e_material_difference_model_updated = Event()
+        self._event_manager = EventManager()
+        self.e_material_difference_model_updated = self._event_manager.create_event()
         self.update()
 
     @staticmethod
@@ -142,3 +143,9 @@ class MaterialDifferenceModel:
     def _notify_material_difference_model_updated(self) -> None:
         """Notifies listeners of material difference model updates"""
         self.e_material_difference_model_updated.notify()
+
+    def cleanup(self) -> None:
+        """Handles model cleanup tasks. This should only ever
+           be run when this model is no longer needed.
+        """
+        self._event_manager.purge_all_events()

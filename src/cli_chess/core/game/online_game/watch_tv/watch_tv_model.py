@@ -77,14 +77,14 @@ class WatchTVModel(GameModelBase):
 
             if 'tv_endGameEvent' in kwargs:
                 data = kwargs['tv_endGameEvent']
-                self.game_metadata['status'] = data['status']
-                self.game_metadata['winner'] = data.get('winner')  # Not included on draws
+                self.game_metadata['state']['status'] = data.get('status')
+                self.game_metadata['state']['winner'] = data.get('winner')  # Not included on draws or abort
 
                 for color in COLOR_NAMES:
                     if data['players'][color].get('user'):
                         self.game_metadata['players'][color] = data['players'][color]['user']
                         self.game_metadata['players'][color]['rating'] = data['players'][color]['rating']
-                        self.game_metadata['players'][color]['ratingDiff'] = data.get('players', {}).get(color, {}).get('ratingDiff', "")  # NOTE: Not included on aborted games
+                        self.game_metadata['players'][color]['rating_diff'] = data.get('players', {}).get(color, {}).get('ratingDiff', "")  # NOTE: Not included on aborted games # noqa
                     elif data['players'][color].get('aiLevel'):
                         self.game_metadata['players'][color]['name'] = f"Stockfish level {data['players'][color]['aiLevel']}"
 
@@ -98,8 +98,6 @@ class WatchTVModel(GameModelBase):
         try:
             # TODO: Data needs to be organized and sent to presenter to handle display
             if 'startGameEvent' in kwargs:
-                # NOTE: If the variant is 3check the initial export fen will include the check counts
-                #       but follow up game stream FENs will not. Lila GH issue #: 12357
                 event = kwargs['startGameEvent']
                 variant = event['variant']['key']
                 white_rating = int(event['players']['white'].get('rating') or 0)
@@ -245,4 +243,5 @@ class StreamTVChannel(threading.Thread):
         # TODO: Need to handle going back to the main menu when the TVStream
         #       connection retries are exhausted. Send event notification to model?
         log.info("TV Stream: Stopping TV stream")
+        self.e_tv_stream_event.remove_all_listeners()
         self.running = False

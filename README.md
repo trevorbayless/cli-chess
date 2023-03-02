@@ -7,6 +7,15 @@ A highly customizable way to play chess in your terminal. Supports online play (
 offline play against the Fairy-Stockfish engine. All Lichess variants are supported.
 </p>
 
+<p align="center">
+    <a href="https://github.com/trevorbayless/cli-chess/actions/">
+        <img alt="CI Workflow" src="https://github.com/trevorbayless/cli-chess/actions/workflows/ci.yml/badge.svg?branch=master?event=push">
+    </a>
+    <a href="https://pypi.org/project/cli-chess/">
+        <img alt="PyPI" src="https://img.shields.io/pypi/v/cli-chess?color=informational&label=PyPI&logo=PyPI">
+    </a>
+</p>
+
 ## Main Features
 - Play online using your Lichess.org account
 - Play offline against the Fairy-Stockfish engine

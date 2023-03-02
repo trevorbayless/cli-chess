@@ -32,14 +32,11 @@ class PlayerInfoPresenter:
         self.model.e_game_model_updated.add_listener(self.update)
 
     def update(self, **kwargs) -> None:
-        """Updates the view based on orientation changes"""
-        # TODO: Only respond to updated here if required (eg. based on kwarg)
-        if 'board_orientation' in kwargs:
-            pass
-
-        orientation = self.model.board_model.get_board_orientation()
-        self.view_upper.update(self.get_player_info(not orientation))
-        self.view_lower.update(self.get_player_info(orientation))
+        """Updates the view based on specific model updates"""
+        if 'board_orientation' in kwargs or 'gameOver' in kwargs:
+            orientation = self.model.board_model.get_board_orientation()
+            self.view_upper.update(self.get_player_info(not orientation))
+            self.view_lower.update(self.get_player_info(orientation))
 
     def get_player_info(self, color: Color) -> dict:
         return self.model.game_metadata['players'][COLOR_NAMES[color]]

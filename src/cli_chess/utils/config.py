@@ -78,7 +78,7 @@ class BaseConfig:
         # Event called on any configuration write event (across sections)
         self.e_config_updated = Event()
 
-    def _get_parser(self) -> "ConfigParser":
+    def _get_parser(self) -> "ConfigParser":  # noqa: F821
         """Returns the config parser object"""
         parser = configparser.ConfigParser()
         parser.read(self.full_filename)

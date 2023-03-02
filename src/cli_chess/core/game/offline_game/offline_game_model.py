@@ -70,9 +70,7 @@ class OfflineGameModel(PlayableGameModelBase):
         """Returns the default structure for game metadata"""
         game_metadata = super()._default_game_metadata()
         game_metadata.update({
-            'my_color': "",
-            'rated': None,
-            'speed': None,
+            'my_color_str': ""
         })
         return game_metadata
 
@@ -81,7 +79,7 @@ class OfflineGameModel(PlayableGameModelBase):
         try:
             if 'game_parameters' in kwargs:
                 data = kwargs['game_parameters']
-                self.game_metadata['my_color'] = COLOR_NAMES[self.my_color]
+                self.game_metadata['my_color_str'] = COLOR_NAMES[self.my_color]
                 self.game_metadata['variant'] = data[GameOption.VARIANT]
                 self.game_metadata['clock']['white']['time'] = data[GameOption.TIME_CONTROL][0]
                 self.game_metadata['clock']['white']['increment'] = data[GameOption.TIME_CONTROL][1]
@@ -95,7 +93,7 @@ class OfflineGameModel(PlayableGameModelBase):
 
                 # Engine information
                 engine_name = "Fairy-Stockfish"  # TODO: Implement a better solution for when other engines are supported
-                engine_name = engine_name + f" Lvl {data.get(GameOption.COMPUTER_SKILL_LEVEL)}" if not data.get(GameOption.SPECIFY_ELO) else engine_name
+                engine_name = engine_name + f" Lvl {data.get(GameOption.COMPUTER_SKILL_LEVEL)}" if not data.get(GameOption.SPECIFY_ELO) else engine_name  # noqa: E501
                 self.game_metadata['players'][COLOR_NAMES[not self.my_color]]['title'] = ""
                 self.game_metadata['players'][COLOR_NAMES[not self.my_color]]['name'] = engine_name
                 self.game_metadata['players'][COLOR_NAMES[not self.my_color]]['rating'] = data.get(GameOption.COMPUTER_ELO, "")

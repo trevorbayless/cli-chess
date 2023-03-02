@@ -59,7 +59,7 @@ class OnlineGamesMenuView(MenuView):
             fragments = self.presenter.tv_channel_menu_presenter.view.get_function_bar_fragments()
         return fragments
 
-    def get_function_bar_key_bindings(self) -> "_MergedKeyBindings":
+    def get_function_bar_key_bindings(self) -> "_MergedKeyBindings":  # noqa: F821
         """Returns the appropriate function bar key bindings based on menu item selection"""
         vs_ai_kb = ConditionalKeyBindings(
             self.presenter.vs_computer_menu_presenter.view.get_function_bar_key_bindings(),
