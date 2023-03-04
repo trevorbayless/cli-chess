@@ -127,6 +127,7 @@ class WatchTVModel(GameModelBase):
             if 'endGameEvent' in kwargs:
                 event = kwargs['endGameEvent']
                 self._save_game_metadata(tv_endGameEvent=event)
+                self.e_game_model_updated.notify(onlineGameOver=True)
         except Exception as e:
             log.error(f"TV Model: Error parsing stream data: {e}")
             raise
