@@ -17,7 +17,7 @@ from cli_chess.core.game import PlayableGameModelBase
 from cli_chess.modules.game_options import GameOption
 from cli_chess.utils.logging import log
 from cli_chess.utils.config import player_info_config
-from chess import Color, COLOR_NAMES
+from chess import COLOR_NAMES
 
 
 class OfflineGameModel(PlayableGameModelBase):
