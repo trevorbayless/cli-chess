@@ -30,6 +30,7 @@ def model_listener():
 @pytest.fixture
 def model(model_listener: Mock, lichess_config: LichessConfig, monkeypatch):
     monkeypatch.setattr('cli_chess.modules.token_manager.token_manager_model.lichess_config', lichess_config)
+    monkeypatch.setattr('cli_chess.core.api.api_manager._start_api', Mock())
     model = TokenManagerModel()
     model.e_token_manager_model_updated.add_listener(model_listener)
     return model
