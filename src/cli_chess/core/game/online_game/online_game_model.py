@@ -249,4 +249,4 @@ class OnlineGameModel(PlayableGameModelBase):
         self._game_end()
         self.game_metadata['state']['status'] = status  # status list can be found in lila status.ts
         self.game_metadata['state']['winner'] = winner
-        self._notify_game_model_updated(gameOver=True)
+        self._notify_game_model_updated(onlineGameOver=True)

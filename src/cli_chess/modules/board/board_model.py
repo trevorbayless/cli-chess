@@ -15,10 +15,12 @@
 
 from cli_chess.utils.event import EventManager
 from cli_chess.utils.logging import log
-from random import randint
-from typing import List
-import chess.variant
 import chess
+import chess.variant
+import dataclasses
+import enum
+from random import randint
+from typing import List, Optional
 
 
 class BoardModel:
@@ -27,6 +29,7 @@ class BoardModel:
         self.initial_fen = self.board.fen()
         self.orientation = chess.WHITE if variant.lower() == "racingkings" else orientation
         self.highlight_move = chess.Move.null()
+        self._game_over = False
         self._log_init_info()
 
         self._event_manager = EventManager()
@@ -64,6 +67,7 @@ class BoardModel:
             self.initial_fen = self.board.fen()
             self.set_board_orientation(chess.WHITE if variant.lower() == "racingkings" else orientation, notify=False)
             self.highlight_move = chess.Move.from_uci(uci_last_move) if uci_last_move else chess.Move.null()
+            self._game_over = False
 
             self._log_init_info()
             self.e_board_model_updated.notify(board_orientation=self.orientation)
@@ -77,20 +81,27 @@ class BoardModel:
         """
         self.board.reset()
         self.set_fen(self.initial_fen, notify=False)
+        self._game_over = False
 
         if notify:
             self._notify_board_model_updated()
 
-    def make_move(self, move: str) -> None:
-        """Attempts to make a move on the board.
-           Raises a ValueError on illegal moves.
+    def make_move(self, move: str, notify=True) -> chess.Move:
+        """Attempts to make a move on the board. If successful, returns
+           the move object. Otherwise, raises a ValueError on illegal moves.
         """
         try:
+            if self.is_game_over():
+                raise Warning("The game has already ended")
+
             move = move.strip()
-            self.highlight_move = self.board.push_san(move)
-            self._notify_successful_move_made()
-            self._notify_board_model_updated()
+            move = self.board.push_san(move)
+            self.highlight_move = move
             log.info(f"BoardModel: Made move ({move})")
+
+            if notify:
+                self._notify_successful_move_made()
+                self._notify_board_model_updated(isGameOver=(self._game_over or self.board.is_game_over()))
         except Exception as e:
             log.error(f"BoardModel: {e}")
             if isinstance(e, chess.InvalidMoveError):
@@ -102,12 +113,17 @@ class BoardModel:
             else:
                 raise e
 
+        return move
+
     def verify_move(self, move: str) -> str:
         """Verify if the passed in move is valid in the current position.
            Raises an exception on move errors (ambiguous, invalid, illegal).
            Returns a string of the move in UCI format.
         """
         try:
+            if self.is_game_over():
+                raise Warning("The game has already ended")
+
             return str(self.board.parse_san(move))
         except Exception as e:
             log.error(f"BoardModel: {e}")
@@ -126,9 +142,9 @@ class BoardModel:
         """
         for move in move_list:
             try:
-                self.highlight_move = self.board.push_san(move)
-            except ValueError as e:
-                log.error(f"BoardModel: Invalid move while making moves from list: {e}")
+                self.highlight_move = self.make_move(move, notify=False)
+            except Exception as e:
+                log.error(f"BoardModel: Exception caught while making moves from list: {e}")
                 raise e
 
         self._notify_successful_move_made()
@@ -139,6 +155,9 @@ class BoardModel:
            stack is empty or takeback of opponents move is attempted.
         """
         try:
+            if self.is_game_over():
+                raise Warning("The game has already ended")
+
             if len(self.board.move_stack) == 0:
                 raise Warning("No moves have been played yet")
 
@@ -292,9 +311,30 @@ class BoardModel:
                 if isinstance(orientation, bool):
                     self.set_board_orientation(orientation, notify=False)
 
-                self.e_board_model_updated.notify(board_orientation=self.orientation)
+                self.e_board_model_updated.notify()
         except Exception as e:
             log.error(f"BoardModel: Error caught setting board position: {e}")
+
+    def is_game_over(self, force_set=False) -> bool:
+        """Returns True if the game is over"""
+        game_over = self.board.is_game_over()
+        if game_over and not self._game_over:
+            self._game_over = True
+        return self._game_over
+
+    def set_game_over(self) -> None:
+        """Mark the game as ended. Sends out a notification to
+           listeners that the game is over. Generally this would be
+           set on a resignation as that is something the board can't detect.
+        """
+        self._game_over = True
+        self.e_board_model_updated.notify(isGameOver=True)
+
+    def cleanup(self) -> None:
+        """Handles model cleanup tasks. This should only ever
+           be run when this model is no longer needed.
+        """
+        self._event_manager.purge_all_events()
 
     def _notify_board_model_updated(self, **kwargs) -> None:
         """Notifies listeners of board model updates"""
@@ -303,12 +343,6 @@ class BoardModel:
     def _notify_successful_move_made(self) -> None:
         """Notifies listeners that a board move has been made"""
         self.e_successful_move_made.notify()
-
-    def cleanup(self) -> None:
-        """Handles model cleanup tasks. This should only ever
-           be run when this model is no longer needed.
-        """
-        self._event_manager.purge_all_events()
 
     def _log_init_info(self):
         """Logs class initialization"""

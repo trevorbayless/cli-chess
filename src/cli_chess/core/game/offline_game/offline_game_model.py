@@ -28,6 +28,15 @@ class OfflineGameModel(PlayableGameModelBase):
         self.game_in_progress = True
         self._save_game_metadata(game_parameters=game_parameters)
 
+    def update(self, **kwargs) -> None:
+        """Called automatically as part of an event listener. This method
+           listens to subscribed model update events and if deemed necessary
+           triages and notifies listeners of the event.
+        """
+        super().update(**kwargs)
+        if kwargs.get('isGameOver', False):
+            self._report_game_over()
+
     def make_move(self, move: str):
         """Sends the move to the board model for it to be made"""
         if self.game_in_progress and move:
@@ -64,7 +73,8 @@ class OfflineGameModel(PlayableGameModelBase):
         """Handle game resignation. Since this is against an engine, the presenter
            will handle calling the engine model to report resignation
         """
-        self.game_in_progress = False
+        self._report_game_over(resigned=True)
+        self.board_model._game_over = True  # TODO: Fix this... but don't want board updates on a resignation
 
     def _default_game_metadata(self) -> dict:
         """Returns the default structure for game metadata"""
@@ -101,3 +111,15 @@ class OfflineGameModel(PlayableGameModelBase):
             self._notify_game_model_updated()
         except KeyError as e:
             log.error(f"Error saving offline game metadata: {e}")
+
+    def _report_game_over(self, resigned=False) -> None:
+        """Saves game information and notifies listeners that the game has ended.
+           This should only ever be called if the game is confirmed to be over
+        """
+        self.game_in_progress = False
+        outcome = self.board_model.board.outcome()
+        outcome.termination = "resign" if resigned else outcome.termination
+        outcome.winner = COLOR_NAMES[not self.my_color] if resigned else COLOR_NAMES[outcome.winner]
+        self.game_metadata['state']['status'] = outcome.termination
+        self.game_metadata['state']['winner'] = outcome.winner
+        self._notify_game_model_updated(offlineGameOver=True)
