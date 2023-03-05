@@ -67,7 +67,11 @@ class OfflineGamePresenter(PlayableGamePresenterBase):
         try:
             engine_move = await self.engine_presenter.get_best_move()
 
-            if engine_move.move:
+            if engine_move.resigned:
+                log.debug("OfflineGamePresenter: Sending resignation on behalf of the engine")
+                self.model.handle_engine_resignation()
+
+            elif engine_move.move:
                 move = engine_move.move.uci()
                 log.debug(f"OfflineGamePresenter: Sending engine move ({move}) to BoardPresenter")
                 self.board_presenter.make_move(move)
