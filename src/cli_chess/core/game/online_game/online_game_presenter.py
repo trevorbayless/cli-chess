@@ -20,12 +20,14 @@ from cli_chess.utils.logging import log
 from chess import Color, COLOR_NAMES
 
 
-def start_online_game_vs_ai(game_parameters: dict) -> None:
-    """Start a game vs the lichess AI"""
+def start_online_game(game_parameters: dict, is_vs_ai: bool) -> None:
+    """Start an online game. If `is_vs_ai` is True a challenge will be sent to
+       the Lichess AI (stockfish). Otherwise, a seek vs a random opponent will be created
+    """
     model = OnlineGameModel(game_parameters)
     presenter = OnlineGamePresenter(model)
     change_views(presenter.view, presenter.view.input_field_container) # noqa
-    model.start_ai_challenge()
+    model.create_a_game(is_vs_ai)
 
 
 class OnlineGamePresenter(PlayableGamePresenterBase):
@@ -41,7 +43,7 @@ class OnlineGamePresenter(PlayableGamePresenterBase):
 
     def _parse_and_present_game_over(self) -> None:
         """Handles parsing the game over status and sending it to the view for display"""
-        # TODO: Break this apart into separate functions for easier readability
+        # TODO: Break this apart into separate functions for easier readability?
         if not self.is_game_in_progress():
             status = self.model.game_metadata['state']['status']
             winner = self.model.game_metadata['state']['winner'].capitalize()

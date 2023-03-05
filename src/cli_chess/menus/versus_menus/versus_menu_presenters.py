@@ -14,26 +14,29 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from __future__ import annotations
-from cli_chess.menus.versus_menus import VsComputerMenuView
+from cli_chess.menus.versus_menus import VersusMenuView
 from cli_chess.menus import MultiValueMenuPresenter
 from cli_chess.modules.game_options import BaseGameOptions, OnlineGameOptions, OfflineGameOptions, GameOption
-from cli_chess.core.game import start_online_game_vs_ai, start_offline_game
+from cli_chess.core.game import start_online_game, start_offline_game
+from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Type
 if TYPE_CHECKING:
-    from cli_chess.menus.versus_menus import VsComputerMenuModel, OnlineVsComputerMenuModel, OfflineVsComputerMenuModel
+    from cli_chess.menus.versus_menus import VersusMenuModel, OfflineVsComputerMenuModel
 
 
-class VsComputerMenuPresenter(MultiValueMenuPresenter):
+class VersusMenuPresenter(MultiValueMenuPresenter, ABC):
     """Base presenter for the VsComputer menus"""
-    def __init__(self, model: VsComputerMenuModel):
+    def __init__(self, model: VersusMenuModel):
         self.model = model
-        self.view = VsComputerMenuView(self)
+        self.view = VersusMenuView(self)
         super().__init__(self.model, self.view)
 
+    @abstractmethod
     def value_cycled_handler(self, selected_option: int):
         """A handler that's called when the value of the selected option changed"""
         pass
 
+    @abstractmethod
     def handle_start_game(self) -> None:
         """Starts the game using the currently selected menu values"""
         pass
@@ -50,23 +53,7 @@ class VsComputerMenuPresenter(MultiValueMenuPresenter):
             raise e
 
 
-class OnlineVsComputerMenuPresenter(VsComputerMenuPresenter):
-    """Defines the presenter for the OnlineVsComputer menu"""
-    def __init__(self, model: OnlineVsComputerMenuModel):
-        self.model = model
-        super().__init__(self.model)
-
-    def value_cycled_handler(self, selected_option: int):
-        """A handler that's called when the value of the selected option changed"""
-        pass
-
-    def handle_start_game(self) -> None:
-        """Starts the game using the currently selected menu values"""
-        game_parameters = super()._create_dict_of_selected_values(OnlineGameOptions)
-        start_online_game_vs_ai(game_parameters)
-
-
-class OfflineVsComputerMenuPresenter(VsComputerMenuPresenter):
+class OfflineVersusMenuPresenter(VersusMenuPresenter):
     """Defines the presenter for the OfflineVsComputer menu"""
     def __init__(self, model: OfflineVsComputerMenuModel):
         self.model = model
@@ -85,3 +72,20 @@ class OfflineVsComputerMenuPresenter(VsComputerMenuPresenter):
         """Starts the game using the currently selected menu values"""
         game_parameters = super()._create_dict_of_selected_values(OfflineGameOptions)
         start_offline_game(game_parameters)
+
+
+class OnlineVersusMenuPresenter(VersusMenuPresenter):
+    """Defines the presenter for the OnlineVsComputer menu"""
+    def __init__(self, model: VersusMenuModel, is_vs_ai: bool):
+        self.model = model
+        self.is_vs_ai = is_vs_ai
+        super().__init__(self.model)
+
+    def value_cycled_handler(self, selected_option: int):
+        """A handler that's called when the value of the selected option changed"""
+        pass
+
+    def handle_start_game(self) -> None:
+        """Starts the game using the currently selected menu values"""
+        game_parameters = super()._create_dict_of_selected_values(OnlineGameOptions)
+        start_online_game(game_parameters, is_vs_ai=self.is_vs_ai)

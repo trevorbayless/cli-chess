@@ -21,11 +21,11 @@ from prompt_toolkit.keys import Keys
 from prompt_toolkit.formatted_text import StyleAndTextTuples
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from cli_chess.menus.versus_menus.versus_menu_presenters import VsComputerMenuPresenter
+    from cli_chess.menus.versus_menus.versus_menu_presenters import VersusMenuPresenter
 
 
-class VsComputerMenuView(MultiValueMenuView):
-    def __init__(self, presenter: VsComputerMenuPresenter):
+class VersusMenuView(MultiValueMenuView):
+    def __init__(self, presenter: VersusMenuPresenter):
         self.presenter = presenter
         super().__init__(self.presenter, container_width=40, column_width=22)
 

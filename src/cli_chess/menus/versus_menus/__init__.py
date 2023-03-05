@@ -1,3 +1,3 @@
-from .versus_menu_models import VsComputerMenuModel, OnlineVsComputerMenuModel, OfflineVsComputerMenuModel
-from .versus_menu_views import VsComputerMenuView
-from .versus_menu_presenters import OnlineVsComputerMenuPresenter, OfflineVsComputerMenuPresenter
+from .versus_menu_models import VersusMenuModel, OfflineVsComputerMenuModel, OnlineVsComputerMenuModel, OnlineVsRandomOpponentMenuModel
+from .versus_menu_views import VersusMenuView
+from .versus_menu_presenters import OfflineVersusMenuPresenter, OnlineVersusMenuPresenter

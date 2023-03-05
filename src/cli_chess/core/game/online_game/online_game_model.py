@@ -42,15 +42,24 @@ class OnlineGameModel(PlayableGameModelBase):
             raise ImportError("API client not setup. Do you have an API token linked?")
 
     @threaded
-    def start_ai_challenge(self) -> None:
+    def create_a_game(self, is_vs_ai: bool) -> None:
         """Sends a request to lichess to start an AI challenge using the selected game parameters"""
         # Note: Only subscribe to IEM events right before creating challenge to lessen chance of grabbing another game
         self.api_iem.subscribe_to_iem_events(self.handle_iem_event)
-        self.api_client.challenges.create_ai(level=self.game_metadata['ai_level'],
-                                             clock_limit=self.game_metadata['clock']['white']['time'],
-                                             clock_increment=self.game_metadata['clock']['white']['increment'],
-                                             color=self.game_metadata['my_color_str'],
-                                             variant=self.game_metadata['variant'])
+
+        if is_vs_ai:  # Challenge Lichess AI (stockfish)
+            self.api_client.challenges.create_ai(level=self.game_metadata['ai_level'],
+                                                 clock_limit=self.game_metadata['clock']['white']['time'],
+                                                 clock_increment=self.game_metadata['clock']['white']['increment'],
+                                                 color=self.game_metadata['my_color_str'],
+                                                 variant=self.game_metadata['variant'])
+        else:  # Find a random opponent
+            self.api_client.board.seek(time=self.game_metadata['clock']['white']['time'],  # Both players initially have the same time
+                                       increment=self.game_metadata['clock']['white']['increment'],
+                                       color=self.game_metadata['my_color_str'],
+                                       variant=self.game_metadata['variant'],
+                                       rated=self.game_metadata['rated'],
+                                       rating_range=None)
 
     def _start_game(self, game_id: str) -> None:
         """Called when a game is started. Sets proper class variables
@@ -187,9 +196,13 @@ class OnlineGameModel(PlayableGameModelBase):
                 self.game_metadata['variant'] = data[GameOption.VARIANT]
                 self.game_metadata['rated'] = data.get(GameOption.RATED, False)  # Games against AI will not have this data
                 self.game_metadata['ai_level'] = data.get(GameOption.COMPUTER_SKILL_LEVEL)  # Only games against AI will have this data
-                self.game_metadata['clock']['white']['time'] = data[GameOption.TIME_CONTROL][0] * 60  # secs
+                self.game_metadata['clock']['white']['time'] = data[GameOption.TIME_CONTROL][0]       # mins
                 self.game_metadata['clock']['white']['increment'] = data[GameOption.TIME_CONTROL][1]  # secs
                 self.game_metadata['clock']['black'] = self.game_metadata['clock']['white']
+
+                if self.game_metadata['ai_level']:
+                    self.game_metadata['clock']['white']['time'] = data[GameOption.TIME_CONTROL][0] * 60  # challenges need time in seconds
+                    self.game_metadata['clock']['black'] = self.game_metadata['clock']['white']
 
             elif 'iem_gameStart' in kwargs:
                 # Reset game metadata
@@ -210,7 +223,7 @@ class OnlineGameModel(PlayableGameModelBase):
                         self.game_metadata['players'][color]['title'] = data.get('color', {}).get('title', "")
                         self.game_metadata['players'][color]['name'] = data[color]['name']
                         self.game_metadata['players'][color]['rating'] = data[color]['rating']
-                        self.game_metadata['players'][color]['provisional'] = data[color]['provisional']
+                        self.game_metadata['players'][color]['provisional'] = data.get(color, {}).get('provisional', False)
                     elif data[color].get('aiLevel'):
                         self.game_metadata['players'][color]['name'] = f"Stockfish level {data[color]['aiLevel']}"
 
