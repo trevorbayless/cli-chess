@@ -38,9 +38,9 @@ class GameModelBase:
         self._assoc_models = [self.board_model, self.move_list_model, self.material_diff_model]
 
     def update(self, **kwargs) -> None:
-        """Called automatically as part of an event listener. This function
-           listens to model update events and if deemed necessary triages
-           and notifies listeners of the event.
+        """Called automatically as part of an event listener. This method
+           listens to subscribed model update events and if deemed necessary
+           triages and notifies listeners of the event.
         """
         if 'board_orientation' in kwargs:
             self._notify_game_model_updated(**kwargs)
