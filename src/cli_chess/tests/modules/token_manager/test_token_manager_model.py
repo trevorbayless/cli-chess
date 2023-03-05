@@ -77,6 +77,19 @@ def test_update_linked_account(model: TokenManagerModel, lichess_config: Lichess
     model_listener.assert_called()
 
 
+def test_validate_token(model: TokenManagerModel, monkeypatch):
+    # Test with empty API token
+    assert model.validate_token(api_token="") is None
+
+    # Test with invalid API token
+    monkeypatch.setattr(clients.OAuth, "test_tokens", mock_fail_test_tokens)
+    assert model.validate_token(api_token="lip_badToken") is None
+
+    # Test with valid API token
+    monkeypatch.setattr(clients.OAuth, "test_tokens", mock_success_test_tokens)
+    assert model.validate_token(api_token="lip_validToken") == mock_success_test_tokens()['lip_validToken']
+
+
 def test_save_account_data(model: TokenManagerModel, lichess_config: LichessConfig, model_listener: Mock):
     assert lichess_config.get_value(lichess_config.Keys.API_TOKEN) == ""
     model_listener.assert_not_called()
