@@ -4,4 +4,4 @@ from .menu_view import MenuView, MultiValueMenuView
 from .menu_presenter import MenuPresenter, MultiValueMenuPresenter
 from .main_menu import MainMenuPresenter
 from .offline_games_menu import OfflineGamesMenuPresenter
-from .vs_computer_menu import OfflineVsComputerMenuPresenter
+from .versus_menus import OfflineVsComputerMenuPresenter

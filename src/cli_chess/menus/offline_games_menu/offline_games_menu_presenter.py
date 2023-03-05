@@ -15,7 +15,7 @@
 
 from __future__ import annotations
 from cli_chess.menus.offline_games_menu import OfflineGamesMenuView
-from cli_chess.menus.vs_computer_menu import OfflineVsComputerMenuModel, OfflineVsComputerMenuPresenter
+from cli_chess.menus.versus_menus import OfflineVsComputerMenuModel, OfflineVsComputerMenuPresenter
 from cli_chess.menus import MenuPresenter
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:

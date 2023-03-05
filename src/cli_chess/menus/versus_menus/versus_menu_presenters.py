@@ -14,13 +14,13 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from __future__ import annotations
-from cli_chess.menus.vs_computer_menu import VsComputerMenuView
+from cli_chess.menus.versus_menus import VsComputerMenuView
 from cli_chess.menus import MultiValueMenuPresenter
 from cli_chess.modules.game_options import BaseGameOptions, OnlineGameOptions, OfflineGameOptions, GameOption
 from cli_chess.core.game import start_online_game_vs_ai, start_offline_game
 from typing import TYPE_CHECKING, Type
 if TYPE_CHECKING:
-    from cli_chess.menus.vs_computer_menu import VsComputerMenuModel, OnlineVsComputerMenuModel, OfflineVsComputerMenuModel
+    from cli_chess.menus.versus_menus import VsComputerMenuModel, OnlineVsComputerMenuModel, OfflineVsComputerMenuModel
 
 
 class VsComputerMenuPresenter(MultiValueMenuPresenter):

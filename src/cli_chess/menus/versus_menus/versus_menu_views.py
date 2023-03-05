@@ -21,7 +21,7 @@ from prompt_toolkit.keys import Keys
 from prompt_toolkit.formatted_text import StyleAndTextTuples
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from cli_chess.menus.vs_computer_menu.vs_computer_menu_presenter import VsComputerMenuPresenter
+    from cli_chess.menus.versus_menus.versus_menu_presenters import VsComputerMenuPresenter
 
 
 class VsComputerMenuView(MultiValueMenuView):
