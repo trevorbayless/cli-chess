@@ -73,8 +73,11 @@ class OfflineGameModel(PlayableGameModelBase):
         """Handle game resignation. Since this is against an engine, the presenter
            will handle calling the engine model to report resignation
         """
-        self._report_game_over(resigned=True)
-        self.board_model._game_over = True  # TODO: Fix this... but don't want board updates on a resignation
+        self.board_model.handle_resignation(self.my_color)
+
+    def handle_engine_resignation(self) -> None:
+        """Handles resignation on behalf of the chess engine"""
+        self.board_model.handle_resignation(not self.my_color)
 
     def _default_game_metadata(self) -> dict:
         """Returns the default structure for game metadata"""
@@ -112,14 +115,13 @@ class OfflineGameModel(PlayableGameModelBase):
         except KeyError as e:
             log.error(f"Error saving offline game metadata: {e}")
 
-    def _report_game_over(self, resigned=False) -> None:
+    def _report_game_over(self) -> None:
         """Saves game information and notifies listeners that the game has ended.
            This should only ever be called if the game is confirmed to be over
         """
         self.game_in_progress = False
-        outcome = self.board_model.board.outcome()
-        outcome.termination = "resign" if resigned else outcome.termination
-        outcome.winner = COLOR_NAMES[not self.my_color] if resigned else COLOR_NAMES[outcome.winner]
+
+        outcome = self.board_model.get_game_over_result()
         self.game_metadata['state']['status'] = outcome.termination
-        self.game_metadata['state']['winner'] = outcome.winner
+        self.game_metadata['state']['winner'] = COLOR_NAMES[outcome.winner]
         self._notify_game_model_updated(offlineGameOver=True)

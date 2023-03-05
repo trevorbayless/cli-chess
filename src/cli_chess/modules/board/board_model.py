@@ -17,8 +17,6 @@ from cli_chess.utils.event import EventManager
 from cli_chess.utils.logging import log
 import chess
 import chess.variant
-import dataclasses
-import enum
 from random import randint
 from typing import List, Optional
 
@@ -29,7 +27,7 @@ class BoardModel:
         self.initial_fen = self.board.fen()
         self.orientation = chess.WHITE if variant.lower() == "racingkings" else orientation
         self.highlight_move = chess.Move.null()
-        self._game_over = False
+        self._game_over_result: Optional[chess.Outcome] = None
         self._log_init_info()
 
         self._event_manager = EventManager()
@@ -67,7 +65,7 @@ class BoardModel:
             self.initial_fen = self.board.fen()
             self.set_board_orientation(chess.WHITE if variant.lower() == "racingkings" else orientation, notify=False)
             self.highlight_move = chess.Move.from_uci(uci_last_move) if uci_last_move else chess.Move.null()
-            self._game_over = False
+            self._game_over_result = None
 
             self._log_init_info()
             self.e_board_model_updated.notify(board_orientation=self.orientation)
@@ -81,7 +79,7 @@ class BoardModel:
         """
         self.board.reset()
         self.set_fen(self.initial_fen, notify=False)
-        self._game_over = False
+        self._game_over_result = None
 
         if notify:
             self._notify_board_model_updated()
@@ -101,7 +99,7 @@ class BoardModel:
 
             if notify:
                 self._notify_successful_move_made()
-                self._notify_board_model_updated(isGameOver=(self._game_over or self.board.is_game_over()))
+                self._notify_board_model_updated(isGameOver=self.is_game_over())
         except Exception as e:
             log.error(f"BoardModel: {e}")
             if isinstance(e, chess.InvalidMoveError):
@@ -315,19 +313,21 @@ class BoardModel:
         except Exception as e:
             log.error(f"BoardModel: Error caught setting board position: {e}")
 
-    def is_game_over(self, force_set=False) -> bool:
+    def is_game_over(self) -> bool:
         """Returns True if the game is over"""
-        game_over = self.board.is_game_over()
-        if game_over and not self._game_over:
-            self._game_over = True
-        return self._game_over
+        self._game_over_result = self.board.outcome() if self._game_over_result is None else self._game_over_result
+        return self._game_over_result is not None
 
-    def set_game_over(self) -> None:
-        """Mark the game as ended. Sends out a notification to
-           listeners that the game is over. Generally this would be
-           set on a resignation as that is something the board can't detect.
+    def get_game_over_result(self) -> chess.Outcome:
+        """Returns the reason the game ended as an Outcome object"""
+        return self._game_over_result
+
+    def handle_resignation(self, color_resigning: chess.Color) -> None:
+        """Handle marking the game as ended by resignation. The color
+           passed in is the side resigning. Sends out a notification to
+           listeners that the game is over.
         """
-        self._game_over = True
+        self._game_over_result = chess.Outcome("resignation", not color_resigning)  # noqa
         self.e_board_model_updated.notify(isGameOver=True)
 
     def cleanup(self) -> None:

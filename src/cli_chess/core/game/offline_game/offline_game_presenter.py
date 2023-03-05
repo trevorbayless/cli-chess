@@ -96,7 +96,7 @@ class OfflineGamePresenter(PlayableGamePresenterBase):
                         output = "Race finished" + output
                     else:
                         output = "Variant ending" + output
-                elif status == "resign":
+                elif status == "resignation":
                     loser = COLOR_NAMES[not Color(COLOR_NAMES.index(winner.lower()))].capitalize()
                     output = f"{loser} resigned" + output
                 else:

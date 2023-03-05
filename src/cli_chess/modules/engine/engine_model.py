@@ -92,4 +92,8 @@ class EngineModel:
         if last_move != (self.board_model.get_move_stack() or [None])[-1]:
             result.move = None
 
+        # Check to make sure the game is still in progress (opponent hasn't resigned)
+        if self.board_model.get_game_over_result() is not None:
+            result.move = None
+
         return result
