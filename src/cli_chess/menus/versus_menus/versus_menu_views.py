@@ -27,7 +27,7 @@ if TYPE_CHECKING:
 class VersusMenuView(MultiValueMenuView):
     def __init__(self, presenter: VersusMenuPresenter):
         self.presenter = presenter
-        super().__init__(self.presenter, container_width=40, column_width=22)
+        super().__init__(self.presenter, container_width=38, column_width=18)
 
     def get_function_bar_fragments(self) -> StyleAndTextTuples:
         return [
