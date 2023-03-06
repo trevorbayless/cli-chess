@@ -14,7 +14,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from cli_chess.modules.board import BoardModel
-from cli_chess.modules.game_options import GameOption
+from cli_chess.core.game.game_options import GameOption
 from cli_chess.utils import log, is_linux_os, is_windows_os
 import chess.engine
 from os import path

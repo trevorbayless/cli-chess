@@ -16,7 +16,7 @@
 from __future__ import annotations
 from cli_chess.menus.versus_menus import VersusMenuView
 from cli_chess.menus import MultiValueMenuPresenter
-from cli_chess.modules.game_options import BaseGameOptions, OnlineGameOptions, OfflineGameOptions, GameOption
+from cli_chess.core.game.game_options import BaseGameOptions, OnlineGameOptions, OfflineGameOptions, GameOption
 from cli_chess.core.game import start_online_game, start_offline_game
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Type

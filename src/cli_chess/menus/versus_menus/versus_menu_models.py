@@ -14,7 +14,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from cli_chess.menus import MultiValueMenuModel, MultiValueMenuOption, MenuCategory
-from cli_chess.modules.game_options import GameOption, OnlineGameOptions, OfflineGameOptions
+from cli_chess.core.game.game_options import GameOption, OnlineGameOptions, OfflineGameOptions
 
 
 class VersusMenuModel(MultiValueMenuModel):

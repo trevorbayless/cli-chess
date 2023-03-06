@@ -14,7 +14,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from cli_chess.menus import MenuModel, MenuOption, MenuCategory
-from cli_chess.modules.game_options import OnlineGameOptions
+from cli_chess.core.game.game_options import OnlineGameOptions
 from enum import Enum
 
 
