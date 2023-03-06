@@ -14,7 +14,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from cli_chess.menus import MultiValueMenuModel, MultiValueMenuOption, MenuCategory
-from cli_chess.core.game.game_options import GameOption, OnlineGameOptions, OfflineGameOptions
+from cli_chess.core.game.game_options import GameOption, OfflineGameOptions, OnlineGameOptions, OnlineDirectChallengesGameOptions
 
 
 class VersusMenuModel(MultiValueMenuModel):
@@ -62,10 +62,10 @@ class OnlineVsComputerMenuModel(VersusMenuModel):
     def _create_menu() -> MenuCategory:
         """Create the online menu options"""
         menu_options = [
-            MultiValueMenuOption(GameOption.VARIANT, "Choose the variant to play", [option for option in OnlineGameOptions.variant_options_dict]),  # noqa: E501
-            MultiValueMenuOption(GameOption.TIME_CONTROL, "Choose the time control", [option for option in OnlineGameOptions.time_control_options_dict]),  # noqa: E501
-            MultiValueMenuOption(GameOption.COMPUTER_SKILL_LEVEL, "Choose the skill level of the computer", [option for option in OnlineGameOptions.skill_level_options_dict]),  # noqa: E501
-            MultiValueMenuOption(GameOption.COLOR, "Choose the side you would like to play as", [option for option in OnlineGameOptions.color_options]),  # noqa: E501
+            MultiValueMenuOption(GameOption.VARIANT, "Choose the variant to play", [option for option in OnlineDirectChallengesGameOptions.variant_options_dict]),  # noqa: E501
+            MultiValueMenuOption(GameOption.TIME_CONTROL, "Choose the time control", [option for option in OnlineDirectChallengesGameOptions.time_control_options_dict]),  # noqa: E501
+            MultiValueMenuOption(GameOption.COMPUTER_SKILL_LEVEL, "Choose the skill level of the computer", [option for option in OnlineDirectChallengesGameOptions.skill_level_options_dict]),  # noqa: E501
+            MultiValueMenuOption(GameOption.COLOR, "Choose the side you would like to play as", [option for option in OnlineDirectChallengesGameOptions.color_options]),  # noqa: E501
         ]
         return MenuCategory("Play Online vs Computer", menu_options)
 

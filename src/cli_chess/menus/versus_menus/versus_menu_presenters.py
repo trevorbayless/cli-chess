@@ -16,7 +16,7 @@
 from __future__ import annotations
 from cli_chess.menus.versus_menus import VersusMenuView
 from cli_chess.menus import MultiValueMenuPresenter
-from cli_chess.core.game.game_options import BaseGameOptions, OnlineGameOptions, OfflineGameOptions, GameOption
+from cli_chess.core.game.game_options import GameOption, BaseGameOptions, OfflineGameOptions, OnlineGameOptions, OnlineDirectChallengesGameOptions
 from cli_chess.core.game import start_online_game, start_offline_game
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Type
@@ -87,5 +87,5 @@ class OnlineVersusMenuPresenter(VersusMenuPresenter):
 
     def handle_start_game(self) -> None:
         """Starts the game using the currently selected menu values"""
-        game_parameters = super()._create_dict_of_selected_values(OnlineGameOptions)
+        game_parameters = super()._create_dict_of_selected_values(OnlineGameOptions if not self.is_vs_ai else OnlineDirectChallengesGameOptions)
         start_online_game(game_parameters, is_vs_ai=self.is_vs_ai)
