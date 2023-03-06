@@ -126,11 +126,10 @@ class OfflineGameOptions(BaseGameOptions):
     time_control_options_dict = dict(BaseGameOptions.time_control_options_dict)
     additional_time_controls = {
         "5+3 (Blitz)": (5, 3),
-        "5+0 (Blitz)": (5+0),
-        "3+2 (Blitz)": (3+2),
-        "3+0 (Blitz)": (3+0),
-        "2+1 (Bullet)": (2+1),
-        "1+0 (Bullet)": (1+0),
-        "Unlimited": ("unlimited", 0)
+        "5+0 (Blitz)": (5, 0),
+        "3+2 (Blitz)": (3, 2),
+        "3+0 (Blitz)": (3, 0),
+        "2+1 (Bullet)": (2, 1),
+        "1+0 (Bullet)": (1, 0),
     }
     time_control_options_dict.update(additional_time_controls)
