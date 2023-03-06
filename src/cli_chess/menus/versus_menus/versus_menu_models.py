@@ -81,7 +81,7 @@ class OnlineVsRandomOpponentMenuModel(VersusMenuModel):
         menu_options = [
             MultiValueMenuOption(GameOption.VARIANT, "Choose the variant to play", [option for option in OnlineGameOptions.variant_options_dict]),  # noqa: E501
             MultiValueMenuOption(GameOption.TIME_CONTROL, "Choose the time control", [option for option in OnlineGameOptions.time_control_options_dict]),  # noqa: E501
-            MultiValueMenuOption(GameOption.RATED, "Choose if you'd like to play a casual or rated game", [option for option in OnlineGameOptions.mode_options_dict]),  # noqa: E501
+            MultiValueMenuOption(GameOption.RATED, "Choose if you'd like to play a casual or rated game", [option for option in OnlineGameOptions.rated_options_dict]),  # noqa: E501
             MultiValueMenuOption(GameOption.COLOR, "Choose the side you would like to play as", [option for option in OnlineGameOptions.color_options]),  # noqa: E501
         ]
         return MenuCategory("Play Online vs Random Opponent", menu_options)

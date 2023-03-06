@@ -100,14 +100,14 @@ class OnlineGameOptions(BaseGameOptions):
             GameOption.VARIANT: BaseGameOptions.variant_options_dict,
             GameOption.TIME_CONTROL: self.time_control_options_dict,
             GameOption.COMPUTER_SKILL_LEVEL: BaseGameOptions.skill_level_options_dict,
-            GameOption.RATED: self.mode_options_dict,
+            GameOption.RATED: self.rated_options_dict,
             GameOption.RATING_RANGE: None,
             GameOption.COLOR: BaseGameOptions.color_options,
         }
 
-    mode_options_dict = {
-        "Rated": True,
-        "Casual": False
+    rated_options_dict = {
+        "No": False,
+        "Yes": True
     }
 
 
