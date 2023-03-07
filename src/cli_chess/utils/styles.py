@@ -32,6 +32,7 @@ default = {
     "label.error": "fg:darkred",
     "label.success.banner": "bg:darkgreen fg:white",
     "label.error.banner": "bg:darkred fg:white",
+    "label.neutral.banner": "bg:slategray fg:white",
 
     "text-area.input": "fg:orangered bold",
     "text-area.input.placeholder": "italic",
@@ -71,6 +72,7 @@ twilight = {
     "label.error": "fg:crimson",
     "label.success.banner": "bg:skyblue fg:white",
     "label.error.banner": "fg:crimson fg:white",
+    "label.neutral.banner": "bg:slategray fg:white",
 
     "text-area.input": "fg:tomato bold",
     "text-area.input.placeholder": "italic",
