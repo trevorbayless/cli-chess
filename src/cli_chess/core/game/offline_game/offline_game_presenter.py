@@ -17,8 +17,8 @@ import asyncio
 from cli_chess.core.game.offline_game import OfflineGameModel
 from cli_chess.core.game import PlayableGamePresenterBase
 from cli_chess.modules.engine import EnginePresenter, EngineModel, create_engine_model
-from cli_chess.utils.logging import log
 from cli_chess.utils.ui_common import change_views
+from cli_chess.utils import log, AlertType
 from chess import Termination, COLOR_NAMES, Color
 
 
@@ -60,7 +60,7 @@ class OfflineGamePresenter(PlayableGamePresenterBase):
             self.model.make_move(move)
             asyncio.create_task(self.make_engine_move())
         except Exception as e:
-            self.view.show_error(f"{e}")
+            self.view.show_alert(f"{e}")
 
     async def make_engine_move(self) -> None:
         """Get the best move from the engine and make it"""
@@ -77,45 +77,75 @@ class OfflineGamePresenter(PlayableGamePresenterBase):
                 self.board_presenter.make_move(move)
         except Exception as e:
             log.critical(f"Received an invalid move from the engine: {e}")
-            self.view.show_error("Invalid move received from engine - inspect logs")
+            self.view.show_alert("Invalid move received from engine - inspect logs")
 
     def _parse_and_present_game_over(self) -> None:
-        """Handles parsing the game over status and sending it to the view for display"""
+        """Triages game over status for parsing and sending to the view for display"""
         if not self.is_game_in_progress():
             status: Termination = self.model.game_metadata['state']['status']
-            winner: str = self.model.game_metadata['state']['winner'].capitalize()
+            winner_str: str = self.model.game_metadata['state']['winner']
 
-            if winner and status:
-                output = f" • {winner} is victorious"
+            if winner_str:  # Handle win/loss output
+                self._display_win_loss_output(status, winner_str)
+            else:  # Handle draw output
+                self._display_draw_output(status)
+        else:
+            log.error("OfflineGamePresenter: In '_parse_and_present_game_over' when the game is not over")
 
-                if status == Termination.CHECKMATE:
-                    output = "Checkmate" + output
-                elif status == Termination.VARIANT_WIN or status == Termination.VARIANT_LOSS:
-                    variant = self.model.game_metadata.get("variant", "")
-                    if variant == "threeCheck":
-                        output = "Three Checks" + output
-                    elif variant == "kingOfTheHill":
-                        output = "King in the center" + output
-                    elif variant == "racingKings":
-                        output = "Race finished" + output
-                    else:
-                        output = "Variant ending" + output
-                elif status == "resignation":
-                    loser = COLOR_NAMES[not Color(COLOR_NAMES.index(winner.lower()))].capitalize()
-                    output = f"{loser} resigned" + output
-                else:
-                    log.debug(f"OfflineGamePresenter: Received game over with uncaught status: {status} / {winner}")
-                    output = "Game over" + output
+    def _display_win_loss_output(self, status: Termination, winner_str: str) -> None:
+        """Generates the win/loss result reason string and sends to the view for display.
+           The winner string must either be `white` or `black`.
+        """
+        if winner_str.lower() not in COLOR_NAMES:
+            log.error(f"OfflineGamePresenter: Received game over with invalid winner string: {winner_str} // {status}")
+            self.view.show_alert("Game over", AlertType.ERROR)
+            return
 
-            else:  # Handle other game end reasons
-                if status == Termination.STALEMATE:
-                    output = "Game over • Stalemate"
-                elif (status == Termination.VARIANT_DRAW or Termination.INSUFFICIENT_MATERIAL or
-                        Termination.SEVENTYFIVE_MOVES or Termination.FIVEFOLD_REPETITION or Termination.FIFTY_MOVES):
-                    output = "Game over • Draw"
-                else:
-                    log.debug(f"OfflineGamePresenter: Received game over with uncaught status: {status}")
-                    output = "Game over"
+        winner_bool = Color(COLOR_NAMES.index(winner_str))
+        output = f" • {winner_str.capitalize()} is victorious"
 
-            # TODO: Handle not showing as "error" output if user won
-            self.view.show_error(output)
+        if status == Termination.CHECKMATE:
+            output = "Checkmate" + output
+        elif status == Termination.VARIANT_WIN or status == Termination.VARIANT_LOSS:
+            variant = self.model.game_metadata.get("variant", "")
+            if variant == "threeCheck":
+                output = "Three Checks" + output
+            elif variant == "kingOfTheHill":
+                output = "King in the center" + output
+            elif variant == "racingKings":
+                output = "Race finished" + output
+            else:
+                output = "Variant ending" + output
+        elif status == "resignation":
+            loser = COLOR_NAMES[not winner_bool].capitalize()
+            output = f"{loser} resigned" + output
+        else:
+            log.debug(f"OfflineGamePresenter: Received game over with uncaught status: {status} / {winner_str}")
+            output = "Game over" + output
+
+        alert_type = AlertType.SUCCESS if self.model.my_color == winner_bool else AlertType.ERROR
+        self.view.show_alert(output, alert_type)
+
+    def _display_draw_output(self, status: Termination) -> None:
+        """Generates the draw result reason string and sends to the view for display"""
+        output = "Draw • "
+        if status:
+            if status == Termination.STALEMATE:
+                output = output + "Stalemate"
+            elif status == Termination.VARIANT_DRAW:
+                output = "Game over • Draw"
+            elif status == Termination.INSUFFICIENT_MATERIAL:
+                output = output + "Insufficient material"
+            elif status == Termination.THREEFOLD_REPETITION:
+                output = output + "Threefold repetition"
+            elif status == Termination.FIVEFOLD_REPETITION:
+                output = output + "Fivefold repetition"
+            elif status == Termination.FIFTY_MOVES:
+                output = output + "Fifty-move rule"
+            elif status == Termination.SEVENTYFIVE_MOVES:
+                output = output + "Seventy-five-move rule"
+        else:
+            log.debug(f"OfflineGamePresenter: Received game over with uncaught status: {status}")
+            output = "Game over • Draw"
+
+        self.view.show_alert(output, AlertType.NEUTRAL)

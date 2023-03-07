@@ -16,7 +16,7 @@
 from cli_chess.core.game import PlayableGamePresenterBase
 from cli_chess.core.game.online_game import OnlineGameModel, OnlineGameView
 from cli_chess.utils.ui_common import change_views
-from cli_chess.utils.logging import log
+from cli_chess.utils import log, AlertType
 from chess import Color, COLOR_NAMES
 
 
@@ -42,52 +42,74 @@ class OnlineGamePresenter(PlayableGamePresenterBase):
             self._parse_and_present_game_over()
 
     def _parse_and_present_game_over(self) -> None:
-        """Handles parsing the game over status and sending it to the view for display"""
-        # TODO: Break this apart into separate functions for easier readability?
+        """Triages game over status for parsing and sending to the view for display"""
         if not self.is_game_in_progress():
-            status = self.model.game_metadata['state']['status']
-            winner = self.model.game_metadata['state']['winner'].capitalize()
+            status: str = self.model.game_metadata['state']['status']
+            winner_str = self.model.game_metadata['state']['winner']
 
-            # NOTE: Status reasons must match what lichess sends via api (lila status.ts)
-            status_win_reasons = ['mate', 'resign', 'timeout', 'outoftime', 'cheat', 'variantEnd']
-            if winner and status in status_win_reasons:
-                output = f" • {winner} is victorious"
-                loser = COLOR_NAMES[not Color(COLOR_NAMES.index(winner.lower()))].capitalize()
+            if winner_str:  # Handle win/loss output
+                self._display_win_loss_output(status, winner_str)
+            else:  # Handle draw, no start, abort output
+                self._display_no_winner_output(status)
+        else:
+            log.error("OnlineGamePresenter: In '_parse_and_present_game_over' when the game is not over")
 
-                if status == "mate":
-                    output = "Checkmate" + output
-                elif status == "resign":
-                    output = f"{loser} resigned" + output
-                elif status == "timeout":
-                    output = f"{loser} left the game" + output
-                elif status == "outoftime":
-                    output = f"{loser} time out" + output
-                elif status == "cheat":
-                    output = "Cheat detected" + output
-                elif status == "variantEnd":
-                    variant = self.model.game_metadata.get("variant", "")
-                    if variant == "threeCheck":
-                        output = "Three Checks" + output
-                    elif variant == "kingOfTheHill":
-                        output = "King in the center" + output
-                    elif variant == "racingKings":
-                        output = "Race finished" + output
-                    else:
-                        output = "Variant ending" + output
-                else:
-                    log.debug(f"OnlineGamePresenter: Received game over with uncaught status: {status} / {winner}")
-                    output = "Game over" + output
+    def _display_win_loss_output(self, status: str, winner_str: str) -> None:
+        """Generates the win/loss result reason string and sends to the view for display.
+           The winner string must either be `white` or `black`.
+        """
+        if winner_str.lower() not in COLOR_NAMES:
+            log.error(f"OfflineGamePresenter: Received game over with invalid winner string: {winner_str} // {status}")
+            self.view.show_alert("Game over", AlertType.ERROR)
+            return
 
-            else:  # Handle other game end reasons
-                if status == "aborted":
-                    output = "Game aborted"
-                elif status == "draw":
-                    output = "Game over • Draw"
-                elif status == "stalemate":
-                    output = "Game over • Stalemate"
-                else:
-                    log.debug(f"OnlineGamePresenter: Received game over with uncaught status: {status}")
-                    output = "Game over"
+        winner_bool = Color(COLOR_NAMES.index(winner_str))
+        loser_str = COLOR_NAMES[not winner_bool].capitalize()
+        output = f" • {winner_str.capitalize()} is victorious"
 
-            # TODO: Handle not showing as "error" output if user won
-            self.view.show_error(output)
+        # NOTE: Status strings can be found in lichess source (lila status.ts)
+        if status == "mate":
+            output = "Checkmate" + output
+        elif status == "resign":
+            output = f"{loser_str} resigned" + output
+        elif status == "timeout":
+            output = f"{loser_str} left the game" + output
+        elif status == "outoftime":
+            output = f"{loser_str} time out" + output
+        elif status == "cheat":
+            output = "Cheat detected" + output
+        elif status == "variantEnd":
+            variant = self.model.game_metadata.get("variant", "")
+            if variant == "threeCheck":
+                output = "Three Checks" + output
+            elif variant == "kingOfTheHill":
+                output = "King in the center" + output
+            elif variant == "racingKings":
+                output = "Race finished" + output
+            else:
+                output = "Variant ending" + output
+        else:
+            log.debug(f"OnlineGamePresenter: Received game over with uncaught status: {status} / {winner_str}")
+            output = "Game over" + output
+
+        alert_type = AlertType.SUCCESS if self.model.my_color == winner_bool else AlertType.ERROR
+        self.view.show_alert(output, alert_type)
+
+    def _display_no_winner_output(self, status: str) -> None:
+        """Generates the game result reason string and sends to the view for display.
+           This function is specific to games which do not have a winner (draw, abort, etc.)
+        """
+        output = "Game over"
+        if status:
+            if status == "aborted":
+                output = "Game aborted"
+            if status == "noStart":
+                output = "Game over • No start"
+            elif status == "draw":
+                output = "Game over • Draw"
+            elif status == "stalemate":
+                output = "Draw • Stalemate"
+        else:
+            log.debug(f"OnlineGamePresenter: Received game over with uncaught status: {status}")
+
+        self.view.show_alert(output, AlertType.NEUTRAL)

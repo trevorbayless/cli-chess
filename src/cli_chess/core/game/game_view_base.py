@@ -14,6 +14,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from __future__ import annotations
+from cli_chess.utils import AlertType
 from cli_chess.utils.ui_common import handle_mouse_click, go_back_to_main_menu
 from prompt_toolkit.widgets import TextArea, Box
 from prompt_toolkit.layout import Window, Container, FormattedTextControl, ConditionalContainer, HSplit, VSplit, VerticalAlign, D
@@ -36,8 +37,8 @@ class GameViewBase:
         self.material_diff_lower_container = presenter.material_diff_presenter.view_lower
         self.player_info_upper_container = presenter.player_info_presenter.view_upper
         self.player_info_lower_container = presenter.player_info_presenter.view_lower
-        self.error_label = FormattedTextControl(text="", style="class:label.error.banner", show_cursor=False)
-        self.error_container = self._create_error_container()
+        self.alert_label = FormattedTextControl(text="", show_cursor=False)
+        self.alert_container = self._create_alert_container()
         self._container = self._create_container()
 
     def _create_container(self) -> Container:
@@ -67,26 +68,27 @@ class GameViewBase:
 
         return bindings
 
-    def _create_error_container(self) -> ConditionalContainer:
+    def _create_alert_container(self) -> ConditionalContainer:
         """Create the error container"""
         return ConditionalContainer(
             Window(
-                self.error_label,
+                self.alert_label,
                 always_hide_cursor=True,
                 height=D(max=1)
             ),
             filter=to_filter(False)
         )
 
-    def show_error(self, text: str) -> None:
-        """Displays the error label with the text passed in"""
-        self.error_label.text = text
-        self.error_container.filter = to_filter(True)
+    def show_alert(self, text: str, alert_type=AlertType.ERROR) -> None:
+        """Displays the alert label with the text passed in"""
+        self.alert_label.text = text
+        self.alert_label.style = alert_type.get_style(alert_type)
+        self.alert_container.filter = to_filter(True)
 
-    def clear_error(self) -> None:
-        """Clears the error containers"""
-        self.error_label.text = ""
-        self.error_container.filter = to_filter(False)
+    def clear_alert(self) -> None:
+        """Clears the alert container"""
+        self.alert_label.text = ""
+        self.alert_container.filter = to_filter(False)
 
     @staticmethod
     def exit() -> None:
@@ -119,7 +121,7 @@ class PlayableGameViewBase(GameViewBase):
                     ])
                 ]),
                 self.input_field_container,
-                self.error_container,
+                self.alert_container,
             ]),
             padding=1,
             padding_bottom=0
