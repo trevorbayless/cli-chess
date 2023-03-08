@@ -27,3 +27,7 @@ class EnginePresenter:
     async def get_best_move(self) -> PlayResult:
         """Notify the engine to get the best move from the current position"""
         return await self.model.get_best_move()
+
+    async def quit_engine(self) -> None:
+        """Calls the model to notify the engine to quit"""
+        await self.model.quit_engine()

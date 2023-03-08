@@ -149,3 +149,11 @@ class OfflineGamePresenter(PlayableGamePresenterBase):
             output = "Game over • Draw"
 
         self.view.show_alert(output, AlertType.NEUTRAL)
+
+    def exit(self) -> None:
+        """Exit current presenter/view"""
+        try:
+            super().exit()
+            asyncio.create_task(self.engine_presenter.quit_engine())
+        except Exception as e:
+            log.error(f"OfflineGamePresenter: Error caught while exiting: {e}")

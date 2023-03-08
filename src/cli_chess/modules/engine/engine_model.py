@@ -65,6 +65,10 @@ class EngineModel:
             log.critical(f"Exception caught starting engine: {e}")
             raise e
 
+    async def quit_engine(self) -> None:
+        """Notify the engine to quit"""
+        await self.engine.quit()
+
     async def configure_engine(self) -> None:
         """Configure the engine with the passed in options"""
         skill_level = fairy_stockfish_mapped_skill_levels.get(self.game_parameters.get(GameOption.COMPUTER_SKILL_LEVEL))
