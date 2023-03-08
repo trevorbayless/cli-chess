@@ -39,7 +39,7 @@ class OfflineGameModel(PlayableGameModelBase):
 
     def make_move(self, move: str):
         """Sends the move to the board model for it to be made"""
-        if self.game_in_progress and move:
+        if self.game_in_progress:
             try:
                 if self.board_model.board.is_game_over():
                     self.game_in_progress = False
@@ -47,6 +47,10 @@ class OfflineGameModel(PlayableGameModelBase):
 
                 if not self.is_my_turn():
                     raise Warning("Not your turn")
+
+                move = move.strip()
+                if not move:
+                    raise Warning("No move specified")
 
                 self.board_model.make_move(move)
             except Exception:
@@ -70,14 +74,16 @@ class OfflineGameModel(PlayableGameModelBase):
         raise Warning("Engines do not accept draw offers")
 
     def resign(self) -> None:
-        """Handle game resignation. Since this is against an engine, the presenter
-           will handle calling the engine model to report resignation
-        """
-        self.board_model.handle_resignation(self.my_color)
-
-    def handle_engine_resignation(self) -> None:
-        """Handles resignation on behalf of the chess engine"""
-        self.board_model.handle_resignation(not self.my_color)
+        """Handles resigning the game"""
+        # TODO: Send back to view to show a confirmation prompt, or notification it was sent
+        if self.game_in_progress:
+            try:
+                self.board_model.handle_resignation(self.my_color)
+            except Exception:
+                raise
+        else:
+            log.warning("OfflineGameModel: Attempted to resign a game that's not in progress")
+            raise Warning("Game has already ended")
 
     def _default_game_metadata(self) -> dict:
         """Returns the default structure for game metadata"""
@@ -120,8 +126,7 @@ class OfflineGameModel(PlayableGameModelBase):
            This should only ever be called if the game is confirmed to be over
         """
         self.game_in_progress = False
-
         outcome = self.board_model.get_game_over_result()
         self.game_metadata['state']['status'] = outcome.termination
-        self.game_metadata['state']['winner'] = COLOR_NAMES[outcome.winner] if outcome.winner else ""
+        self.game_metadata['state']['winner'] = COLOR_NAMES[outcome.winner]
         self._notify_game_model_updated(offlineGameOver=True)

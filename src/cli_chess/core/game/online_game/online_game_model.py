@@ -131,13 +131,17 @@ class OnlineGameModel(PlayableGameModelBase):
            function will pass the move over to the game state dispatcher to be sent
            Raises an exception on move or API errors.
         """
-        if self.game_in_progress and move:
+        if self.game_in_progress:
             try:
                 if not self.is_my_turn():
-                    raise ValueError("Not your turn")
+                    raise Warning("Not your turn")
+
+                move = move.strip()
+                if not move:
+                    raise Warning("No move specified")
 
                 if move == "0000":
-                    raise ValueError("Null moves are not supported in online games")
+                    raise Warning("Null moves are not supported in online games")
 
                 move = self.board_model.verify_move(move)
 

@@ -105,7 +105,7 @@ class BoardModel:
             if isinstance(e, chess.InvalidMoveError):
                 raise ValueError(f"Invalid move: {move}")
             elif isinstance(e, chess.IllegalMoveError):
-                raise ValueError(f"Invalid move: {move}")
+                raise ValueError(f"Illegal move: {move}")
             elif isinstance(e, chess.AmbiguousMoveError):
                 raise ValueError(f"Ambiguous move: {move}")
             else:

@@ -69,7 +69,7 @@ class OfflineGamePresenter(PlayableGamePresenterBase):
 
             if engine_move.resigned:
                 log.debug("OfflineGamePresenter: Sending resignation on behalf of the engine")
-                self.model.handle_engine_resignation()
+                self.board_presenter.handle_resignation(not self.model.my_color)
 
             elif engine_move.move:
                 move = engine_move.move.uci()
@@ -128,22 +128,22 @@ class OfflineGamePresenter(PlayableGamePresenterBase):
 
     def _display_draw_output(self, status: Termination) -> None:
         """Generates the draw result reason string and sends to the view for display"""
-        output = "Draw • "
+        output = "Draw"
         if status:
             if status == Termination.STALEMATE:
-                output = output + "Stalemate"
+                output = output + "• Stalemate"
             elif status == Termination.VARIANT_DRAW:
                 output = "Game over • Draw"
             elif status == Termination.INSUFFICIENT_MATERIAL:
-                output = output + "Insufficient material"
+                output = output + "• Insufficient material"
             elif status == Termination.THREEFOLD_REPETITION:
-                output = output + "Threefold repetition"
+                output = output + "• Threefold repetition"
             elif status == Termination.FIVEFOLD_REPETITION:
-                output = output + "Fivefold repetition"
+                output = output + "• Fivefold repetition"
             elif status == Termination.FIFTY_MOVES:
-                output = output + "Fifty-move rule"
+                output = output + "• Fifty-move rule"
             elif status == Termination.SEVENTYFIVE_MOVES:
-                output = output + "Seventy-five-move rule"
+                output = output + "• Seventy-five-move rule"
         else:
             log.debug(f"OfflineGamePresenter: Received game over with uncaught status: {status}")
             output = "Game over • Draw"

@@ -191,24 +191,8 @@ class BoardPresenter:
 
         return square_color
 
-    def game_result(self) -> str:
-        """Returns a string containing the result of the game"""
-        game_result = self.model.board.result()
-        is_checkmate = self.model.board.is_checkmate()
-        output = ""
-
-        if is_checkmate:
-            output = "Checkmate - "
-        if game_result == "1-0":
-            output += "White is victorious"
-        elif game_result == "0-1":
-            output += "Black is victorious"
-        elif game_result == "1/2-1/2":
-            if self.model.board.is_stalemate():
-                output = "Stalemate"
-            else:
-                output = "Draw"
-        elif game_result == "*":
-            output = "Draw"
-
-        return output
+    def handle_resignation(self, color_resigning: chess.Color) -> None:
+        """Handle marking the game as ended by resignation. Sends the
+           resignation notification over to the model to be handled.
+        """
+        self.model.handle_resignation(color_resigning)

@@ -304,37 +304,3 @@ def test_get_square_display_color(model: BoardModel, presenter: BoardPresenter, 
 
     if chess.BB_SQUARES[last_move.from_square] & chess.BB_DARK_SQUARES:
         assert presenter.get_square_display_color(last_move.from_square) == "blue"
-
-
-def test_game_result(model: BoardModel, presenter: BoardPresenter):
-    white_checkmate_fen = "7k/7R/5N2/3K4/8/8/8/8 b - - 0 1"
-    black_checkmate_fen = "8/8/8/8/8/7k/6q1/7K w - - 0 1"
-    stalemate_fen = "7k/5K2/6Q1/8/8/8/8/8 b - - 0 1"
-    draw_fen = "8/8/8/3k4/8/3K4/8/8 w - - 0 1"
-    ongoing_game_fen = "8/3k4/3B1K2/4P3/1Pb5/8/8/8 b - - 0 1"
-
-    # Test white checkmate result
-    model.set_fen(white_checkmate_fen)
-    result = presenter.game_result()
-    assert result == "Checkmate - White is victorious"
-
-    # Test black checkmate result
-    model.set_fen(black_checkmate_fen)
-    result = presenter.game_result()
-    assert result == "Checkmate - Black is victorious"
-
-    # Test stalemate result
-    model.set_fen(stalemate_fen)
-    result = presenter.game_result()
-    assert result == "Stalemate"
-
-    # Test draw result
-    model.set_fen(draw_fen)
-    result = presenter.game_result()
-    assert result == "Draw"
-
-    # Test claim draw result
-    model.set_fen(ongoing_game_fen)
-    model.board.result(claim_draw=True)
-    result = presenter.game_result()
-    assert result == "Draw"

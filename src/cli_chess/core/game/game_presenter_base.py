@@ -62,10 +62,6 @@ class PlayableGamePresenterBase(GamePresenterBase, ABC):
 
         self.model.board_model.e_successful_move_made.add_listener(self.view.clear_alert)
 
-    @abstractmethod
-    def _parse_and_present_game_over(self) -> str:
-        pass
-
     def user_input_received(self, inpt: str) -> None:
         """Respond to the users input. This input can either be the
            move input, or game actions (such as resign)
@@ -116,3 +112,7 @@ class PlayableGamePresenterBase(GamePresenterBase, ABC):
 
     def is_game_in_progress(self) -> bool:
         return self.model.game_in_progress
+
+    @abstractmethod
+    def _parse_and_present_game_over(self) -> str:
+        pass
