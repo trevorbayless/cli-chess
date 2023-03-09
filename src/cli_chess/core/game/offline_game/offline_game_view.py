@@ -13,7 +13,14 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import annotations
+from cli_chess.core.game import PlayableGameViewBase
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from cli_chess.core.game.offline_game import OfflineGamePresenter
 
-class OfflineGameView:
-    def __init__(self) -> None:
-        pass
+
+class OfflineGameView(PlayableGameViewBase):
+    def __init__(self, presenter: OfflineGamePresenter):
+        self.presenter = presenter
+        super().__init__(presenter)

@@ -34,10 +34,13 @@ class OnlineGamePresenter(PlayableGamePresenterBase):
     def __init__(self, model: OnlineGameModel):
         self.model = model
         super().__init__(model)
-        self.view = OnlineGameView(self)
+
+    def _get_view(self) -> OnlineGameView:
+        """Sets and returns the view to use"""
+        return OnlineGameView(self)
 
     def update(self, **kwargs) -> None:
-        """Overrides base and responds to specific model updates"""
+        """Update method called on game model updates. Overrides base."""
         if 'onlineGameOver' in kwargs:
             self._parse_and_present_game_over()
 

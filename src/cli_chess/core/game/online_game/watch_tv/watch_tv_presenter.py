@@ -28,9 +28,16 @@ class WatchTVPresenter(GamePresenterBase):
     def __init__(self, model: WatchTVModel):
         self.model = model
         super().__init__(model)
-        self.view = WatchTVView(self)
 
         self.model.start_watching()
+
+    def _get_view(self) -> WatchTVView:
+        """Sets and returns the view to use"""
+        return WatchTVView(self)
+
+    def update(self, **kwargs) -> None:
+        """Update method called on game model updates. Overrides base."""
+        pass
 
     def exit(self) -> None:
         """Stops TV and returns to the main menu"""

@@ -23,12 +23,13 @@ from prompt_toolkit.key_binding import KeyBindings
 from prompt_toolkit.keys import Keys
 from prompt_toolkit.buffer import Buffer
 from prompt_toolkit.filters import to_filter, Condition
+from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from cli_chess.core.game import GamePresenterBase, PlayableGamePresenterBase
 
 
-class GameViewBase:
+class GameViewBase(ABC):
     def __init__(self, presenter: GamePresenterBase) -> None:
         self.presenter = presenter
         self.board_output_container = presenter.board_presenter.view
@@ -41,8 +42,9 @@ class GameViewBase:
         self.alert_container = self._create_alert_container()
         self._container = self._create_container()
 
+    @abstractmethod
     def _create_container(self) -> Container:
-        return Window(FormattedTextControl("Parent class needs to override _create_container()"))
+        pass
 
     def _base_function_bar_fragments(self) -> StyleAndTextTuples:
         """Return the base function bar fragments"""

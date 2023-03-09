@@ -21,26 +21,30 @@ from cli_chess.modules.material_difference import MaterialDifferencePresenter
 from cli_chess.modules.player_info import PlayerInfoPresenter
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING
-
 if TYPE_CHECKING:
     from cli_chess.core.game import GameModelBase, PlayableGameModelBase
 
 
-class GamePresenterBase:
+class GamePresenterBase(ABC):
     def __init__(self, model: GameModelBase):
         self.model = model
         self.board_presenter = BoardPresenter(model.board_model)
         self.move_list_presenter = MoveListPresenter(model.move_list_model)
         self.material_diff_presenter = MaterialDifferencePresenter(model.material_diff_model)
         self.player_info_presenter = PlayerInfoPresenter(model)
-        self.view = GameViewBase(self)
+        self.view = self._get_view()
 
         self.model.e_game_model_updated.add_listener(self.update)
 
+    @abstractmethod
+    def _get_view(self) -> GameViewBase:
+        """Returns the view to use for this presenter"""
+        pass
+
+    @abstractmethod
     def update(self, **kwargs) -> None:
-        """Listens to game model updates when notified. Child classes should
-           override if interested in specific kwargs. See model for specific
-           kwargs that are currently being sent.
+        """Listens to game model updates when notified.
+           See model for specific kwargs that are currently being sent.
         """
         pass
 
@@ -56,11 +60,15 @@ class GamePresenterBase:
 
 class PlayableGamePresenterBase(GamePresenterBase, ABC):
     def __init__(self, model: PlayableGameModelBase):
-        self.model = model
         super().__init__(model)
-        self.view = PlayableGameViewBase(self)
+        self.model = model
 
         self.model.board_model.e_successful_move_made.add_listener(self.view.clear_alert)
+
+    @abstractmethod
+    def _get_view(self) -> PlayableGameViewBase:
+        """Returns the view to use for this presenter"""
+        return PlayableGameViewBase(self)
 
     def user_input_received(self, inpt: str) -> None:
         """Respond to the users input. This input can either be the

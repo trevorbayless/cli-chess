@@ -14,7 +14,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 import asyncio
-from cli_chess.core.game.offline_game import OfflineGameModel
+from cli_chess.core.game.offline_game import OfflineGameModel, OfflineGameView
 from cli_chess.core.game import PlayableGamePresenterBase
 from cli_chess.modules.engine import EnginePresenter, EngineModel, create_engine_model
 from cli_chess.utils.ui_common import change_views
@@ -41,7 +41,6 @@ async def _play_offline(game_parameters: dict) -> None:
 
 class OfflineGamePresenter(PlayableGamePresenterBase):
     def __init__(self, model: OfflineGameModel, engine_model: EngineModel):
-        # NOTE: Model subscriptions are currently handled in parent. Override here if needed.
         self.model = model
         self.engine_presenter = EnginePresenter(engine_model)
         super().__init__(model)
@@ -49,8 +48,12 @@ class OfflineGamePresenter(PlayableGamePresenterBase):
         if self.model.board_model.get_turn() != self.model.my_color:
             asyncio.create_task(self.make_engine_move())
 
+    def _get_view(self) -> OfflineGameView:
+        """Sets and returns the view to use"""
+        return OfflineGameView(self)
+
     def update(self, **kwargs) -> None:
-        """Overrides base and responds to specific model updates"""
+        """Update method called on game model updates. Overrides base."""
         if "offlineGameOver" in kwargs:
             self._parse_and_present_game_over()
 
