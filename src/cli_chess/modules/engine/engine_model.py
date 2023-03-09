@@ -37,39 +37,26 @@ fairy_stockfish_mapped_skill_levels = {
 }
 
 
-async def create_engine_model(board_model: BoardModel, game_parameters: dict):
-    """Create an instance of the engine model with the engine loaded"""
-    model = EngineModel(board_model, game_parameters)
-    await model._init()  # noqa
-    return model
-
-
 class EngineModel:
     def __init__(self, board_model: BoardModel, game_parameters: dict):
         self.board_model = board_model
         self.game_parameters = game_parameters
-
-    async def _init(self):
-        self.engine = await self.load_engine()
-        await self.configure_engine()
+        self.engine = self._start_engine()
+        self._configure_engine()
 
     @staticmethod
-    async def load_engine() -> chess.engine.UciProtocol:
-        """Load the chess engine"""
-        # TODO: Add support for other engines. Menu logic would need to be
-        #       Updated to show only valid variants for the engine, UCI Elo levels, etc.
+    def _start_engine() -> chess.engine.SimpleEngine:
+        """Starts the Fairy-Stockfish chess engine"""
         try:
-            _, engine = await chess.engine.popen_uci(ENGINE_PATH + ENGINE_BINARY_NAME)
-            return engine
+            # Use SimpleEngine to allow engine assignment in initializer. Additionally,
+            # by having this as a blocking call it stops multiple engines from being
+            # able to be started if the start game button is spammed
+            return chess.engine.SimpleEngine.popen_uci(ENGINE_PATH + ENGINE_BINARY_NAME)
         except Exception as e:
             log.critical(f"Exception caught starting engine: {e}")
             raise e
 
-    async def quit_engine(self) -> None:
-        """Notify the engine to quit"""
-        await self.engine.quit()
-
-    async def configure_engine(self) -> None:
+    def _configure_engine(self) -> None:
         """Configure the engine with the passed in options"""
         skill_level = fairy_stockfish_mapped_skill_levels.get(self.game_parameters.get(GameOption.COMPUTER_SKILL_LEVEL))
         limit_strength = self.game_parameters.get(GameOption.SPECIFY_ELO)
@@ -81,16 +68,15 @@ class EngineModel:
             'UCI_Elo': uci_elo if uci_elo else 1350
         }
 
-        await self.engine.configure(engine_cfg)
+        self.engine.configure(engine_cfg)
 
     async def get_best_move(self) -> chess.engine.PlayResult:
         """Query the engine to get the best move"""
         # Keep track of the last move that was made. This allows checking
         # for if a takeback happened while the engine has been thinking
-        # TODO: look into ways to cancel thinking if a takeback occurred
         last_move = (self.board_model.get_move_stack() or [None])[-1]
-        result = await self.engine.play(self.board_model.board,
-                                        chess.engine.Limit(2))
+        result = await self.engine.protocol.play(self.board_model.board,
+                                                 chess.engine.Limit(2))
 
         # Check if the move stack has been altered, if so void this move
         if last_move != (self.board_model.get_move_stack() or [None])[-1]:
@@ -100,4 +86,9 @@ class EngineModel:
         if self.board_model.get_game_over_result() is not None:
             result.move = None
 
+        log.debug(f"EngineModel: Returning {result}")
         return result
+
+    def quit_engine(self) -> None:
+        """Notify the engine to quit"""
+        self.engine.quit()

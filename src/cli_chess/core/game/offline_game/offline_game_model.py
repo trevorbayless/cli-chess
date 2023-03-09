@@ -14,6 +14,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from cli_chess.core.game import PlayableGameModelBase
+from cli_chess.modules.engine import EngineModel
 from cli_chess.core.game.game_options import GameOption
 from cli_chess.utils.logging import log
 from cli_chess.utils.config import player_info_config
@@ -25,6 +26,7 @@ class OfflineGameModel(PlayableGameModelBase):
         super().__init__(play_as_color=game_parameters[GameOption.COLOR],
                          variant=game_parameters[GameOption.VARIANT])
 
+        self.engine_model = EngineModel(self.board_model, game_parameters)
         self.game_in_progress = True
         self._save_game_metadata(game_parameters=game_parameters)
 

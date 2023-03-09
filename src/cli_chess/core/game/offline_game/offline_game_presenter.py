@@ -16,33 +16,26 @@
 import asyncio
 from cli_chess.core.game.offline_game import OfflineGameModel, OfflineGameView
 from cli_chess.core.game import PlayableGamePresenterBase
-from cli_chess.modules.engine import EnginePresenter, EngineModel, create_engine_model
+from cli_chess.modules.engine import EnginePresenter
 from cli_chess.utils.ui_common import change_views
 from cli_chess.utils import log, AlertType
 from chess import Termination, COLOR_NAMES, Color
 
 
-def start_offline_game(game_parameters: dict) -> None:
-    """Start an offline game"""
-    asyncio.create_task(_play_offline(game_parameters))
-
-
-async def _play_offline(game_parameters: dict) -> None:
+def start_offline_game(game_parameters: dict):
     try:
-        model = OfflineGameModel(game_parameters)
-        engine_model = await create_engine_model(model.board_model, game_parameters)
-
-        presenter = OfflineGamePresenter(model, engine_model)
+        presenter = OfflineGamePresenter(OfflineGameModel(game_parameters))
         change_views(presenter.view, presenter.view.input_field_container)
     except Exception as e:
+        # TODO: Instead of raising print this to an error container for better display
         log.error(f"Error starting engine: {e}")
         raise e
 
 
 class OfflineGamePresenter(PlayableGamePresenterBase):
-    def __init__(self, model: OfflineGameModel, engine_model: EngineModel):
+    def __init__(self, model: OfflineGameModel):
         self.model = model
-        self.engine_presenter = EnginePresenter(engine_model)
+        self.engine_presenter = EnginePresenter(self.model.engine_model)
         super().__init__(model)
 
         if self.model.board_model.get_turn() != self.model.my_color:
@@ -76,11 +69,11 @@ class OfflineGamePresenter(PlayableGamePresenterBase):
 
             elif engine_move.move:
                 move = engine_move.move.uci()
-                log.debug(f"OfflineGamePresenter: Sending engine move ({move}) to BoardPresenter")
+                log.debug(f"OfflineGamePresenter: Received move ({move}) from engine. Playing move on board.")
                 self.board_presenter.make_move(move)
         except Exception as e:
-            log.critical(f"Received an invalid move from the engine: {e}")
-            self.view.show_alert("Invalid move received from engine - inspect logs")
+            log.critical(f"OfflineGamePresenter: Engine error {e}")
+            self.view.show_alert(f"Engine error: {e}")
 
     def _parse_and_present_game_over(self) -> None:
         """Triages game over status for parsing and sending to the view for display"""
@@ -157,6 +150,6 @@ class OfflineGamePresenter(PlayableGamePresenterBase):
         """Exit current presenter/view"""
         try:
             super().exit()
-            asyncio.create_task(self.engine_presenter.quit_engine())
+            self.engine_presenter.quit_engine()
         except Exception as e:
             log.error(f"OfflineGamePresenter: Error caught while exiting: {e}")
