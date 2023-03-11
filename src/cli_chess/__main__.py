@@ -1,4 +1,4 @@
-# Copyright (C) 2021-2022 Trevor Bayless <trevorbayless1@gmail.com>
+# Copyright (C) 2021-2023 Trevor Bayless <trevorbayless1@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -13,12 +13,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from cli_chess.core.startup import StartupModel, StartupPresenter
+from cli_chess.core.main import MainModel, MainPresenter
+main_presenter = MainPresenter(MainModel())
 
 
 def run() -> None:
     """Main entry point"""
-    StartupPresenter(StartupModel()).run()
+    main_presenter.run()
 
 
 if __name__ == "__main__":

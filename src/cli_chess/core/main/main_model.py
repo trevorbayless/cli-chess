@@ -19,8 +19,8 @@ from cli_chess.__metadata__ import __version__
 from platform import python_version, system, release, machine
 
 
-class StartupModel:
-    """Model for the startup presenter"""
+class MainModel:
+    """Model for the main presenter"""
     def __init__(self):
         self._start_loggers()
         self.startup_args = self._parse_args()

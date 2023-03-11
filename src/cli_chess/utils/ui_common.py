@@ -25,7 +25,7 @@ T = TypeVar("T", bound=Callable[[MouseEvent], None])
 
 def go_back_to_main_menu() -> None:
     """Returns to the main menu"""
-    from cli_chess.core.startup.startup_presenter import main_presenter
+    from cli_chess.__main__ import main_presenter
     change_views(main_presenter.view)
 
 
