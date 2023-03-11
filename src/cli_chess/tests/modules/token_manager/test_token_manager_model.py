@@ -44,7 +44,7 @@ def lichess_config():
 
 
 def mock_fail_test_tokens(*args): # noqa
-    raise BerserkError
+    return {'lip_badToken': None}
 
 
 def mock_success_test_tokens(*args): # noqa
