@@ -18,7 +18,7 @@ from cli_chess.utils.ui_common import handle_mouse_click, go_back_to_main_menu, 
 from prompt_toolkit.widgets import TextArea, Box
 from prompt_toolkit.layout import Window, Container, FormattedTextControl, HSplit, VSplit, VerticalAlign, D
 from prompt_toolkit.formatted_text import StyleAndTextTuples
-from prompt_toolkit.key_binding import KeyBindings
+from prompt_toolkit.key_binding import KeyBindings, merge_key_bindings
 from prompt_toolkit.keys import Keys
 from prompt_toolkit.buffer import Buffer
 from prompt_toolkit.filters import Condition
@@ -58,7 +58,7 @@ class GameViewBase(ABC):
             Window(FormattedTextControl(self._base_function_bar_fragments())),
         ], height=D(max=1, preferred=1))
 
-    def _container_key_bindings(self) -> KeyBindings:
+    def _container_key_bindings(self) -> "_MergedKeyBindings":  # noqa: F821:
         """Creates the key bindings for this container"""
         bindings = KeyBindings()
 
@@ -66,7 +66,7 @@ class GameViewBase(ABC):
         def _(event): # noqa
             self.presenter.flip_board()
 
-        return bindings
+        return merge_key_bindings([bindings, self.move_list_container.key_bindings])
 
     @staticmethod
     def exit() -> None:
@@ -139,9 +139,9 @@ class PlayableGameViewBase(GameViewBase):
             Window(FormattedTextControl(_get_function_bar_fragments)),
         ], height=D(max=1, preferred=1))
 
-    def _container_key_bindings(self) -> KeyBindings:
+    def _container_key_bindings(self) -> "_MergedKeyBindings":  # noqa: F821:
         """Creates the key bindings for this container"""
-        bindings = super()._container_key_bindings()
+        bindings = KeyBindings()
 
         @bindings.add(Keys.F2, filter=Condition(self.presenter.is_game_in_progress), eager=True)
         def _(event): # noqa
@@ -161,15 +161,7 @@ class PlayableGameViewBase(GameViewBase):
         def _(event): # noqa
             self.presenter.exit()
 
-        @bindings.add(Keys.Up, eager=True)
-        def _(event):  # noqa
-            self.presenter.move_list_presenter.scroll_up()
-
-        @bindings.add(Keys.Down, eager=True)
-        def _(event):  # noqa
-            self.presenter.move_list_presenter.scroll_down()
-
-        return bindings
+        return merge_key_bindings([bindings, super()._container_key_bindings()])
 
     def _create_input_field_container(self) -> TextArea:
         """Returns a TextArea to use as the input field"""
