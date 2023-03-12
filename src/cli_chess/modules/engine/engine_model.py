@@ -18,6 +18,7 @@ from cli_chess.core.game.game_options import GameOption
 from cli_chess.utils import log, is_linux_os, is_windows_os
 import chess.engine
 from os import path
+from typing import Optional
 
 ENGINE_PATH = path.dirname(path.realpath(__file__)) + "/binaries/"
 ENGINE_BINARY_NAME = "fairy-stockfish_14_x86-64_" + ("linux" if is_linux_os() else ("windows" if is_windows_os() else "mac"))
@@ -39,36 +40,32 @@ fairy_stockfish_mapped_skill_levels = {
 
 class EngineModel:
     def __init__(self, board_model: BoardModel, game_parameters: dict):
+        self.engine: Optional[chess.engine.SimpleEngine] = None
         self.board_model = board_model
         self.game_parameters = game_parameters
-        self.engine = self._start_engine()
-        self._configure_engine()
 
-    @staticmethod
-    def _start_engine() -> chess.engine.SimpleEngine:
-        """Starts the Fairy-Stockfish chess engine"""
+    def start_engine(self):
+        """Starts and configures the Fairy-Stockfish chess engine"""
         try:
             # Use SimpleEngine to allow engine assignment in initializer. Additionally,
             # by having this as a blocking call it stops multiple engines from being
             # able to be started if the start game button is spammed
-            return chess.engine.SimpleEngine.popen_uci(ENGINE_PATH + ENGINE_BINARY_NAME)
+            self.engine = chess.engine.SimpleEngine.popen_uci(ENGINE_PATH + ENGINE_BINARY_NAME)
+
+            # Engine configuration
+            skill_level = fairy_stockfish_mapped_skill_levels.get(self.game_parameters.get(GameOption.COMPUTER_SKILL_LEVEL))
+            limit_strength = self.game_parameters.get(GameOption.SPECIFY_ELO)
+            uci_elo = self.game_parameters.get(GameOption.COMPUTER_ELO)
+            engine_cfg = {
+                'Skill Level': skill_level if skill_level else 0,
+                'UCI_LimitStrength': True if limit_strength else False,
+                'UCI_Elo': uci_elo if uci_elo else 1350
+            }
+            self.engine.configure(engine_cfg)
         except Exception as e:
-            log.critical(f"Exception caught starting engine: {e}")
-            raise e
-
-    def _configure_engine(self) -> None:
-        """Configure the engine with the passed in options"""
-        skill_level = fairy_stockfish_mapped_skill_levels.get(self.game_parameters.get(GameOption.COMPUTER_SKILL_LEVEL))
-        limit_strength = self.game_parameters.get(GameOption.SPECIFY_ELO)
-        uci_elo = self.game_parameters.get(GameOption.COMPUTER_ELO)
-
-        engine_cfg = {
-            'Skill Level': skill_level if skill_level else 0,
-            'UCI_LimitStrength': True if limit_strength else False,
-            'UCI_Elo': uci_elo if uci_elo else 1350
-        }
-
-        self.engine.configure(engine_cfg)
+            msg = f"Error starting engine: {e}"
+            log.error(msg)
+            raise Warning(msg)
 
     async def get_best_move(self) -> chess.engine.PlayResult:
         """Query the engine to get the best move"""
@@ -86,7 +83,7 @@ class EngineModel:
         if self.board_model.get_game_over_result() is not None:
             result.move = None
 
-        log.debug(f"EngineModel: Returning {result}")
+        log.debug(f"Returning {result}")
         return result
 
     def quit_engine(self) -> None:

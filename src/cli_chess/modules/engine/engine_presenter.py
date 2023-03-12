@@ -23,6 +23,7 @@ if TYPE_CHECKING:
 class EnginePresenter:
     def __init__(self, model: EngineModel):
         self.model = model
+        self.model.start_engine()
 
     async def get_best_move(self) -> PlayResult:
         """Notify the engine to get the best move from the current position"""
