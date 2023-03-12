@@ -15,7 +15,6 @@
 
 from cli_chess.modules.token_manager import TokenManagerModel
 from cli_chess.utils.config import LichessConfig
-from berserk.exceptions import BerserkError
 from berserk import clients
 from os import remove
 from unittest.mock import Mock
