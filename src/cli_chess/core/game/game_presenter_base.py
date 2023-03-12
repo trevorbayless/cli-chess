@@ -63,7 +63,7 @@ class PlayableGamePresenterBase(GamePresenterBase, ABC):
         super().__init__(model)
         self.model = model
 
-        self.model.board_model.e_successful_move_made.add_listener(self.view.clear_alert)
+        self.model.board_model.e_successful_move_made.add_listener(self.view.alert.clear_alert)
 
     @abstractmethod
     def _get_view(self) -> PlayableGameViewBase:
@@ -90,23 +90,23 @@ class PlayableGamePresenterBase(GamePresenterBase, ABC):
             move = move.strip()
             if move:
                 self.model.make_move(move)
-                self.view.clear_alert()
+                self.view.alert.clear_alert()
         except Exception as e:
-            self.view.show_alert(f"{e}")
+            self.view.alert.show_alert(str(e))
 
     def propose_takeback(self) -> None:
         """Proposes a takeback"""
         try:
             self.model.propose_takeback()
         except Exception as e:
-            self.view.show_alert(f"{e}")
+            self.view.alert.show_alert(str(e))
 
     def offer_draw(self) -> None:
         """Offers a draw"""
         try:
             self.model.offer_draw()
         except Exception as e:
-            self.view.show_alert(f"{e}")
+            self.view.alert.show_alert(str(e))
 
     def resign(self) -> None:
         """Resigns the game"""
@@ -116,7 +116,7 @@ class PlayableGamePresenterBase(GamePresenterBase, ABC):
             else:
                 self.exit()
         except Exception as e:
-            self.view.show_alert(f"{e}")
+            self.view.alert.show_alert(str(e))
 
     def is_game_in_progress(self) -> bool:
         return self.model.game_in_progress

@@ -55,7 +55,7 @@ class OfflineGamePresenter(PlayableGamePresenterBase):
             self.model.make_move(move)
             asyncio.create_task(self.make_engine_move())
         except Exception as e:
-            self.view.show_alert(f"{e}")
+            self.view.alert.show_alert(str(e))
 
     async def make_engine_move(self) -> None:
         """Get the best move from the engine and make it"""
@@ -72,7 +72,7 @@ class OfflineGamePresenter(PlayableGamePresenterBase):
                 self.board_presenter.make_move(move)
         except Exception as e:
             log.error(f"Engine error {e}")
-            self.view.show_alert(f"Engine error: {e}")
+            self.view.alert.show_alert(f"Engine error: {e}")
 
     def _parse_and_present_game_over(self) -> None:
         """Triages game over status for parsing and sending to the view for display"""
@@ -93,7 +93,7 @@ class OfflineGamePresenter(PlayableGamePresenterBase):
         """
         if winner_str.lower() not in COLOR_NAMES:
             log.error(f"Received game over with invalid winner string: {winner_str} // {status}")
-            self.view.show_alert("Game over", AlertType.ERROR)
+            self.view.alert.show_alert("Game over", AlertType.ERROR)
             return
 
         winner_bool = Color(COLOR_NAMES.index(winner_str))
@@ -119,7 +119,7 @@ class OfflineGamePresenter(PlayableGamePresenterBase):
             output = "Game over" + output
 
         alert_type = AlertType.SUCCESS if self.model.my_color == winner_bool else AlertType.ERROR
-        self.view.show_alert(output, alert_type)
+        self.view.alert.show_alert(output, alert_type)
 
     def _display_draw_output(self, status: Termination) -> None:
         """Generates the draw result reason string and sends to the view for display"""
@@ -143,7 +143,7 @@ class OfflineGamePresenter(PlayableGamePresenterBase):
             log.debug(f"Received game over with uncaught status: {status}")
             output = "Game over • Draw"
 
-        self.view.show_alert(output, AlertType.NEUTRAL)
+        self.view.alert.show_alert(output, AlertType.NEUTRAL)
 
     def exit(self) -> None:
         """Exit current presenter/view"""
