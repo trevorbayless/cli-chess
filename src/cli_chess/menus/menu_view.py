@@ -78,7 +78,7 @@ class MenuView:
         tokens.pop()
         return tokens
 
-    def _create_key_bindings(self):
+    def _create_key_bindings(self) -> KeyBindings:
         """Create the generic key bindings for menu navigation"""
         bindings = KeyBindings()
 
