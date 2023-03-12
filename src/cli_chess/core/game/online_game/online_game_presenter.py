@@ -55,14 +55,14 @@ class OnlineGamePresenter(PlayableGamePresenterBase):
             else:  # Handle draw, no start, abort output
                 self._display_no_winner_output(status)
         else:
-            log.error("OnlineGamePresenter: In '_parse_and_present_game_over' when the game is not over")
+            log.error("Attempted to present game over status when the game is not over")
 
     def _display_win_loss_output(self, status: str, winner_str: str) -> None:
         """Generates the win/loss result reason string and sends to the view for display.
            The winner string must either be `white` or `black`.
         """
         if winner_str.lower() not in COLOR_NAMES:
-            log.error(f"OfflineGamePresenter: Received game over with invalid winner string: {winner_str} // {status}")
+            log.error(f"Received game over with invalid winner string: {winner_str} // {status}")
             self.view.show_alert("Game over", AlertType.ERROR)
             return
 
@@ -92,7 +92,7 @@ class OnlineGamePresenter(PlayableGamePresenterBase):
             else:
                 output = "Variant ending" + output
         else:
-            log.debug(f"OnlineGamePresenter: Received game over with uncaught status: {status} / {winner_str}")
+            log.debug(f"Received game over with uncaught status: {status} / {winner_str}")
             output = "Game over" + output
 
         alert_type = AlertType.SUCCESS if self.model.my_color == winner_bool else AlertType.ERROR
@@ -113,6 +113,6 @@ class OnlineGamePresenter(PlayableGamePresenterBase):
             elif status == "stalemate":
                 output = "Draw • Stalemate"
         else:
-            log.debug(f"OnlineGamePresenter: Received game over with uncaught status: {status}")
+            log.debug(f"Received game over with uncaught status: {status}")
 
         self.view.show_alert(output, AlertType.NEUTRAL)

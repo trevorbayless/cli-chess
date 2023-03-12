@@ -38,7 +38,7 @@ class OnlineGameModel(PlayableGameModelBase):
             self.api_client = api_client
         except ImportError:
             # TODO: Clean this up so the error is displayed on the main screen
-            log.error("OnlineGameModel: Failed to import api_iem and api_client")
+            log.error("Failed to import api_iem and api_client")
             raise ImportError("API client not setup. Do you have an API token linked?")
 
     @threaded
@@ -145,12 +145,12 @@ class OnlineGameModel(PlayableGameModelBase):
 
                 move = self.board_model.verify_move(move)
 
-                log.info(f"OnlineGameModel: Sending move ({move}) to lichess")
+                log.info(f"Sending move ({move}) to lichess")
                 self.game_state_dispatcher.make_move(move)
             except Exception:
                 raise
         else:
-            log.warning("OnlineGameModel: Attempted to make a move in a game that's not in progress")
+            log.warning("Attempted to make a move in a game that's not in progress")
             raise Warning("Game has already ended")
 
     def propose_takeback(self) -> None:
@@ -164,7 +164,7 @@ class OnlineGameModel(PlayableGameModelBase):
             except Exception:
                 raise
         else:
-            log.warning("OnlineGameModel: Attempted to propose a takeback in a game that's not in progress")
+            log.warning("Attempted to propose a takeback in a game that's not in progress")
             raise Warning("Game has already ended")
 
     def offer_draw(self) -> None:
@@ -176,7 +176,7 @@ class OnlineGameModel(PlayableGameModelBase):
             except Exception:
                 raise
         else:
-            log.warning("OnlineGameModel: Attempted to offer a draw to a game that's not in progress")
+            log.warning("Attempted to offer a draw to a game that's not in progress")
             raise Warning("Game has already ended")
 
     def resign(self) -> None:
@@ -188,7 +188,7 @@ class OnlineGameModel(PlayableGameModelBase):
             except Exception:
                 raise
         else:
-            log.warning("OnlineGameModel: Attempted to resign a game that's not in progress")
+            log.warning("Attempted to resign a game that's not in progress")
             raise Warning("Game has already ended")
 
     def _save_game_metadata(self, **kwargs) -> None:

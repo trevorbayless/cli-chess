@@ -56,7 +56,7 @@ class GameModelBase:
             try:
                 model.cleanup()
             except AttributeError:
-                log.error(f"GameModelBase: {model} does not have a cleanup method")
+                log.error(f"{model} does not have a cleanup method")
 
     def _notify_game_model_updated(self, **kwargs) -> None:
         """Notify listeners that the model has updated"""

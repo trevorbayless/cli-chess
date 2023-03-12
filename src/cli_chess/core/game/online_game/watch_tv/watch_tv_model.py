@@ -90,7 +90,7 @@ class WatchTVModel(GameModelBase):
 
             self.e_game_model_updated.notify()
         except Exception as e:
-            log.error(f"TV Model: Error saving game metadata: {e}")
+            log.error(f"Error saving game metadata: {e}")
             raise
 
     def stream_event_received(self, **kwargs):
@@ -129,7 +129,7 @@ class WatchTVModel(GameModelBase):
                 self._save_game_metadata(tv_endGameEvent=event)
                 self.e_game_model_updated.notify(onlineGameOver=True)
         except Exception as e:
-            log.error(f"TV Model: Error parsing stream data: {e}")
+            log.error(f"Error parsing stream data: {e}")
             raise
 
 
@@ -148,11 +148,11 @@ class StreamTVChannel(threading.Thread):
             self.api_client = api_client
         except ImportError:
             # TODO: Clean this up so the error is displayed on the main screen
-            log.error("StreamTVChannel: Failed to import api_client")
+            log.error("Failed to import api_client")
             raise ImportError("API client not setup. Do you have an API token linked?")
 
         # Current flow that has to be followed to watch the "variant" tv channels
-        # as /api/tv/feed is only for the top rated game, and doesn't allow channel specification
+        # as /api/tv/feed is only for the top-rated game, and doesn't allow channel specification
         # 1. Get current tv game (/api/tv/channels) -> Get the game ID for the game we're interested in
         # 2. Start streaming game, on initial input set board orientation, show player names, etc. On follow up set pos.
         # 3. When the game completes, start this loop over.
@@ -167,7 +167,7 @@ class StreamTVChannel(threading.Thread):
 
     def run(self):
         """Main entrypoint for the thread"""
-        log.info(f"TV Stream: Started watching {self.channel.value} TV")
+        log.info(f"Started watching {self.channel.value} TV")
         self.running = True
         while self.running:
             try:
@@ -194,12 +194,12 @@ class StreamTVChannel(threading.Thread):
                         status = event.get('status', {}).get('name')
 
                         if winner or status != "started" and status:
-                            log.info(f"TV Stream: Game finished: {game_id}")
+                            log.info(f"Game finished: {game_id}")
                             self.e_tv_stream_event.notify(endGameEvent=event)
                             break
 
                         if status == "started":
-                            log.info(f"TV Stream: Started streaming TV game: {game_id}")
+                            log.info(f"Started streaming TV game: {game_id}")
                             self.e_tv_stream_event.notify(startGameEvent=event)
                             turns_behind = event.get('turns')
 
@@ -218,13 +218,13 @@ class StreamTVChannel(threading.Thread):
             else:
                 if self.running:
                     self.retries = 0
-                    log.debug("TV Stream: Sleeping 2 seconds before finding next TV game")
+                    log.debug("Sleeping 2 seconds before finding next TV game")
                     sleep(2)
 
     def handle_exceptions(self, e: Exception):
         """Handles the passed in exception and responds appropriately"""
         if self.retries <= self.max_retries:
-            log.error(f"TV Stream: {e}")
+            log.error(e)
             self.current_game = ""
             delay = 2 * (self.retries + 1)
 
@@ -233,8 +233,7 @@ class StreamTVChannel(threading.Thread):
                     delay = 60
 
             # TODO: Send event to model with retry notification so we can display it to the user
-            log.info(
-                f"TV Stream: Sleeping {delay} seconds before retrying ({self.max_retries - self.retries} retries left).")
+            log.info(f"Sleeping {delay} seconds before retrying ({self.max_retries - self.retries} retries left).")
             sleep(delay)
             self.retries += 1
         else:
@@ -243,6 +242,6 @@ class StreamTVChannel(threading.Thread):
     def stop_watching(self):
         # TODO: Need to handle going back to the main menu when the TVStream
         #       connection retries are exhausted. Send event notification to model?
-        log.info("TV Stream: Stopping TV stream")
+        log.info("Stopping TV stream")
         self.e_tv_stream_event.remove_all_listeners()
         self.running = False

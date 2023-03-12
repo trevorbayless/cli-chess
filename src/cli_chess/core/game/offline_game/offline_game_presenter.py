@@ -13,22 +13,21 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-import asyncio
 from cli_chess.core.game.offline_game import OfflineGameModel, OfflineGameView
 from cli_chess.core.game import PlayableGamePresenterBase
 from cli_chess.modules.engine import EnginePresenter
 from cli_chess.utils.ui_common import change_views
 from cli_chess.utils import log, AlertType
 from chess import Termination, COLOR_NAMES, Color
+import asyncio
 
 
 def start_offline_game(game_parameters: dict):
+    """Start an offline game vs the engine"""
     try:
         presenter = OfflineGamePresenter(OfflineGameModel(game_parameters))
         change_views(presenter.view, presenter.view.input_field_container)
     except Exception as e:
-        # TODO: Instead of raising print this to an error container for better display
-        log.error(f"Error starting engine: {e}")
         raise e
 
 
@@ -64,15 +63,15 @@ class OfflineGamePresenter(PlayableGamePresenterBase):
             engine_move = await self.engine_presenter.get_best_move()
 
             if engine_move.resigned:
-                log.debug("OfflineGamePresenter: Sending resignation on behalf of the engine")
+                log.debug("Sending resignation on behalf of the engine")
                 self.board_presenter.handle_resignation(not self.model.my_color)
 
             elif engine_move.move:
                 move = engine_move.move.uci()
-                log.debug(f"OfflineGamePresenter: Received move ({move}) from engine. Playing move on board.")
+                log.debug(f"Received move ({move}) from engine. Playing move on board.")
                 self.board_presenter.make_move(move)
         except Exception as e:
-            log.critical(f"OfflineGamePresenter: Engine error {e}")
+            log.error(f"Engine error {e}")
             self.view.show_alert(f"Engine error: {e}")
 
     def _parse_and_present_game_over(self) -> None:
@@ -86,14 +85,14 @@ class OfflineGamePresenter(PlayableGamePresenterBase):
             else:  # Handle draw output
                 self._display_draw_output(status)
         else:
-            log.error("OfflineGamePresenter: In '_parse_and_present_game_over' when the game is not over")
+            log.error("Attempted to present game over status when the game is not over")
 
     def _display_win_loss_output(self, status: Termination, winner_str: str) -> None:
         """Generates the win/loss result reason string and sends to the view for display.
            The winner string must either be `white` or `black`.
         """
         if winner_str.lower() not in COLOR_NAMES:
-            log.error(f"OfflineGamePresenter: Received game over with invalid winner string: {winner_str} // {status}")
+            log.error(f"Received game over with invalid winner string: {winner_str} // {status}")
             self.view.show_alert("Game over", AlertType.ERROR)
             return
 
@@ -116,7 +115,7 @@ class OfflineGamePresenter(PlayableGamePresenterBase):
             loser = COLOR_NAMES[not winner_bool].capitalize()
             output = f"{loser} resigned" + output
         else:
-            log.debug(f"OfflineGamePresenter: Received game over with uncaught status: {status} / {winner_str}")
+            log.debug(f"Received game over with uncaught status: {status} / {winner_str}")
             output = "Game over" + output
 
         alert_type = AlertType.SUCCESS if self.model.my_color == winner_bool else AlertType.ERROR
@@ -141,7 +140,7 @@ class OfflineGamePresenter(PlayableGamePresenterBase):
             elif status == Termination.SEVENTYFIVE_MOVES:
                 output = output + "• Seventy-five-move rule"
         else:
-            log.debug(f"OfflineGamePresenter: Received game over with uncaught status: {status}")
+            log.debug(f"Received game over with uncaught status: {status}")
             output = "Game over • Draw"
 
         self.view.show_alert(output, AlertType.NEUTRAL)
@@ -152,4 +151,4 @@ class OfflineGamePresenter(PlayableGamePresenterBase):
             super().exit()
             self.engine_presenter.quit_engine()
         except Exception as e:
-            log.error(f"OfflineGamePresenter: Error caught while exiting: {e}")
+            log.error(f"Error caught while exiting: {e}")

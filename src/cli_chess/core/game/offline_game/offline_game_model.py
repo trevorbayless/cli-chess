@@ -58,7 +58,7 @@ class OfflineGameModel(PlayableGameModelBase):
             except Exception:
                 raise
         else:
-            log.warning("OfflineGameModel: Attempted to make a move in a game that's not in progress")
+            log.warning("Attempted to make a move in a game that's not in progress")
             raise Warning("Game has already ended")
 
     def propose_takeback(self) -> None:
@@ -69,7 +69,7 @@ class OfflineGameModel(PlayableGameModelBase):
 
             self.board_model.takeback(self.my_color)
         except Exception as e:
-            log.error(f"OfflineGameModel: Takeback failed - {e}")
+            log.error(f"Takeback failed - {e}")
             raise
 
     def offer_draw(self) -> None:
@@ -84,7 +84,7 @@ class OfflineGameModel(PlayableGameModelBase):
             except Exception:
                 raise
         else:
-            log.warning("OfflineGameModel: Attempted to resign a game that's not in progress")
+            log.warning("Attempted to resign a game that's not in progress")
             raise Warning("Game has already ended")
 
     def _default_game_metadata(self) -> dict:
