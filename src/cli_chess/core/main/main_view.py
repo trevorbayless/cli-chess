@@ -18,7 +18,7 @@ from cli_chess.__metadata__ import __version__
 from cli_chess.utils.ui_common import handle_mouse_click, exit_app
 from cli_chess.utils import is_linux_os, default
 from prompt_toolkit import print_formatted_text as pt_print, HTML
-from prompt_toolkit.application import Application, DummyApplication, get_app
+from prompt_toolkit.application import Application, DummyApplication
 from prompt_toolkit.layout import Layout, Window, Container, FormattedTextControl, VSplit, HSplit, VerticalAlign, WindowAlign, D
 from prompt_toolkit.formatted_text import StyleAndTextTuples
 from prompt_toolkit.key_binding import KeyBindings, merge_key_bindings
@@ -104,17 +104,16 @@ class MainView:
 
         return merge_key_bindings([main_menu_fb_key_bindings, always_included_bindings])
 
-    @staticmethod
-    def print_in_terminal_msg(msg: str, error=False):
+    def print_in_terminal_msg(self, msg: str, error=False):
         """Print an in terminal message. This is only to be used
            when the main application is not running yet. Set error
            parameter to True to highlight error messages.
         """
-        if not get_app().is_running:
-            if not error:
-                pt_print(f"{msg}")
-            else:
+        if not self.app.is_running:
+            if error:
                 pt_print(HTML(f"<red>Error:</red> {msg}"))
+            else:
+                pt_print(f"{msg}")
 
     def __pt_container__(self) -> Container:
         """Return the view container"""
