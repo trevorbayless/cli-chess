@@ -15,6 +15,7 @@
 
 from __future__ import annotations
 from cli_chess.utils.ui_common import handle_mouse_click, go_back_to_main_menu, AlertContainer
+from cli_chess.utils.logging import log
 from prompt_toolkit.widgets import TextArea, Box
 from prompt_toolkit.layout import Window, Container, FormattedTextControl, HSplit, VSplit, VerticalAlign, D
 from prompt_toolkit.formatted_text import StyleAndTextTuples
@@ -39,6 +40,8 @@ class GameViewBase(ABC):
         self.player_info_lower_container = presenter.player_info_presenter.view_lower
         self.alert = AlertContainer()
         self._container = self._create_container()
+
+        log.debug(f"Created game view (id={id(self)})")
 
     @abstractmethod
     def _create_container(self) -> Container:

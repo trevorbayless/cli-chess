@@ -37,6 +37,8 @@ class GameModelBase:
         # Keep track of all associated models to handle bulk cleanup on exit
         self._assoc_models = [self.board_model, self.move_list_model, self.material_diff_model]
 
+        log.debug(f"Created game model (id={id(self)})")
+
     def update(self, **kwargs) -> None:
         """Called automatically as part of an event listener. This method
            listens to subscribed model update events and if deemed necessary
@@ -55,6 +57,7 @@ class GameModelBase:
         for model in self._assoc_models:
             try:
                 model.cleanup()
+                log.debug(f"Finished cleaning up after {model}")
             except AttributeError:
                 log.error(f"{model} does not have a cleanup method")
 

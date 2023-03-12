@@ -14,7 +14,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from __future__ import annotations
-from cli_chess.utils import AlertType
+from cli_chess.utils import AlertType, log
 from prompt_toolkit.layout import Window, FormattedTextControl, ConditionalContainer, D
 from prompt_toolkit.filters import to_filter
 from prompt_toolkit.mouse_events import MouseEvent, MouseEventType
@@ -37,6 +37,7 @@ def change_views(container: Container, focused_element=None):
     """Change the view to the passed in container.
        Focuses the view on the optional passed in element.
     """
+    log.debug(f"Changing view to {container}")
     focused_element = focused_element if focused_element else container
     get_app().layout = Layout(container)
 

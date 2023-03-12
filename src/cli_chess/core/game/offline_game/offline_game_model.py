@@ -131,4 +131,6 @@ class OfflineGameModel(PlayableGameModelBase):
         outcome = self.board_model.get_game_over_result()
         self.game_metadata['state']['status'] = outcome.termination
         self.game_metadata['state']['winner'] = COLOR_NAMES[outcome.winner]
+
+        log.info(f"Game over (status={outcome.termination} winner={COLOR_NAMES[outcome.winner]})")
         self._notify_game_model_updated(offlineGameOver=True)

@@ -19,6 +19,7 @@ from cli_chess.modules.board import BoardPresenter
 from cli_chess.modules.move_list import MoveListPresenter
 from cli_chess.modules.material_difference import MaterialDifferencePresenter
 from cli_chess.modules.player_info import PlayerInfoPresenter
+from cli_chess.utils.logging import log
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -35,6 +36,7 @@ class GamePresenterBase(ABC):
         self.view = self._get_view()
 
         self.model.e_game_model_updated.add_listener(self.update)
+        log.debug(f"Created game presenter (id={id(self)})")
 
     @abstractmethod
     def _get_view(self) -> GameViewBase:
@@ -54,6 +56,7 @@ class GamePresenterBase(ABC):
 
     def exit(self) -> None:
         """Exit current presenter/view"""
+        log.debug("Exiting game presenter")
         self.model.cleanup()
         self.view.exit()
 
