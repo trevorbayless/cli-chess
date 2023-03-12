@@ -75,11 +75,3 @@ class MoveListPresenter:
                     output = output[:eq_index+1] + promotion_unicode_symbol + output[eq_index+2:]
 
         return output if output else move
-
-    def scroll_up(self) -> None:
-        """Scroll up on the move list"""
-        self.view.scroll_up()
-
-    def scroll_down(self) -> None:
-        """Scroll down on the move list"""
-        self.view.scroll_down()
