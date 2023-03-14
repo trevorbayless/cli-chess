@@ -61,8 +61,8 @@ class GameViewBase(ABC):
             Window(FormattedTextControl(self._base_function_bar_fragments())),
         ], height=D(max=1, preferred=1))
 
-    def _container_key_bindings(self) -> "_MergedKeyBindings":  # noqa: F821:
-        """Creates the key bindings for this container"""
+    def get_key_bindings(self) -> "_MergedKeyBindings":  # noqa: F821:
+        """Returns the key bindings for this container"""
         bindings = KeyBindings()
 
         @bindings.add(Keys.F1, eager=True)
@@ -111,7 +111,7 @@ class PlayableGameViewBase(GameViewBase):
             self._create_function_bar()
         ], align=VerticalAlign.BOTTOM)
 
-        return HSplit([main_content, function_bar], key_bindings=self._container_key_bindings())
+        return HSplit([main_content, function_bar], key_bindings=self.get_key_bindings())
 
     def _create_function_bar(self) -> VSplit:
         """Create the conditional function bar"""
@@ -142,8 +142,8 @@ class PlayableGameViewBase(GameViewBase):
             Window(FormattedTextControl(_get_function_bar_fragments)),
         ], height=D(max=1, preferred=1))
 
-    def _container_key_bindings(self) -> "_MergedKeyBindings":  # noqa: F821:
-        """Creates the key bindings for this container"""
+    def get_key_bindings(self) -> "_MergedKeyBindings":  # noqa: F821:
+        """Returns the key bindings for this container"""
         bindings = KeyBindings()
 
         @bindings.add(Keys.F2, filter=Condition(self.presenter.is_game_in_progress), eager=True)
@@ -164,7 +164,7 @@ class PlayableGameViewBase(GameViewBase):
         def _(event): # noqa
             self.presenter.exit()
 
-        return merge_key_bindings([bindings, super()._container_key_bindings()])
+        return merge_key_bindings([bindings, super().get_key_bindings()])
 
     def _create_input_field_container(self) -> TextArea:
         """Returns a TextArea to use as the input field"""

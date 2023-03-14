@@ -54,7 +54,7 @@ class WatchTVView(GameViewBase):
             self._create_function_bar()
         ], align=VerticalAlign.BOTTOM)
 
-        return HSplit([main_content, function_bar], key_bindings=self._container_key_bindings())
+        return HSplit([main_content, function_bar], key_bindings=self.get_key_bindings())
 
     def _create_function_bar(self) -> VSplit:
         """Create the conditional function bar"""
@@ -70,9 +70,9 @@ class WatchTVView(GameViewBase):
             Window(FormattedTextControl(_get_function_bar_fragments)),
         ], height=D(max=1, preferred=1))
 
-    def _container_key_bindings(self) -> KeyBindings:
-        """Creates the key bindings for this container"""
-        bindings = super()._container_key_bindings()
+    def get_key_bindings(self) -> KeyBindings:
+        """Returns the key bindings for this container"""
+        bindings = super().get_key_bindings()
 
         @bindings.add(Keys.F10, eager=True)
         def _(event): # noqa

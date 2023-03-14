@@ -75,11 +75,11 @@ class MainMenuView(MenuView):
                     & Condition(lambda: self.presenter.selection == MainMenuOptions.ABOUT)
                 )
             ]),
-        ], key_bindings=self._container_key_bindings())
+        ], key_bindings=self.get_key_bindings())
 
     @staticmethod
-    def _container_key_bindings() -> KeyBindings:
-        """Creates the key bindings for this container"""
+    def get_key_bindings() -> KeyBindings:
+        """Returns the key bindings for this container"""
         bindings = KeyBindings()
         bindings.add(Keys.Right)(focus_next)
         bindings.add(Keys.ControlF)(focus_next)

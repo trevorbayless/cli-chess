@@ -29,8 +29,8 @@ T = TypeVar("T", bound=Callable[[MouseEvent], None])
 
 def go_back_to_main_menu() -> None:
     """Returns to the main menu"""
-    from cli_chess.__main__ import main_presenter
-    change_views(main_presenter.view)
+    from cli_chess.core.main.main_view import main_view
+    change_views(main_view)
 
 
 def change_views(container: Container, focused_element=None):
@@ -38,13 +38,22 @@ def change_views(container: Container, focused_element=None):
        Focuses the view on the optional passed in element.
     """
     log.debug(f"Changing view to {container}")
+    app = get_app()
     focused_element = focused_element if focused_element else container
-    get_app().layout = Layout(container)
+    app.layout = Layout(container)
 
     try:
-        get_app().layout.focus(focused_element)
-    except ValueError:
-        pass
+        app.layout.focus(focused_element)
+
+        # NOTE: There's a possible PT bug here. There shouldn't be a need to
+        #  assign the current container bindings to the application. The bindings
+        #  should be picked up automatically (and are the majority of the time).
+        #  However, I've seen this drop bindings multiple times (e.g. if spamming
+        #  a menu change quickly, or sometimes after clicking the function bar).
+        app.key_bindings = container.get_key_bindings()
+    except (ValueError, AttributeError) as e:
+        if isinstance(e, AttributeError):
+            log.debug(f"{container} is missing `get_key_bindings()` method")
 
     repaint_ui()
 
