@@ -14,13 +14,12 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from cli_chess.core.main import MainModel, MainPresenter
-main_presenter = MainPresenter(MainModel())
 
 
-def run() -> None:
+def main() -> None:
     """Main entry point"""
-    main_presenter.run()
+    MainPresenter(MainModel()).run()
 
 
 if __name__ == "__main__":
-    run()
+    main()

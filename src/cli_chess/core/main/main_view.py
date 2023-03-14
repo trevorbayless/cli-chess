@@ -16,9 +16,9 @@
 from __future__ import annotations
 from cli_chess.__metadata__ import __version__
 from cli_chess.utils.ui_common import handle_mouse_click, exit_app
-from cli_chess.utils import is_linux_os, default
+from cli_chess.utils import is_linux_os, default, log
 from prompt_toolkit import print_formatted_text as pt_print, HTML
-from prompt_toolkit.application import Application, DummyApplication
+from prompt_toolkit.application import Application
 from prompt_toolkit.layout import Layout, Window, Container, FormattedTextControl, VSplit, HSplit, VerticalAlign, WindowAlign, D
 from prompt_toolkit.formatted_text import StyleAndTextTuples
 from prompt_toolkit.key_binding import KeyBindings, merge_key_bindings
@@ -34,21 +34,14 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from cli_chess.core.main import MainPresenter
 
+main_view: Container
+
 
 class MainView:
     def __init__(self, presenter: MainPresenter):
-        self.app = DummyApplication()
-        self.presenter = presenter
-        self._container = self._create_main_container()
-
-    def run(self) -> None:
-        """Runs the main application"""
-        self._create_app()
-        self.app.run()
-
-    def _create_app(self) -> None:
-        """Create the main application with the initial layout"""
         try:
+            self.presenter = presenter
+            self._container = self._create_main_container()
             self.app = Application(
                 layout=Layout(self._container),
                 color_depth=ColorDepth.TRUE_COLOR if is_linux_os() else ColorDepth.DEFAULT,
@@ -57,11 +50,23 @@ class MainView:
                 style=Style.from_dict(default),
                 refresh_interval=0.5
             )
-        except NoConsoleScreenBufferError:
-            print("Error starting cli-chess:\n"
-                  "A Windows console was expected and not found.\n"
-                  "Try running this program using cmd.exe instead.")
+
+            global main_view
+            main_view = self
+
+        except Exception as e:
+            log.critical(f"Error starting cli-chess: {e}")
+            if isinstance(e, NoConsoleScreenBufferError):
+                print("Error starting cli-chess:\n"
+                      "A Windows console was expected and not found.\n"
+                      "Try running this program using cmd.exe instead.")
+            else:
+                print(f"Error starting cli-chess:\n{e}")
             exit(1)
+
+    def run(self) -> None:
+        """Runs the main application"""
+        self.app.run()
 
     def _create_main_container(self):
         """Creates the container for the main view"""
