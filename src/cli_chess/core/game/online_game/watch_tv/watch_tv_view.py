@@ -19,7 +19,7 @@ from cli_chess.utils.ui_common import handle_mouse_click
 from prompt_toolkit.layout import Container, Window, FormattedTextControl, VSplit, HSplit, VerticalAlign, D
 from prompt_toolkit.widgets import Box
 from prompt_toolkit.formatted_text import StyleAndTextTuples
-from prompt_toolkit.key_binding import KeyBindings
+from prompt_toolkit.key_binding import KeyBindings, merge_key_bindings
 from prompt_toolkit.keys import Keys
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -70,12 +70,12 @@ class WatchTVView(GameViewBase):
             Window(FormattedTextControl(_get_function_bar_fragments)),
         ], height=D(max=1, preferred=1))
 
-    def get_key_bindings(self) -> KeyBindings:
+    def get_key_bindings(self) -> "_MergedKeyBindings":  # noqa: F821:
         """Returns the key bindings for this container"""
-        bindings = super().get_key_bindings()
+        bindings = KeyBindings()
 
         @bindings.add(Keys.F10, eager=True)
         def _(event): # noqa
             self.presenter.exit()
 
-        return bindings
+        return merge_key_bindings([bindings, super().get_key_bindings()])
