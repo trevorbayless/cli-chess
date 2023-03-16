@@ -51,9 +51,11 @@ def change_views(container: Container, focused_element=None):
         #  However, I've seen this drop bindings multiple times (e.g. if spamming
         #  a menu change quickly, or sometimes after clicking the function bar).
         app.key_bindings = container.get_key_bindings()
-    except (ValueError, AttributeError) as e:
-        if isinstance(e, AttributeError):
-            log.debug(f"{container} is missing `get_key_bindings()` method")
+    except (ValueError, AttributeError):
+        # ValueError is expected on elements that cannot be focused. Proceed regardless.
+        # AttributeError is expected on containers that don't define `get_key_bindings()`.
+        # In the case of AttributeError, PT will look at each container to grab bindings.
+        pass
 
     repaint_ui()
 
