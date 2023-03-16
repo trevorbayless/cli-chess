@@ -79,10 +79,10 @@ class IncomingEventManager(threading.Thread):
         """Returns a list of games in progress for this account"""
         return self.my_games
 
-    def subscribe_to_iem_events(self, listener: Callable) -> None:
+    def subscribe_to_events(self, listener: Callable) -> None:
         """Subscribes the passed in method to IEM events"""
         self.e_new_event_received.add_listener(listener)
 
-    def unsubscribe_from_iem_events(self, listener: Callable) -> None:
+    def unsubscribe_from_events(self, listener: Callable) -> None:
         """Unsubscribes the passed in method to IEM events"""
         self.e_new_event_received.remove_listener(listener)
