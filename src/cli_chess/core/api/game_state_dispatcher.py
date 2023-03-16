@@ -13,12 +13,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from cli_chess.utils import Event, log
+from cli_chess.utils import Event, log, str_to_bool
 from typing import Callable
-import threading
+from threading import Thread
 
 
-class GameStateDispatcher(threading.Thread):
+class GameStateDispatcher(Thread):
     """Handles streaming a game and sending game commands (make move, offer draw, etc)
        using the Board API. The game that is streamed using this class must be owned
        by the account linked to the api token.
@@ -59,8 +59,15 @@ class GameStateDispatcher(threading.Thread):
                 self.e_game_state_dispatcher_event.notify(chatLine=event)
 
             elif event['type'] == "opponentGone":
-                # TODO: Start countdown if opponent is gone. Automatically claim win if timer elapses.
-                #  The countdown should stop if the opponent comes back before the timer elapses.
+                is_gone = str_to_bool(event.get('gone', ""))
+                secs_until_claim = event.get('claimWinInSeconds', None)
+
+                if is_gone and secs_until_claim:
+                    pass  # TODO implement call to auto-claim win when `secs_until_claim` elapses
+
+                if not is_gone:
+                    pass  # TODO: Cancel auto-claim countdown
+
                 self.e_game_state_dispatcher_event.notify(opponentGone=event)
 
         log.info(f"Completed streaming of: {self.game_id}")
@@ -99,6 +106,12 @@ class GameStateDispatcher(threading.Thread):
             self.api_client.board.resign_game(self.game_id)
         except Exception:
             raise
+
+    def claim_victory(self) -> None:
+        """Submits a claim of victory to lichess as the opponent is gone.
+           This is to only be called when the opponentGone timer has elapsed.
+        """
+        pass
 
     def _game_ended(self) -> None:
         """Handles removing all event listeners since the game has completed"""
