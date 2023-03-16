@@ -71,21 +71,31 @@ class EngineModel:
         """Query the engine to get the best move"""
         # Keep track of the last move that was made. This allows checking
         # for if a takeback happened while the engine has been thinking
-        last_move = (self.board_model.get_move_stack() or [None])[-1]
-        result = await self.engine.protocol.play(self.board_model.board,
-                                                 chess.engine.Limit(2))
+        try:
+            last_move = (self.board_model.get_move_stack() or [None])[-1]
+            result = await self.engine.protocol.play(self.board_model.board,
+                                                     chess.engine.Limit(2))
 
-        # Check if the move stack has been altered, if so void this move
-        if last_move != (self.board_model.get_move_stack() or [None])[-1]:
-            result.move = None
+            # Check if the move stack has been altered, if so void this move
+            if last_move != (self.board_model.get_move_stack() or [None])[-1]:
+                result.move = None
 
-        # Check to make sure the game is still in progress (opponent hasn't resigned)
-        if self.board_model.get_game_over_result() is not None:
-            result.move = None
+            # Check to make sure the game is still in progress (opponent hasn't resigned)
+            if self.board_model.get_game_over_result() is not None:
+                result.move = None
+        except Exception as e:
+            log.error(f"{e}")
+            if not self.engine:
+                raise Warning("Engine is not running")
+            raise
 
         log.debug(f"Returning {result}")
         return result
 
     def quit_engine(self) -> None:
         """Notify the engine to quit"""
-        self.engine.quit()
+        try:
+            if self.engine:
+                self.engine.quit()
+        except Exception as e:
+            log.error(f"Error quitting engine: {e}")
