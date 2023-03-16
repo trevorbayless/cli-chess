@@ -15,7 +15,7 @@
 
 from __future__ import annotations
 from cli_chess.utils import AlertType, log
-from prompt_toolkit.layout import Window, FormattedTextControl, ConditionalContainer, D
+from prompt_toolkit.layout import Window, FormattedTextControl, ConditionalContainer
 from prompt_toolkit.filters import to_filter
 from prompt_toolkit.mouse_events import MouseEvent, MouseEventType
 from prompt_toolkit.key_binding import KeyPressEvent
@@ -96,7 +96,7 @@ class AlertContainer:
     def _create_alert_container(self) -> ConditionalContainer:
         """Create the error container"""
         return ConditionalContainer(
-            Window(self._alert_label, always_hide_cursor=True, height=D(max=1), wrap_lines=True),
+            Window(self._alert_label, always_hide_cursor=True, wrap_lines=True),
             filter=to_filter(False)
         )
 
