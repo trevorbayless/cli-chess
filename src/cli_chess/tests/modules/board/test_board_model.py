@@ -14,9 +14,10 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from cli_chess.modules.board import BoardModel
-import chess
 from unittest.mock import Mock
 import pytest
+import chess
+import chess.variant
 
 
 @pytest.fixture
@@ -370,6 +371,52 @@ def test_set_board_position(model: BoardModel, board_updated_listener: Mock):
     assert model.get_board_orientation() == chess.BLACK
     board_updated_listener.assert_called()
     assert model.get_highlight_move() == chess.Move.null()
+
+
+def test_is_game_over(model: BoardModel):
+    # Test game in progress
+    model.set_fen("k7/8/8/8/8/8/8/K5Q1 w - - 0 1")
+    assert not model.is_game_over()
+
+    # Test game over
+    model.make_move("Qb6")  # stalemate
+    assert model.is_game_over()
+
+
+def test_get_game_over_result(model: BoardModel):
+    # Test game in progress
+    model.set_fen("8/6q1/6k1/8/2K5/8/8/8 w - - 0 1")
+
+    # Test game over with a standard termination reason
+    model.set_fen("7K/6q1/6k1/8/8/8/8/8 w - - 0 1")
+    assert model.get_game_over_result() == chess.Outcome(chess.Termination.CHECKMATE, chess.BLACK)
+
+    # Test game over by resignation
+    model.set_fen("8/8/4K3/8/3pk3/8/8/8 b - - 0 1")
+    model.handle_resignation(chess.WHITE)
+    assert model.get_game_over_result() == chess.Outcome("resignation", chess.BLACK)  # noqa
+
+
+def test_handle_resignation(model: BoardModel):
+    # Test white resignation
+    model.set_fen("8/1PK5/8/8/8/4q3/8/1k6 b - - 0 1")
+    model.handle_resignation(chess.WHITE)
+    assert model.get_game_over_result() == chess.Outcome("resignation", chess.BLACK)  # noqa
+    assert model.is_game_over()
+
+    # Test black resignation
+    model.set_fen("8/3k4/3B1K2/4P3/1Pb5/8/8/8 b - - 0 1")
+    model.handle_resignation(chess.BLACK)
+    assert model.get_game_over_result() == chess.Outcome("resignation", chess.WHITE)  # noqa
+
+
+def test_cleanup(model: BoardModel, board_updated_listener: Mock, successful_move_listener: Mock):
+    assert len(model.e_board_model_updated.listeners) > 0
+    assert len(model.e_successful_move_made.listeners) > 0
+
+    model.cleanup()
+    assert len(model.e_board_model_updated.listeners) == 0
+    assert len(model.e_successful_move_made.listeners) == 0
 
 
 def test_notify_board_model_updated(model: BoardModel, board_updated_listener: Mock):
