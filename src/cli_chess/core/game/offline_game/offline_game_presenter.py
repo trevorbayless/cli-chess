@@ -24,11 +24,8 @@ import asyncio
 
 def start_offline_game(game_parameters: dict):
     """Start an offline game vs the engine"""
-    try:
-        presenter = OfflineGamePresenter(OfflineGameModel(game_parameters))
-        change_views(presenter.view, presenter.view.input_field_container)
-    except Exception as e:
-        raise e
+    presenter = OfflineGamePresenter(OfflineGameModel(game_parameters))
+    change_views(presenter.view, presenter.view.input_field_container)
 
 
 class OfflineGamePresenter(PlayableGamePresenterBase):
@@ -37,8 +34,12 @@ class OfflineGamePresenter(PlayableGamePresenterBase):
         self.engine_presenter = EnginePresenter(self.model.engine_model)
         super().__init__(model)
 
-        if self.model.board_model.get_turn() != self.model.my_color:
-            asyncio.create_task(self.make_engine_move())
+        try:
+            self.engine_presenter.start_engine()
+            if self.model.board_model.get_turn() != self.model.my_color:
+                asyncio.create_task(self.make_engine_move())
+        except Exception as e:
+            self.view.alert.show_alert(str(e))
 
     def _get_view(self) -> OfflineGameView:
         """Sets and returns the view to use"""
