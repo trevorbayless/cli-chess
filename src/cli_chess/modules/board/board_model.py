@@ -320,7 +320,7 @@ class BoardModel:
 
     def get_game_over_result(self) -> chess.Outcome:
         """Returns the reason the game ended as an Outcome object"""
-        return self._game_over_result
+        return self._game_over_result if self._game_over_result else self.board.outcome()
 
     def handle_resignation(self, color_resigning: chess.Color) -> None:
         """Handle marking the game as ended by resignation. The color
