@@ -259,25 +259,6 @@ class BoardConfig(SectionBase):
         self.e_board_config_updated.notify()
 
 
-class UiConfig(SectionBase):
-    """Creates and manages the "ui" configuration. This configuration can
-       either live in its own file, or be appended as a section by using a
-       configuration filename that already exists (such as DEFAULT_CONFIG_FILENAME).
-       By default, this will be appended to the default configuration.
-    """
-    class Keys(Enum):
-        ZEN_MODE = {"name": "zen_mode", "default": False}
-
-    def __init__(self, filename: str = DEFAULT_CONFIG_FILENAME):
-        self.e_ui_config_updated = Event()
-        super().__init__(section_name="ui", section_keys=self.Keys, filename=filename)
-
-    def write_config(self) -> None:
-        """Writes to the configuration file"""
-        super().write_config()
-        self.e_ui_config_updated.notify()
-
-
 class LichessConfig(SectionBase):
     """Creates and manages the "lichess" configuration. This configuration can
        either live in its own file, or be appended as a section by using a
@@ -309,5 +290,4 @@ class LichessConfig(SectionBase):
 
 player_info_config = PlayerInfoConfig()
 board_config = BoardConfig()
-ui_config = UiConfig()
 lichess_config = LichessConfig()
