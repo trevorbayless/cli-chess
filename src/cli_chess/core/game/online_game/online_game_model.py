@@ -45,7 +45,7 @@ class OnlineGameModel(PlayableGameModelBase):
     def create_a_game(self, is_vs_ai: bool) -> None:
         """Sends a request to lichess to start an AI challenge using the selected game parameters"""
         # Note: Only subscribe to IEM events right before creating challenge to lessen chance of grabbing another game
-        self.api_iem.subscribe_to_iem_events(self.handle_iem_event)
+        self.api_iem.subscribe_to_events(self.handle_iem_event)
 
         if is_vs_ai:  # Challenge Lichess AI (stockfish)
             self.api_client.challenges.create_ai(level=self.game_metadata['ai_level'],
@@ -77,7 +77,7 @@ class OnlineGameModel(PlayableGameModelBase):
         """The game we are playing has ended. Handle cleaning up."""
         self.game_in_progress = False
         self.playing_game_id = None
-        self.api_iem.unsubscribe_from_iem_events(self.handle_iem_event)
+        self.api_iem.unsubscribe_from_events(self.handle_iem_event)
 
     def handle_iem_event(self, **kwargs) -> None:
         """Handles events received from the IncomingEventManager"""
@@ -267,3 +267,18 @@ class OnlineGameModel(PlayableGameModelBase):
         self.game_metadata['state']['status'] = status  # status list can be found in lila status.ts
         self.game_metadata['state']['winner'] = winner
         self._notify_game_model_updated(onlineGameOver=True)
+
+    def cleanup(self) -> None:
+        """Cleans up after this model by clearing event listeners and subscriptions.
+           This should only ever be run when the models are no longer needed. This is
+           called automatically on exit.
+        """
+        super().cleanup()
+
+        if self.api_iem:
+            self.api_iem.unsubscribe_from_events(self.handle_iem_event)
+            log.debug(f"Cleared subscription from {self.api_iem}")
+
+        if self.game_in_progress:
+            self.game_state_dispatcher.unsubscribe_from_events(self.handle_game_state_dispatcher_event)
+            log.debug(f"Cleared subscription from  {self.game_state_dispatcher}")
