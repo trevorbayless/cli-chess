@@ -65,8 +65,8 @@ def test_update_cached_config_values(model: BoardModel, presenter: BoardPresente
     board_config.set_value(board_config.Keys.BLINDFOLD_CHESS, "yes")
     board_config.set_value(board_config.Keys.USE_UNICODE_PIECES, "no")
     assert presenter.board_config_values == board_config.get_all_values()
-    assert presenter.board_config_values[board_config.Keys.BLINDFOLD_CHESS.value["name"]]
-    assert not presenter.board_config_values[board_config.Keys.USE_UNICODE_PIECES.value["name"]]
+    assert presenter.board_config_values[board_config.Keys.BLINDFOLD_CHESS]
+    assert not presenter.board_config_values[board_config.Keys.USE_UNICODE_PIECES]
 
     # Remove board config notification listener and verify updates don't come through
     board_config.e_board_config_updated.remove_listener(presenter._update_cached_config_values)

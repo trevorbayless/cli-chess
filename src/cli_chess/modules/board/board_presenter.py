@@ -85,7 +85,7 @@ class BoardPresenter:
            is disabled in the configuration.
         """
         file_labels = ""
-        show_board_coordinates = self.board_config_values[board_config.Keys.SHOW_BOARD_COORDINATES.value["name"]]
+        show_board_coordinates = self.board_config_values[board_config.Keys.SHOW_BOARD_COORDINATES]
 
         if show_board_coordinates:
             file_labels = self.model.get_file_labels()
@@ -94,11 +94,11 @@ class BoardPresenter:
 
     def get_file_label_color(self) -> str:
         """Returns the color to use for the file labels"""
-        return self.board_config_values[board_config.Keys.FILE_LABEL_COLOR.value["name"]]
+        return self.board_config_values[board_config.Keys.FILE_LABEL_COLOR]
 
     def get_rank_label_color(self) -> str:
         """Returns the color to use for the rank labels"""
-        return self.board_config_values[board_config.Keys.RANK_LABEL_COLOR.value["name"]]
+        return self.board_config_values[board_config.Keys.RANK_LABEL_COLOR]
 
     def get_rank_label(self, square: chess.Square) -> str:
         """Returns a label string if at the start of a rank
@@ -106,7 +106,7 @@ class BoardPresenter:
         """
         rank_label = ""
         rank_index = self.model.get_square_rank_index(square)
-        show_board_coordinates = self.board_config_values[board_config.Keys.SHOW_BOARD_COORDINATES.value["name"]]
+        show_board_coordinates = self.board_config_values[board_config.Keys.SHOW_BOARD_COORDINATES]
 
         if self.is_square_start_of_rank(square) and show_board_coordinates:
             rank_label = self.model.get_rank_label(rank_index)
@@ -144,8 +144,8 @@ class BoardPresenter:
         piece = self.model.board.piece_at(square)
         piece_str = ""
 
-        blindfold_chess = self.board_config_values[board_config.Keys.BLINDFOLD_CHESS.value["name"]]
-        use_unicode_pieces = self.board_config_values[board_config.Keys.USE_UNICODE_PIECES.value["name"]]
+        blindfold_chess = self.board_config_values[board_config.Keys.BLINDFOLD_CHESS]
+        use_unicode_pieces = self.board_config_values[board_config.Keys.USE_UNICODE_PIECES]
 
         if piece and not blindfold_chess:
             piece_str = get_piece_unicode_symbol(piece.symbol()) if use_unicode_pieces else piece.symbol().upper()
@@ -161,9 +161,9 @@ class BoardPresenter:
         if piece:
             piece_is_light = True if piece.color else False
             if piece_is_light:
-                piece_color = self.board_config_values[board_config.Keys.LIGHT_PIECE_COLOR.value["name"]]
+                piece_color = self.board_config_values[board_config.Keys.LIGHT_PIECE_COLOR]
             else:
-                piece_color = self.board_config_values[board_config.Keys.DARK_PIECE_COLOR.value["name"]]
+                piece_color = self.board_config_values[board_config.Keys.DARK_PIECE_COLOR]
 
         return piece_color
 
@@ -172,22 +172,22 @@ class BoardPresenter:
            square based on configuration settings, last move, and check.
         """
         if self.model.is_light_square(square):
-            square_color = self.board_config_values[board_config.Keys.LIGHT_SQUARE_COLOR.value["name"]]
+            square_color = self.board_config_values[board_config.Keys.LIGHT_SQUARE_COLOR]
         else:
-            square_color = self.board_config_values[board_config.Keys.DARK_SQUARE_COLOR.value["name"]]
+            square_color = self.board_config_values[board_config.Keys.DARK_SQUARE_COLOR]
 
-        show_board_highlights = self.board_config_values[board_config.Keys.SHOW_BOARD_HIGHLIGHTS.value["name"]]
+        show_board_highlights = self.board_config_values[board_config.Keys.SHOW_BOARD_HIGHLIGHTS]
         if show_board_highlights:
             try:
                 last_move = self.model.get_highlight_move()
                 if bool(last_move) and (square == last_move.to_square or square == last_move.from_square):
-                    square_color = self.board_config_values[board_config.Keys.LAST_MOVE_COLOR.value["name"]]
+                    square_color = self.board_config_values[board_config.Keys.LAST_MOVE_COLOR]
                     # TODO: Lighten last move square color if on light square
             except IndexError:
                 pass
 
             if self.model.is_square_in_check(square):
-                square_color = self.board_config_values[board_config.Keys.IN_CHECK_COLOR.value["name"]]
+                square_color = self.board_config_values[board_config.Keys.IN_CHECK_COLOR]
 
         return square_color
 

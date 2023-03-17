@@ -169,7 +169,7 @@ class SectionBase(BaseConfig):
         if self._section_exists():
             for key in self.section_keys:
                 if not self._section_has_key(key):
-                    super().set_key_value(self.section_name, key.name, key.value["default"])
+                    super().set_key_value(self.section_name, key.name, key.default_value)
         else:
             self.create_section()
 
@@ -177,10 +177,12 @@ class SectionBase(BaseConfig):
         """Creates this section using key value defaults"""
         super().add_section(self.section_name)
         for key in self.section_keys:
-            super().set_key_value(self.section_name, key.name, key.value["default"])
+            super().set_key_value(self.section_name, key.name, key.default_value)
 
     def get_all_values(self) -> dict:
-        """Returns a dictionary of all key/values in this section"""
+        """Returns a dictionary of all key/values in this section.
+           The returned result is a raw text based dictionary.
+        """
         return super().get_sections_values(self.section_name)
 
     def get_value(self, key: Enum) -> str:
@@ -211,7 +213,15 @@ class PlayerInfoConfig(SectionBase):
        By default, this will be appended to the default configuration.
     """
     class Keys(Enum):
-        OFFLINE_PLAYER_NAME = {"name": "offline_player_name", "default": getuser() if getuser() else "You"}
+        OFFLINE_PLAYER_NAME = "offline_player_name"
+
+        @property
+        def default_value(self):
+            """Returns the default value for the key"""
+            default_lookup = {
+                self.OFFLINE_PLAYER_NAME: getuser() if getuser() else "You"
+            }
+            return default_lookup[self]
 
     def __init__(self, filename: str = DEFAULT_CONFIG_FILENAME):
         self.e_player_info_config_updated = Event()
@@ -230,24 +240,43 @@ class BoardConfig(SectionBase):
        By default, this will be appended to the default configuration.
     """
     class Keys(Enum):
-        # NOTE: If PAD_UNICODE is set to True, add a space after the move list/material diff
-        #  when using unicode characters. This helps if character overlap is occurring
-        #  when mixing unicode/ascii (e.g. ♞f3)
-        SHOW_BOARD_COORDINATES = {"name": "show_board_coordinates", "default": True}
-        SHOW_BOARD_HIGHLIGHTS = {"name": "show_board_highlights", "default": True}
-        BLINDFOLD_CHESS = {"name": "blindfold_chess", "default": False}
-        USE_UNICODE_PIECES = {"name": "use_unicode_pieces", "default": False if is_windows_os() else True}
-        SHOW_MOVE_LIST_IN_UNICODE = {"name": "show_move_list_in_unicode", "default": False}
-        SHOW_MATERIAL_DIFF_IN_UNICODE = {"name": "show_material_diff_in_unicode", "default": False if is_windows_os() else True}
-        PAD_UNICODE = {"name": "pad_unicode", "default": True if is_windows_os() else False}
-        RANK_LABEL_COLOR = {"name": "rank_label_color", "default": "gray"}
-        FILE_LABEL_COLOR = {"name": "file_label_color", "default": "gray"}
-        LAST_MOVE_COLOR = {"name": "last_move_color", "default": "yellowgreen"}
-        LIGHT_SQUARE_COLOR = {"name": "light_square_color", "default": "cadetblue"}
-        DARK_SQUARE_COLOR = {"name": "dark_square_color", "default": "darkslateblue"}
-        IN_CHECK_COLOR = {"name": "in_check_color", "default": "red"}
-        LIGHT_PIECE_COLOR = {"name": "light_piece_color", "default": "white"}
-        DARK_PIECE_COLOR = {"name": "dark_piece_color", "default": "black"}
+        SHOW_BOARD_COORDINATES = "show_board_coordinates"
+        SHOW_BOARD_HIGHLIGHTS = "show_board_highlights"
+        BLINDFOLD_CHESS = "blindfold_chess"
+        USE_UNICODE_PIECES = "use_unicode_pieces"
+        SHOW_MOVE_LIST_IN_UNICODE = "show_move_list_in_unicode"
+        SHOW_MATERIAL_DIFF_IN_UNICODE = "show_material_diff_in_unicode"
+        PAD_UNICODE = "pad_unicode"
+        RANK_LABEL_COLOR = "rank_label_color"
+        FILE_LABEL_COLOR = "file_label_color"
+        LAST_MOVE_COLOR = "last_move_color"
+        LIGHT_SQUARE_COLOR = "light_square_color"
+        DARK_SQUARE_COLOR = "dark_square_color"
+        IN_CHECK_COLOR = "in_check_color"
+        LIGHT_PIECE_COLOR = "light_piece_color"
+        DARK_PIECE_COLOR = "dark_piece_color"
+
+        @property
+        def default_value(self):
+            """Returns the default value for the key"""
+            default_lookup = {
+                self.SHOW_BOARD_COORDINATES: True,
+                self.SHOW_BOARD_HIGHLIGHTS: True,
+                self.BLINDFOLD_CHESS: False,
+                self.USE_UNICODE_PIECES: False if is_windows_os() else True,
+                self.SHOW_MOVE_LIST_IN_UNICODE: False,
+                self.SHOW_MATERIAL_DIFF_IN_UNICODE: False if is_windows_os() else True,
+                self.PAD_UNICODE: True if is_windows_os() else False,
+                self.RANK_LABEL_COLOR: "gray",
+                self.FILE_LABEL_COLOR: "gray",
+                self.LAST_MOVE_COLOR: "yellowgreen",
+                self.LIGHT_SQUARE_COLOR: "cadetblue",
+                self.DARK_SQUARE_COLOR: "darkslateblue",
+                self.IN_CHECK_COLOR: "red",
+                self.LIGHT_PIECE_COLOR: "white",
+                self.DARK_PIECE_COLOR: "black",
+            }
+            return default_lookup[self]
 
     def __init__(self, filename: str = DEFAULT_CONFIG_FILENAME):
         self.e_board_config_updated = Event()
@@ -258,6 +287,19 @@ class BoardConfig(SectionBase):
         super().write_config()
         self.e_board_config_updated.notify()
 
+    def get_all_values(self) -> dict:
+        """Returns a dictionary of all key/values in this section.
+           The keys of the dictionary is this sections Key enum.
+        """
+        raw_config_values = super().get_all_values()
+        enum_mapped_dict = raw_config_values.copy()
+        for key in raw_config_values:
+            try:
+                enum_mapped_dict[BoardConfig.Keys(key)] = enum_mapped_dict.pop(key)
+            except ValueError:
+                log.error(f"Unrecognized key ({key}) found in configuration")
+        return enum_mapped_dict
+
 
 class LichessConfig(SectionBase):
     """Creates and manages the "lichess" configuration. This configuration can
@@ -266,7 +308,15 @@ class LichessConfig(SectionBase):
        By default, this will be appended to the default configuration.
     """
     class Keys(Enum):
-        API_TOKEN = {"name": "api_token", "default": ""}
+        API_TOKEN = "api_token"
+
+        @property
+        def default_value(self):
+            """Returns the default value for the key"""
+            default_lookup = {
+                self.API_TOKEN: ""
+            }
+            return default_lookup[self]
 
     def __init__(self, filename: str = DEFAULT_CONFIG_FILENAME):
         self.e_lichess_config_updated = Event()
