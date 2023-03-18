@@ -49,45 +49,5 @@ default = {
     "player-info.title": "fg:darkorange bold",
     "player-info.title.bot": "fg:darkmagenta",
     "player-info.pos-rating-diff": "fg:darkgreen",
-    "player-info.neg-rating-diff": "fg:darkred",
-
-}
-
-twilight = {
-    "menu": "bg:",
-    "menu.category-title": "fg:black bg:darkseagreen",
-    "menu.option": "fg:white",
-    "menu.multi-value": "fg:tomato",
-    "focused-selected": "fg:black bg:plum noinherit",
-    "unfocused-selected": "fg:black bg:white noinherit",
-    "menu.multi-value focused-selected": "fg:tomato bold noinherit",
-    "menu.multi-value unfocused-selected": "fg:tomato noinherit",
-
-    "function-bar.key": "fg:white",
-    "function-bar.label": "fg:black bg:plum",
-    "function-bar.spacer": "",
-
-    "label": "fg:white",
-    "label.success": "fg:skyblue",
-    "label.error": "fg:crimson",
-    "label.success.banner": "bg:skyblue fg:white",
-    "label.error.banner": "fg:crimson fg:white",
-    "label.neutral.banner": "bg:slategray fg:white",
-
-    "text-area.input": "fg:tomato bold",
-    "text-area.input.placeholder": "italic",
-    "text-area.prompt": "fg:white bold noinherit",
-
-    "validation-toolbar": "fg:white bg:crimson",
-
-    "material-difference": "fg:gray",
-
-    "move-input": "fg:white bold",
-    "move-list": "fg:gray",
-
-    "player-info": "fg:white",
-    "player-info.title": "fg:darkorange bold",
-    "player-info.title.bot": "fg:darkmagenta",
-    "player-info.pos-rating-diff": "fg:skyblue",
-    "player-info.neg-rating-diff": "fg:crimson",
+    "player-info.neg-rating-diff": "fg:darkred"
 }

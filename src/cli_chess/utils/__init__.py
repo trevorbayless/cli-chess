@@ -3,5 +3,5 @@ from .config import force_recreate_configs, print_program_config
 from .event import Event, EventManager
 from .logging import log, redact_from_logs
 from .argparse import setup_argparse
-from .styles import default, twilight
+from .styles import default
 from .ui_common import AlertContainer
