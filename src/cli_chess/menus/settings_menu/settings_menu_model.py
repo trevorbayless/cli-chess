@@ -1,4 +1,4 @@
-# Copyright (C) 2021-2022 Trevor Bayless <trevorbayless1@gmail.com>
+# Copyright (C) 2021-2023 Trevor Bayless <trevorbayless1@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,8 +19,7 @@ from enum import Enum
 
 class SettingsMenuOptions(Enum):
     LICHESS_AUTHENTICATION = "Authenticate with Lichess"
-    GAME_SETTINGS = "Game settings"
-    PROGRAM_SETTINGS = "Program settings"
+    PROGRAM_SETTINGS = "Program Settings"
 
 
 class SettingsMenuModel(MenuModel):
@@ -33,8 +32,7 @@ class SettingsMenuModel(MenuModel):
         """Create the menu options"""
         menu_options = [
             MenuOption(SettingsMenuOptions.LICHESS_AUTHENTICATION, "Authenticate with Lichess by adding your API access token (required for playing online)"),  # noqa: E501
-            MenuOption(SettingsMenuOptions.GAME_SETTINGS, "Customize the look and feel when playing games"),
-            MenuOption(SettingsMenuOptions.PROGRAM_SETTINGS, "Customize the look and feel of cli-chess"),
+            MenuOption(SettingsMenuOptions.PROGRAM_SETTINGS, "Customize cli-chess"),
         ]
 
         return MenuCategory("General Settings", menu_options)

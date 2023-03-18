@@ -1,4 +1,4 @@
-# Copyright (C) 2021-2022 Trevor Bayless <trevorbayless1@gmail.com>
+# Copyright (C) 2021-2023 Trevor Bayless <trevorbayless1@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@ from cli_chess.menus import MenuView
 from cli_chess.menus.settings_menu import SettingsMenuOptions
 from prompt_toolkit.layout import Container, ConditionalContainer, VSplit, HSplit
 from prompt_toolkit.filters import Condition, is_done
-from prompt_toolkit.key_binding import ConditionalKeyBindings
+from prompt_toolkit.key_binding import ConditionalKeyBindings, merge_key_bindings
 from prompt_toolkit.formatted_text import StyleAndTextTuples
 from prompt_toolkit.widgets import Box
 from typing import TYPE_CHECKING
@@ -42,6 +42,11 @@ class SettingsMenuView(MenuView):
                     filter=~is_done
                     & Condition(lambda: self.presenter.selection == SettingsMenuOptions.LICHESS_AUTHENTICATION)
                 ),
+                ConditionalContainer(
+                    Box(self.presenter.program_settings_menu_presenter.view, padding=0, padding_right=1),
+                    filter=~is_done
+                    & Condition(lambda: self.presenter.selection == SettingsMenuOptions.PROGRAM_SETTINGS)
+                ),
             ]),
         ])
 
@@ -52,14 +57,12 @@ class SettingsMenuView(MenuView):
             fragments = self.presenter.token_manger_presenter.view.get_function_bar_fragments()
         return fragments
 
-    def get_function_bar_key_bindings(self) -> ConditionalKeyBindings:
+    def get_function_bar_key_bindings(self) -> ConditionalKeyBindings:  # noqa: F821
         """Returns the appropriate function bar key bindings based on menu item selection"""
-        lichess_auth_kb = ConditionalKeyBindings(
+        return ConditionalKeyBindings(
             self.presenter.token_manger_presenter.view.get_function_bar_key_bindings(),
             filter=Condition(lambda: self.presenter.selection == SettingsMenuOptions.LICHESS_AUTHENTICATION)
         )
-
-        return lichess_auth_kb
 
     def __pt_container__(self) -> Container:
         return self._settings_menu_container
