@@ -19,10 +19,11 @@ from cli_chess.utils.config import get_config_path
 from prompt_toolkit.layout import Window, FormattedTextControl, ConditionalContainer
 from prompt_toolkit.filters import to_filter
 from prompt_toolkit.mouse_events import MouseEvent, MouseEventType
-from prompt_toolkit.key_binding import KeyPressEvent
+from prompt_toolkit.key_binding import KeyPressEvent, merge_key_bindings
 from prompt_toolkit.application import get_app
 from prompt_toolkit.layout import Layout, Container
 from typing import TypeVar, Callable, cast
+import os
 
 E = TypeVar("E", bound=Callable[[KeyPressEvent], None])
 T = TypeVar("T", bound=Callable[[MouseEvent], None])
@@ -51,7 +52,8 @@ def change_views(container: Container, focused_element=None):
         #  should be picked up automatically (and are the majority of the time).
         #  However, I've seen this drop bindings multiple times (e.g. if spamming
         #  a menu change quickly, or sometimes after clicking the function bar).
-        app.key_bindings = container.get_key_bindings()
+        from cli_chess.core.main.main_view import main_view
+        app.key_bindings = merge_key_bindings([container.get_key_bindings(), main_view.get_global_key_bindings()])  # noqa
     except (ValueError, AttributeError):
         # ValueError is expected on elements that cannot be focused. Proceed regardless.
         # AttributeError is expected on containers that don't define `get_key_bindings()`.
@@ -91,14 +93,33 @@ def handle_mouse_click(handler: T) -> T:
 
 
 def get_custom_style() -> dict:
-    """Returns the custom style if one has been defined"""
+    """Returns the user defined custom style"""
     try:
         custom_style_path = get_config_path() + "custom_style.py"
+        if not os.path.isfile(custom_style_path) or os.stat(custom_style_path).st_size == 0:
+            create_skeleton_custom_style()
+
         with open(custom_style_path, 'r') as file:
-            custom_style = eval(file.read())
-            return custom_style
+            custom_style = file.read()
+            return eval(custom_style)
     except Exception as e:
         log.critical(f"Custom style error: {e}")
+        raise
+
+
+def create_skeleton_custom_style() -> None:
+    """Creates (or overwrites) the 'custom_style.py' file.
+       Raises an exception on generation errors.
+    """
+    try:
+        custom_style_path = get_config_path() + "custom_style.py"
+        with open(custom_style_path, 'w') as file:
+            file.write("# This file is used to override the default style of cli-chess. It must be kept in dictionary format.\n")
+            file.write("\n")
+            file.write("{")
+            file.write('\n\t#"menu.option": "fg:white",\n')
+            file.write("}")
+    except Exception:
         raise
 
 

@@ -17,7 +17,6 @@ from __future__ import annotations
 from cli_chess.__metadata__ import __version__
 from cli_chess.utils.ui_common import handle_mouse_click, exit_app, get_custom_style
 from cli_chess.utils import is_linux_os, default, log
-from prompt_toolkit import print_formatted_text as pt_print, HTML
 from prompt_toolkit.application import Application
 from prompt_toolkit.layout import Layout, Window, Container, FormattedTextControl, VSplit, HSplit, VerticalAlign, WindowAlign, D
 from prompt_toolkit.formatted_text import StyleAndTextTuples
@@ -25,7 +24,9 @@ from prompt_toolkit.key_binding import KeyBindings, merge_key_bindings
 from prompt_toolkit.keys import Keys
 from prompt_toolkit.widgets import Box
 from prompt_toolkit.styles import Style, merge_styles
+from prompt_toolkit import print_formatted_text, HTML
 from prompt_toolkit.output.color_depth import ColorDepth
+import sys
 try:
     from prompt_toolkit.output.win32 import NoConsoleScreenBufferError # noqa
 except AssertionError:
@@ -42,6 +43,7 @@ class MainView:
         try:
             self.presenter = presenter
             self._container = self._create_main_container()
+
             self.app = Application(
                 layout=Layout(self._container),
                 color_depth=ColorDepth.TRUE_COLOR if is_linux_os() else ColorDepth.DEFAULT,
@@ -55,13 +57,12 @@ class MainView:
             main_view = self
 
         except Exception as e:
-            log.critical(f"Error starting cli-chess: {e}")
-            if isinstance(e, NoConsoleScreenBufferError):
-                print("Error starting cli-chess:\n"
-                      "A Windows console was expected and not found.\n"
-                      "Try running this program using cmd.exe instead.")
-            else:
-                print(f"Error starting cli-chess:\n{e}")
+            msg = str(e)
+            log.critical(f"Error starting cli-chess: {msg}")
+            if 'NoConsoleScreenBufferError' in sys.modules:
+                if isinstance(e, NoConsoleScreenBufferError):
+                    msg = "A Windows console was expected and not found. Try running this program using cmd.exe instead."
+            self.print_error_to_terminal(title="Error starting cli-chess", msg=msg)
             exit(1)
 
     def run(self) -> None:
@@ -77,7 +78,7 @@ class MainView:
             HSplit([
                 self._create_function_bar()
             ], align=VerticalAlign.BOTTOM)
-        ], key_bindings=self._create_function_bar_key_bindings())
+        ], key_bindings=merge_key_bindings([self.get_global_key_bindings(), self._create_function_bar_key_bindings()]))
 
     def _create_function_bar(self) -> VSplit:
         """Create the conditional function bar"""
@@ -102,28 +103,47 @@ class MainView:
     def _create_function_bar_key_bindings(self) -> "_MergedKeyBindings":  # noqa: F821
         """Creates the key bindings for the function bar"""
         main_menu_fb_key_bindings = self.presenter.main_menu_presenter.view.get_function_bar_key_bindings()
+        main_view_fb_key_bindings = KeyBindings()
+        main_view_fb_key_bindings.add(Keys.F10)(exit_app)
 
-        # Always included key bindings
-        always_included_bindings = KeyBindings()
-        always_included_bindings.add(Keys.F10)(exit_app)
+        return merge_key_bindings([main_view_fb_key_bindings, main_menu_fb_key_bindings])
 
-        return merge_key_bindings([main_menu_fb_key_bindings, always_included_bindings])
+    def get_global_key_bindings(self) -> KeyBindings():
+        """Returns the global key bindings to be used application wide"""
+        bindings = KeyBindings()
 
-    @staticmethod
-    def print_error_to_terminal(msg: str, error_header="Error:"):
-        """Print an in terminal message. This is only to be used
-           when the main application is not running yet. Set error
-           parameter to True to highlight error messages.
+        # Global binding to refresh style
+        @bindings.add(Keys.ControlR, eager=True, is_global=True)
+        def _(event): # noqa
+            log.info("Requested application style refresh")
+            self.app.style = self._get_combined_styles(hot_swap=True)
+        return bindings
+
+    def _get_combined_styles(self, hot_swap=False) -> "_MergedStyle":  # noqa: F821
+        """Combines the cli-chess default style with a user
+           supplied custom style and returns the result
         """
-        pt_print(HTML(f"<red>{error_header}</red> {msg}"))
-
-    def _get_combined_styles(self):
-        """Combine and return the style to use"""
         try:
             return merge_styles([Style.from_dict(default), Style.from_dict(get_custom_style())])
         except Exception as e:
-            self.print_error_to_terminal(error_header="Error parsing custom style:", msg=str(e))
-            exit(1)
+            log.critical(f"Error parsing custom style: {e}")
+            if not hot_swap:
+                self.print_error_to_terminal(title="Error parsing custom style", msg=str(e))
+                exit(1)
+
+            log.info("Ignoring invalid custom style and using default instead")
+            return Style.from_dict(default)
+
+    def print_error_to_terminal(self, msg: str, title="Error", ):
+        """Prints an error to the terminal. This will only print
+           statements when the application is not yet running in
+           order to avoid tearing the output.
+        """
+        if (not hasattr(self, 'app') or not self.app.is_running) and msg:
+            # NOTE: Print statements are separated in order to be able to print
+            #  syntax errors which can have mismatched tags (e.g. with eval()).
+            print_formatted_text(HTML(f"<red>{title}</red> "))
+            print_formatted_text(msg)
 
     def __pt_container__(self) -> Container:
         """Return the view container"""
