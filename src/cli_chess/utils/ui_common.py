@@ -15,6 +15,7 @@
 
 from __future__ import annotations
 from cli_chess.utils import AlertType, log
+from cli_chess.utils.config import get_config_path
 from prompt_toolkit.layout import Window, FormattedTextControl, ConditionalContainer
 from prompt_toolkit.filters import to_filter
 from prompt_toolkit.mouse_events import MouseEvent, MouseEventType
@@ -87,6 +88,18 @@ def handle_mouse_click(handler: T) -> T:
             return NotImplemented
 
     return cast(T, mouse_down)
+
+
+def get_custom_style() -> dict:
+    """Returns the custom style if one has been defined"""
+    try:
+        custom_style_path = get_config_path() + "custom_style.py"
+        with open(custom_style_path, 'r') as file:
+            custom_style = eval(file.read())
+            return custom_style
+    except Exception as e:
+        log.critical(f"Custom style error: {e}")
+        raise
 
 
 class AlertContainer:

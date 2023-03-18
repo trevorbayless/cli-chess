@@ -15,7 +15,7 @@
 
 from __future__ import annotations
 from cli_chess.__metadata__ import __version__
-from cli_chess.utils.ui_common import handle_mouse_click, exit_app
+from cli_chess.utils.ui_common import handle_mouse_click, exit_app, get_custom_style
 from cli_chess.utils import is_linux_os, default, log
 from prompt_toolkit import print_formatted_text as pt_print, HTML
 from prompt_toolkit.application import Application
@@ -24,7 +24,7 @@ from prompt_toolkit.formatted_text import StyleAndTextTuples
 from prompt_toolkit.key_binding import KeyBindings, merge_key_bindings
 from prompt_toolkit.keys import Keys
 from prompt_toolkit.widgets import Box
-from prompt_toolkit.styles import Style
+from prompt_toolkit.styles import Style, merge_styles
 from prompt_toolkit.output.color_depth import ColorDepth
 try:
     from prompt_toolkit.output.win32 import NoConsoleScreenBufferError # noqa
@@ -47,7 +47,7 @@ class MainView:
                 color_depth=ColorDepth.TRUE_COLOR if is_linux_os() else ColorDepth.DEFAULT,
                 mouse_support=True,
                 full_screen=True,
-                style=Style.from_dict(default),
+                style=self._get_combined_styles(),
                 refresh_interval=0.5
             )
 
@@ -116,6 +116,14 @@ class MainView:
            parameter to True to highlight error messages.
         """
         pt_print(HTML(f"<red>{error_header}</red> {msg}"))
+
+    def _get_combined_styles(self):
+        """Combine and return the style to use"""
+        try:
+            return merge_styles([Style.from_dict(default), Style.from_dict(get_custom_style())])
+        except Exception as e:
+            self.print_error_to_terminal(error_header="Error parsing custom style:", msg=str(e))
+            exit(1)
 
     def __pt_container__(self) -> Container:
         """Return the view container"""
