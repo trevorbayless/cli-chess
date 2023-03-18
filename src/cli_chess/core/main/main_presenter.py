@@ -44,7 +44,7 @@ class MainPresenter:
 
         if args.token:
             if not g_token_manager_model.update_linked_account(args.token):
-                self.view.print_in_terminal_msg(f"Invalid API token or missing required scopes. Scopes required: {required_token_scopes}", error=True)
+                self.view.print_error_to_terminal(f"Invalid API token or missing required scopes. Scopes required: {required_token_scopes}", error=True)
                 exit(1)
 
     def run(self):

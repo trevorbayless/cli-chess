@@ -109,16 +109,13 @@ class MainView:
 
         return merge_key_bindings([main_menu_fb_key_bindings, always_included_bindings])
 
-    def print_in_terminal_msg(self, msg: str, error=False):
+    @staticmethod
+    def print_error_to_terminal(msg: str, error_header="Error:"):
         """Print an in terminal message. This is only to be used
            when the main application is not running yet. Set error
            parameter to True to highlight error messages.
         """
-        if not self.app.is_running:
-            if error:
-                pt_print(HTML(f"<red>Error:</red> {msg}"))
-            else:
-                pt_print(f"{msg}")
+        pt_print(HTML(f"<red>{error_header}</red> {msg}"))
 
     def __pt_container__(self) -> Container:
         """Return the view container"""
