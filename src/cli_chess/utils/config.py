@@ -233,8 +233,8 @@ class PlayerInfoConfig(SectionBase):
         self.e_player_info_config_updated.notify()
 
 
-class BoardConfig(SectionBase):
-    """Creates and manages the "board" configuration. This configuration can
+class GameConfig(SectionBase):
+    """Creates and manages the "game" configuration. This configuration can
        either live in its own file, or be appended as a section by using a
        configuration filename that already exists (such as DEFAULT_CONFIG_FILENAME).
        By default, this will be appended to the default configuration.
@@ -279,13 +279,13 @@ class BoardConfig(SectionBase):
             return default_lookup[self]
 
     def __init__(self, filename: str = DEFAULT_CONFIG_FILENAME):
-        self.e_board_config_updated = Event()
-        super().__init__(section_name="board", section_keys=self.Keys, filename=filename)
+        self.e_game_config_updated = Event()
+        super().__init__(section_name="game", section_keys=self.Keys, filename=filename)
 
     def write_config(self) -> None:
         """Writes to the configuration file"""
         super().write_config()
-        self.e_board_config_updated.notify()
+        self.e_game_config_updated.notify()
 
     def get_all_values(self) -> dict:
         """Returns a dictionary of all key/values in this section.
@@ -295,7 +295,7 @@ class BoardConfig(SectionBase):
         enum_mapped_dict = raw_config_values.copy()
         for key in raw_config_values:
             try:
-                enum_mapped_dict[BoardConfig.Keys(key)] = enum_mapped_dict.pop(key)
+                enum_mapped_dict[GameConfig.Keys(key)] = enum_mapped_dict.pop(key)
             except ValueError:
                 log.error(f"Unrecognized key ({key}) found in configuration")
         return enum_mapped_dict
@@ -339,5 +339,5 @@ class LichessConfig(SectionBase):
 
 
 player_info_config = PlayerInfoConfig()
-board_config = BoardConfig()
+game_config = GameConfig()
 lichess_config = LichessConfig()
