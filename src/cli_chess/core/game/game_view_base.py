@@ -133,7 +133,7 @@ class PlayableGameViewBase(GameViewBase):
                 fragments.extend(game_in_progress_fragments)
             else:
                 fragments.extend([
-                    ("class:function-bar.key", "F10", handle_mouse_click(self.presenter.exit)),
+                    ("class:function-bar.key", "F8", handle_mouse_click(self.presenter.exit)),
                     ("class:function-bar.label", f"{'Exit':<11}", handle_mouse_click(self.presenter.exit))
                 ])
             return fragments
@@ -160,7 +160,7 @@ class PlayableGameViewBase(GameViewBase):
             if not event.is_repeat:
                 self.presenter.resign()
 
-        @bindings.add(Keys.F10, filter=~Condition(self.presenter.is_game_in_progress), eager=True)
+        @bindings.add(Keys.F8, filter=~Condition(self.presenter.is_game_in_progress), eager=True)
         def _(event): # noqa
             self.presenter.exit()
 

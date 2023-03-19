@@ -89,7 +89,7 @@ class MainView:
                 fragments.append(("class:function-bar.spacer", " "))
 
             fragments.extend([
-                ("class:function-bar.key", "F10", handle_mouse_click(exit_app)),
+                ("class:function-bar.key", "F8", handle_mouse_click(exit_app)),
                 ("class:function-bar.label", f"{'Quit':<14}", handle_mouse_click(exit_app))
             ])
 
@@ -104,7 +104,7 @@ class MainView:
         """Creates the key bindings for the function bar"""
         main_menu_fb_key_bindings = self.presenter.main_menu_presenter.view.get_function_bar_key_bindings()
         main_view_fb_key_bindings = KeyBindings()
-        main_view_fb_key_bindings.add(Keys.F10)(exit_app)
+        main_view_fb_key_bindings.add(Keys.F8)(exit_app)
 
         return merge_key_bindings([main_view_fb_key_bindings, main_menu_fb_key_bindings])
 
