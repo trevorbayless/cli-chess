@@ -13,7 +13,41 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+light_piece_color = "white"
+dark_piece_color = "black"
+
 default = {
+    # Game styling
+    "rank-label": "fg:gray",
+    "file-label": "fg:gray",
+
+    "light-square": "bg:cadetblue",
+    "light-square.light-piece": f"fg:{light_piece_color}",
+    "light-square.dark-piece": f"fg:{dark_piece_color}",
+
+    "dark-square": "bg:darkslateblue",
+    "dark-square.light-piece": f"fg:{light_piece_color}",
+    "dark-square.dark-piece": f"fg:{dark_piece_color}",
+
+    "last-move": "bg:yellowgreen",
+    "last-move.light-piece": f"fg:{light_piece_color}",
+    "last-move.dark-piece": f"fg:{dark_piece_color}",
+
+    "in-check": "bg:red",
+    "in-check.light-piece": f"fg:{light_piece_color}",
+    "in-check.dark-piece": f"fg:{dark_piece_color}",
+
+    "material-difference": "fg:gray",
+    "move-list": "fg:gray",
+    "move-input": "fg:white bold",
+
+    "player-info": "fg:white",
+    "player-info.title": "fg:darkorange bold",
+    "player-info.title.bot": "fg:darkmagenta",
+    "player-info.pos-rating-diff": "fg:darkgreen",
+    "player-info.neg-rating-diff": "fg:darkred",
+
+    # Program styling
     "menu": "bg:",
     "menu.category-title": "fg:black bg:limegreen",
     "menu.option": "fg:white",
@@ -39,15 +73,4 @@ default = {
     "text-area.prompt": "fg:white bg:darkcyan bold noinherit",
 
     "validation-toolbar": "fg:white bg:darkred",
-
-    "material-difference": "fg:gray",
-
-    "move-input": "fg:white bold",
-    "move-list": "fg:gray",
-
-    "player-info": "fg:white",
-    "player-info.title": "fg:darkorange bold",
-    "player-info.title.bot": "fg:darkmagenta",
-    "player-info.pos-rating-diff": "fg:darkgreen",
-    "player-info.neg-rating-diff": "fg:darkred"
 }

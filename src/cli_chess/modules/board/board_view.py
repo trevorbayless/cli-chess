@@ -41,22 +41,20 @@ class BoardView:
         """Returns a string containing the board output to be used for
            display. The string returned will contain HTML elements"""
         board_output_str = ""
-        file_label_color = self.presenter.get_file_label_color()
-        rank_label_color = self.presenter.get_rank_label_color()
 
         for square in board_output_list:
+            square_style = f"{square['square_display_color']}.{square['piece_display_color']}"
             piece_str = square['piece_str']
             piece_str += " " if square['piece_str'] else "  "
 
-            board_output_str += f"<style fg='{rank_label_color}'>{square['rank_label']}</style>"
-            board_output_str += f"<style fg='{square['piece_display_color']}'\
-                                         bg='{square['square_display_color']}'>{piece_str}</style>"
+            board_output_str += f"<rank-label>{square['rank_label']}</rank-label>"
+            board_output_str += f"<{square_style}>{piece_str}</{square_style}>"
 
             if square['is_end_of_rank']:
                 board_output_str += "\n"
 
         file_labels = " " + self.presenter.get_file_labels()
-        board_output_str += f"<style fg='{file_label_color}'>{file_labels}</style>"
+        board_output_str += f"<file-label>{file_labels}</file-label>"
 
         return board_output_str
 

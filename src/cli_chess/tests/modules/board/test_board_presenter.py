@@ -97,11 +97,6 @@ def test_get_board_display(model: BoardModel, presenter: BoardPresenter, game_co
     game_config.set_value(game_config.Keys.BLINDFOLD_CHESS, "no")
     game_config.set_value(game_config.Keys.USE_UNICODE_PIECES, "no")
     game_config.set_value(game_config.Keys.SHOW_BOARD_COORDINATES, "yes")
-    game_config.set_value(game_config.Keys.IN_CHECK_COLOR, "purple")
-    game_config.set_value(game_config.Keys.LIGHT_SQUARE_COLOR, "teal")
-    game_config.set_value(game_config.Keys.DARK_SQUARE_COLOR, "orange")
-    game_config.set_value(game_config.Keys.LIGHT_PIECE_COLOR, "white")
-    game_config.set_value(game_config.Keys.DARK_PIECE_COLOR, "black")
 
     model.set_fen("8/P2R2B1/4p3/5ppQ/1q1nP3/1P1P4/3K1kB1/b7 w - - 0 1")  # white in check
     board_output = presenter.get_board_display()
@@ -112,8 +107,8 @@ def test_get_board_display(model: BoardModel, presenter: BoardPresenter, game_co
             assert square_data == {
                 'square_number': chess.D2,
                 'piece_str': 'K',
-                'piece_display_color': 'white',
-                'square_display_color': 'purple',
+                'piece_display_color': 'light-piece',
+                'square_display_color': 'in-check',
                 'rank_label': '',
                 'is_end_of_rank': False
             }
@@ -123,8 +118,8 @@ def test_get_board_display(model: BoardModel, presenter: BoardPresenter, game_co
             assert square_data == {
                 'square_number': chess.A1,
                 'piece_str': 'B',
-                'piece_display_color': 'black',
-                'square_display_color': 'orange',
+                'piece_display_color': 'dark-piece',
+                'square_display_color': 'dark-square',
                 'rank_label': '1',
                 'is_end_of_rank': False
             }
@@ -135,7 +130,7 @@ def test_get_board_display(model: BoardModel, presenter: BoardPresenter, game_co
                 'square_number': chess.H7,
                 'piece_str': '',
                 'piece_display_color': '',
-                'square_display_color': 'teal',
+                'square_display_color': 'light-square',
                 'rank_label': '',
                 'is_end_of_rank': True
             }
@@ -147,16 +142,6 @@ def test_get_file_labels(model: BoardModel, presenter: BoardPresenter, game_conf
 
     game_config.set_value(game_config.Keys.SHOW_BOARD_COORDINATES, "no")
     assert presenter.get_file_labels() == ""
-
-
-def test_get_file_label_color(model: BoardModel, presenter: BoardPresenter, game_config: GameConfig):
-    game_config.set_value(game_config.Keys.FILE_LABEL_COLOR, "yellow")
-    assert presenter.get_file_label_color() == "yellow"
-
-
-def test_get_rank_label_color(model: BoardModel, presenter: BoardPresenter, game_config: GameConfig):
-    game_config.set_value(game_config.Keys.RANK_LABEL_COLOR, "purple")
-    assert presenter.get_rank_label_color() == "purple"
 
 
 def test_get_rank_label(model: BoardModel, presenter: BoardPresenter, game_config: GameConfig):
@@ -246,20 +231,17 @@ def test_get_piece_str(model: BoardModel, presenter: BoardPresenter, game_config
 
 
 def test_get_piece_display_color(model: BoardModel, presenter: BoardPresenter, game_config: GameConfig):
-    game_config.set_value(game_config.Keys.LIGHT_PIECE_COLOR, "gray")
-    game_config.set_value(game_config.Keys.DARK_PIECE_COLOR, "navy")
-
     for square in chess.SQUARES:
         piece = model.board.piece_at(square)
         bb = chess.BB_SQUARES[square]
 
         # Test light piece color
         if bb & chess.BB_RANK_1 or bb & chess.BB_RANK_2:
-            assert presenter.get_piece_display_color(piece) == "gray"
+            assert presenter.get_piece_display_color(piece) == "light-piece"
 
         # Test dark piece color
         elif bb & chess.BB_RANK_7 or bb & chess.BB_RANK_8:
-            assert presenter.get_piece_display_color(piece) == "navy"
+            assert presenter.get_piece_display_color(piece) == "dark-piece"
 
         # Test no piece
         else:
@@ -267,11 +249,7 @@ def test_get_piece_display_color(model: BoardModel, presenter: BoardPresenter, g
 
 
 def test_get_square_display_color(model: BoardModel, presenter: BoardPresenter, game_config: GameConfig):
-    game_config.set_value(game_config.Keys.LIGHT_SQUARE_COLOR, "white")
-    game_config.set_value(game_config.Keys.DARK_SQUARE_COLOR, "blue")
     game_config.set_value(game_config.Keys.SHOW_BOARD_HIGHLIGHTS, "yes")
-    game_config.set_value(game_config.Keys.LAST_MOVE_COLOR, "yellow")
-    game_config.set_value(game_config.Keys.IN_CHECK_COLOR, "red")
 
     model.set_fen("rnbqkbnr/ppppp1pp/8/5p2/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 1")
     presenter.make_move("Qh5")  # black in check
@@ -280,19 +258,19 @@ def test_get_square_display_color(model: BoardModel, presenter: BoardPresenter, 
     for square in chess.SQUARES:
         # Test in check square
         if model.is_square_in_check(square):
-            assert presenter.get_square_display_color(square) == "red"
+            assert presenter.get_square_display_color(square) == "in-check"
 
         # Test last move squares
         elif square == last_move.to_square or square == last_move.from_square:
-            assert presenter.get_square_display_color(square) == "yellow"
+            assert presenter.get_square_display_color(square) == "last-move"
 
         # Test light square
         elif model.is_light_square(square):
-            assert presenter.get_square_display_color(square) == "white"
+            assert presenter.get_square_display_color(square) == "light-square"
 
         # Test dark square
         elif not model.is_light_square(square):
-            assert presenter.get_square_display_color(square) == "blue"
+            assert presenter.get_square_display_color(square) == "dark-square"
 
     # Test board highlights disabled (no last move color)
     game_config.set_value(game_config.Keys.SHOW_BOARD_HIGHLIGHTS, "no")
@@ -300,7 +278,7 @@ def test_get_square_display_color(model: BoardModel, presenter: BoardPresenter, 
     last_move = model.board.peek()
 
     if chess.BB_SQUARES[last_move.to_square] & chess.BB_LIGHT_SQUARES:
-        assert presenter.get_square_display_color(last_move.to_square) == "white"
+        assert presenter.get_square_display_color(last_move.to_square) == "light-square"
 
     if chess.BB_SQUARES[last_move.from_square] & chess.BB_DARK_SQUARES:
-        assert presenter.get_square_display_color(last_move.from_square) == "blue"
+        assert presenter.get_square_display_color(last_move.from_square) == "dark-square"

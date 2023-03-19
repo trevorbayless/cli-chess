@@ -92,14 +92,6 @@ class BoardPresenter:
 
         return file_labels
 
-    def get_file_label_color(self) -> str:
-        """Returns the color to use for the file labels"""
-        return self.game_config_values[game_config.Keys.FILE_LABEL_COLOR]
-
-    def get_rank_label_color(self) -> str:
-        """Returns the color to use for the rank labels"""
-        return self.game_config_values[game_config.Keys.RANK_LABEL_COLOR]
-
     def get_rank_label(self, square: chess.Square) -> str:
         """Returns a label string if at the start of a rank
            otherwise an empty string will be returned
@@ -161,9 +153,9 @@ class BoardPresenter:
         if piece:
             piece_is_light = True if piece.color else False
             if piece_is_light:
-                piece_color = self.game_config_values[game_config.Keys.LIGHT_PIECE_COLOR]
+                piece_color = "light-piece"
             else:
-                piece_color = self.game_config_values[game_config.Keys.DARK_PIECE_COLOR]
+                piece_color = "dark-piece"
 
         return piece_color
 
@@ -172,22 +164,22 @@ class BoardPresenter:
            square based on configuration settings, last move, and check.
         """
         if self.model.is_light_square(square):
-            square_color = self.game_config_values[game_config.Keys.LIGHT_SQUARE_COLOR]
+            square_color = "light-square"
         else:
-            square_color = self.game_config_values[game_config.Keys.DARK_SQUARE_COLOR]
+            square_color = "dark-square"
 
         show_board_highlights = self.game_config_values[game_config.Keys.SHOW_BOARD_HIGHLIGHTS]
         if show_board_highlights:
             try:
                 last_move = self.model.get_highlight_move()
                 if bool(last_move) and (square == last_move.to_square or square == last_move.from_square):
-                    square_color = self.game_config_values[game_config.Keys.LAST_MOVE_COLOR]
+                    square_color = "last-move"
                     # TODO: Lighten last move square color if on light square
             except IndexError:
                 pass
 
             if self.model.is_square_in_check(square):
-                square_color = self.game_config_values[game_config.Keys.IN_CHECK_COLOR]
+                square_color = "in-check"
 
         return square_color
 

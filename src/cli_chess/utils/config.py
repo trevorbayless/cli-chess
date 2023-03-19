@@ -247,14 +247,6 @@ class GameConfig(SectionBase):
         SHOW_MOVE_LIST_IN_UNICODE = "show_move_list_in_unicode"
         SHOW_MATERIAL_DIFF_IN_UNICODE = "show_material_diff_in_unicode"
         PAD_UNICODE = "pad_unicode"
-        RANK_LABEL_COLOR = "rank_label_color"
-        FILE_LABEL_COLOR = "file_label_color"
-        LAST_MOVE_COLOR = "last_move_color"
-        LIGHT_SQUARE_COLOR = "light_square_color"
-        DARK_SQUARE_COLOR = "dark_square_color"
-        IN_CHECK_COLOR = "in_check_color"
-        LIGHT_PIECE_COLOR = "light_piece_color"
-        DARK_PIECE_COLOR = "dark_piece_color"
 
         @property
         def default_value(self):
@@ -267,14 +259,6 @@ class GameConfig(SectionBase):
                 self.SHOW_MOVE_LIST_IN_UNICODE: False,
                 self.SHOW_MATERIAL_DIFF_IN_UNICODE: False if is_windows_os() else True,
                 self.PAD_UNICODE: True if is_windows_os() else False,
-                self.RANK_LABEL_COLOR: "gray",
-                self.FILE_LABEL_COLOR: "gray",
-                self.LAST_MOVE_COLOR: "yellowgreen",
-                self.LIGHT_SQUARE_COLOR: "cadetblue",
-                self.DARK_SQUARE_COLOR: "darkslateblue",
-                self.IN_CHECK_COLOR: "red",
-                self.LIGHT_PIECE_COLOR: "white",
-                self.DARK_PIECE_COLOR: "black",
             }
             return default_lookup[self]
 
