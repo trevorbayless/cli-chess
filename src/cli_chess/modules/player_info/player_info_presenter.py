@@ -33,7 +33,7 @@ class PlayerInfoPresenter:
 
     def update(self, **kwargs) -> None:
         """Updates the view based on specific model updates"""
-        if 'board_orientation' in kwargs or 'onlineGameOver' in kwargs:
+        if 'boardOrientationChanged' in kwargs or 'onlineGameOver' in kwargs:
             orientation = self.model.board_model.get_board_orientation()
             self.view_upper.update(self.get_player_info(not orientation))
             self.view_lower.update(self.get_player_info(orientation))

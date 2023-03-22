@@ -44,7 +44,7 @@ class GameModelBase:
            listens to subscribed model update events and if deemed necessary
            triages and notifies listeners of the event.
         """
-        if 'board_orientation' in kwargs:
+        if 'boardOrientationChanged' in kwargs or 'successfulMoveMade' in kwargs:
             self._notify_game_model_updated(**kwargs)
 
     def cleanup(self) -> None:

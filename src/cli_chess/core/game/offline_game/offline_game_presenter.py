@@ -47,6 +47,7 @@ class OfflineGamePresenter(PlayableGamePresenterBase):
 
     def update(self, **kwargs) -> None:
         """Update method called on game model updates. Overrides base."""
+        super().update(**kwargs)
         if "offlineGameOver" in kwargs:
             self._parse_and_present_game_over()
 

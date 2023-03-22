@@ -32,7 +32,6 @@ class BoardModel:
 
         self._event_manager = EventManager()
         self.e_board_model_updated = self._event_manager.create_event()
-        self.e_successful_move_made = self._event_manager.create_event()
 
     @staticmethod
     def _initialize_board(variant: str, fen: str):
@@ -68,7 +67,7 @@ class BoardModel:
             self._game_over_result = None
 
             self._log_init_info()
-            self.e_board_model_updated.notify(board_orientation=self.orientation)
+            self.e_board_model_updated.notify(boardOrientationChanged=True)
         except ValueError as e:
             log.error(f"Error while trying to reinitialize the board: {e}")
             raise
@@ -98,8 +97,7 @@ class BoardModel:
             log.info(f"Made move ({move})")
 
             if notify:
-                self._notify_successful_move_made()
-                self._notify_board_model_updated(isGameOver=self.is_game_over())
+                self._notify_board_model_updated(isGameOver=self.is_game_over(), successfulMoveMade=True)
         except Exception as e:
             log.error(e)
             if isinstance(e, chess.InvalidMoveError):
@@ -145,8 +143,7 @@ class BoardModel:
                 log.error(f"Exception caught while making moves from list: {e}")
                 raise e
 
-        self._notify_successful_move_made()
-        self._notify_board_model_updated()
+        self._notify_board_model_updated(successfulMoveMade=True)
 
     def takeback(self, caller_color: chess.Color):
         """Issues a takeback, so it's the callers move again. Raises a Warning if the move
@@ -167,8 +164,7 @@ class BoardModel:
                 self.board.pop()
 
             self.highlight_move = self.board.peek() if len(self.board.move_stack) > 0 else chess.Move.null()
-            self._notify_board_model_updated()
-            self._notify_successful_move_made()
+            self._notify_board_model_updated(successfulMoveMade=True)
 
         except Exception as e:
             if isinstance(e, Warning):
@@ -213,7 +209,7 @@ class BoardModel:
         log.debug(f"Board orientation set to {chess.COLOR_NAMES[self.orientation].upper()}")
 
         if notify:
-            self._notify_board_model_updated(board_orientation=self.orientation)
+            self._notify_board_model_updated(boardOrientationChanged=True)
 
     def set_fen(self, fen: str, notify=True) -> None:
         """Sets the board FEN. Raises ValueError if syntactically invalid.
@@ -339,10 +335,6 @@ class BoardModel:
     def _notify_board_model_updated(self, **kwargs) -> None:
         """Notifies listeners of board model updates"""
         self.e_board_model_updated.notify(**kwargs)
-
-    def _notify_successful_move_made(self) -> None:
-        """Notifies listeners that a board move has been made"""
-        self.e_successful_move_made.notify()
 
     def _log_init_info(self):
         """Logs class initialization"""

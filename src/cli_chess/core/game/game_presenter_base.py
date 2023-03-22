@@ -66,12 +66,15 @@ class PlayableGamePresenterBase(GamePresenterBase, ABC):
         super().__init__(model)
         self.model = model
 
-        self.model.board_model.e_successful_move_made.add_listener(self.view.alert.clear_alert)
-
     @abstractmethod
     def _get_view(self) -> PlayableGameViewBase:
         """Returns the view to use for this presenter"""
         return PlayableGameViewBase(self)
+
+    def update(self, **kwargs) -> None:
+        """Update method called on game model updates. Overrides base."""
+        if "successfulMoveMade" in kwargs:
+            self.view.alert.clear_alert()
 
     def user_input_received(self, inpt: str) -> None:
         """Respond to the users input. This input can either be the
