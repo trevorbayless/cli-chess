@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from cli_chess.utils import Event, log, str_to_bool
+from cli_chess.utils import Event, log
 from typing import Callable
 from threading import Thread
 
@@ -44,6 +44,7 @@ class GameStateDispatcher(Thread):
         log.info(f"Started streaming game state: {self.game_id}")
 
         for event in self.api_client.board.stream_game_state(self.game_id):
+            log.debug(f"Stream event received: {event['type']}")
             if event['type'] == "gameFull":
                 self.e_game_state_dispatcher_event.notify(gameFull=event)
 
@@ -59,7 +60,7 @@ class GameStateDispatcher(Thread):
                 self.e_game_state_dispatcher_event.notify(chatLine=event)
 
             elif event['type'] == "opponentGone":
-                is_gone = str_to_bool(event.get('gone', ""))
+                is_gone = event.get('gone', False)
                 secs_until_claim = event.get('claimWinInSeconds', None)
 
                 if is_gone and secs_until_claim:
