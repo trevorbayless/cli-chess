@@ -67,7 +67,7 @@ class BoardModel:
             self._game_over_result = None
 
             self._log_init_info()
-            self.e_board_model_updated.notify(boardOrientationChanged=True)
+            self._notify_board_model_updated(boardOrientationChanged=True)
         except ValueError as e:
             log.error(f"Error while trying to reinitialize the board: {e}")
             raise
@@ -94,9 +94,9 @@ class BoardModel:
             move = move.strip()
             move = self.board.push_san(move)
             self.highlight_move = move
-            log.info(f"Made move ({move})")
 
             if notify:
+                log.debug(f"Made move ({move})")
                 self._notify_board_model_updated(isGameOver=self.is_game_over(), successfulMoveMade=True)
         except Exception as e:
             log.error(e)
@@ -143,7 +143,9 @@ class BoardModel:
                 log.error(f"Exception caught while making moves from list: {e}")
                 raise e
 
-        self._notify_board_model_updated(successfulMoveMade=True)
+        if move_list:
+            log.debug(f"Updated board with moves from list. Last move played: {move_list[-1]}")
+            self._notify_board_model_updated(successfulMoveMade=True)
 
     def takeback(self, caller_color: chess.Color):
         """Issues a takeback, so it's the callers move again. Raises a Warning if the move
@@ -305,7 +307,7 @@ class BoardModel:
                 if isinstance(orientation, bool):
                     self.set_board_orientation(orientation, notify=False)
 
-                self.e_board_model_updated.notify()
+                self._notify_board_model_updated()
         except Exception as e:
             log.error(f"Error caught setting board position: {e}")
 
@@ -324,7 +326,7 @@ class BoardModel:
            listeners that the game is over.
         """
         self._game_over_result = chess.Outcome("resignation", not color_resigning)  # noqa
-        self.e_board_model_updated.notify(isGameOver=True)
+        self._notify_board_model_updated(isGameOver=True)
 
     def cleanup(self) -> None:
         """Handles model cleanup tasks. This should only ever
