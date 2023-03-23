@@ -17,6 +17,7 @@ from __future__ import annotations
 from cli_chess.utils.ui_common import repaint_ui
 from prompt_toolkit.layout import Window, FormattedTextControl, D
 from prompt_toolkit.formatted_text import HTML
+from prompt_toolkit.widgets import Box
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from cli_chess.modules.board import BoardPresenter
@@ -30,12 +31,12 @@ class BoardView:
 
     def _create_container(self):
         """Create the Board container"""
-        return Window(
+        return Box(Window(
             self.board_output,
             always_hide_cursor=True,
-            width=D(max=20, preferred=20),
-            height=D(max=10, preferred=10)
-        )
+            width=D(max=18, preferred=18),
+            height=D(max=9, preferred=9)
+        ), padding=1)
 
     def _build_output(self, board_output_list: list) -> str:
         """Returns a string containing the board output to be used for
@@ -63,6 +64,6 @@ class BoardView:
         self.board_output.text = HTML(self._build_output(board_output_list))
         repaint_ui()
 
-    def __pt_container__(self) -> Window:
+    def __pt_container__(self) -> Box:
         """Returns this container"""
         return self._container
