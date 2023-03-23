@@ -88,6 +88,7 @@ class GameModelBase:
                 },
             },
             'clock': {
+                'units': "ms",
                 'white': {
                     'time': 0,
                     'increment': 0

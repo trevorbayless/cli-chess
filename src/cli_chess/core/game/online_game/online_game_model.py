@@ -231,7 +231,7 @@ class OnlineGameModel(PlayableGameModelBase):
                     elif data[color].get('aiLevel'):
                         self.game_metadata['players'][color]['name'] = f"Stockfish level {data[color]['aiLevel']}"
 
-                # NOTE: Times below come from lichess in milliseconds
+                self.game_metadata['clock']['units'] = "ms"
                 self.game_metadata['clock']['white']['time'] = data['state']['wtime']
                 self.game_metadata['clock']['white']['increment'] = data['state']['winc']
                 self.game_metadata['clock']['black']['time'] = data['state']['btime']
@@ -239,7 +239,6 @@ class OnlineGameModel(PlayableGameModelBase):
 
             elif 'gsd_gameState' in kwargs:
                 data = kwargs['gsd_gameState']
-                # NOTE: Times below come from lichess in milliseconds
                 self.game_metadata['clock']['white']['time'] = data['wtime']
                 self.game_metadata['clock']['black']['time'] = data['btime']
 
