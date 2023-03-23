@@ -102,9 +102,6 @@ class OfflineGameModel(PlayableGameModelBase):
                 data = kwargs['game_parameters']
                 self.game_metadata['my_color_str'] = COLOR_NAMES[self.my_color]
                 self.game_metadata['variant'] = data[GameOption.VARIANT]
-                self.game_metadata['clock']['white']['time'] = data[GameOption.TIME_CONTROL][0]
-                self.game_metadata['clock']['white']['increment'] = data[GameOption.TIME_CONTROL][1]
-                self.game_metadata['clock']['black'] = self.game_metadata['clock']['white']
 
                 # My player information
                 my_name = player_info_config.get_value(player_info_config.Keys.OFFLINE_PLAYER_NAME)
