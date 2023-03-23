@@ -70,10 +70,9 @@ class WatchTVModel(GameModelBase):
 
             if 'tv_coreGameEvent' in kwargs:
                 data = kwargs['tv_coreGameEvent']
-                self.game_metadata['clock']['white']['time'] = data['wc']  # in seconds
-                self.game_metadata['clock']['white']['increment'] = 0
-                self.game_metadata['clock']['black']['time'] = data['bc']  # in seconds
-                self.game_metadata['clock']['black']['increment'] = 0
+                self.game_metadata['clock']['units'] = "sec"
+                self.game_metadata['clock']['white']['time'] = data['wc']
+                self.game_metadata['clock']['black']['time'] = data['bc']
 
             if 'tv_endGameEvent' in kwargs:
                 data = kwargs['tv_endGameEvent']
@@ -116,6 +115,7 @@ class WatchTVModel(GameModelBase):
                     last_move = "k@" + last_move[2:]
 
                 self.board_model.reinitialize_board(variant, orientation, event.get('fen'), last_move)
+                self.e_game_model_updated.notify(tvPositionUpdated=True)
 
             if 'coreGameEvent' in kwargs:
                 # NOTE: the `lm` field that lichess sends is not valid UCI. It should only be used
@@ -123,6 +123,7 @@ class WatchTVModel(GameModelBase):
                 event = kwargs['coreGameEvent']
                 self._save_game_metadata(tv_coreGameEvent=event)
                 self.board_model.set_board_position(event.get('fen'), uci_last_move=event.get('lm'))
+                self.e_game_model_updated.notify(tvPositionUpdated=True)
 
             if 'endGameEvent' in kwargs:
                 event = kwargs['endGameEvent']
