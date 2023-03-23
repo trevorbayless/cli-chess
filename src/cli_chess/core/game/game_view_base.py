@@ -16,8 +16,8 @@
 from __future__ import annotations
 from cli_chess.utils.ui_common import handle_mouse_click, go_back_to_main_menu, AlertContainer
 from cli_chess.utils.logging import log
-from prompt_toolkit.widgets import TextArea, Box
-from prompt_toolkit.layout import Window, Container, FormattedTextControl, HSplit, VSplit, VerticalAlign, D
+from prompt_toolkit.widgets import TextArea
+from prompt_toolkit.layout import Window, Container, FormattedTextControl, VSplit, D
 from prompt_toolkit.formatted_text import StyleAndTextTuples
 from prompt_toolkit.key_binding import KeyBindings, merge_key_bindings
 from prompt_toolkit.keys import Keys
@@ -38,6 +38,8 @@ class GameViewBase(ABC):
         self.material_diff_lower_container = presenter.material_diff_presenter.view_lower
         self.player_info_upper_container = presenter.player_info_presenter.view_upper
         self.player_info_lower_container = presenter.player_info_presenter.view_lower
+        self.clock_upper = presenter.clock_presenter.view_upper
+        self.clock_lower = presenter.clock_presenter.view_lower
         self.alert = AlertContainer()
         self._container = self._create_container()
 
@@ -81,37 +83,16 @@ class GameViewBase(ABC):
         return self._container
 
 
-class PlayableGameViewBase(GameViewBase):
+class PlayableGameViewBase(GameViewBase, ABC):
     """Implements a base game view which has a move input field"""
     def __init__(self, presenter: PlayableGamePresenterBase):
         self.presenter = presenter
         self.input_field_container = self._create_input_field_container()
         super().__init__(presenter)
 
+    @abstractmethod
     def _create_container(self) -> Container:
-        main_content = Box(
-            HSplit([
-                VSplit([
-                    self.board_output_container,
-                    HSplit([
-                        self.player_info_upper_container,
-                        self.material_diff_upper_container,
-                        self.move_list_container,
-                        self.material_diff_lower_container,
-                        self.player_info_lower_container
-                    ])
-                ]),
-                self.input_field_container,
-                self.alert,
-            ]),
-            padding=1,
-            padding_bottom=0
-        )
-        function_bar = HSplit([
-            self._create_function_bar()
-        ], align=VerticalAlign.BOTTOM)
-
-        return HSplit([main_content, function_bar], key_bindings=self.get_key_bindings())
+        pass
 
     def _create_function_bar(self) -> VSplit:
         """Create the conditional function bar"""
