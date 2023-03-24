@@ -16,7 +16,7 @@
 from __future__ import annotations
 from cli_chess.__metadata__ import __version__
 from cli_chess.utils.ui_common import handle_mouse_click, exit_app, get_custom_style
-from cli_chess.utils import is_linux_os, default, log
+from cli_chess.utils import is_linux_os, is_windows_os, default, log
 from prompt_toolkit.application import Application
 from prompt_toolkit.layout import Layout, Window, Container, FormattedTextControl, VSplit, HSplit, VerticalAlign, WindowAlign, D
 from prompt_toolkit.formatted_text import StyleAndTextTuples
@@ -26,9 +26,8 @@ from prompt_toolkit.widgets import Box
 from prompt_toolkit.styles import Style, merge_styles
 from prompt_toolkit import print_formatted_text, HTML
 from prompt_toolkit.output.color_depth import ColorDepth
-import sys
 try:
-    from prompt_toolkit.output.win32 import NoConsoleScreenBufferError # noqa
+    from prompt_toolkit.output.win32 import NoConsoleScreenBufferError  # noqa
 except AssertionError:
     pass
 from typing import TYPE_CHECKING
@@ -57,13 +56,7 @@ class MainView:
             main_view = self
 
         except Exception as e:
-            msg = str(e)
-            log.critical(f"Error starting cli-chess: {msg}")
-            if 'NoConsoleScreenBufferError' in sys.modules:
-                if isinstance(e, NoConsoleScreenBufferError):
-                    msg = "A Windows console was expected and not found. Try running this program using cmd.exe instead."
-            self.print_error_to_terminal(title="Error starting cli-chess", msg=msg)
-            exit(1)
+            self._handle_startup_exceptions(e)
 
     def run(self) -> None:
         """Runs the main application"""
@@ -142,8 +135,19 @@ class MainView:
         if (not hasattr(self, 'app') or not self.app.is_running) and msg:
             # NOTE: Print statements are separated in order to be able to print
             #  syntax errors which can have mismatched tags (e.g. with eval()).
-            print_formatted_text(HTML(f"<red>{title}</red> "))
+            print_formatted_text(HTML(f"<red>{title}</red>"))
             print_formatted_text(msg)
+
+    def _handle_startup_exceptions(self, e: Exception) -> None:
+        """Handles exceptions caught during application startup"""
+        log.critical(f"Error starting cli-chess: {str(e)}")
+        if is_windows_os() and isinstance(e, NoConsoleScreenBufferError):
+            print("Error starting cli-chess:\n"
+                  "A Windows console was expected and not found.\n"
+                  "Try running this program using cmd.exe instead.")
+        else:
+            self.print_error_to_terminal(title="Error starting cli-chess", msg=str(e))
+        exit(1)
 
     def __pt_container__(self) -> Container:
         """Return the view container"""
