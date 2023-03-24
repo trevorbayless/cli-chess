@@ -96,6 +96,7 @@ class EngineModel:
         """Notify the engine to quit"""
         try:
             if self.engine:
+                log.debug("Quitting engine")
                 self.engine.quit()
         except Exception as e:
             log.error(f"Error quitting engine: {e}")

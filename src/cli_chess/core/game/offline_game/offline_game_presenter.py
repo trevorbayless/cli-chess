@@ -70,7 +70,7 @@ class OfflineGamePresenter(PlayableGamePresenterBase):
 
             elif engine_move.move:
                 move = engine_move.move.uci()
-                log.debug(f"Received move ({move}) from engine. Playing move on board.")
+                log.debug(f"Received move ({move}) from engine.")
                 self.board_presenter.make_move(move)
         except Exception as e:
             log.error(f"Engine error {e}")

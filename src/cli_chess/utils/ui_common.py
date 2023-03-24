@@ -39,7 +39,7 @@ def change_views(container: Container, focused_element=None):
     """Change the view to the passed in container.
        Focuses the view on the optional passed in element.
     """
-    log.debug(f"Changing view to {container}")
+    log.debug(f"View changed to {type(container).__name__} (id={id(container)})")
     app = get_app()
     focused_element = focused_element if focused_element else container
     app.layout = Layout(container)

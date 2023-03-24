@@ -38,7 +38,7 @@ class GamePresenterBase(ABC):
         self.view = self._get_view()
 
         self.model.e_game_model_updated.add_listener(self.update)
-        log.debug(f"Created game presenter (id={id(self)})")
+        log.debug(f"Created {type(self).__name__} (id={id(self)})")
 
     @abstractmethod
     def _get_view(self) -> GameViewBase:

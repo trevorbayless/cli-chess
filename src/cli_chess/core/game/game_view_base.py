@@ -43,7 +43,7 @@ class GameViewBase(ABC):
         self.alert = AlertContainer()
         self._container = self._create_container()
 
-        log.debug(f"Created game view (id={id(self)})")
+        log.debug(f"Created {type(self).__name__} (id={id(self)})")
 
     @abstractmethod
     def _create_container(self) -> Container:

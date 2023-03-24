@@ -276,8 +276,8 @@ class OnlineGameModel(PlayableGameModelBase):
 
         if self.api_iem:
             self.api_iem.unsubscribe_from_events(self.handle_iem_event)
-            log.debug(f"Cleared subscription from {self.api_iem}")
+            log.debug(f"Cleared subscription from {type(self.api_iem).__name__} (id={id(self.api_iem)})")
 
         if self.game_in_progress:
             self.game_state_dispatcher.unsubscribe_from_events(self.handle_game_state_dispatcher_event)
-            log.debug(f"Cleared subscription from  {self.game_state_dispatcher}")
+            log.debug(f"Cleared subscription from {type(self.game_state_dispatcher).__name__} (id={id(self.game_state_dispatcher)})")
