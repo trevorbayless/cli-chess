@@ -15,7 +15,6 @@
 
 from __future__ import annotations
 from cli_chess.modules.clock import ClockView
-from cli_chess.utils.logging import log
 from chess import Color, COLOR_NAMES
 from datetime import datetime, timezone
 from typing import TYPE_CHECKING
@@ -47,11 +46,10 @@ class ClockPresenter:
         time = clock_data.get(COLOR_NAMES[color]).get('time')
 
         if not time:
-            log.error(f"Time data is not available for {COLOR_NAMES[color]}")
             return "--:--"
 
         if not isinstance(time, datetime):
-            if clock_data.get('units') == "ms":
+            if units == "ms":
                 time = datetime.fromtimestamp(time / 1000, timezone.utc)
             elif units == "sec":
                 time = datetime.fromtimestamp(time, timezone.utc)
