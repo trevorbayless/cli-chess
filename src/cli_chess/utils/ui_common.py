@@ -45,6 +45,7 @@ def change_views(container: Container, focused_element=None):
     app.layout = Layout(container)
 
     try:
+        app.key_bindings = None
         app.layout.focus(focused_element)
 
         # NOTE: There's a possible PT bug here. There shouldn't be a need to
