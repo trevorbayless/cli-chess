@@ -32,13 +32,13 @@ class OfflineGameView(PlayableGameViewBase):
             HSplit([
                 VSplit([
                     self.board_output_container,
-                    HSplit([
+                    Box(HSplit([
                         self.player_info_upper_container,
                         self.material_diff_upper_container,
                         self.move_list_container,
                         self.material_diff_lower_container,
                         self.player_info_lower_container,
-                    ])
+                    ]), padding=0, padding_top=1)
                 ]),
                 self.input_field_container,
                 self.alert,
