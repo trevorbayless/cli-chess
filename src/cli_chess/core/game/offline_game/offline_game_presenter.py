@@ -17,9 +17,8 @@ from cli_chess.core.game.offline_game import OfflineGameModel, OfflineGameView
 from cli_chess.core.game import PlayableGamePresenterBase
 from cli_chess.modules.engine import EnginePresenter
 from cli_chess.utils.ui_common import change_views
-from cli_chess.utils import log, AlertType
+from cli_chess.utils import log, threaded, AlertType
 from chess import Termination, COLOR_NAMES, Color
-import asyncio
 
 
 def start_offline_game(game_parameters: dict):
@@ -37,7 +36,7 @@ class OfflineGamePresenter(PlayableGamePresenterBase):
         try:
             self.engine_presenter.start_engine()
             if self.model.board_model.get_turn() != self.model.my_color:
-                asyncio.create_task(self.make_engine_move())
+                self.make_engine_move()
         except Exception as e:
             self.view.alert.show_alert(str(e))
 
@@ -55,14 +54,15 @@ class OfflineGamePresenter(PlayableGamePresenterBase):
         """Make the users move on the board"""
         try:
             self.model.make_move(move)
-            asyncio.create_task(self.make_engine_move())
+            self.make_engine_move()
         except Exception as e:
             self.view.alert.show_alert(str(e))
 
-    async def make_engine_move(self) -> None:
+    @threaded
+    def make_engine_move(self) -> None:
         """Get the best move from the engine and make it"""
         try:
-            engine_move = await self.engine_presenter.get_best_move()
+            engine_move = self.engine_presenter.get_best_move()
 
             if engine_move.resigned:
                 log.debug("Sending resignation on behalf of the engine")
