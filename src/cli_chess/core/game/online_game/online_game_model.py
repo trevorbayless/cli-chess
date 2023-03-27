@@ -17,7 +17,7 @@ from cli_chess.core.game import PlayableGameModelBase
 from cli_chess.core.game.game_options import GameOption
 from cli_chess.core.api import GameStateDispatcher
 from cli_chess.utils import log, threaded
-from chess import COLOR_NAMES
+from chess import COLOR_NAMES, WHITE
 from typing import Optional
 
 
@@ -100,8 +100,8 @@ class OnlineGameModel(PlayableGameModelBase):
             event = kwargs['gameFull']
             self._save_game_metadata(gsd_gameFull=event)
             self.board_model.reinitialize_board(variant=self.game_metadata['variant'],
-                                                orientation=self.my_color,
-                                                fen=event['initialFen'])
+                                                orientation=(self.my_color if self.board_model.get_variant_name() != "racingkings" else WHITE),
+                                                fen=event.get('initialFen', ""))
             self.board_model.make_moves_from_list(event.get('state', {}).get('moves', []).split())
 
         elif 'gameState' in kwargs:
