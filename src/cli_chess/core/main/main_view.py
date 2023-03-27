@@ -18,6 +18,7 @@ from cli_chess.__metadata__ import __version__
 from cli_chess.utils.ui_common import handle_mouse_click, exit_app, get_custom_style
 from cli_chess.utils import is_linux_os, is_windows_os, default, log
 from prompt_toolkit.application import Application
+from prompt_toolkit.patch_stdout import patch_stdout
 from prompt_toolkit.layout import Layout, Window, Container, FormattedTextControl, VSplit, HSplit, VerticalAlign, WindowAlign, D
 from prompt_toolkit.formatted_text import StyleAndTextTuples
 from prompt_toolkit.key_binding import KeyBindings, merge_key_bindings
@@ -60,7 +61,8 @@ class MainView:
 
     def run(self) -> None:
         """Runs the main application"""
-        self.app.run()
+        with patch_stdout():
+            self.app.run()
 
     def _create_main_container(self):
         """Creates the container for the main view"""
