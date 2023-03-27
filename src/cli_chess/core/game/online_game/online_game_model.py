@@ -82,16 +82,16 @@ class OnlineGameModel(PlayableGameModelBase):
     def handle_iem_event(self, **kwargs) -> None:
         """Handles events received from the IncomingEventManager"""
         if 'gameStart' in kwargs:
-            event = kwargs['gameStart']['game']
+            event = kwargs['gameStart'].get('game')
             # TODO: There has to be a better way to ensure this is the right game...
             #  add some further specific clauses like color, time control, date, etc?
-            if not self.game_in_progress and not event['hasMoved'] and event['compat']['board']:
+            if not self.game_in_progress and not event.get('hasMoved') and event.get('compat', {}).get('board'):
                 self._save_game_metadata(iem_gameStart=event)
-                self._start_game(event['gameId'])
+                self._start_game(event.get('gameId'))
 
         elif 'gameFinish' in kwargs:
-            event = kwargs['gameFinish']['game']
-            if self.game_in_progress and self.playing_game_id == event['gameId']:
+            event = kwargs['gameFinish'].get('game')
+            if self.game_in_progress and self.playing_game_id == event.get('gameId'):
                 self._game_end()
 
     def handle_game_state_dispatcher_event(self, **kwargs) -> None:
@@ -102,7 +102,7 @@ class OnlineGameModel(PlayableGameModelBase):
             self.board_model.reinitialize_board(variant=self.game_metadata['variant'],
                                                 orientation=self.my_color,
                                                 fen=event['initialFen'])
-            self.board_model.make_moves_from_list(event['state']['moves'].split())
+            self.board_model.make_moves_from_list(event.get('state', {}).get('moves', []).split())
 
         elif 'gameState' in kwargs:
             event = kwargs['gameState']
@@ -112,7 +112,7 @@ class OnlineGameModel(PlayableGameModelBase):
             # Resetting and replaying the moves guarantees the game between lichess
             # and our local board are in sync (eg. takebacks, moves played on website, etc)
             self.board_model.reset(notify=False)
-            self.board_model.make_moves_from_list(event['moves'].split())
+            self.board_model.make_moves_from_list(event.get('moves', []).split())
 
             if kwargs['gameOver']:
                 self._report_game_over(status=event.get('status'), winner=event.get('winner', ""))
@@ -197,15 +197,15 @@ class OnlineGameModel(PlayableGameModelBase):
             if 'game_parameters' in kwargs:  # This is the data that came from the menu selections
                 data = kwargs['game_parameters']
                 self.game_metadata['my_color_str'] = COLOR_NAMES[self.my_color]
-                self.game_metadata['variant'] = data[GameOption.VARIANT]
+                self.game_metadata['variant'] = data.get(GameOption.VARIANT)
                 self.game_metadata['rated'] = data.get(GameOption.RATED, False)  # Games against AI will not have this data
                 self.game_metadata['ai_level'] = data.get(GameOption.COMPUTER_SKILL_LEVEL)  # Only games against AI will have this data
-                self.game_metadata['clock']['white']['time'] = data[GameOption.TIME_CONTROL][0]       # mins
-                self.game_metadata['clock']['white']['increment'] = data[GameOption.TIME_CONTROL][1]  # secs
+                self.game_metadata['clock']['white']['time'] = data.get(GameOption.TIME_CONTROL)[0]       # mins
+                self.game_metadata['clock']['white']['increment'] = data.get(GameOption.TIME_CONTROL)[1]  # secs
                 self.game_metadata['clock']['black'] = self.game_metadata['clock']['white']
 
                 if self.game_metadata['ai_level']:
-                    self.game_metadata['clock']['white']['time'] = data[GameOption.TIME_CONTROL][0] * 60  # challenges need time in seconds
+                    self.game_metadata['clock']['white']['time'] = data.get(GameOption.TIME_CONTROL)[0] * 60  # challenges need time in seconds
                     self.game_metadata['clock']['black'] = self.game_metadata['clock']['white']
 
             elif 'iem_gameStart' in kwargs:
@@ -213,34 +213,34 @@ class OnlineGameModel(PlayableGameModelBase):
                 self.game_metadata = self._default_game_metadata()
 
                 data = kwargs['iem_gameStart']
-                self.game_metadata['gameId'] = data['gameId']
-                self.game_metadata['my_color_str'] = data['color']
-                self.game_metadata['rated'] = data['rated']
-                self.game_metadata['variant'] = data['variant']['name']
+                self.game_metadata['gameId'] = data.get('gameId')
+                self.game_metadata['my_color_str'] = data.get('color')
+                self.game_metadata['rated'] = data.get('rated')
+                self.game_metadata['variant'] = data.get('variant', {}).get('name')
                 self.game_metadata['speed'] = data['speed']
 
             elif 'gsd_gameFull' in kwargs:
                 data = kwargs['gsd_gameFull']
 
                 for color in COLOR_NAMES:
-                    if data[color].get('name'):
-                        self.game_metadata['players'][color]['title'] = data.get('color', {}).get('title', "")
-                        self.game_metadata['players'][color]['name'] = data[color]['name']
-                        self.game_metadata['players'][color]['rating'] = data[color]['rating']
+                    if data.get(color, {}).get('name'):
+                        self.game_metadata['players'][color]['title'] = data.get(color, {}).get('title')
+                        self.game_metadata['players'][color]['name'] = data.get(color, {}).get('name', "?")
+                        self.game_metadata['players'][color]['rating'] = data.get(color, {}).get('rating', "?")
                         self.game_metadata['players'][color]['provisional'] = data.get(color, {}).get('provisional', False)
-                    elif data[color].get('aiLevel'):
-                        self.game_metadata['players'][color]['name'] = f"Stockfish level {data[color]['aiLevel']}"
+                    elif data.get(color, {}).get('aiLevel'):
+                        self.game_metadata['players'][color]['name'] = f"Stockfish level {data.get(color, {}).get('aiLevel', '?')}"
 
                 self.game_metadata['clock']['units'] = "ms"
-                self.game_metadata['clock']['white']['time'] = data['state']['wtime']
-                self.game_metadata['clock']['white']['increment'] = data['state']['winc']
-                self.game_metadata['clock']['black']['time'] = data['state']['btime']
-                self.game_metadata['clock']['black']['increment'] = data['state']['binc']
+                self.game_metadata['clock']['white']['time'] = data.get('state', {}).get('wtime')
+                self.game_metadata['clock']['white']['increment'] = data.get('state', {}).get('winc')
+                self.game_metadata['clock']['black']['time'] = data.get('state', {}).get('btime')
+                self.game_metadata['clock']['black']['increment'] = data.get('state', {}).get('binc')
 
             elif 'gsd_gameState' in kwargs:
                 data = kwargs['gsd_gameState']
-                self.game_metadata['clock']['white']['time'] = data['wtime']
-                self.game_metadata['clock']['black']['time'] = data['btime']
+                self.game_metadata['clock']['white']['time'] = data.get('wtime')
+                self.game_metadata['clock']['black']['time'] = data.get('btime')
 
             self._notify_game_model_updated()
         except Exception as e:

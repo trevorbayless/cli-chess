@@ -64,11 +64,11 @@ class WatchTVModel(GameModelBase):
                 self.game_metadata['state']['winner'] = data.get('winner')  # Not included on draws or abort
 
                 for color in COLOR_NAMES:
-                    if data['players'][color].get('user'):
+                    if data.get('players', {}).get(color, {}).get('user'):  # non-ai player data
                         self.game_metadata['players'][color] = data.get('players', {}).get(color, {}).get('user', "")
                         self.game_metadata['players'][color]['rating'] = data.get('players', {}).get(color, {}).get('rating', "")
                         self.game_metadata['players'][color]['rating_diff'] = data.get('players', {}).get(color, {}).get('ratingDiff', "")
-                    elif data['players'][color].get('aiLevel'):
+                    elif data.get('players', {}).get(color, {}).get('aiLevel'):  # ai data
                         self.game_metadata['players'][color]['name'] = f"Stockfish level {data.get('players', {}).get(color, {}).get('aiLevel', '')}"
 
             if 'tv_coreGameEvent' in kwargs:
@@ -88,9 +88,9 @@ class WatchTVModel(GameModelBase):
             # TODO: Data needs to be organized and sent to presenter to handle display
             if 'startGameEvent' in kwargs:
                 event = kwargs['startGameEvent']
-                variant = event['variant']['key']
-                white_rating = int(event['players']['white'].get('rating') or 0)
-                black_rating = int(event['players']['black'].get('rating') or 0)
+                variant = event.get('variant', {}).get('key')
+                white_rating = int(event.get('players', {}).get('white', {}).get('rating') or 0)
+                black_rating = int(event.get('players', {}).get('black', {}).get('rating') or 0)
                 orientation = True if ((white_rating >= black_rating) or self.channel.variant.lower() == "racingkings") else False
 
                 self._save_game_metadata(tv_descriptionEvent=event, tv_startGameEvent=True)
