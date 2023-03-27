@@ -51,41 +51,31 @@ class WatchTVModel(GameModelBase):
     def _save_game_metadata(self, **kwargs) -> None:
         """Parses and saves the data of the game being played"""
         try:
-            if 'tv_gameStartEvent' in kwargs:
-                # Reset game metadata
-                self.game_metadata = self._default_game_metadata()
+            if 'tv_descriptionEvent' in kwargs:
+                data = kwargs['tv_descriptionEvent']
+                if 'tv_startGameEvent' in kwargs:
+                    self.game_metadata = self._default_game_metadata()
 
-                data = kwargs['tv_gameStartEvent']
                 self.game_metadata['gameId'] = data.get('id')
                 self.game_metadata['rated'] = data.get('rated')
                 self.game_metadata['variant'] = data.get('variant')
                 self.game_metadata['speed'] = data.get('speed')
-
-                for color in COLOR_NAMES:
-                    if data['players'][color].get('user'):
-                        self.game_metadata['players'][color] = data['players'][color]['user']
-                        self.game_metadata['players'][color]['rating'] = data['players'][color]['rating']
-                    elif data['players'][color].get('aiLevel'):
-                        self.game_metadata['players'][color]['name'] = f"Stockfish level {data['players'][color]['aiLevel']}"
-
-            if 'tv_coreGameEvent' in kwargs:
-                data = kwargs['tv_coreGameEvent']
-                self.game_metadata['clock']['units'] = "sec"
-                self.game_metadata['clock']['white']['time'] = data['wc']
-                self.game_metadata['clock']['black']['time'] = data['bc']
-
-            if 'tv_endGameEvent' in kwargs:
-                data = kwargs['tv_endGameEvent']
                 self.game_metadata['state']['status'] = data.get('status')
                 self.game_metadata['state']['winner'] = data.get('winner')  # Not included on draws or abort
 
                 for color in COLOR_NAMES:
                     if data['players'][color].get('user'):
-                        self.game_metadata['players'][color] = data['players'][color]['user']
-                        self.game_metadata['players'][color]['rating'] = data['players'][color]['rating']
-                        self.game_metadata['players'][color]['rating_diff'] = data.get('players', {}).get(color, {}).get('ratingDiff', "")  # NOTE: Not included on aborted games # noqa
+                        self.game_metadata['players'][color] = data.get('players', {}).get(color, {}).get('user', "")
+                        self.game_metadata['players'][color]['rating'] = data.get('players', {}).get(color, {}).get('rating', "")
+                        self.game_metadata['players'][color]['rating_diff'] = data.get('players', {}).get(color, {}).get('ratingDiff', "")
                     elif data['players'][color].get('aiLevel'):
-                        self.game_metadata['players'][color]['name'] = f"Stockfish level {data['players'][color]['aiLevel']}"
+                        self.game_metadata['players'][color]['name'] = f"Stockfish level {data.get('players', {}).get(color, {}).get('aiLevel', '')}"
+
+            if 'tv_coreGameEvent' in kwargs:
+                data = kwargs['tv_coreGameEvent']
+                self.game_metadata['clock']['units'] = "sec"
+                self.game_metadata['clock']['white']['time'] = data.get('wc')
+                self.game_metadata['clock']['black']['time'] = data.get('bc')
 
             self.e_game_model_updated.notify()
         except Exception as e:
@@ -103,7 +93,7 @@ class WatchTVModel(GameModelBase):
                 black_rating = int(event['players']['black'].get('rating') or 0)
                 orientation = True if ((white_rating >= black_rating) or self.channel.variant.lower() == "racingkings") else False
 
-                self._save_game_metadata(tv_gameStartEvent=event)
+                self._save_game_metadata(tv_descriptionEvent=event, tv_startGameEvent=True)
                 last_move = event.get('lastMove', "")
                 if variant == "crazyhouse" and len(last_move) == 4 and last_move[:2] == last_move[2:]:
                     # NOTE: This is a dirty fix. When streaming a crazyhouse game from lichess, if the
@@ -127,7 +117,7 @@ class WatchTVModel(GameModelBase):
 
             if 'endGameEvent' in kwargs:
                 event = kwargs['endGameEvent']
-                self._save_game_metadata(tv_endGameEvent=event)
+                self._save_game_metadata(tv_descriptionEvent=event)
                 self.e_game_model_updated.notify(onlineGameOver=True)
         except Exception as e:
             log.error(f"Error parsing stream data: {e}")
@@ -202,7 +192,7 @@ class StreamTVChannel(threading.Thread):
                         if status == "started":
                             log.info(f"Started streaming TV game: {game_id}")
                             self.e_tv_stream_event.notify(startGameEvent=event)
-                            turns_behind = event.get('turns')
+                            turns_behind = event.get('turns', 0)
 
                         if fen:
                             if turns_behind <= 2:
