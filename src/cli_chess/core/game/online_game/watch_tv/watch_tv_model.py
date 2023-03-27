@@ -205,13 +205,14 @@ class StreamTVChannel(threading.Thread):
                             turns_behind = event.get('turns')
 
                         if fen:
-                            if turns_behind and turns_behind > 0:
-                                # Keeping track of turns behind allows skipping this event until
-                                # we are caught up. This stops a quick game replay from happening.
-                                turns_behind -= 1
-                            else:
+                            if turns_behind <= 2:
                                 if event.get('wc') and event.get('bc'):
                                     self.e_tv_stream_event.notify(coreGameEvent=event)
+                            else:
+                                # Keeping track of turns behind allows skipping this event until
+                                # we are caught up. This stops a quick game replay from happening.
+                                # We do however want to grab the last move event to pick up the clock data.
+                                turns_behind -= 1
 
             except Exception as e:
                 self.handle_exceptions(e)
