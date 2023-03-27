@@ -83,12 +83,12 @@ class OnlineGamePresenter(PlayableGamePresenterBase):
         elif status == "cheat":
             output = "Cheat detected" + output
         elif status == "variantEnd":
-            variant = self.model.game_metadata.get("variant", "")
-            if variant == "threeCheck":
+            variant = self.model.board_model.get_variant_name()
+            if variant == "3check":
                 output = "Three Checks" + output
-            elif variant == "kingOfTheHill":
+            elif variant == "kingofthehill":
                 output = "King in the center" + output
-            elif variant == "racingKings":
+            elif variant == "racingkings":
                 output = "Race finished" + output
             else:
                 output = "Variant ending" + output
