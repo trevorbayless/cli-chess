@@ -31,6 +31,7 @@ class OnlineGameModel(PlayableGameModelBase):
 
         self.game_state_dispatcher = Optional[GameStateDispatcher]
         self.playing_game_id = None
+        self.vs_ai = False
 
         try:
             from cli_chess.core.api.api_manager import api_client, api_iem
@@ -46,8 +47,9 @@ class OnlineGameModel(PlayableGameModelBase):
         """Sends a request to lichess to start an AI challenge using the selected game parameters"""
         # Note: Only subscribe to IEM events right before creating challenge to lessen chance of grabbing another game
         self.api_iem.subscribe_to_events(self.handle_iem_event)
+        self.vs_ai = is_vs_ai
 
-        if is_vs_ai:  # Challenge Lichess AI (stockfish)
+        if self.vs_ai:  # Challenge Lichess AI (stockfish)
             self.api_client.challenges.create_ai(level=self.game_metadata['ai_level'],
                                                  clock_limit=self.game_metadata['clock']['white']['time'],
                                                  clock_increment=self.game_metadata['clock']['white']['increment'],
@@ -171,6 +173,9 @@ class OnlineGameModel(PlayableGameModelBase):
         """Notifies the game state dispatcher to offer a draw"""
         # TODO: Send back to view to show a confirmation prompt, or notification it was sent
         if self.game_in_progress:
+            if self.vs_ai:
+                raise Warning("AI does not accept draw offers")
+
             try:
                 self.game_state_dispatcher.send_draw_offer()
             except Exception:
