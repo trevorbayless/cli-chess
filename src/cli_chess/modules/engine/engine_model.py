@@ -15,13 +15,12 @@
 
 from cli_chess.modules.board import BoardModel
 from cli_chess.core.game.game_options import GameOption
-from cli_chess.utils import log, is_linux_os, is_windows_os
+from cli_chess.utils import log, is_linux_os, is_windows_os, is_mac_os
 import chess.engine
 from os import path
+import platform
 from typing import Optional
 
-ENGINE_PATH = path.dirname(path.realpath(__file__)) + "/binaries/"
-ENGINE_BINARY_NAME = "fairy-stockfish_14_x86-64_" + ("linux" if is_linux_os() else ("windows" if is_windows_os() else "mac"))
 
 fairy_stockfish_mapped_skill_levels = {
     # These defaults are for the Fairy Stockfish engine
@@ -50,7 +49,7 @@ class EngineModel:
             # Use SimpleEngine to allow engine assignment in initializer. Additionally,
             # by having this as a blocking call it stops multiple engines from being
             # able to be started if the start game button is spammed
-            self.engine = chess.engine.SimpleEngine.popen_uci(ENGINE_PATH + ENGINE_BINARY_NAME)
+            self.engine = chess.engine.SimpleEngine.popen_uci(path.dirname(path.realpath(__file__)) + "/binaries/" + self._get_engine_filename())
 
             # Engine configuration
             skill_level = fairy_stockfish_mapped_skill_levels.get(self.game_parameters.get(GameOption.COMPUTER_SKILL_LEVEL))
@@ -100,3 +99,11 @@ class EngineModel:
                 self.engine.quit()
         except Exception as e:
             log.error(f"Error quitting engine: {e}")
+
+    @staticmethod
+    def _get_engine_filename() -> str:
+        """Returns the engines filename to use for opening"""
+        binary_name = "fairy-stockfish_x86-64_" + ("linux" if is_linux_os() else ("windows" if is_windows_os() else "macos"))
+        if is_mac_os() and platform.machine() == "arm64":
+            binary_name = "fairy-stockfish_arm64_macos"
+        return binary_name
