@@ -71,9 +71,19 @@ class MainView:
                 Box(self.presenter.main_menu_presenter.view, padding=0, padding_right=1),
             ]),
             HSplit([
+                self._create_navigation_hint(),
                 self._create_function_bar()
             ], align=VerticalAlign.BOTTOM)
         ], key_bindings=merge_key_bindings([self.get_global_key_bindings(), self._create_function_bar_key_bindings()]))
+
+    @staticmethod
+    def _create_navigation_hint() -> Box:
+        """Creates the navigation hint container"""
+        message = "Use [ARROWS] to navigate the menus. Use [SPACEBAR] or [ENTER] to modify values."
+        return Box(
+            Window(FormattedTextControl(HTML(f"<i>{message}</i>"), style="class:label"), align=WindowAlign.CENTER),
+            padding=0, padding_bottom=1, height=D(max=2)
+        )
 
     def _create_function_bar(self) -> VSplit:
         """Create the conditional function bar"""
