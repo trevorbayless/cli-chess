@@ -82,10 +82,10 @@ jobs:
           name: dir-${{ env.binary }}
           path: src/${{ env.binary }}
           
-  macos_aarch64:
+  macos_arm64:
     runs-on: macos-12
     env:
-      binary: fairy-stockfish_aarch64_macos
+      binary: fairy-stockfish_arm64_macos
     steps:
       - name: Clone Fairy-Stockfish @ tag:${{ inputs.fairy_sf_tag }}
         uses: actions/checkout@master
@@ -112,7 +112,7 @@ jobs:
       - linux_x86-64
       - windows_x86-64
       - macos_x86-64
-      - macos_aarch64
+      - macos_arm64
     env:
       COMMIT_PATH: src/cli_chess/modules/engine/binaries
       BRANCH_NAME: workflow/update-binaries-${{github.run_id}}
