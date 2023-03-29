@@ -16,7 +16,7 @@
 from __future__ import annotations
 from cli_chess.modules.move_list import MoveListView
 from cli_chess.modules.common import get_piece_unicode_symbol
-from cli_chess.utils.config import board_config
+from cli_chess.utils.config import game_config
 from chess import BLACK, PAWN
 from typing import TYPE_CHECKING, List
 if TYPE_CHECKING:
@@ -29,7 +29,7 @@ class MoveListPresenter:
         self.view = MoveListView(self)
 
         self.model.e_move_list_model_updated.add_listener(self.update)
-        board_config.e_board_config_updated.add_listener(self.update)
+        game_config.e_game_config_updated.add_listener(self.update)
 
     def update(self) -> None:
         """Update the move list output"""
@@ -39,8 +39,8 @@ class MoveListPresenter:
         """Returns a list containing the formatted moves"""
         formatted_move_list = []
         move_list_data = self.model.get_move_list_data()
-        use_unicode = board_config.get_boolean(board_config.Keys.SHOW_MOVE_LIST_IN_UNICODE)
-        pad_unicode = board_config.get_boolean(board_config.Keys.PAD_UNICODE)
+        use_unicode = game_config.get_boolean(game_config.Keys.SHOW_MOVE_LIST_IN_UNICODE)
+        pad_unicode = game_config.get_boolean(game_config.Keys.PAD_UNICODE)
 
         for entry in move_list_data:
             move = self.get_move_as_unicode(entry, pad_unicode) if use_unicode else (entry['move'])
@@ -75,11 +75,3 @@ class MoveListPresenter:
                     output = output[:eq_index+1] + promotion_unicode_symbol + output[eq_index+2:]
 
         return output if output else move
-
-    def scroll_up(self) -> None:
-        """Scroll up on the move list"""
-        self.view.scroll_up()
-
-    def scroll_down(self) -> None:
-        """Scroll down on the move list"""
-        self.view.scroll_down()

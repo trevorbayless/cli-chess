@@ -13,11 +13,31 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import annotations
 from cli_chess.utils.logging import log
+from platform import system
 import threading
 import subprocess
-from platform import system
+import enum
 import os
+
+
+class AlertType(enum.Enum):
+    """General alert class which can be
+       used for alert type classification
+    """
+    SUCCESS = enum.auto()
+    NEUTRAL = enum.auto()
+    ERROR = enum.auto()
+
+    def get_style(self, alert_type: AlertType) -> str:
+        """Returns the associated style for the passed in alert type"""
+        if alert_type is self.SUCCESS:
+            return "class:label.success.banner"
+        elif alert_type is self.NEUTRAL:
+            return "class:label.neutral.banner"
+        else:
+            return "class:label.error.banner"
 
 
 def is_linux_os() -> bool:

@@ -39,7 +39,7 @@ def _start_api(token: str):
         api_iem.start()
         api_ready = True
     except Exception as e:
-        log.exception(f"api_manager: Failed to start api: {e}")
+        log.exception(f"Failed to start api: {e}")
 
 
 def api_is_ready() -> bool:

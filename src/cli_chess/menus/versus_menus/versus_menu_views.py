@@ -21,13 +21,13 @@ from prompt_toolkit.keys import Keys
 from prompt_toolkit.formatted_text import StyleAndTextTuples
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from cli_chess.menus.vs_computer_menu.vs_computer_menu_presenter import VsComputerMenuPresenter
+    from cli_chess.menus.versus_menus.versus_menu_presenters import VersusMenuPresenter
 
 
-class VsComputerMenuView(MultiValueMenuView):
-    def __init__(self, presenter: VsComputerMenuPresenter):
+class VersusMenuView(MultiValueMenuView):
+    def __init__(self, presenter: VersusMenuPresenter):
         self.presenter = presenter
-        super().__init__(self.presenter, container_width=40, column_width=22)
+        super().__init__(self.presenter, container_width=38, column_width=18)
 
     def get_function_bar_fragments(self) -> StyleAndTextTuples:
         return [

@@ -51,46 +51,35 @@ class WatchTVModel(GameModelBase):
     def _save_game_metadata(self, **kwargs) -> None:
         """Parses and saves the data of the game being played"""
         try:
-            if 'tv_gameStartEvent' in kwargs:
-                # Reset game metadata
-                self.game_metadata = self._default_game_metadata()
+            if 'tv_descriptionEvent' in kwargs:
+                data = kwargs['tv_descriptionEvent']
+                if 'tv_startGameEvent' in kwargs:
+                    self.game_metadata = self._default_game_metadata()
 
-                data = kwargs['tv_gameStartEvent']
                 self.game_metadata['gameId'] = data.get('id')
                 self.game_metadata['rated'] = data.get('rated')
                 self.game_metadata['variant'] = data.get('variant')
                 self.game_metadata['speed'] = data.get('speed')
-
-                for color in COLOR_NAMES:
-                    if data['players'][color].get('user'):
-                        self.game_metadata['players'][color] = data['players'][color]['user']
-                        self.game_metadata['players'][color]['rating'] = data['players'][color]['rating']
-                    elif data['players'][color].get('aiLevel'):
-                        self.game_metadata['players'][color]['name'] = f"Stockfish level {data['players'][color]['aiLevel']}"
-
-            if 'tv_coreGameEvent' in kwargs:
-                data = kwargs['tv_coreGameEvent']
-                self.game_metadata['clock']['white']['time'] = data['wc']  # in seconds
-                self.game_metadata['clock']['white']['increment'] = 0
-                self.game_metadata['clock']['black']['time'] = data['bc']  # in seconds
-                self.game_metadata['clock']['black']['increment'] = 0
-
-            if 'tv_endGameEvent' in kwargs:
-                data = kwargs['tv_endGameEvent']
                 self.game_metadata['state']['status'] = data.get('status')
                 self.game_metadata['state']['winner'] = data.get('winner')  # Not included on draws or abort
 
                 for color in COLOR_NAMES:
-                    if data['players'][color].get('user'):
-                        self.game_metadata['players'][color] = data['players'][color]['user']
-                        self.game_metadata['players'][color]['rating'] = data['players'][color]['rating']
-                        self.game_metadata['players'][color]['rating_diff'] = data.get('players', {}).get(color, {}).get('ratingDiff', "")  # NOTE: Not included on aborted games # noqa
-                    elif data['players'][color].get('aiLevel'):
-                        self.game_metadata['players'][color]['name'] = f"Stockfish level {data['players'][color]['aiLevel']}"
+                    if data.get('players', {}).get(color, {}).get('user'):  # non-ai player data
+                        self.game_metadata['players'][color] = data.get('players', {}).get(color, {}).get('user', "")
+                        self.game_metadata['players'][color]['rating'] = data.get('players', {}).get(color, {}).get('rating', "")
+                        self.game_metadata['players'][color]['rating_diff'] = data.get('players', {}).get(color, {}).get('ratingDiff', "")
+                    elif data.get('players', {}).get(color, {}).get('aiLevel'):  # ai data
+                        self.game_metadata['players'][color]['name'] = f"Stockfish level {data.get('players', {}).get(color, {}).get('aiLevel', '')}"
+
+            if 'tv_coreGameEvent' in kwargs:
+                data = kwargs['tv_coreGameEvent']
+                self.game_metadata['clock']['units'] = "sec"
+                self.game_metadata['clock']['white']['time'] = data.get('wc')
+                self.game_metadata['clock']['black']['time'] = data.get('bc')
 
             self.e_game_model_updated.notify()
         except Exception as e:
-            log.error(f"TV Model: Error saving game metadata: {e}")
+            log.error(f"Error saving game metadata: {e}")
             raise
 
     def stream_event_received(self, **kwargs):
@@ -99,12 +88,12 @@ class WatchTVModel(GameModelBase):
             # TODO: Data needs to be organized and sent to presenter to handle display
             if 'startGameEvent' in kwargs:
                 event = kwargs['startGameEvent']
-                variant = event['variant']['key']
-                white_rating = int(event['players']['white'].get('rating') or 0)
-                black_rating = int(event['players']['black'].get('rating') or 0)
+                variant = event.get('variant', {}).get('key')
+                white_rating = int(event.get('players', {}).get('white', {}).get('rating') or 0)
+                black_rating = int(event.get('players', {}).get('black', {}).get('rating') or 0)
                 orientation = True if ((white_rating >= black_rating) or self.channel.variant.lower() == "racingkings") else False
 
-                self._save_game_metadata(tv_gameStartEvent=event)
+                self._save_game_metadata(tv_descriptionEvent=event, tv_startGameEvent=True)
                 last_move = event.get('lastMove', "")
                 if variant == "crazyhouse" and len(last_move) == 4 and last_move[:2] == last_move[2:]:
                     # NOTE: This is a dirty fix. When streaming a crazyhouse game from lichess, if the
@@ -116,6 +105,7 @@ class WatchTVModel(GameModelBase):
                     last_move = "k@" + last_move[2:]
 
                 self.board_model.reinitialize_board(variant, orientation, event.get('fen'), last_move)
+                self.e_game_model_updated.notify(tvPositionUpdated=True)
 
             if 'coreGameEvent' in kwargs:
                 # NOTE: the `lm` field that lichess sends is not valid UCI. It should only be used
@@ -123,12 +113,14 @@ class WatchTVModel(GameModelBase):
                 event = kwargs['coreGameEvent']
                 self._save_game_metadata(tv_coreGameEvent=event)
                 self.board_model.set_board_position(event.get('fen'), uci_last_move=event.get('lm'))
+                self.e_game_model_updated.notify(tvPositionUpdated=True)
 
             if 'endGameEvent' in kwargs:
                 event = kwargs['endGameEvent']
-                self._save_game_metadata(tv_endGameEvent=event)
+                self._save_game_metadata(tv_descriptionEvent=event)
+                self.e_game_model_updated.notify(onlineGameOver=True)
         except Exception as e:
-            log.error(f"TV Model: Error parsing stream data: {e}")
+            log.error(f"Error parsing stream data: {e}")
             raise
 
 
@@ -147,11 +139,11 @@ class StreamTVChannel(threading.Thread):
             self.api_client = api_client
         except ImportError:
             # TODO: Clean this up so the error is displayed on the main screen
-            log.error("StreamTVChannel: Failed to import api_client")
+            log.error("Failed to import api_client")
             raise ImportError("API client not setup. Do you have an API token linked?")
 
         # Current flow that has to be followed to watch the "variant" tv channels
-        # as /api/tv/feed is only for the top rated game, and doesn't allow channel specification
+        # as /api/tv/feed is only for the top-rated game, and doesn't allow channel specification
         # 1. Get current tv game (/api/tv/channels) -> Get the game ID for the game we're interested in
         # 2. Start streaming game, on initial input set board orientation, show player names, etc. On follow up set pos.
         # 3. When the game completes, start this loop over.
@@ -166,7 +158,7 @@ class StreamTVChannel(threading.Thread):
 
     def run(self):
         """Main entrypoint for the thread"""
-        log.info(f"TV Stream: Started watching {self.channel.value} TV")
+        log.info(f"Started watching {self.channel.value} TV")
         self.running = True
         while self.running:
             try:
@@ -193,23 +185,24 @@ class StreamTVChannel(threading.Thread):
                         status = event.get('status', {}).get('name')
 
                         if winner or status != "started" and status:
-                            log.info(f"TV Stream: Game finished: {game_id}")
+                            log.info(f"Game finished: {game_id}")
                             self.e_tv_stream_event.notify(endGameEvent=event)
                             break
 
                         if status == "started":
-                            log.info(f"TV Stream: Started streaming TV game: {game_id}")
+                            log.info(f"Started streaming TV game: {game_id}")
                             self.e_tv_stream_event.notify(startGameEvent=event)
-                            turns_behind = event.get('turns')
+                            turns_behind = event.get('turns', 0)
 
                         if fen:
-                            if turns_behind and turns_behind > 0:
-                                # Keeping track of turns behind allows skipping this event until
-                                # we are caught up. This stops a quick game replay from happening.
-                                turns_behind -= 1
-                            else:
+                            if turns_behind <= 2:
                                 if event.get('wc') and event.get('bc'):
                                     self.e_tv_stream_event.notify(coreGameEvent=event)
+                            else:
+                                # Keeping track of turns behind allows skipping this event until
+                                # we are caught up. This stops a quick game replay from happening.
+                                # We do however want to grab the last move event to pick up the clock data.
+                                turns_behind -= 1
 
             except Exception as e:
                 self.handle_exceptions(e)
@@ -217,13 +210,13 @@ class StreamTVChannel(threading.Thread):
             else:
                 if self.running:
                     self.retries = 0
-                    log.debug("TV Stream: Sleeping 2 seconds before finding next TV game")
+                    log.debug("Sleeping 2 seconds before finding next TV game")
                     sleep(2)
 
     def handle_exceptions(self, e: Exception):
         """Handles the passed in exception and responds appropriately"""
         if self.retries <= self.max_retries:
-            log.error(f"TV Stream: {e}")
+            log.error(e)
             self.current_game = ""
             delay = 2 * (self.retries + 1)
 
@@ -232,8 +225,7 @@ class StreamTVChannel(threading.Thread):
                     delay = 60
 
             # TODO: Send event to model with retry notification so we can display it to the user
-            log.info(
-                f"TV Stream: Sleeping {delay} seconds before retrying ({self.max_retries - self.retries} retries left).")
+            log.info(f"Sleeping {delay} seconds before retrying ({self.max_retries - self.retries} retries left).")
             sleep(delay)
             self.retries += 1
         else:
@@ -242,6 +234,6 @@ class StreamTVChannel(threading.Thread):
     def stop_watching(self):
         # TODO: Need to handle going back to the main menu when the TVStream
         #       connection retries are exhausted. Send event notification to model?
-        log.info("TV Stream: Stopping TV stream")
+        log.info("Stopping TV stream")
         self.e_tv_stream_event.remove_all_listeners()
         self.running = False

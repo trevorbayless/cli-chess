@@ -14,20 +14,22 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from __future__ import annotations
-from cli_chess.utils.ui_common import handle_mouse_click, go_back_to_main_menu
-from prompt_toolkit.widgets import TextArea, Box
-from prompt_toolkit.layout import Window, Container, FormattedTextControl, ConditionalContainer, HSplit, VSplit, VerticalAlign, D
+from cli_chess.utils.ui_common import handle_mouse_click, go_back_to_main_menu, AlertContainer
+from cli_chess.utils.logging import log
+from prompt_toolkit.widgets import TextArea
+from prompt_toolkit.layout import Window, Container, FormattedTextControl, VSplit, D
 from prompt_toolkit.formatted_text import StyleAndTextTuples
-from prompt_toolkit.key_binding import KeyBindings
+from prompt_toolkit.key_binding import KeyBindings, merge_key_bindings
 from prompt_toolkit.keys import Keys
 from prompt_toolkit.buffer import Buffer
-from prompt_toolkit.filters import to_filter, Condition
+from prompt_toolkit.filters import Condition
+from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from cli_chess.core.game import GamePresenterBase, PlayableGamePresenterBase
 
 
-class GameViewBase:
+class GameViewBase(ABC):
     def __init__(self, presenter: GamePresenterBase) -> None:
         self.presenter = presenter
         self.board_output_container = presenter.board_presenter.view
@@ -36,12 +38,16 @@ class GameViewBase:
         self.material_diff_lower_container = presenter.material_diff_presenter.view_lower
         self.player_info_upper_container = presenter.player_info_presenter.view_upper
         self.player_info_lower_container = presenter.player_info_presenter.view_lower
-        self.error_label = FormattedTextControl(text="", style="class:label.error.banner", show_cursor=False)
-        self.error_container = self._create_error_container()
+        self.clock_upper = presenter.clock_presenter.view_upper
+        self.clock_lower = presenter.clock_presenter.view_lower
+        self.alert = AlertContainer()
         self._container = self._create_container()
 
+        log.debug(f"Created {type(self).__name__} (id={id(self)})")
+
+    @abstractmethod
     def _create_container(self) -> Container:
-        return Window(FormattedTextControl("Parent class needs to override _create_container()"))
+        pass
 
     def _base_function_bar_fragments(self) -> StyleAndTextTuples:
         """Return the base function bar fragments"""
@@ -57,36 +63,15 @@ class GameViewBase:
             Window(FormattedTextControl(self._base_function_bar_fragments())),
         ], height=D(max=1, preferred=1))
 
-    def _container_key_bindings(self) -> KeyBindings:
-        """Creates the key bindings for this container"""
+    def get_key_bindings(self) -> "_MergedKeyBindings":  # noqa: F821:
+        """Returns the key bindings for this container"""
         bindings = KeyBindings()
 
         @bindings.add(Keys.F1, eager=True)
         def _(event): # noqa
             self.presenter.flip_board()
 
-        return bindings
-
-    def _create_error_container(self) -> ConditionalContainer:
-        """Create the error container"""
-        return ConditionalContainer(
-            Window(
-                self.error_label,
-                always_hide_cursor=True,
-                height=D(max=1)
-            ),
-            filter=to_filter(False)
-        )
-
-    def show_error(self, text: str) -> None:
-        """Displays the error label with the text passed in"""
-        self.error_label.text = text
-        self.error_container.filter = to_filter(True)
-
-    def clear_error(self) -> None:
-        """Clears the error containers"""
-        self.error_label.text = ""
-        self.error_container.filter = to_filter(False)
+        return merge_key_bindings([bindings, self.move_list_container.key_bindings])
 
     @staticmethod
     def exit() -> None:
@@ -98,37 +83,16 @@ class GameViewBase:
         return self._container
 
 
-class PlayableGameViewBase(GameViewBase):
+class PlayableGameViewBase(GameViewBase, ABC):
     """Implements a base game view which has a move input field"""
     def __init__(self, presenter: PlayableGamePresenterBase):
         self.presenter = presenter
         self.input_field_container = self._create_input_field_container()
         super().__init__(presenter)
 
+    @abstractmethod
     def _create_container(self) -> Container:
-        main_content = Box(
-            HSplit([
-                VSplit([
-                    self.board_output_container,
-                    HSplit([
-                        self.player_info_upper_container,
-                        self.material_diff_upper_container,
-                        self.move_list_container,
-                        self.material_diff_lower_container,
-                        self.player_info_lower_container
-                    ])
-                ]),
-                self.input_field_container,
-                self.error_container,
-            ]),
-            padding=1,
-            padding_bottom=0
-        )
-        function_bar = HSplit([
-            self._create_function_bar()
-        ], align=VerticalAlign.BOTTOM)
-
-        return HSplit([main_content, function_bar], key_bindings=self._container_key_bindings())
+        pass
 
     def _create_function_bar(self) -> VSplit:
         """Create the conditional function bar"""
@@ -150,7 +114,7 @@ class PlayableGameViewBase(GameViewBase):
                 fragments.extend(game_in_progress_fragments)
             else:
                 fragments.extend([
-                    ("class:function-bar.key", "F10", handle_mouse_click(self.presenter.exit)),
+                    ("class:function-bar.key", "F8", handle_mouse_click(self.presenter.exit)),
                     ("class:function-bar.label", f"{'Exit':<11}", handle_mouse_click(self.presenter.exit))
                 ])
             return fragments
@@ -159,9 +123,9 @@ class PlayableGameViewBase(GameViewBase):
             Window(FormattedTextControl(_get_function_bar_fragments)),
         ], height=D(max=1, preferred=1))
 
-    def _container_key_bindings(self) -> KeyBindings:
-        """Creates the key bindings for this container"""
-        bindings = super()._container_key_bindings()
+    def get_key_bindings(self) -> "_MergedKeyBindings":  # noqa: F821:
+        """Returns the key bindings for this container"""
+        bindings = KeyBindings()
 
         @bindings.add(Keys.F2, filter=Condition(self.presenter.is_game_in_progress), eager=True)
         def _(event): # noqa
@@ -177,19 +141,11 @@ class PlayableGameViewBase(GameViewBase):
             if not event.is_repeat:
                 self.presenter.resign()
 
-        @bindings.add(Keys.F10, filter=~Condition(self.presenter.is_game_in_progress), eager=True)
+        @bindings.add(Keys.F8, filter=~Condition(self.presenter.is_game_in_progress), eager=True)
         def _(event): # noqa
             self.presenter.exit()
 
-        @bindings.add(Keys.Up, eager=True)
-        def _(event):  # noqa
-            self.presenter.move_list_presenter.scroll_up()
-
-        @bindings.add(Keys.Down, eager=True)
-        def _(event):  # noqa
-            self.presenter.move_list_presenter.scroll_down()
-
-        return bindings
+        return merge_key_bindings([bindings, super().get_key_bindings()])
 
     def _create_input_field_container(self) -> TextArea:
         """Returns a TextArea to use as the input field"""

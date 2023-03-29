@@ -15,55 +15,76 @@
 
 from __future__ import annotations
 from cli_chess.__metadata__ import __version__
-from cli_chess.utils.ui_common import handle_mouse_click, exit_app
-from prompt_toolkit.layout import Window, FormattedTextControl, ConditionalContainer, VSplit, HSplit, VerticalAlign, WindowAlign, D
+from cli_chess.utils.ui_common import handle_mouse_click, exit_app, get_custom_style
+from cli_chess.utils import is_linux_os, is_windows_os, default, log
+from prompt_toolkit.application import Application
+from prompt_toolkit.patch_stdout import patch_stdout
+from prompt_toolkit.layout import Layout, Window, Container, FormattedTextControl, VSplit, HSplit, VerticalAlign, WindowAlign, D
 from prompt_toolkit.formatted_text import StyleAndTextTuples
 from prompt_toolkit.key_binding import KeyBindings, merge_key_bindings
-from prompt_toolkit.key_binding.bindings.focus import focus_next, focus_previous
 from prompt_toolkit.keys import Keys
-from prompt_toolkit.filters import to_filter
 from prompt_toolkit.widgets import Box
+from prompt_toolkit.styles import Style, merge_styles
+from prompt_toolkit import print_formatted_text, HTML
+from prompt_toolkit.output.color_depth import ColorDepth
+try:
+    from prompt_toolkit.output.win32 import NoConsoleScreenBufferError  # noqa
+except AssertionError:
+    pass
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from cli_chess.core.main import MainPresenter
 
+main_view: Container
+
 
 class MainView:
     def __init__(self, presenter: MainPresenter):
-        self.presenter = presenter
-        self._error_label = FormattedTextControl(text="", style="class:label.error.banner", show_cursor=False)
-        self._container = self._create_container()
+        try:
+            self.presenter = presenter
+            self._container = self._create_main_container()
 
-    def _create_container(self):
+            self.app = Application(
+                layout=Layout(self._container),
+                color_depth=ColorDepth.TRUE_COLOR if is_linux_os() else ColorDepth.DEFAULT,
+                mouse_support=True,
+                full_screen=True,
+                style=self._get_combined_styles(),
+                refresh_interval=0.5
+            )
+
+            global main_view
+            main_view = self
+
+        except Exception as e:
+            self._handle_startup_exceptions(e)
+
+    def run(self) -> None:
+        """Runs the main application"""
+        with patch_stdout():
+            self.app.run()
+
+    def _create_main_container(self):
         """Creates the container for the main view"""
         return HSplit([
             VSplit([
                 Box(self.presenter.main_menu_presenter.view, padding=0, padding_right=1),
             ]),
             HSplit([
-                self._create_error_container(),
                 self._create_function_bar()
             ], align=VerticalAlign.BOTTOM)
-        ], key_bindings=merge_key_bindings([self._container_key_bindings(), self._create_function_bar_key_bindings()]))
-
-    def _create_error_container(self) -> ConditionalContainer:
-        """Create the container used to display errors"""
-        return ConditionalContainer(
-            Window(self._error_label, always_hide_cursor=True, height=D(max=1)),
-            filter=to_filter(self._error_label.text == "")
-        )
+        ], key_bindings=merge_key_bindings([self.get_global_key_bindings(), self._create_function_bar_key_bindings()]))
 
     def _create_function_bar(self) -> VSplit:
         """Create the conditional function bar"""
         def _get_function_bar_fragments() -> StyleAndTextTuples:
             fragments = self.presenter.main_menu_presenter.view.get_function_bar_fragments()
-            self._error_label.text = ""
 
             if fragments:
                 fragments.append(("class:function-bar.spacer", " "))
 
             fragments.extend([
-                ("class:function-bar.key", "F10", handle_mouse_click(exit_app)),
+                ("class:function-bar.key", "F8", handle_mouse_click(exit_app)),
                 ("class:function-bar.label", f"{'Quit':<14}", handle_mouse_click(exit_app))
             ])
 
@@ -76,33 +97,60 @@ class MainView:
 
     def _create_function_bar_key_bindings(self) -> "_MergedKeyBindings":  # noqa: F821
         """Creates the key bindings for the function bar"""
-        main_menu_key_bindings = self.presenter.main_menu_presenter.view.get_function_bar_key_bindings()
+        main_menu_fb_key_bindings = self.presenter.main_menu_presenter.view.get_function_bar_key_bindings()
+        main_view_fb_key_bindings = KeyBindings()
+        main_view_fb_key_bindings.add(Keys.F8)(exit_app)
 
-        # Always included key bindings
-        always_included_bindings = KeyBindings()
-        always_included_bindings.add(Keys.F10)(exit_app)
+        return merge_key_bindings([main_view_fb_key_bindings, main_menu_fb_key_bindings])
 
-        return merge_key_bindings([main_menu_key_bindings, always_included_bindings])
-
-    @staticmethod
-    def _container_key_bindings() -> KeyBindings:
-        """Creates the key bindings for this container"""
+    def get_global_key_bindings(self) -> KeyBindings():
+        """Returns the global key bindings to be used application wide"""
         bindings = KeyBindings()
-        bindings.add(Keys.Right)(focus_next)
-        bindings.add(Keys.ControlF)(focus_next)
-        bindings.add(Keys.Tab)(focus_next)
-        bindings.add(Keys.Left)(focus_previous)
-        bindings.add(Keys.ControlB)(focus_previous)
-        bindings.add(Keys.BackTab)(focus_previous)
+
+        # Global binding to refresh style
+        @bindings.add(Keys.ControlR, eager=True, is_global=True)
+        def _(event): # noqa
+            log.info("Requested application style refresh")
+            self.app.style = self._get_combined_styles(hot_swap=True)
         return bindings
 
-    def print_error(self, err: str) -> None:
-        """Print the passed in error to the error container"""
-        self._error_label.text = err
+    def _get_combined_styles(self, hot_swap=False) -> "_MergedStyle":  # noqa: F821
+        """Combines the cli-chess default style with a user
+           supplied custom style and returns the result
+        """
+        try:
+            return merge_styles([Style.from_dict(default), Style.from_dict(get_custom_style())])
+        except Exception as e:
+            log.critical(f"Error parsing custom style: {e}")
+            if not hot_swap:
+                self.print_error_to_terminal(title="Error parsing custom style", msg=str(e))
+                exit(1)
 
-    def clear_error(self) -> None:
-        """Clear any errors displayed in the error container"""
-        self._error_label.text = ""
+            log.info("Ignoring invalid custom style and using default instead")
+            return Style.from_dict(default)
 
-    def __pt_container__(self):
+    def print_error_to_terminal(self, msg: str, title="Error", ):
+        """Prints an error to the terminal. This will only print
+           statements when the application is not yet running in
+           order to avoid tearing the output.
+        """
+        if (not hasattr(self, 'app') or not self.app.is_running) and msg:
+            # NOTE: Print statements are separated in order to be able to print
+            #  syntax errors which can have mismatched tags (e.g. with eval()).
+            print_formatted_text(HTML(f"<red>{title}</red>"))
+            print_formatted_text(msg)
+
+    def _handle_startup_exceptions(self, e: Exception) -> None:
+        """Handles exceptions caught during application startup"""
+        log.critical(f"Error starting cli-chess: {str(e)}")
+        if is_windows_os() and isinstance(e, NoConsoleScreenBufferError):
+            print("Error starting cli-chess:\n"
+                  "A Windows console was expected and not found.\n"
+                  "Try running this program using cmd.exe instead.")
+        else:
+            self.print_error_to_terminal(title="Error starting cli-chess", msg=str(e))
+        exit(1)
+
+    def __pt_container__(self) -> Container:
+        """Return the view container"""
         return self._container

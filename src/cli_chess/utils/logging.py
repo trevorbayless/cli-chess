@@ -1,4 +1,4 @@
-# Copyright (C) 2021-2022 Trevor Bayless <trevorbayless1@gmail.com>
+# Copyright (C) 2021-2023 Trevor Bayless <trevorbayless1@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@ def configure_logger(name: str, level=logging.DEBUG) -> logging.Logger:
     from cli_chess.utils.config import get_config_path
 
     log_file = f"{get_config_path()}" + f"{name}.log"
-    log_format = "%(asctime)s.%(msecs)03d | %(levelname)-5s | %(name)s | %(module)s | %(message)s"
+    log_format = "%(asctime)s.%(msecs)03d | %(levelname)-5s | %(name)s | %(module)s.%(funcName)s | %(message)s"
     time_format = "%m/%d/%Y %I:%M:%S"
 
     file_handler = logging.FileHandler(log_file, mode="w")

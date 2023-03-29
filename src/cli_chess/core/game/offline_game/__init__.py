@@ -1,1 +1,3 @@
 from .offline_game_model import OfflineGameModel
+from .offline_game_view import OfflineGameView
+from .offline_game_presenter import OfflineGamePresenter

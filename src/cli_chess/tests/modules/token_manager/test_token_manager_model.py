@@ -15,7 +15,6 @@
 
 from cli_chess.modules.token_manager import TokenManagerModel
 from cli_chess.utils.config import LichessConfig
-from berserk.exceptions import BerserkError
 from berserk import clients
 from os import remove
 from unittest.mock import Mock
@@ -30,6 +29,7 @@ def model_listener():
 @pytest.fixture
 def model(model_listener: Mock, lichess_config: LichessConfig, monkeypatch):
     monkeypatch.setattr('cli_chess.modules.token_manager.token_manager_model.lichess_config', lichess_config)
+    monkeypatch.setattr('cli_chess.core.api.api_manager._start_api', Mock())
     model = TokenManagerModel()
     model.e_token_manager_model_updated.add_listener(model_listener)
     return model
@@ -43,7 +43,7 @@ def lichess_config():
 
 
 def mock_fail_test_tokens(*args): # noqa
-    raise BerserkError
+    return {'lip_badToken': None}
 
 
 def mock_success_test_tokens(*args): # noqa
@@ -75,6 +75,19 @@ def test_update_linked_account(model: TokenManagerModel, lichess_config: Lichess
     assert model.update_linked_account(api_token="lip_validToken")
     assert lichess_config.get_value(lichess_config.Keys.API_TOKEN) == "lip_validToken"
     model_listener.assert_called()
+
+
+def test_validate_token(model: TokenManagerModel, monkeypatch):
+    # Test with empty API token
+    assert model.validate_token(api_token="") is None
+
+    # Test with invalid API token
+    monkeypatch.setattr(clients.OAuth, "test_tokens", mock_fail_test_tokens)
+    assert model.validate_token(api_token="lip_badToken") is None
+
+    # Test with valid API token
+    monkeypatch.setattr(clients.OAuth, "test_tokens", mock_success_test_tokens)
+    assert model.validate_token(api_token="lip_validToken") == mock_success_test_tokens()['lip_validToken']
 
 
 def test_save_account_data(model: TokenManagerModel, lichess_config: LichessConfig, model_listener: Mock):

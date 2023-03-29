@@ -38,6 +38,11 @@ class OnlineGamesMenuView(MenuView):
             VSplit([
                 Box(self._container, padding=0, padding_right=1),
                 ConditionalContainer(
+                    Box(self.presenter.vs_random_opponent_menu_presenter.view, padding=0, padding_right=1),
+                    filter=~is_done
+                    & Condition(lambda: self.presenter.selection == OnlineGamesMenuOptions.CREATE_GAME)
+                ),
+                ConditionalContainer(
                     Box(self.presenter.vs_computer_menu_presenter.view, padding=0, padding_right=1),
                     filter=~is_done
                     & Condition(lambda: self.presenter.selection == OnlineGamesMenuOptions.VS_COMPUTER_ONLINE)
@@ -53,6 +58,8 @@ class OnlineGamesMenuView(MenuView):
     def get_function_bar_fragments(self) -> StyleAndTextTuples:
         """Returns the appropriate function bar fragments based on menu item selection"""
         fragments: StyleAndTextTuples = []
+        if self.presenter.selection == OnlineGamesMenuOptions.CREATE_GAME:
+            fragments = self.presenter.vs_random_opponent_menu_presenter.view.get_function_bar_fragments()
         if self.presenter.selection == OnlineGamesMenuOptions.VS_COMPUTER_ONLINE:
             fragments = self.presenter.vs_computer_menu_presenter.view.get_function_bar_fragments()
         if self.presenter.selection == OnlineGamesMenuOptions.WATCH_LICHESS_TV:
@@ -61,6 +68,11 @@ class OnlineGamesMenuView(MenuView):
 
     def get_function_bar_key_bindings(self) -> "_MergedKeyBindings":  # noqa: F821
         """Returns the appropriate function bar key bindings based on menu item selection"""
+        vs_random_opponent_kb = ConditionalKeyBindings(
+            self.presenter.vs_random_opponent_menu_presenter.view.get_function_bar_key_bindings(),
+            filter=Condition(lambda: self.presenter.selection == OnlineGamesMenuOptions.CREATE_GAME)
+        )
+
         vs_ai_kb = ConditionalKeyBindings(
             self.presenter.vs_computer_menu_presenter.view.get_function_bar_key_bindings(),
             filter=Condition(lambda: self.presenter.selection == OnlineGamesMenuOptions.VS_COMPUTER_ONLINE)
@@ -71,7 +83,7 @@ class OnlineGamesMenuView(MenuView):
             filter=Condition(lambda: self.presenter.selection == OnlineGamesMenuOptions.WATCH_LICHESS_TV)
         )
 
-        return merge_key_bindings([vs_ai_kb, tv_kb])
+        return merge_key_bindings([vs_random_opponent_kb, vs_ai_kb, tv_kb])
 
     def __pt_container__(self) -> Container:
         return self._online_games_menu_container

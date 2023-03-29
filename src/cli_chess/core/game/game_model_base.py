@@ -37,12 +37,14 @@ class GameModelBase:
         # Keep track of all associated models to handle bulk cleanup on exit
         self._assoc_models = [self.board_model, self.move_list_model, self.material_diff_model]
 
+        log.debug(f"Created {type(self).__name__} (id={id(self)})")
+
     def update(self, **kwargs) -> None:
-        """Called automatically as part of an event listener. This function
-           listens to model update events and if deemed necessary triages
-           and notifies listeners of the event.
+        """Called automatically as part of an event listener. This method
+           listens to subscribed model update events and if deemed necessary
+           triages and notifies listeners of the event.
         """
-        if 'board_orientation' in kwargs:
+        if 'boardOrientationChanged' in kwargs or 'successfulMoveMade' in kwargs:
             self._notify_game_model_updated(**kwargs)
 
     def cleanup(self) -> None:
@@ -55,8 +57,9 @@ class GameModelBase:
         for model in self._assoc_models:
             try:
                 model.cleanup()
+                log.debug(f"Finished cleaning up after {type(model).__name__} (id={id(model)})")
             except AttributeError:
-                log.error(f"GameModelBase: {model} does not have a cleanup method")
+                log.error(f"{type(model).__name__} does not have a cleanup method")
 
     def _notify_game_model_updated(self, **kwargs) -> None:
         """Notify listeners that the model has updated"""
@@ -85,6 +88,7 @@ class GameModelBase:
                 },
             },
             'clock': {
+                'units': "ms",
                 'white': {
                     'time': 0,
                     'increment': 0

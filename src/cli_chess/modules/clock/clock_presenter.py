@@ -14,29 +14,44 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from __future__ import annotations
-from cli_chess.modules.player_info import PlayerInfoView
+from cli_chess.modules.clock import ClockView
 from chess import Color, COLOR_NAMES
+from datetime import datetime, timezone
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from cli_chess.core.game import GameModelBase
 
 
-class PlayerInfoPresenter:
+class ClockPresenter:
     def __init__(self, model: GameModelBase):
         self.model = model
 
         orientation = self.model.board_model.get_board_orientation()
-        self.view_upper = PlayerInfoView(self, self.get_player_info(not orientation))
-        self.view_lower = PlayerInfoView(self, self.get_player_info(orientation))
+        self.view_upper = ClockView(self, self.get_clock_display(not orientation))
+        self.view_lower = ClockView(self, self.get_clock_display(orientation))
 
         self.model.e_game_model_updated.add_listener(self.update)
 
     def update(self, **kwargs) -> None:
         """Updates the view based on specific model updates"""
-        if 'boardOrientationChanged' in kwargs or 'onlineGameOver' in kwargs:
+        if 'boardOrientationChanged' in kwargs or 'successfulMoveMade' in kwargs or 'onlineGameOver' in kwargs or 'tvPositionUpdated' in kwargs:
             orientation = self.model.board_model.get_board_orientation()
-            self.view_upper.update(self.get_player_info(not orientation))
-            self.view_lower.update(self.get_player_info(orientation))
+            self.view_upper.update(self.get_clock_display(not orientation))
+            self.view_lower.update(self.get_clock_display(orientation))
 
-    def get_player_info(self, color: Color) -> dict:
-        return self.model.game_metadata['players'][COLOR_NAMES[color]]
+    def get_clock_display(self, color: Color) -> str:
+        """Returns the formatted clock display for the color passed in"""
+        clock_data = self.model.game_metadata.get('clock')
+        units = clock_data.get('units')
+        time = clock_data.get(COLOR_NAMES[color]).get('time')
+
+        if not time:
+            return "--:--"
+
+        if not isinstance(time, datetime):
+            if units == "ms":
+                time = datetime.fromtimestamp(time / 1000, timezone.utc)
+            elif units == "sec":
+                time = datetime.fromtimestamp(time, timezone.utc)
+
+        return time.strftime("%M:%S") if not time.hour else time.strftime("%H:%M:%S")

@@ -15,10 +15,10 @@
 
 from cli_chess.utils import Event, log
 from typing import Callable
-import threading
+from threading import Thread
 
 
-class GameStateDispatcher(threading.Thread):
+class GameStateDispatcher(Thread):
     """Handles streaming a game and sending game commands (make move, offer draw, etc)
        using the Board API. The game that is streamed using this class must be owned
        by the account linked to the api token.
@@ -34,16 +34,17 @@ class GameStateDispatcher(threading.Thread):
             self.api_client = api_client
         except ImportError:
             # TODO: Clean this up so the error is displayed on the main screen
-            log.error("GameStateDispatcher: Failed to import api_client")
+            log.error("Failed to import api_client")
             raise ImportError("API client not setup. Do you have an API token linked?")
 
     def run(self):
         """This is the threads main function. It handles emitting the game state to
            listeners (typically the OnlineGameModel).
         """
-        log.info(f"GameStateDispatcher: Started streaming game state: {self.game_id}")
+        log.info(f"Started streaming game state: {self.game_id}")
 
         for event in self.api_client.board.stream_game_state(self.game_id):
+            log.debug(f"Stream event received: {event['type']}")
             if event['type'] == "gameFull":
                 self.e_game_state_dispatcher_event.notify(gameFull=event)
 
@@ -59,11 +60,18 @@ class GameStateDispatcher(threading.Thread):
                 self.e_game_state_dispatcher_event.notify(chatLine=event)
 
             elif event['type'] == "opponentGone":
-                # TODO: Start countdown if opponent is gone. Automatically claim win if timer elapses.
-                #  The countdown should stop if the opponent comes back before the timer elapses.
+                is_gone = event.get('gone', False)
+                secs_until_claim = event.get('claimWinInSeconds', None)
+
+                if is_gone and secs_until_claim:
+                    pass  # TODO implement call to auto-claim win when `secs_until_claim` elapses
+
+                if not is_gone:
+                    pass  # TODO: Cancel auto-claim countdown
+
                 self.e_game_state_dispatcher_event.notify(opponentGone=event)
 
-        log.info(f"GameStateDispatcher: Completed streaming of: {self.game_id}")
+        log.info(f"Completed streaming of: {self.game_id}")
 
     def make_move(self, move: str):
         """Sends the move to lichess. This move should have already
@@ -71,7 +79,7 @@ class GameStateDispatcher(threading.Thread):
            The move must be in UCI format.
         """
         try:
-            log.debug(f"GameStateDispatcher: Sending move ({move}) to lichess")
+            log.debug(f"Sending move ({move}) to lichess")
             self.api_client.board.make_move(self.game_id, move)
         except Exception:
             raise
@@ -79,7 +87,7 @@ class GameStateDispatcher(threading.Thread):
     def send_takeback_request(self) -> None:
         """Sends a takeback request to our opponent"""
         try:
-            log.debug("GameStateDispatcher: Sending takeback offer to opponent")
+            log.debug("Sending takeback offer to opponent")
             self.api_client.board.offer_takeback(self.game_id)
         except Exception:
             raise
@@ -87,7 +95,7 @@ class GameStateDispatcher(threading.Thread):
     def send_draw_offer(self) -> None:
         """Sends a draw offer to our opponent"""
         try:
-            log.debug("GameStateDispatcher: Sending draw offer to opponent")
+            log.debug("Sending draw offer to opponent")
             self.api_client.board.offer_draw(self.game_id)
         except Exception:
             raise
@@ -95,10 +103,16 @@ class GameStateDispatcher(threading.Thread):
     def resign(self) -> None:
         """Resigns the game"""
         try:
-            log.debug("GameStateDispatcher: Sending resignation")
+            log.debug("Sending resignation")
             self.api_client.board.resign_game(self.game_id)
         except Exception:
             raise
+
+    def claim_victory(self) -> None:
+        """Submits a claim of victory to lichess as the opponent is gone.
+           This is to only be called when the opponentGone timer has elapsed.
+        """
+        pass
 
     def _game_ended(self) -> None:
         """Handles removing all event listeners since the game has completed"""

@@ -16,7 +16,7 @@
 from __future__ import annotations
 from cli_chess.modules.material_difference import MaterialDifferenceView
 from cli_chess.modules.common import get_piece_unicode_symbol
-from cli_chess.utils.config import board_config
+from cli_chess.utils.config import game_config
 from chess import Color, PIECE_TYPES, PIECE_SYMBOLS, KING
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -34,7 +34,7 @@ class MaterialDifferencePresenter:
         self.view_lower = MaterialDifferenceView(self, self.format_diff_output(orientation), self.show_diff)
 
         self.model.e_material_difference_model_updated.add_listener(self.update)
-        board_config.e_board_config_updated.add_listener(self.update)
+        game_config.e_game_config_updated.add_listener(self.update)
 
     def update(self) -> None:
         """Updates the material differences for both sides"""
@@ -46,8 +46,8 @@ class MaterialDifferencePresenter:
         """Returns the formatted difference of the color passed in as a string"""
         output = ""
         material_difference = self.model.get_material_difference(color)
-        use_unicode = board_config.get_boolean(board_config.Keys.SHOW_MATERIAL_DIFF_IN_UNICODE)
-        pad_unicode = board_config.get_boolean(board_config.Keys.PAD_UNICODE)
+        use_unicode = game_config.get_boolean(game_config.Keys.SHOW_MATERIAL_DIFF_IN_UNICODE)
+        pad_unicode = game_config.get_boolean(game_config.Keys.PAD_UNICODE)
 
         if self.is_crazyhouse:
             return self._get_crazyhouse_pocket_output(color, use_unicode, pad_unicode)

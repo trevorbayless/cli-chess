@@ -14,7 +14,8 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from cli_chess.core.game import PlayableGameModelBase
-from cli_chess.modules.game_options import GameOption
+from cli_chess.modules.engine import EngineModel
+from cli_chess.core.game.game_options import GameOption
 from cli_chess.utils.logging import log
 from cli_chess.utils.config import player_info_config
 from chess import COLOR_NAMES
@@ -25,12 +26,22 @@ class OfflineGameModel(PlayableGameModelBase):
         super().__init__(play_as_color=game_parameters[GameOption.COLOR],
                          variant=game_parameters[GameOption.VARIANT])
 
+        self.engine_model = EngineModel(self.board_model, game_parameters)
         self.game_in_progress = True
         self._save_game_metadata(game_parameters=game_parameters)
 
+    def update(self, **kwargs) -> None:
+        """Called automatically as part of an event listener. This method
+           listens to subscribed model update events and if deemed necessary
+           triages and notifies listeners of the event.
+        """
+        super().update(**kwargs)
+        if kwargs.get('isGameOver', False):
+            self._report_game_over()
+
     def make_move(self, move: str):
         """Sends the move to the board model for it to be made"""
-        if self.game_in_progress and move:
+        if self.game_in_progress:
             try:
                 if self.board_model.board.is_game_over():
                     self.game_in_progress = False
@@ -39,11 +50,15 @@ class OfflineGameModel(PlayableGameModelBase):
                 if not self.is_my_turn():
                     raise Warning("Not your turn")
 
-                self.board_model.make_move(move, human=True)
+                move = move.strip()
+                if not move:
+                    raise Warning("No move specified")
+
+                self.board_model.make_move(move)
             except Exception:
                 raise
         else:
-            log.warning("OfflineGameModel: Attempted to make a move in a game that's not in progress")
+            log.warning("Attempted to make a move in a game that's not in progress")
             raise Warning("Game has already ended")
 
     def propose_takeback(self) -> None:
@@ -54,17 +69,23 @@ class OfflineGameModel(PlayableGameModelBase):
 
             self.board_model.takeback(self.my_color)
         except Exception as e:
-            log.error(f"OfflineGameModel: Takeback failed - {e}")
+            log.error(f"Takeback failed - {e}")
             raise
 
     def offer_draw(self) -> None:
         raise Warning("Engines do not accept draw offers")
 
     def resign(self) -> None:
-        """Handle game resignation. Since this is against an engine, the presenter
-           will handle calling the engine model to report resignation
-        """
-        self.game_in_progress = False
+        """Handles resigning the game"""
+        # TODO: Send back to view to show a confirmation prompt, or notification it was sent
+        if self.game_in_progress:
+            try:
+                self.board_model.handle_resignation(self.my_color)
+            except Exception:
+                raise
+        else:
+            log.warning("Attempted to resign a game that's not in progress")
+            raise Warning("Game has already ended")
 
     def _default_game_metadata(self) -> dict:
         """Returns the default structure for game metadata"""
@@ -81,9 +102,6 @@ class OfflineGameModel(PlayableGameModelBase):
                 data = kwargs['game_parameters']
                 self.game_metadata['my_color_str'] = COLOR_NAMES[self.my_color]
                 self.game_metadata['variant'] = data[GameOption.VARIANT]
-                self.game_metadata['clock']['white']['time'] = data[GameOption.TIME_CONTROL][0]
-                self.game_metadata['clock']['white']['increment'] = data[GameOption.TIME_CONTROL][1]
-                self.game_metadata['clock']['black'] = self.game_metadata['clock']['white']
 
                 # My player information
                 my_name = player_info_config.get_value(player_info_config.Keys.OFFLINE_PLAYER_NAME)
@@ -101,3 +119,15 @@ class OfflineGameModel(PlayableGameModelBase):
             self._notify_game_model_updated()
         except KeyError as e:
             log.error(f"Error saving offline game metadata: {e}")
+
+    def _report_game_over(self) -> None:
+        """Saves game information and notifies listeners that the game has ended.
+           This should only ever be called if the game is confirmed to be over
+        """
+        self.game_in_progress = False
+        outcome = self.board_model.get_game_over_result()
+        self.game_metadata['state']['status'] = outcome.termination
+        self.game_metadata['state']['winner'] = COLOR_NAMES[outcome.winner]
+
+        log.info(f"Game over (status={outcome.termination} winner={COLOR_NAMES[outcome.winner]})")
+        self._notify_game_model_updated(offlineGameOver=True)

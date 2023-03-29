@@ -1,4 +1,4 @@
-# Copyright (C) 2021-2022 Trevor Bayless <trevorbayless1@gmail.com>
+# Copyright (C) 2021-2023 Trevor Bayless <trevorbayless1@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,7 +15,7 @@
 
 from __future__ import annotations
 from cli_chess.menus.offline_games_menu import OfflineGamesMenuView
-from cli_chess.menus.vs_computer_menu import OfflineVsComputerMenuModel, OfflineVsComputerMenuPresenter
+from cli_chess.menus.versus_menus import OfflineVsComputerMenuModel, OfflineVersusMenuPresenter
 from cli_chess.menus import MenuPresenter
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -23,10 +23,9 @@ if TYPE_CHECKING:
 
 
 class OfflineGamesMenuPresenter(MenuPresenter):
-    """Defines the Main Menu"""
     def __init__(self, model: OfflineGamesMenuModel):
         self.model = model
-        self.vs_computer_menu_presenter = OfflineVsComputerMenuPresenter(OfflineVsComputerMenuModel())
+        self.vs_computer_menu_presenter = OfflineVersusMenuPresenter(OfflineVsComputerMenuModel())
         self.view = OfflineGamesMenuView(self)
         self.selection = self.model.get_menu_options()[0].option
 

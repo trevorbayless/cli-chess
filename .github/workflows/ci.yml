@@ -24,7 +24,7 @@ jobs:
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
         with:
-          python-version: '3.10'
+          python-version: '3.11'
 
       - name: Install dependencies
         run: |
@@ -43,7 +43,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest]  # TODO: Test on macos-latest when repo is public
-        python-version: ["3.7", "3.8", "3.9", "3.10"]  # TODO: Add 3.11 after `wrapt` update: https://github.com/GrahamDumpleton/wrapt/issues/226
+        python-version: ["3.7", "3.8", "3.9", "3.10", "3.11"]
     permissions:
       contents: read
 

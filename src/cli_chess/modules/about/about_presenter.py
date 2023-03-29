@@ -13,13 +13,23 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from cli_chess.core.main import MainModel, MainPresenter
+from cli_chess.modules.about import AboutView
+from cli_chess.utils.common import open_url_in_browser
+
+CLI_CHESS_GITHUB_URL = "https://github.com/trevorbayless/cli-chess/"
+CLI_CHESS_GITHUB_ISSUE_URL = CLI_CHESS_GITHUB_URL + "issues/new?assignees=&labels=bug&template=bug.yml"
 
 
-def main() -> None:
-    """Main entry point"""
-    MainPresenter(MainModel()).run()
+class AboutPresenter:
+    def __init__(self):
+        self.view = AboutView(self)
 
+    @staticmethod
+    def open_github_url() -> None:
+        """Open the cli-chess GitHub URL"""
+        open_url_in_browser(CLI_CHESS_GITHUB_URL)
 
-if __name__ == "__main__":
-    main()
+    @staticmethod
+    def open_github_issue_url() -> None:
+        """Opens the cli-chess GitHub issue URL"""
+        open_url_in_browser(CLI_CHESS_GITHUB_ISSUE_URL)

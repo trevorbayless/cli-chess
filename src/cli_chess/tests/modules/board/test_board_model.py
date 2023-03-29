@@ -14,9 +14,10 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 from cli_chess.modules.board import BoardModel
-import chess
 from unittest.mock import Mock
 import pytest
+import chess
+import chess.variant
 
 
 @pytest.fixture
@@ -24,16 +25,10 @@ def board_updated_listener():
     return Mock()
 
 
-@pytest.fixture
-def successful_move_listener():
-    return Mock()
-
-
 @pytest.fixture()
-def model(board_updated_listener: Mock, successful_move_listener: Mock):
+def model(board_updated_listener: Mock):
     model = BoardModel()
     model.e_board_model_updated.add_listener(board_updated_listener)
-    model.e_successful_move_made.add_listener(successful_move_listener)
     return model
 
 
@@ -100,12 +95,11 @@ def test_reinitialize_board(model: BoardModel, board_updated_listener: Mock):
     assert model.get_highlight_move() == chess.Move.null()
 
 
-def test_make_move(model: BoardModel, board_updated_listener: Mock, successful_move_listener: Mock):
+def test_make_move(model: BoardModel, board_updated_listener: Mock):
     # Test valid move
     try:
         model.make_move("Nf3")
         board_updated_listener.assert_called()
-        successful_move_listener.assert_called()
         assert model.get_highlight_move() == model.board.peek()
     except Exception as e:
         pytest.fail(f"test_make_move raised {e}")
@@ -113,12 +107,10 @@ def test_make_move(model: BoardModel, board_updated_listener: Mock, successful_m
     # Test illegal move
     # Todo: Test custom exceptions once python-chess updates (IllegalMove, AmbiguousMove, etc)
     board_updated_listener.reset_mock()
-    successful_move_listener.reset_mock()
     with pytest.raises(ValueError):
         model.make_move("Qe6")
 
     board_updated_listener.assert_not_called()
-    successful_move_listener.assert_not_called()
     assert model.get_highlight_move() == model.board.peek()
 
 
@@ -140,7 +132,7 @@ def test_make_moves_from_list(model: BoardModel, board_updated_listener: Mock):
     board_updated_listener.assert_not_called()
 
 
-def test_takeback(model: BoardModel, board_updated_listener: Mock, successful_move_listener: Mock):
+def test_takeback(model: BoardModel, board_updated_listener: Mock):
     # Test empty move stack
     model.board.reset()
     with pytest.raises(Warning):
@@ -149,7 +141,6 @@ def test_takeback(model: BoardModel, board_updated_listener: Mock, successful_mo
     assert model.get_turn() == chess.WHITE
     assert model.get_highlight_move() == chess.Move.null()
     board_updated_listener.assert_not_called()
-    successful_move_listener.assert_not_called()
 
     # Ensure callbacks are called on successful takeback
     model.make_move("e4")
@@ -157,16 +148,13 @@ def test_takeback(model: BoardModel, board_updated_listener: Mock, successful_mo
     assert model.get_turn() == chess.WHITE
     assert len(model.get_move_stack()) == 0
     board_updated_listener.assert_called()
-    successful_move_listener.assert_called()
 
     # Ensure callbacks are not called on unsuccessful takebacks
     model.make_move("e4")
     board_updated_listener.reset_mock()
-    successful_move_listener.reset_mock()
     with pytest.raises(Warning):
         model.takeback(chess.BLACK)
     board_updated_listener.assert_not_called()
-    successful_move_listener.assert_not_called()
 
     # Test a valid black takeback
     model.board.reset()
@@ -372,6 +360,49 @@ def test_set_board_position(model: BoardModel, board_updated_listener: Mock):
     assert model.get_highlight_move() == chess.Move.null()
 
 
+def test_is_game_over(model: BoardModel):
+    # Test game in progress
+    model.set_fen("k7/8/8/8/8/8/8/K5Q1 w - - 0 1")
+    assert not model.is_game_over()
+
+    # Test game over
+    model.make_move("Qb6")  # stalemate
+    assert model.is_game_over()
+
+
+def test_get_game_over_result(model: BoardModel):
+    # Test game in progress
+    model.set_fen("8/6q1/6k1/8/2K5/8/8/8 w - - 0 1")
+
+    # Test game over with a standard termination reason
+    model.set_fen("7K/6q1/6k1/8/8/8/8/8 w - - 0 1")
+    assert model.get_game_over_result() == chess.Outcome(chess.Termination.CHECKMATE, chess.BLACK)
+
+    # Test game over by resignation
+    model.set_fen("8/8/4K3/8/3pk3/8/8/8 b - - 0 1")
+    model.handle_resignation(chess.WHITE)
+    assert model.get_game_over_result() == chess.Outcome("resignation", chess.BLACK)  # noqa
+
+
+def test_handle_resignation(model: BoardModel):
+    # Test white resignation
+    model.set_fen("8/1PK5/8/8/8/4q3/8/1k6 b - - 0 1")
+    model.handle_resignation(chess.WHITE)
+    assert model.get_game_over_result() == chess.Outcome("resignation", chess.BLACK)  # noqa
+    assert model.is_game_over()
+
+    # Test black resignation
+    model.set_fen("8/3k4/3B1K2/4P3/1Pb5/8/8/8 b - - 0 1")
+    model.handle_resignation(chess.BLACK)
+    assert model.get_game_over_result() == chess.Outcome("resignation", chess.WHITE)  # noqa
+
+
+def test_cleanup(model: BoardModel, board_updated_listener: Mock):
+    assert len(model.e_board_model_updated.listeners) > 0
+    model.cleanup()
+    assert len(model.e_board_model_updated.listeners) == 0
+
+
 def test_notify_board_model_updated(model: BoardModel, board_updated_listener: Mock):
     # Test registered board update listener is called
     model._notify_board_model_updated()
@@ -382,15 +413,3 @@ def test_notify_board_model_updated(model: BoardModel, board_updated_listener: M
     model.e_board_model_updated.remove_listener(board_updated_listener)
     model._notify_board_model_updated()
     board_updated_listener.assert_not_called()
-
-
-def test_notify_successful_move_made(model: BoardModel, successful_move_listener: Mock):
-    # Test registered successful move listener is called
-    model._notify_successful_move_made()
-    successful_move_listener.assert_called()
-
-    # Unregister listener and test it's not called
-    successful_move_listener.reset_mock()
-    model.e_successful_move_made.remove_listener(successful_move_listener)
-    model._notify_successful_move_made()
-    successful_move_listener.assert_not_called()

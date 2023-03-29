@@ -13,7 +13,41 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+light_piece_color = "white"
+dark_piece_color = "black"
+
 default = {
+    # Game styling
+    "rank-label": "fg:gray",
+    "file-label": "fg:gray",
+
+    "light-square": "bg:cadetblue",
+    "light-square.light-piece": f"fg:{light_piece_color}",
+    "light-square.dark-piece": f"fg:{dark_piece_color}",
+
+    "dark-square": "bg:darkslateblue",
+    "dark-square.light-piece": f"fg:{light_piece_color}",
+    "dark-square.dark-piece": f"fg:{dark_piece_color}",
+
+    "last-move": "bg:yellowgreen",
+    "last-move.light-piece": f"fg:{light_piece_color}",
+    "last-move.dark-piece": f"fg:{dark_piece_color}",
+
+    "in-check": "bg:red",
+    "in-check.light-piece": f"fg:{light_piece_color}",
+    "in-check.dark-piece": f"fg:{dark_piece_color}",
+
+    "material-difference": "fg:gray",
+    "move-list": "fg:gray",
+    "move-input": "fg:white bold",
+
+    "player-info": "fg:white",
+    "player-info.title": "fg:darkorange bold",
+    "player-info.title.bot": "fg:darkmagenta",
+    "player-info.pos-rating-diff": "fg:darkgreen",
+    "player-info.neg-rating-diff": "fg:darkred",
+
+    # Program styling
     "menu": "bg:",
     "menu.category-title": "fg:black bg:limegreen",
     "menu.option": "fg:white",
@@ -32,60 +66,11 @@ default = {
     "label.error": "fg:darkred",
     "label.success.banner": "bg:darkgreen fg:white",
     "label.error.banner": "bg:darkred fg:white",
+    "label.neutral.banner": "bg:slategray fg:white",
 
     "text-area.input": "fg:orangered bold",
     "text-area.input.placeholder": "italic",
     "text-area.prompt": "fg:white bg:darkcyan bold noinherit",
 
     "validation-toolbar": "fg:white bg:darkred",
-
-    "material-difference": "fg:gray",
-
-    "move-input": "fg:white bold",
-    "move-list": "fg:gray",
-
-    "player-info": "fg:white",
-    "player-info.title": "fg:darkorange bold",
-    "player-info.title.bot": "fg:darkmagenta",
-    "player-info.pos-rating-diff": "fg:darkgreen",
-    "player-info.neg-rating-diff": "fg:darkred",
-
-}
-
-twilight = {
-    "menu": "bg:",
-    "menu.category-title": "fg:black bg:darkseagreen",
-    "menu.option": "fg:white",
-    "menu.multi-value": "fg:tomato",
-    "focused-selected": "fg:black bg:plum noinherit",
-    "unfocused-selected": "fg:black bg:white noinherit",
-    "menu.multi-value focused-selected": "fg:tomato bold noinherit",
-    "menu.multi-value unfocused-selected": "fg:tomato noinherit",
-
-    "function-bar.key": "fg:white",
-    "function-bar.label": "fg:black bg:plum",
-    "function-bar.spacer": "",
-
-    "label": "fg:white",
-    "label.success": "fg:skyblue",
-    "label.error": "fg:crimson",
-    "label.success.banner": "bg:skyblue fg:white",
-    "label.error.banner": "fg:crimson fg:white",
-
-    "text-area.input": "fg:tomato bold",
-    "text-area.input.placeholder": "italic",
-    "text-area.prompt": "fg:white bold noinherit",
-
-    "validation-toolbar": "fg:white bg:crimson",
-
-    "material-difference": "fg:gray",
-
-    "move-input": "fg:white bold",
-    "move-list": "fg:gray",
-
-    "player-info": "fg:white",
-    "player-info.title": "fg:darkorange bold",
-    "player-info.title.bot": "fg:darkmagenta",
-    "player-info.pos-rating-diff": "fg:skyblue",
-    "player-info.neg-rating-diff": "fg:crimson",
 }

@@ -1,4 +1,4 @@
-# Copyright (C) 2021-2022 Trevor Bayless <trevorbayless1@gmail.com>
+# Copyright (C) 2021-2023 Trevor Bayless <trevorbayless1@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -41,7 +41,7 @@ class PlayerInfoView:
         return VSplit([
             ConditionalContainer(
                 Box(Window(self._player_title_control, align=WindowAlign.LEFT, dont_extend_width=True), padding=0, padding_right=1),
-                Condition(lambda: self.player_title != "")
+                Condition(lambda: False if not self.player_title else True)
             ),
             Box(Window(self._player_name_control, align=WindowAlign.LEFT, dont_extend_width=True), padding=0, padding_right=1),
             Box(Window(self._player_rating_control, align=WindowAlign.RIGHT, dont_extend_width=True), padding=0, padding_right=1),
@@ -52,7 +52,7 @@ class PlayerInfoView:
     def update(self, player_info: dict) -> None:
         """Updates the player info using the data passed in"""
         self.player_title = player_info.get('title', "")
-        self.player_name = player_info.get('name', "Unknown")
+        self.player_name = player_info.get('name', "?")
         self._format_rating_diff(player_info.get('rating_diff', None))
 
         rating = player_info.get('rating', "")

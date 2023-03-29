@@ -19,29 +19,36 @@ from cli_chess.modules.board import BoardPresenter
 from cli_chess.modules.move_list import MoveListPresenter
 from cli_chess.modules.material_difference import MaterialDifferencePresenter
 from cli_chess.modules.player_info import PlayerInfoPresenter
+from cli_chess.modules.clock import ClockPresenter
 from cli_chess.utils.logging import log
-from chess import Color, COLOR_NAMES
+from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING
-
 if TYPE_CHECKING:
     from cli_chess.core.game import GameModelBase, PlayableGameModelBase
 
 
-class GamePresenterBase:
+class GamePresenterBase(ABC):
     def __init__(self, model: GameModelBase):
         self.model = model
         self.board_presenter = BoardPresenter(model.board_model)
         self.move_list_presenter = MoveListPresenter(model.move_list_model)
         self.material_diff_presenter = MaterialDifferencePresenter(model.material_diff_model)
         self.player_info_presenter = PlayerInfoPresenter(model)
-        self.view = GameViewBase(self)
+        self.clock_presenter = ClockPresenter(model)
+        self.view = self._get_view()
 
         self.model.e_game_model_updated.add_listener(self.update)
+        log.debug(f"Created {type(self).__name__} (id={id(self)})")
 
+    @abstractmethod
+    def _get_view(self) -> GameViewBase:
+        """Returns the view to use for this presenter"""
+        pass
+
+    @abstractmethod
     def update(self, **kwargs) -> None:
-        """Listens to game model updates when notified. Child classes should
-           override if interested in specific kwargs. See model for specific
-           kwargs that are currently being sent.
+        """Listens to game model updates when notified.
+           See model for specific kwargs that are currently being sent.
         """
         pass
 
@@ -51,60 +58,25 @@ class GamePresenterBase:
 
     def exit(self) -> None:
         """Exit current presenter/view"""
+        log.debug("Exiting game presenter")
         self.model.cleanup()
         self.view.exit()
 
 
-class PlayableGamePresenterBase(GamePresenterBase):
+class PlayableGamePresenterBase(GamePresenterBase, ABC):
     def __init__(self, model: PlayableGameModelBase):
-        self.model = model
         super().__init__(model)
-        self.view = PlayableGameViewBase(self)
+        self.model = model
 
-        self.model.board_model.e_successful_move_made.add_listener(self.view.clear_error)
+    @abstractmethod
+    def _get_view(self) -> PlayableGameViewBase:
+        """Returns the view to use for this presenter"""
+        return PlayableGameViewBase(self)
 
     def update(self, **kwargs) -> None:
-        """Overrides base and responds to specific model updates"""
-        if 'gameOver' in kwargs:
-            self._parse_and_present_game_over()
-
-    def _parse_and_present_game_over(self):
-        """Handles parsing and presenting the game over status"""
-        if not self.is_game_in_progress():
-            status = self.model.game_metadata['state']['status']
-            winner = self.model.game_metadata['state']['winner'].capitalize()
-
-            status_win_reasons = ['mate', 'resign', 'timeout', 'outoftime', 'cheat', 'variantEnd']
-            if winner and status in status_win_reasons:
-                output = f" • {winner} is victorious"
-                loser = COLOR_NAMES[not Color(COLOR_NAMES.index(winner.lower()))].capitalize()
-
-                if status == "mate":
-                    output = "Checkmate" + output
-                elif status == "resign":
-                    output = f"{loser} resigned" + output
-                elif status == "timeout":
-                    output = f"{loser} left the game" + output
-                elif status == "outoftime":
-                    output = f"{loser} time out" + output
-                elif status == "cheat":
-                    output = "Cheat detected"
-                else:  # TODO: Handle variantEnd (need to know variant)
-                    log.debug(f"PlayableGamePresenterBase: Received game over with uncaught status: {status} / {winner}")
-                    output = "Game over" + output
-
-            else:  # Handle other game end reasons
-                if status == "aborted":
-                    output = "Game aborted"
-                elif status == "draw":
-                    output = "Game over • Draw"
-                elif status == "stalemate":
-                    output = "Game over • Stalemate"
-                else:
-                    log.debug(f"PlayableGamePresenterBase: Received game over with uncaught status: {status}")
-                    output = "Game over"
-
-            self.view.show_error(output)
+        """Update method called on game model updates. Overrides base."""
+        if "successfulMoveMade" in kwargs:
+            self.view.alert.clear_alert()
 
     def user_input_received(self, inpt: str) -> None:
         """Respond to the users input. This input can either be the
@@ -126,23 +98,23 @@ class PlayableGamePresenterBase(GamePresenterBase):
             move = move.strip()
             if move:
                 self.model.make_move(move)
-                self.view.clear_error()
+                self.view.alert.clear_alert()
         except Exception as e:
-            self.view.show_error(f"{e}")
+            self.view.alert.show_alert(str(e))
 
     def propose_takeback(self) -> None:
         """Proposes a takeback"""
         try:
             self.model.propose_takeback()
         except Exception as e:
-            self.view.show_error(f"{e}")
+            self.view.alert.show_alert(str(e))
 
     def offer_draw(self) -> None:
         """Offers a draw"""
         try:
             self.model.offer_draw()
         except Exception as e:
-            self.view.show_error(f"{e}")
+            self.view.alert.show_alert(str(e))
 
     def resign(self) -> None:
         """Resigns the game"""
@@ -152,7 +124,11 @@ class PlayableGamePresenterBase(GamePresenterBase):
             else:
                 self.exit()
         except Exception as e:
-            self.view.show_error(f"{e}")
+            self.view.alert.show_alert(str(e))
 
     def is_game_in_progress(self) -> bool:
         return self.model.game_in_progress
+
+    @abstractmethod
+    def _parse_and_present_game_over(self) -> str:
+        pass
