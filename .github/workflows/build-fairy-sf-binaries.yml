@@ -1,0 +1,148 @@
+name: Build Fairy-Stockfish Binaries
+
+on:
+  workflow_dispatch:
+    inputs:
+      fairy_sf_tag:
+        type: string
+        default: fairy_sf_14
+        description: Fairy-Stockfish repo tag
+        required: true
+      create_pull_request:
+        type: boolean
+        description: Create PR with new binaries
+
+jobs:
+  linux_x86-64:
+    runs-on: ubuntu-latest
+    env:
+      binary: fairy-stockfish_x86-64_linux
+    steps:
+      - name: Clone Fairy-Stockfish @ tag:${{ inputs.fairy_sf_tag }}
+        uses: actions/checkout@master
+        with:
+          repository: fairy-stockfish/Fairy-Stockfish
+          ref: refs/tags/${{ inputs.fairy_sf_tag }}
+
+      - name: Build
+        run: |
+          cd src
+          make clean
+          make -j build COMP=gcc ARCH=x86-64 EXE=${{ env.binary }}
+          strip ${{ env.binary }}
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: dir-${{ env.binary }}
+          path: src/${{ env.binary }}
+
+  windows_x86-64:
+    runs-on: windows-2022
+    env:
+      binary: fairy-stockfish_x86-64_windows
+    steps:
+      - name: Clone Fairy-Stockfish @ tag:${{ inputs.fairy_sf_tag }}
+        uses: actions/checkout@master
+        with:
+          repository: fairy-stockfish/Fairy-Stockfish
+          ref: refs/tags/${{ inputs.fairy_sf_tag }}
+
+      - name: Build
+        run: |
+          cd src
+          make clean
+          make -j build COMP=mingw ARCH=x86-64 EXE=${{ env.binary }}.exe
+          strip ${{ env.binary }}.exe
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: dir-${{ env.binary }}
+          path: src/${{ env.binary }}.exe
+          
+  macos_x86-64:
+    runs-on: macos-12
+    env:
+      binary: fairy-stockfish_x86-64_macos
+    steps:
+      - name: Clone Fairy-Stockfish @ tag:${{ inputs.fairy_sf_tag }}
+        uses: actions/checkout@master
+        with:
+          repository: fairy-stockfish/Fairy-Stockfish
+          ref: refs/tags/${{ inputs.fairy_sf_tag }}
+
+      - name: Build
+        run: |
+          cd src
+          make clean
+          make -j build COMP=clang ARCH=x86-64 EXE=${{ env.binary }}
+          strip ${{ env.binary }}
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: dir-${{ env.binary }}
+          path: src/${{ env.binary }}
+          
+  macos_aarch64:
+    runs-on: macos-12
+    env:
+      binary: fairy-stockfish_aarch64_macos
+    steps:
+      - name: Clone Fairy-Stockfish @ tag:${{ inputs.fairy_sf_tag }}
+        uses: actions/checkout@master
+        with:
+          repository: fairy-stockfish/Fairy-Stockfish
+          ref: refs/tags/${{ inputs.fairy_sf_tag }}
+
+      - name: Build
+        run: |
+          cd src
+          make clean
+          make -j build COMP=clang ARCH=apple-silicon EXE=${{ env.binary }}
+          strip ${{ env.binary }}
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: dir-${{ env.binary }}
+          path: src/${{ env.binary }}
+          
+  create_pr:
+    if: github.event.inputs.create_pull_request == 'true'
+    runs-on: ubuntu-latest
+    needs:
+      - linux_x86-64
+      - windows_x86-64
+      - macos_x86-64
+      - macos_aarch64
+    env:
+      COMMIT_PATH: src/cli_chess/modules/engine/binaries
+      BRANCH_NAME: workflow/update-binaries-${{github.run_id}}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Clone cli-chess
+        uses: actions/checkout@v3
+        
+      - name: Download Fairy-Stockfish artifacts
+        uses: actions/download-artifact@v3
+        with:
+          path: ${{ env.COMMIT_PATH }}
+    
+      - name: Extract and make binaries executable
+        run: |
+          find dir-* -type f -exec mv -f '{}' ./ ';'
+          chmod +x fairy-stockfish*
+          rm -rf dir-*
+          ls -la
+        working-directory: ${{ env.COMMIT_PATH }}
+
+      - name: Create pull request
+        run: |
+          cd $COMMIT_PATH
+          git config user.name 'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+          git checkout -b $BRANCH_NAME
+          git add fairy-stockfish*
+          git commit -m "Update Fairy-Stockfish binaries"
+          git push -u origin $BRANCH_NAME
+          gh pr create -B master -H $BRANCH_NAME \
+          --title "Update Fairy-Stockfish binaries using tag@${{ inputs.fairy_sf_tag }}" \
+          --body "Generated from GitHub workflow [run #${{github.run_id}}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})"
