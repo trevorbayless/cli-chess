@@ -1,4 +1,4 @@
-# Copyright (C) 2021-2022 Trevor Bayless <trevorbayless1@gmail.com>
+# Copyright (C) 2021-2023 Trevor Bayless <trevorbayless1@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -26,9 +26,9 @@ class MenuCategory:
 
 class MenuOption:
     """A menu option that has one action on enter or click (e.g. Start game)"""
-    def __init__(self, option: Enum, description: str, enabled: bool = True, visible: bool = True):
+    def __init__(self, option: Enum, description: str, enabled: bool = True, visible: bool = True, display_name=""):
         self.option = option
-        self.option_name = self.option.value
+        self.option_name = display_name if display_name else self.option.value
         self.description = description
         self.enabled = enabled
         self.visible = visible
@@ -36,8 +36,8 @@ class MenuOption:
 
 class MultiValueMenuOption(MenuOption):
     """A menu option which has multiple values to choose from (e.g. Side to play as) """
-    def __init__(self, option: Enum, description: str, values: List[str], enabled: bool = True, visible: bool = True):
-        super().__init__(option, description, enabled, visible)
+    def __init__(self, option: Enum, description: str, values: List[str], enabled: bool = True, visible: bool = True, display_name=""):
+        super().__init__(option, description, enabled, visible, display_name)
         self.values = values
         self.selected_value = {
             "index": self.values.index(self.values[0]),
