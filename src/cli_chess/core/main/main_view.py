@@ -81,7 +81,7 @@ class MainView:
         """Creates the navigation hint container"""
         message = "Use [ARROWS] to navigate the menus. Use [SPACEBAR] or [ENTER] to modify values."
         return Box(
-            Window(FormattedTextControl(HTML(f"<i>{message}</i>"), style="class:label"), align=WindowAlign.CENTER),
+            Window(FormattedTextControl(HTML(f"<i>{message}</i>"), style="class:label.dim"), align=WindowAlign.CENTER),
             padding=0, padding_bottom=1, height=D(max=2)
         )
 
@@ -102,7 +102,7 @@ class MainView:
 
         return VSplit([
             Window(FormattedTextControl(_get_function_bar_fragments)),
-            Window(FormattedTextControl(f"cli-chess {__version__}"), align=WindowAlign.RIGHT)
+            Window(FormattedTextControl(f"cli-chess {__version__}", style="class:label"), align=WindowAlign.RIGHT)
         ], height=D(max=1, preferred=1))
 
     def _create_function_bar_key_bindings(self) -> "_MergedKeyBindings":  # noqa: F821

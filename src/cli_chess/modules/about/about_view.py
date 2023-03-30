@@ -41,9 +41,9 @@ class AboutView:
         """Creates the container for the token manager view"""
         return VSplit([
             HSplit([
-                Window(FormattedTextControl(HTML("<b>Author:</b> Trevor Bayless")), dont_extend_width=True, dont_extend_height=True),
-                Window(FormattedTextControl(HTML("<b>License:</b> GPL v3.0")), dont_extend_width=True, dont_extend_height=True),
-                Window(FormattedTextControl(HTML(f"<b>Version:</b> {__version__}")), dont_extend_width=True, dont_extend_height=True),
+                Window(FormattedTextControl(HTML("<b>Author:</b> Trevor Bayless"), style="class:label"), dont_extend_width=True, dont_extend_height=True),  # noqa: E501
+                Window(FormattedTextControl(HTML("<b>License:</b> GPL v3.0"), style="class:label"), dont_extend_width=True, dont_extend_height=True),
+                Window(FormattedTextControl(HTML(f"<b>Version:</b> {__version__}"), style="class:label"), dont_extend_width=True, dont_extend_height=True),  # noqa: E501
             ]),
             Box(Window(FormattedTextControl(CLI_CHESS_LINES)), padding=0, padding_left=2, width=D(min=1))
         ], width=D(min=1, max=80))

@@ -62,6 +62,7 @@ default = {
     "function-bar.spacer": "",
 
     "label": "fg:white",
+    "label.dim": "fg:dimgray",
     "label.success": "fg:darkgreen",
     "label.error": "fg:darkred",
     "label.success.banner": "bg:darkgreen fg:white",
