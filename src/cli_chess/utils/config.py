@@ -255,10 +255,10 @@ class GameConfig(SectionBase):
                 self.SHOW_BOARD_COORDINATES: True,
                 self.SHOW_BOARD_HIGHLIGHTS: True,
                 self.BLINDFOLD_CHESS: False,
-                self.USE_UNICODE_PIECES: False if is_windows_os() else True,
+                self.USE_UNICODE_PIECES: True,
                 self.SHOW_MOVE_LIST_IN_UNICODE: False,
-                self.SHOW_MATERIAL_DIFF_IN_UNICODE: False if is_windows_os() else True,
-                self.PAD_UNICODE: True if is_windows_os() else False,
+                self.SHOW_MATERIAL_DIFF_IN_UNICODE: True,
+                self.PAD_UNICODE: True,
             }
             return default_lookup[self]
 
