@@ -142,11 +142,13 @@ class AlertContainer:
         self._alert_label.text = text
         self._alert_label.style = alert_type.get_style(alert_type)
         self._alert_container.filter = to_filter(True)
+        repaint_ui()
 
     def clear_alert(self) -> None:
         """Clears the alert container"""
         self._alert_label.text = ""
         self._alert_container.filter = to_filter(False)
+        repaint_ui()
 
     def __pt_container__(self):
         return self._alert_container

@@ -48,6 +48,7 @@ class OnlineGameModel(PlayableGameModelBase):
         """Sends a request to lichess to start an AI challenge using the selected game parameters"""
         # Note: Only subscribe to IEM events right before creating challenge to lessen chance of grabbing another game
         self.api_iem.subscribe_to_events(self.handle_iem_event)
+        self._notify_game_model_updated(searchingForOpponent=True)
         self.vs_ai = is_vs_ai
         self.searching = True
 
@@ -165,13 +166,14 @@ class OnlineGameModel(PlayableGameModelBase):
 
     def propose_takeback(self) -> None:
         """Notifies the game state dispatcher to propose a takeback"""
-        # TODO: Send back to view to show a confirmation prompt, or notification it was sent
         if self.game_in_progress:
             try:
                 if len(self.board_model.get_move_stack()) < 2:
                     raise Warning("Cannot send takeback with less than two moves")
                 self.game_state_dispatcher.send_takeback_request()
-                raise RequestSuccessfullySent("Takeback request sent")
+
+                if not self.vs_ai:
+                    raise RequestSuccessfullySent("Takeback request sent")
             except Exception:
                 raise
         else:
@@ -183,7 +185,6 @@ class OnlineGameModel(PlayableGameModelBase):
 
     def offer_draw(self) -> None:
         """Notifies the game state dispatcher to offer a draw"""
-        # TODO: Send back to view to show a confirmation prompt, or notification it was sent
         if self.game_in_progress:
             if self.vs_ai:
                 raise Warning("AI does not accept draw offers")

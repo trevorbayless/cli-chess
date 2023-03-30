@@ -98,7 +98,6 @@ class PlayableGamePresenterBase(GamePresenterBase, ABC):
             move = move.strip()
             if move:
                 self.model.make_move(move)
-                self.view.alert.clear_alert()
         except Exception as e:
             self.view.alert.show_alert(str(e))
 

@@ -77,7 +77,6 @@ class OfflineGameModel(PlayableGameModelBase):
 
     def resign(self) -> None:
         """Handles resigning the game"""
-        # TODO: Send back to view to show a confirmation prompt, or notification it was sent
         if self.game_in_progress:
             try:
                 self.board_model.handle_resignation(self.my_color)
