@@ -85,7 +85,12 @@ class WatchTVModel(GameModelBase):
     def stream_event_received(self, **kwargs):
         """An event was received from the TV thread. Raises exception on invalid data"""
         try:
-            # TODO: Data needs to be organized and sent to presenter to handle display
+            if 'searchingForGame' in kwargs:
+                self.e_game_model_updated.notify(searchingForGame=True)
+
+            if 'tvGameFound' in kwargs:
+                self.e_game_model_updated.notify(tvGameFound=True)
+
             if 'startGameEvent' in kwargs:
                 event = kwargs['startGameEvent']
                 variant = event.get('variant', {}).get('key')
@@ -119,6 +124,9 @@ class WatchTVModel(GameModelBase):
                 event = kwargs['endGameEvent']
                 self._save_game_metadata(tv_descriptionEvent=event)
                 self.e_game_model_updated.notify(onlineGameOver=True)
+
+            if 'tvError' in kwargs:
+                self.e_game_model_updated.notify(tvError=True, msg=kwargs.get('msg'))
         except Exception as e:
             log.error(f"Error parsing stream data: {e}")
             raise
@@ -162,6 +170,7 @@ class StreamTVChannel(threading.Thread):
         self.running = True
         while self.running:
             try:
+                self.e_tv_stream_event.notify(searchingForGame=True)
                 game_id = self.get_channel_game_id(self.channel.value)
 
                 if game_id != self.current_game:
@@ -191,7 +200,7 @@ class StreamTVChannel(threading.Thread):
 
                         if status == "started":
                             log.info(f"Started streaming TV game: {game_id}")
-                            self.e_tv_stream_event.notify(startGameEvent=event)
+                            self.e_tv_stream_event.notify(startGameEvent=event, tvGameFound=True)
                             turns_behind = event.get('turns', 0)
 
                         if fen:
@@ -226,14 +235,14 @@ class StreamTVChannel(threading.Thread):
 
             # TODO: Send event to model with retry notification so we can display it to the user
             log.info(f"Sleeping {delay} seconds before retrying ({self.max_retries - self.retries} retries left).")
+            self.e_tv_stream_event.notify(tvError=True, msg=f"Error streaming. Retrying in {delay} seconds.")
             sleep(delay)
             self.retries += 1
         else:
             self.stop_watching()
 
     def stop_watching(self):
-        # TODO: Need to handle going back to the main menu when the TVStream
-        #       connection retries are exhausted. Send event notification to model?
         log.info("Stopping TV stream")
+        self.e_tv_stream_event.notify(tvError=True, msg="Retries exhausted. Stopping TV.")
         self.e_tv_stream_event.remove_all_listeners()
         self.running = False

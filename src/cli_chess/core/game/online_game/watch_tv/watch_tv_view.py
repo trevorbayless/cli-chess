@@ -47,7 +47,8 @@ class WatchTVView(GameViewBase):
                         self.player_info_lower_container,
                         self.clock_lower
                     ]),
-                ])
+                ]),
+                self.alert
             ]),
             padding=0
         )
