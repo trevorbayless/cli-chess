@@ -41,6 +41,8 @@ class MainPresenter:
 
         if args.reset_config:
             force_recreate_configs()
+            print("Configuration successfully reset")
+            exit(0)
 
         if args.token:
             if not g_token_manager_model.update_linked_account(args.token):
