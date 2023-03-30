@@ -16,7 +16,7 @@
 from cli_chess.core.game import PlayableGameModelBase
 from cli_chess.core.game.game_options import GameOption
 from cli_chess.core.api import GameStateDispatcher
-from cli_chess.utils import log, threaded
+from cli_chess.utils import log, threaded, RequestSuccessfullySent
 from chess import COLOR_NAMES, WHITE
 from typing import Optional
 
@@ -31,6 +31,7 @@ class OnlineGameModel(PlayableGameModelBase):
 
         self.game_state_dispatcher = Optional[GameStateDispatcher]
         self.playing_game_id = None
+        self.searching = False
         self.vs_ai = False
 
         try:
@@ -48,6 +49,7 @@ class OnlineGameModel(PlayableGameModelBase):
         # Note: Only subscribe to IEM events right before creating challenge to lessen chance of grabbing another game
         self.api_iem.subscribe_to_events(self.handle_iem_event)
         self.vs_ai = is_vs_ai
+        self.searching = True
 
         if self.vs_ai:  # Challenge Lichess AI (stockfish)
             self.api_client.challenges.create_ai(level=self.game_metadata['ai_level'],
@@ -68,7 +70,9 @@ class OnlineGameModel(PlayableGameModelBase):
            and starts and registers game stream event callback
         """
         if game_id and not self.game_in_progress:
+            self._notify_game_model_updated(opponentFound=True)
             self.game_in_progress = True
+            self.searching = False
             self.playing_game_id = game_id
 
             self.game_state_dispatcher = GameStateDispatcher(game_id)
@@ -78,6 +82,7 @@ class OnlineGameModel(PlayableGameModelBase):
     def _game_end(self) -> None:
         """The game we are playing has ended. Handle cleaning up."""
         self.game_in_progress = False
+        self.searching = False
         self.playing_game_id = None
         self.api_iem.unsubscribe_from_events(self.handle_iem_event)
 
@@ -153,7 +158,10 @@ class OnlineGameModel(PlayableGameModelBase):
                 raise
         else:
             log.warning("Attempted to make a move in a game that's not in progress")
-            raise Warning("Game has already ended")
+            if self.searching:
+                raise Warning("Still searching for opponent")
+            else:
+                raise Warning("Game has already ended")
 
     def propose_takeback(self) -> None:
         """Notifies the game state dispatcher to propose a takeback"""
@@ -163,11 +171,15 @@ class OnlineGameModel(PlayableGameModelBase):
                 if len(self.board_model.get_move_stack()) < 2:
                     raise Warning("Cannot send takeback with less than two moves")
                 self.game_state_dispatcher.send_takeback_request()
+                raise RequestSuccessfullySent("Takeback request sent")
             except Exception:
                 raise
         else:
             log.warning("Attempted to propose a takeback in a game that's not in progress")
-            raise Warning("Game has already ended")
+            if self.searching:
+                raise Warning("Still searching for opponent")
+            else:
+                raise Warning("Game has already ended")
 
     def offer_draw(self) -> None:
         """Notifies the game state dispatcher to offer a draw"""
@@ -178,15 +190,18 @@ class OnlineGameModel(PlayableGameModelBase):
 
             try:
                 self.game_state_dispatcher.send_draw_offer()
+                raise RequestSuccessfullySent("Draw offer sent")
             except Exception:
                 raise
         else:
             log.warning("Attempted to offer a draw to a game that's not in progress")
-            raise Warning("Game has already ended")
+            if self.searching:
+                raise Warning("Still searching for opponent")
+            else:
+                raise Warning("Game has already ended")
 
     def resign(self) -> None:
         """Notifies the game state dispatcher to resign the game"""
-        # TODO: Send back to view to show a confirmation prompt, or notification it was sent
         if self.game_in_progress:
             try:
                 self.game_state_dispatcher.resign()
@@ -194,7 +209,10 @@ class OnlineGameModel(PlayableGameModelBase):
                 raise
         else:
             log.warning("Attempted to resign a game that's not in progress")
-            raise Warning("Game has already ended")
+            if self.searching:
+                raise Warning("Still searching for opponent")
+            else:
+                raise Warning("Game has already ended")
 
     def _save_game_metadata(self, **kwargs) -> None:
         """Parses and saves the data of the game being played."""

@@ -34,6 +34,7 @@ class OnlineGamePresenter(PlayableGamePresenterBase):
     def __init__(self, model: OnlineGameModel):
         self.model = model
         super().__init__(model)
+        self.view.alert.show_alert("Searching for opponent...", AlertType.NEUTRAL)
 
     def _get_view(self) -> OnlineGameView:
         """Sets and returns the view to use"""
@@ -42,6 +43,8 @@ class OnlineGamePresenter(PlayableGamePresenterBase):
     def update(self, **kwargs) -> None:
         """Update method called on game model updates. Overrides base."""
         super().update(**kwargs)
+        if 'opponentFound' in kwargs:
+            self.view.alert.clear_alert()
         if 'onlineGameOver' in kwargs:
             self._parse_and_present_game_over()
 

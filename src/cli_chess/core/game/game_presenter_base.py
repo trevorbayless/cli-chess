@@ -20,7 +20,7 @@ from cli_chess.modules.move_list import MoveListPresenter
 from cli_chess.modules.material_difference import MaterialDifferencePresenter
 from cli_chess.modules.player_info import PlayerInfoPresenter
 from cli_chess.modules.clock import ClockPresenter
-from cli_chess.utils.logging import log
+from cli_chess.utils import log, AlertType, RequestSuccessfullySent
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -107,14 +107,20 @@ class PlayableGamePresenterBase(GamePresenterBase, ABC):
         try:
             self.model.propose_takeback()
         except Exception as e:
-            self.view.alert.show_alert(str(e))
+            if isinstance(e, RequestSuccessfullySent):
+                self.view.alert.show_alert(str(e), AlertType.NEUTRAL)
+            else:
+                self.view.alert.show_alert(str(e))
 
     def offer_draw(self) -> None:
         """Offers a draw"""
         try:
             self.model.offer_draw()
         except Exception as e:
-            self.view.alert.show_alert(str(e))
+            if isinstance(e, RequestSuccessfullySent):
+                self.view.alert.show_alert(str(e), AlertType.NEUTRAL)
+            else:
+                self.view.alert.show_alert(str(e))
 
     def resign(self) -> None:
         """Resigns the game"""

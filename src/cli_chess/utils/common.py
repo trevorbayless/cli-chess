@@ -22,6 +22,11 @@ import enum
 import os
 
 
+class RequestSuccessfullySent(Exception):
+    """Custom exception to use upon success of a call"""
+    pass
+
+
 class AlertType(enum.Enum):
     """General alert class which can be
        used for alert type classification
