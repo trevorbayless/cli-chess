@@ -152,8 +152,6 @@ class OnlineGameModel(PlayableGameModelBase):
                     raise Warning("Null moves are not supported in online games")
 
                 move = self.board_model.verify_move(move)
-
-                log.info(f"Sending move ({move}) to lichess")
                 self.game_state_dispatcher.make_move(move)
             except Exception:
                 raise

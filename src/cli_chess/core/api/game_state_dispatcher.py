@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from cli_chess.utils import Event, log
+from cli_chess.utils import Event, log, retry
 from typing import Callable
 from threading import Thread
 
@@ -73,41 +73,34 @@ class GameStateDispatcher(Thread):
 
         log.info(f"Completed streaming of: {self.game_id}")
 
+    @retry(times=3, exceptions=(Exception, ))
     def make_move(self, move: str):
         """Sends the move to lichess. This move should have already
            been verified as valid in the current context of the board.
            The move must be in UCI format.
         """
-        try:
-            log.debug(f"Sending move ({move}) to lichess")
-            self.api_client.board.make_move(self.game_id, move)
-        except Exception:
-            raise
+        log.debug(f"Sending move ({move}) to lichess")
+        self.api_client.board.make_move(self.game_id, move)
 
+    @retry(times=3, exceptions=(Exception,))
     def send_takeback_request(self) -> None:
         """Sends a takeback request to our opponent"""
-        try:
-            log.debug("Sending takeback offer to opponent")
-            self.api_client.board.offer_takeback(self.game_id)
-        except Exception:
-            raise
+        log.debug("Sending takeback offer to opponent")
+        self.api_client.board.offer_takeback(self.game_id)
 
+    @retry(times=3, exceptions=(Exception,))
     def send_draw_offer(self) -> None:
         """Sends a draw offer to our opponent"""
-        try:
-            log.debug("Sending draw offer to opponent")
-            self.api_client.board.offer_draw(self.game_id)
-        except Exception:
-            raise
+        log.debug("Sending draw offer to opponent")
+        self.api_client.board.offer_draw(self.game_id)
 
+    @retry(times=3, exceptions=(Exception,))
     def resign(self) -> None:
         """Resigns the game"""
-        try:
-            log.debug("Sending resignation")
-            self.api_client.board.resign_game(self.game_id)
-        except Exception:
-            raise
+        log.debug("Sending resignation")
+        self.api_client.board.resign_game(self.game_id)
 
+    @retry(times=3, exceptions=(Exception,))
     def claim_victory(self) -> None:
         """Submits a claim of victory to lichess as the opponent is gone.
            This is to only be called when the opponentGone timer has elapsed.

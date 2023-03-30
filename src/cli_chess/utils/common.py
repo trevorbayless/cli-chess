@@ -16,6 +16,7 @@
 from __future__ import annotations
 from cli_chess.utils.logging import log
 from platform import system
+from typing import Tuple, Type
 import threading
 import subprocess
 import enum
@@ -65,13 +66,6 @@ def str_to_bool(s: str) -> bool:
     return s.lower() in ("true", "yes", "1")
 
 
-def threaded(fn):
-    """Decorator for a threaded function"""
-    def wrapper(*args, **kwargs):
-        threading.Thread(target=fn, args=args, kwargs=kwargs, daemon=True).start()
-    return wrapper
-
-
 def open_url_in_browser(url: str):
     """Open the passed in URL in the default web browser"""
     url = url.strip()
@@ -89,3 +83,29 @@ def open_url_in_browser(url: str):
                                  start_new_session=True)
         except Exception as e:
             log.error(f"Common: Error opening URL in browser: {e}")
+
+
+def threaded(fn):
+    """Decorator for a threaded function"""
+    def wrapper(*args, **kwargs):
+        threading.Thread(target=fn, args=args, kwargs=kwargs, daemon=True).start()
+    return wrapper
+
+
+def retry(times: int, exceptions: Tuple[Type[Exception], ...]):
+    """Decorator to retry a function. Retries the wrapped function
+       (x) times if the exceptions listed in `exceptions` are thrown.
+       Example exceptions parameter: exceptions=(ValueError, KeyError)
+    """
+    def wrapper(func):
+        def retry_fn(*args, **kwargs):
+            attempt = 1
+            while attempt <= times:
+                try:
+                    return func(*args, **kwargs)
+                except exceptions as e:
+                    log.error(f"Exception when attempting to run {func}. Attempt {attempt} of {times}. Exception = {e}")
+                    attempt += 1
+            return func(*args, **kwargs)
+        return retry_fn
+    return wrapper
