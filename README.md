@@ -24,6 +24,7 @@ offline against the Fairy-Stockfish engine. All Lichess variants are supported.
 - Play offline against the Fairy-Stockfish engine
 - Supports playing all Lichess [variants](https://lichess.org/variant)
 - Theme the chess board and pieces to the colors of your choice
+- Theme UI components to the colors of your choice
 - Supports making moves in UCI, SAN, or LAN
 - Play blindfold chess
 - Watch Lichess TV
@@ -70,11 +71,10 @@ for your terminal and display preferences. The fonts that I have found to work b
 cli-chess for piece alignment are `Ubuntu Mono`, `MS Gothic`, and `NSimSun`.
 
 #### 4. What operating systems are supported?
-Development is mainly focused to support Linux. While cli-chess will work on
-other operating systems (such as Windows and macOS) the support priority will
-be directed towards Linux. Regardless of operating system please report any issues
-found, and I will do my best to support.
+Linux, Windows, and macOS. Development is mainly focused and will be prioritized for
+Linux as it's readily available for me to test on. Regardless of operating system,
+please report any issues found and I will do my best to support.
 
 #### 5. Can I use a different chess engine?
 Playing offline vs the computer is _currently_ only directly compatible with the [Fairy-Stockfish](<https://fairy-stockfish.github.io/>) engine.
-For simplicity, the Fairy-Stockfish binaries come pre-built with cli-chess for Linux, Windows, and macOS _(x86_64 architecture)_.
+For simplicity, the Fairy-Stockfish binaries come pre-built with cli-chess for Linux, Windows, and macOS _(x86-64 (and arm64 for macOS) architecture)_.
