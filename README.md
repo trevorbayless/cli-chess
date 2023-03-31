@@ -19,6 +19,14 @@ offline against the Fairy-Stockfish engine. All Lichess variants are supported.
     </a>
 </p>
 
+<details><summary>Demo</summary>
+
+Offline against Fairy-Stockfish            |  Watching Lichess Bullet TV
+:-------------------------:|:-------------------------:
+<img src=https://user-images.githubusercontent.com/3620552/229156062-309d5ae9-bcc2-43bc-ab4c-714e2a9c9c83.gif width=450 width=222> | <img src=https://user-images.githubusercontent.com/3620552/229156269-8a0bb436-ab9e-4e55-9218-b488e5a2eccb.gif width=430 height=245>
+
+</details>
+
 ## Main Features
 - Play online using your Lichess.org account
 - Play offline against the Fairy-Stockfish engine
@@ -58,7 +66,7 @@ in the `custom_style.py` file. This file will be located at `$HOME/.config/cli-c
 Colors are expected to be [HTML color names](https://www.w3schools.com/tags/ref_colornames.asp) (e.g. `seagreen`)
 or [HTML hex colors](https://www.w3schools.com/colors/colors_picker.asp) (e.g. `#2E8B57`). The display of selected
 colors is dependent on the terminal supporting true colors and the `Terminal Color Depth` option in cli-chess program
-setting being set to `True Colors`). If the terminal does not support true colors, the colors selected will be mapped
+settings being set to `True Colors`). If the terminal does not support true colors, the colors selected will be mapped
 to the closest supported color.
 
 Restarting cli-chess, or pressing `Ctrl+R` on any screen will force a style refresh. If this custom style sheet is
