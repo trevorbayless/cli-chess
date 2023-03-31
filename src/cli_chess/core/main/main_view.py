@@ -16,7 +16,8 @@
 from __future__ import annotations
 from cli_chess.__metadata__ import __version__
 from cli_chess.utils.ui_common import handle_mouse_click, exit_app, get_custom_style
-from cli_chess.utils import is_linux_os, is_windows_os, default, log
+from cli_chess.utils import is_windows_os, default, log
+from cli_chess.utils.config import terminal_config
 from prompt_toolkit.application import Application
 from prompt_toolkit.patch_stdout import patch_stdout
 from prompt_toolkit.layout import Layout, Window, Container, FormattedTextControl, VSplit, HSplit, VerticalAlign, WindowAlign, D
@@ -26,7 +27,6 @@ from prompt_toolkit.keys import Keys
 from prompt_toolkit.widgets import Box
 from prompt_toolkit.styles import Style, merge_styles
 from prompt_toolkit import print_formatted_text, HTML
-from prompt_toolkit.output.color_depth import ColorDepth
 try:
     from prompt_toolkit.output.win32 import NoConsoleScreenBufferError  # noqa
 except AssertionError:
@@ -42,11 +42,12 @@ class MainView:
     def __init__(self, presenter: MainPresenter):
         try:
             self.presenter = presenter
+            self.color_depth = terminal_config.get_value(terminal_config.Keys.TERMINAL_COLOR_DEPTH)
             self._container = self._create_main_container()
 
             self.app = Application(
                 layout=Layout(self._container),
-                color_depth=ColorDepth.TRUE_COLOR if is_linux_os() else ColorDepth.DEFAULT,
+                color_depth=lambda: self.color_depth,
                 mouse_support=True,
                 full_screen=True,
                 style=self._get_combined_styles(),

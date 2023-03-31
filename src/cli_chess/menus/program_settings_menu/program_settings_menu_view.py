@@ -23,4 +23,4 @@ if TYPE_CHECKING:
 class ProgramSettingsMenuView(MultiValueMenuView):
     def __init__(self, presenter: ProgramSettingsMenuPresenter):
         self.presenter = presenter
-        super().__init__(self.presenter, container_width=38, column_width=30)
+        super().__init__(self.presenter, container_width=40, column_width=28)

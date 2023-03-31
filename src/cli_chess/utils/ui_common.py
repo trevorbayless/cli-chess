@@ -15,6 +15,7 @@
 
 from __future__ import annotations
 from cli_chess.utils import AlertType, log
+from cli_chess.utils.common import VALID_COLOR_DEPTHS
 from cli_chess.utils.config import get_config_path
 from prompt_toolkit.layout import Window, FormattedTextControl, ConditionalContainer
 from prompt_toolkit.filters import to_filter
@@ -91,6 +92,15 @@ def handle_mouse_click(handler: T) -> T:
             return NotImplemented
 
     return cast(T, mouse_down)
+
+
+def set_color_depth(depth: str) -> None:
+    """Sets the color depth to the depth passed in"""
+    if depth in VALID_COLOR_DEPTHS:
+        from cli_chess.core.main.main_view import main_view
+        log.info(f"Setting color depth to: {depth}")
+        main_view.color_depth = depth
+        repaint_ui()
 
 
 def get_custom_style() -> dict:

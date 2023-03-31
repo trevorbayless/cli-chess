@@ -18,7 +18,7 @@ from cli_chess.menus import MenuView
 from cli_chess.menus.settings_menu import SettingsMenuOptions
 from prompt_toolkit.layout import Container, ConditionalContainer, VSplit, HSplit
 from prompt_toolkit.filters import Condition, is_done
-from prompt_toolkit.key_binding import ConditionalKeyBindings, merge_key_bindings
+from prompt_toolkit.key_binding import ConditionalKeyBindings
 from prompt_toolkit.formatted_text import StyleAndTextTuples
 from prompt_toolkit.widgets import Box
 from typing import TYPE_CHECKING

@@ -22,6 +22,13 @@ import subprocess
 import enum
 import os
 
+VALID_COLOR_DEPTHS = ["DEPTH_24_BIT", "DEPTH_8_BIT", "DEPTH_4_BIT"]
+COLOR_DEPTH_MAP = {
+    "DEPTH_24_BIT": "True color",
+    "DEPTH_8_BIT": "256 colors",
+    "DEPTH_4_BIT": "ANSI colors"
+}
+
 
 class RequestSuccessfullySent(Exception):
     """Custom exception to use upon success of a call"""

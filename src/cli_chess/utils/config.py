@@ -13,9 +13,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from cli_chess.utils.common import is_windows_os
+from cli_chess.utils.common import is_linux_os, is_windows_os
 from cli_chess.utils.logging import log, redact_from_logs
 from cli_chess.utils.event import Event
+from cli_chess.utils.common import VALID_COLOR_DEPTHS
 from getpass import getuser
 from enum import Enum
 import configparser
@@ -285,6 +286,40 @@ class GameConfig(SectionBase):
         return enum_mapped_dict
 
 
+class TerminalConfig(SectionBase):
+    """Creates and manages the "terminal" configuration. This configuration can
+       either live in its own file, or be appended as a section by using a
+       configuration filename that already exists (such as DEFAULT_CONFIG_FILENAME).
+       By default, this will be appended to the default configuration.
+    """
+    class Keys(Enum):
+        TERMINAL_COLOR_DEPTH = "terminal_color_depth"
+
+        @property
+        def default_value(self):
+            """Returns the default value for the key"""
+            default_lookup = {
+                self.TERMINAL_COLOR_DEPTH: "DEPTH_24_BIT" if is_linux_os() else "DEPTH_8_BIT"
+            }
+            return default_lookup[self]
+
+    def __init__(self, filename: str = DEFAULT_CONFIG_FILENAME):
+        self.e_program_config_updated = Event()
+        super().__init__(section_name="terminal", section_keys=self.Keys, filename=filename)
+
+    def get_value(self, key: Enum) -> str:
+        """Get the value of the key passed in from the configuration file"""
+        value = super().get_key_value(self.section_name, key.name, False)
+        if key == self.Keys.TERMINAL_COLOR_DEPTH and value not in VALID_COLOR_DEPTHS:
+            super().set_value(self.Keys.TERMINAL_COLOR_DEPTH, self.Keys.TERMINAL_COLOR_DEPTH.default_value)
+        return super().get_key_value(self.section_name, key.name, False)
+
+    def write_config(self) -> None:
+        """Writes to the configuration file"""
+        super().write_config()
+        self.e_program_config_updated.notify()
+
+
 class LichessConfig(SectionBase):
     """Creates and manages the "lichess" configuration. This configuration can
        either live in its own file, or be appended as a section by using a
@@ -324,4 +359,5 @@ class LichessConfig(SectionBase):
 
 player_info_config = PlayerInfoConfig()
 game_config = GameConfig()
+terminal_config = TerminalConfig()
 lichess_config = LichessConfig()
