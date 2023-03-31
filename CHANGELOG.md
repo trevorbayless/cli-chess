@@ -1,5 +1,6 @@
-# Changelog
+Changelog
+=====================
 
-### [0.1.0]
-##### Features
-
+v1.0.0
+-------
+* Initial release :tada:
