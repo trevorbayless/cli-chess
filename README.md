@@ -49,6 +49,42 @@ steps will only need to be run once as cli-chess will remember the API token.
 4. Highlight and copy the token
 5. Run cli-chess using the following command: `cli-chess --token ****` _(replace *'s with your API token)_
 
+## Custom styling
+Nearly every component of cli-chess can be styled by overriding parts of the
+[default style elements](https://github.com/trevorbayless/cli-chess/blob/master/src/cli_chess/utils/styles.py)
+in the `custom_style.py` file. This file will be located at `$HOME/.config/cli-chess/` for Linux and macOS and
+`$APPDATA/cli-chess/` for Windows.
+
+Colors are expected to be [HTML color names](https://www.w3schools.com/tags/ref_colornames.asp) (e.g. `seagreen`)
+or [HTML hex colors](https://www.w3schools.com/colors/colors_picker.asp) (e.g. `#2E8B57`). The display of selected
+colors is dependent on the terminal supporting true colors and the `Terminal Color Depth` option in cli-chess program
+setting being set to `True Colors`). If the terminal does not support true colors, the colors selected will be mapped
+to the closest supported color.
+
+Restarting cli-chess, or pressing `Ctrl+R` on any screen will force a style refresh. If this custom style sheet is
+invalid in any way, the default cli-chess style will be applied. This file must be kept in dictionary format.
+
+Example `custom_style.py` to override board and piece colors:
+```json
+{
+    "light-square": "bg:wheat",
+    "light-square.light-piece": "fg:white",
+    "light-square.dark-piece": "fg:black",
+
+    "dark-square": "bg:#2E8B57",
+    "dark-square.light-piece": "fg:white",
+    "dark-square.dark-piece": "fg:black",
+
+    "last-move": "bg:slateblue",
+    "last-move.light-piece": "fg:white",
+    "last-move.dark-piece": "fg:black",
+
+    "in-check": "bg:#FFA500",
+    "in-check.light-piece": "fg:white",
+    "in-check.dark-piece": "fg:black"
+}
+```
+
 ## Questions
 #### 1. How do I make a move?
 Moves are case-sensitive and must be made in SAN, LAN, or UCI. Moves cannot be made using the mouse.

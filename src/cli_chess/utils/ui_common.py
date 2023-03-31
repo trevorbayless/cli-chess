@@ -126,9 +126,10 @@ def create_skeleton_custom_style() -> None:
         custom_style_path = get_config_path() + "custom_style.py"
         with open(custom_style_path, 'w') as file:
             file.write("# This file is used to override the default style of cli-chess. It must be kept in dictionary format.\n")
-            file.write("\n")
-            file.write("{")
-            file.write('\n\t#"menu.option": "fg:white",\n')
+            file.write("# Colors are expected to be HTML color names (e.g. seagreen) or HTML hex colors (e.g. #2E8B57)\n")
+            file.write("# Restarting cli-chess or pressing [CTRL+R] on any screen will force a style refresh.\n")
+            file.write("# Visit the cli-chess github page (https://github.com/trevorbayless/cli-chess/) for more styling information.\n\n")
+            file.write("{\n\n")
             file.write("}")
     except Exception:
         raise
