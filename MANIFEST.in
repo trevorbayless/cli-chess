@@ -1,0 +1,4 @@
+prune **/__pycache__
+global-exclude .coverage
+global-exclude *.py[co]
+include src/cli_chess/modules/engine/binaries/*
