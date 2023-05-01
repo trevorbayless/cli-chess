@@ -99,6 +99,7 @@ class OnlineGameModel(PlayableGameModelBase):
 
         elif 'gameFinish' in kwargs:
             event = kwargs['gameFinish'].get('game')
+            self._save_game_metadata(iem_gameFinish=event)
             if self.game_in_progress and self.playing_game_id == event.get('gameId'):
                 self._game_end()
 
@@ -240,6 +241,11 @@ class OnlineGameModel(PlayableGameModelBase):
                 self.game_metadata['rated'] = data.get('rated')
                 self.game_metadata['variant'] = data.get('variant', {}).get('name')
                 self.game_metadata['speed'] = data['speed']
+
+            elif 'iem_gameFinish' in kwargs:
+                data = kwargs['iem_gameFinish']
+                self.game_metadata['players'][COLOR_NAMES[self.my_color]]['rating_diff'] = data.get('ratingDiff', "")
+                self.game_metadata['players'][COLOR_NAMES[not self.my_color]]['rating_diff'] = data.get('opponent', {}).get('ratingDiff', "")
 
             elif 'gsd_gameFull' in kwargs:
                 data = kwargs['gsd_gameFull']
