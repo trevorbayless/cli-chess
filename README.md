@@ -15,7 +15,7 @@ offline against the Fairy-Stockfish engine. All Lichess variants are supported.
         <img alt="PyPI" src="https://img.shields.io/pypi/v/cli-chess?color=informational&label=PyPI&logo=PyPI">
     </a>
     <a href="#">
-        <img alt="Python" src="https://img.shields.io/static/v1?label=Python&message=3.7%2B&color=informational&logo=python">
+        <img alt="Python" src="https://img.shields.io/static/v1?label=Python&message=3.8%2B&color=informational&logo=python">
     </a>
 </p>
 
