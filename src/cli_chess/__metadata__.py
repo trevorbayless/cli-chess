@@ -1,4 +1,4 @@
-# Copyright (C) 2021-2022 Trevor Bayless <trevorbayless1@gmail.com>
+# Copyright (C) 2021-2023 Trevor Bayless <trevorbayless1@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -14,7 +14,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 __name__ = "cli-chess"
-__version__ = "1.0.0"
+__version__ = "1.0.1"
 __description__ = "A highly customizable way to play chess in your terminal"
 __url__ = "https://github.com/trevorbayless/cli-chess"
 __author__ = "Trevor Bayless"
