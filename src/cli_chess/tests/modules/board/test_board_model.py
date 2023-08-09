@@ -35,7 +35,7 @@ def model(board_updated_listener: Mock):
 def test_initialize_board():
     # Test standard chess
     model = BoardModel()
-    assert type(model.board) == chess.Board
+    assert isinstance(model.board, chess.Board)
     assert model.get_board_orientation() == chess.WHITE
     assert model.board.fen() == chess.STARTING_FEN
     assert model.get_highlight_move() == chess.Move.null()
@@ -52,12 +52,12 @@ def test_initialize_board():
     # Test chess960 initialization
     model = BoardModel(orientation=chess.BLACK, variant="chess960")
     assert model.board.chess960
-    assert type(model.board) == chess.Board
+    assert isinstance(model.board, chess.Board)
     assert model.get_board_orientation() == chess.BLACK
 
     # Test a valid variant
     model = BoardModel(variant="crazyhouse", fen="r1b3Bk/p1p4P/2p2p2/3p1p2/3P4/5N2/PPP2PPP/R1BQK2R/QRnbpnpn w KQ - 0 21")
-    assert type(model.board) == chess.variant.CrazyhouseBoard
+    assert isinstance(model.board, chess.variant.CrazyhouseBoard)
     assert model.board.fen() != model.board.starting_fen
     assert model.get_turn() == chess.WHITE
 
