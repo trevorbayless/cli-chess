@@ -96,7 +96,7 @@ class WatchTVModel(GameModelBase):
                 variant = event.get('variant', {}).get('key')
                 white_rating = int(event.get('players', {}).get('white', {}).get('rating') or 0)
                 black_rating = int(event.get('players', {}).get('black', {}).get('rating') or 0)
-                orientation = True if ((white_rating >= black_rating) or self.channel.variant.lower() == "racingkings") else False
+                orientation = True if ((white_rating >= black_rating) or self.channel.key == "racingKings") else False
 
                 self._save_game_metadata(tv_descriptionEvent=event, tv_startGameEvent=True)
                 last_move = event.get('lastMove', "")
@@ -156,11 +156,11 @@ class StreamTVChannel(threading.Thread):
         # 2. Start streaming game, on initial input set board orientation, show player names, etc. On follow up set pos.
         # 3. When the game completes, start this loop over.
 
-    def get_channel_game_id(self, channel: str) -> str:
+    def get_channel_game_id(self, channel: TVChannelMenuOptions) -> str:
         """Returns the game ID of the ongoing TV game of the passed in channel"""
-        channel_game_id = self.api_client.tv.get_current_games().get(channel, {}).get('gameId')
+        channel_game_id = self.api_client.tv.get_current_games().get(channel.key, {}).get('gameId')
         if not channel_game_id:
-            raise ValueError(f"TV Stream: Didn't receive game ID for current {channel} TV game")
+            raise ValueError(f"TV Stream: Didn't receive game ID for current {channel.value} TV game")
 
         return channel_game_id
 
@@ -171,7 +171,7 @@ class StreamTVChannel(threading.Thread):
         while self.running:
             try:
                 self.e_tv_stream_event.notify(searchingForGame=True)
-                game_id = self.get_channel_game_id(self.channel.value)
+                game_id = self.get_channel_game_id(self.channel)
 
                 if game_id != self.current_game:
                     self.current_game = game_id
