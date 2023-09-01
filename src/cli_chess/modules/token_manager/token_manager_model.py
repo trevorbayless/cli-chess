@@ -23,8 +23,14 @@ linked_token_scopes = set()
 
 class TokenManagerModel:
     def __init__(self):
+        self.base_url = ""
         self.linked_account = ""
         self.e_token_manager_model_updated = Event()
+
+    def set_base_url(self, url: str):
+        """Sets the base URL for all requests to go to"""
+        self.base_url = url
+        log.debug(f"Base URL set to: {self.base_url}")
 
     @threaded
     def validate_existing_linked_account(self) -> None:
@@ -62,14 +68,13 @@ class TokenManagerModel:
                 return False
         return False
 
-    @staticmethod
-    def validate_token(api_token: str) -> dict:
+    def validate_token(self, api_token: str) -> dict:
         """Validates the proper scopes are available for the passed in token.
            Returns the scopes and userId associated to the passed in token.
         """
         if api_token:
             session = TokenSession(api_token)
-            oauth_client = Client(session).oauth
+            oauth_client = Client(session, base_url=self.base_url).oauth
             try:
                 token_data = oauth_client.test_tokens(api_token)
 
@@ -104,14 +109,13 @@ class TokenManagerModel:
 
         self._notify_token_manager_model_updated()
 
-    @staticmethod
-    def _handle_start_api(api_token: str) -> None:
+    def _handle_start_api(self, api_token: str) -> None:
         """Handles starting the API using the supplied token.
            This function should only ever be called by this model.
         """
         if api_token.strip():
             from cli_chess.core.api.api_manager import _start_api  # noqa
-            _start_api(api_token)
+            _start_api(api_token, self.base_url)
 
     def _notify_token_manager_model_updated(self) -> None:
         """Notifies listeners of token manager model updates"""

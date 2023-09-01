@@ -44,6 +44,9 @@ class MainPresenter:
             print("Configuration successfully reset")
             exit(0)
 
+        if args.base_url:
+            g_token_manager_model.set_base_url(args.base_url)
+
         if args.token:
             if not g_token_manager_model.update_linked_account(args.token):
                 print(f"Invalid API token or missing required scopes. Scopes required: {required_token_scopes}")

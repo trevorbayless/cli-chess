@@ -43,7 +43,8 @@ def setup_argparse() -> ArgumentParser:
     parser.add_argument(
         "--token",
         metavar="API_TOKEN",
-        type=str, help=f"Links your Lichess API token with cli-chess. Scopes required: {required_token_scopes}"
+        help=f"Links your Lichess API token with cli-chess. Scopes required: {required_token_scopes}",
+        type=str
     )
     parser.add_argument(
         "--reset-config",
@@ -58,6 +59,13 @@ def setup_argparse() -> ArgumentParser:
 
     debug_group = parser.add_argument_group("debugging")
     debug_group.description = f"Program settings and logs can be found here: {get_config_path()}"
+    debug_group.add_argument(
+        "--base-url",
+        metavar="URL",
+        help="Point cli-chess requests to a different URL (e.g. http://localhost:8080)",
+        default="https://lichess.org",
+        type=str
+    )
     debug_group.add_argument(
         "--print-config",
         help="Prints the cli-chess configuration file to the terminal and exits.",

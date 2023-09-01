@@ -25,7 +25,7 @@ api_iem: Optional[IncomingEventManager]
 api_ready = False
 
 
-def _start_api(token: str):
+def _start_api(token: str, base_url: str):
     """Handles creating a new API session, client, and IEM
        when the API token has been updated. This generally
        should only ever be called via the Token Manager on
@@ -34,7 +34,7 @@ def _start_api(token: str):
     global api_session, api_client, api_iem, api_ready
     try:
         api_session = TokenSession(token)
-        api_client = Client(api_session)
+        api_client = Client(api_session, base_url)
         api_iem = IncomingEventManager()
         api_iem.start()
         api_ready = True
@@ -47,17 +47,3 @@ def api_is_ready() -> bool:
        this is used for toggling the online menu availability
     """
     return api_ready
-
-
-def _create_api_token_url() -> str:
-    """Created the API token creation url by iterating over scopes"""
-    url = "https://lichess.org/account/oauth/token/create?"
-
-    for scope in required_token_scopes:
-        url = url + f"scopes[]={scope}&"
-
-    url = url + "description=cli-chess+token"
-    return url
-
-
-API_TOKEN_CREATION_URL = _create_api_token_url()
