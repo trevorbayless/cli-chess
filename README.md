@@ -50,7 +50,7 @@ authenticate with. Follow the steps below to create the token and register it wi
 steps will only need to be run once as cli-chess will remember the API token.
 
 1. Open your browser and login to your Lichess account
-2. Click [here](https://lichess.org/account/oauth/token/create?scopes[]=board:play&scopes[]=challenge:read&scopes[]=challenge:write&description=cli-chess+token)
+2. Click [here](https://lichess.org/account/oauth/token/create?scopes[]=board:play&description=cli-chess+token)
     to create a Lichess API token for cli-chess to authenticate with _(**NOTE**: Do not uncheck any of the
     token permissions as these are required by cli-chess)_
 3. Click "Create"
