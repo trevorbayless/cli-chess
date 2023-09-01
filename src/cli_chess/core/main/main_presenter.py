@@ -27,9 +27,9 @@ if TYPE_CHECKING:
 class MainPresenter:
     def __init__(self, model: MainModel):
         self.model = model
+        self._handle_startup_args()
         self.main_menu_presenter = MainMenuPresenter(MainMenuModel())
         self.view = MainView(self)
-        self._handle_startup_args()
 
     def _handle_startup_args(self):
         """Handles the arguments passed"""
@@ -46,7 +46,7 @@ class MainPresenter:
 
         if args.token:
             if not g_token_manager_model.update_linked_account(args.token):
-                self.view.print_error_to_terminal(f"Invalid API token or missing required scopes. Scopes required: {required_token_scopes}")
+                print(f"Invalid API token or missing required scopes. Scopes required: {required_token_scopes}")
                 exit(1)
 
     def run(self):
