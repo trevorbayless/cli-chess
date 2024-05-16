@@ -18,6 +18,7 @@ from cli_chess.modules.engine import EngineModel
 from cli_chess.core.game.game_options import GameOption
 from cli_chess.utils.logging import log
 from cli_chess.utils.config import player_info_config
+from chess import Board
 from chess import COLOR_NAMES
 
 
@@ -49,12 +50,42 @@ class OfflineGameModel(PlayableGameModelBase):
 
                 if not self.is_my_turn():
                     raise Warning("Not your turn")
-
                 move = move.strip()
                 if not move:
                     raise Warning("No move specified")
 
+                self.board_model.premove = None
                 self.board_model.make_move(move)
+
+            except Exception:
+                raise
+        else:
+            log.warning("Attempted to make a move in a game that's not in progress")
+            raise Warning("Game has already ended")
+        
+    def make_premove(self, move: str):
+        """Sends the move to the board model for it to be made"""
+        if self.game_in_progress:
+            try:
+                if self.board_model.board.is_game_over():
+                    self.game_in_progress = False
+                    raise Warning("Game has already ended")
+                if self.board_model.premove:
+                    raise Warning("You already have a premove set")
+                if self.is_my_turn():
+                    raise Warning("It is your turn, cant not make a premove")
+                move = move.strip()
+                if not move:
+                    raise Warning("No move specified")
+                fen = self.board_model.board.fen()
+                tmp_board = Board(fen)
+                tmp_board.turn = not tmp_board.turn
+                try:
+                    move = tmp_board.push_san(move).uci()
+                except ValueError as e:
+                    raise Warning("Invalid move")
+                self.board_model.premove = move
+                self.board_model._notify_board_model_updated(successfulMoveMade=True)
             except Exception:
                 raise
         else:

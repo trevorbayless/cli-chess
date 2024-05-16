@@ -40,6 +40,7 @@ class GameViewBase(ABC):
         self.player_info_lower_container = presenter.player_info_presenter.view_lower
         self.clock_upper = presenter.clock_presenter.view_upper
         self.clock_lower = presenter.clock_presenter.view_lower
+        self.premove_container = presenter.premove_presenter.view
         self.alert = AlertContainer()
         self._container = self._create_container()
 

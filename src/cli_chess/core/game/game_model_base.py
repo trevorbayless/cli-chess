@@ -130,6 +130,10 @@ class PlayableGameModelBase(GameModelBase, ABC):
         pass
 
     @abstractmethod
+    def make_premove(self, move: str) -> None:
+        pass
+    
+    @abstractmethod
     def propose_takeback(self) -> None:
         pass
 

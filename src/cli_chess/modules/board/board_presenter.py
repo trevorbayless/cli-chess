@@ -180,6 +180,14 @@ class BoardPresenter:
 
             if self.model.is_square_in_check(square):
                 square_color = "in-check"
+            
+            if self.model.premove:
+                try:
+                    move = chess.Move.from_uci(self.model.premove)
+                    if square == move.from_square or square == move.to_square:
+                        square_color = "pre-move"
+                except Exception:
+                    pass
 
         return square_color
 

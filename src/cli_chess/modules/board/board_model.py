@@ -17,6 +17,7 @@ from cli_chess.utils.event import EventManager
 from cli_chess.utils.logging import log
 import chess
 import chess.variant
+from chess import Move
 from random import randint
 from typing import List, Optional
 
@@ -27,6 +28,7 @@ class BoardModel:
         self.initial_fen = self.board.fen()
         self.orientation = chess.WHITE if variant.lower() == "racingkings" else orientation
         self.highlight_move = chess.Move.null()
+        self.premove:str = None
         self._game_over_result: Optional[chess.Outcome] = None
         self._log_init_info()
 
