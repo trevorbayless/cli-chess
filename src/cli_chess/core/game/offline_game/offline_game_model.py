@@ -54,7 +54,7 @@ class OfflineGameModel(PlayableGameModelBase):
                 if not move:
                     raise Warning("No move specified")
 
-                self.board_model.premove = None
+                self.board_model.set_premove(None)
                 self.board_model.make_move(move)
 
             except Exception:
@@ -70,7 +70,7 @@ class OfflineGameModel(PlayableGameModelBase):
                 if self.board_model.board.is_game_over():
                     self.game_in_progress = False
                     raise Warning("Game has already ended")
-                if self.board_model.premove:
+                if self.board_model.get_premove() is not None:
                     raise Warning("You already have a premove set")
                 if self.is_my_turn():
                     raise Warning("It is your turn, cant not make a premove")
@@ -84,7 +84,7 @@ class OfflineGameModel(PlayableGameModelBase):
                     move = tmp_board.push_san(move).uci()
                 except ValueError as e:
                     raise Warning("Invalid move")
-                self.board_model.premove = move
+                self.board_model.set_premove(move)
                 self.board_model._notify_board_model_updated(successfulMoveMade=True)
             except Exception:
                 raise

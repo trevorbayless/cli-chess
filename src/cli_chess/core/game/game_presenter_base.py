@@ -143,6 +143,10 @@ class PlayableGamePresenterBase(GamePresenterBase, ABC):
                 self.exit()
         except Exception as e:
             self.view.alert.show_alert(str(e))
+            
+    def clear_premove(self) -> None:
+        """Cleans the premove"""
+        self.model.clear_premove()
 
     def is_game_in_progress(self) -> bool:
         return self.model.game_in_progress

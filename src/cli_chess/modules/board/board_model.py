@@ -204,6 +204,15 @@ class BoardModel:
            the true last move always use board.peek()
         """
         return self.highlight_move
+    
+    def get_premove(self) -> str:
+        """Returns the premove"""
+        return self.premove
+    
+    def set_premove(self, move: str=None) -> None:
+        """Sets the premove"""
+        self.premove = move
+        self._notify_board_model_updated(successfulMoveMade=True)
 
     def set_board_orientation(self, color: chess.Color, notify=True) -> None:
         """Sets the board's orientation to the color passed in.

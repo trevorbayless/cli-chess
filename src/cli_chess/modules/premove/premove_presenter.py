@@ -34,4 +34,4 @@ class PremovePresenter:
         self.view.update(self.get_permove())
 
     def get_permove(self) -> dict:
-        return self.model.board_model.premove if self.model.board_model.premove else None
+        return self.model.board_model.get_premove()

@@ -162,6 +162,10 @@ class OnlineGameModel(PlayableGameModelBase):
                 raise Warning("Still searching for opponent")
             else:
                 raise Warning("Game has already ended")
+            
+    def make_premove(self, move: str):
+        # TODO: Implement premove for online games
+        pass
 
     def propose_takeback(self) -> None:
         """Notifies the game state dispatcher to propose a takeback"""
