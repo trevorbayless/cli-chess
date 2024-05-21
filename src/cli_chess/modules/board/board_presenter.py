@@ -181,6 +181,7 @@ class BoardPresenter:
             if self.model.is_square_in_check(square):
                 square_color = "in-check"
             
+            # premove highlight
             if self.model.get_premove() is not None:
                 try:
                     move = chess.Move.from_uci(self.model.get_premove())

@@ -57,6 +57,7 @@ class OfflineGamePresenter(PlayableGamePresenterBase):
                 self.model.make_move(move)
                 self.make_engine_move()
             else:
+                # if not my turn, set premove
                 self.model.make_premove(move)
         except Exception as e:
             self.view.alert.show_alert(str(e))
@@ -75,6 +76,7 @@ class OfflineGamePresenter(PlayableGamePresenterBase):
                 move = engine_move.move.uci()
                 log.debug(f"Received move ({move}) from engine.")
                 self.board_presenter.make_move(move)
+                # After engine move, if premove is set, make it
                 if self.model.board_model.get_premove():
                     self.make_move(self.model.board_model.get_premove())
         except Exception as e:

@@ -53,7 +53,7 @@ class OfflineGameModel(PlayableGameModelBase):
                 move = move.strip()
                 if not move:
                     raise Warning("No move specified")
-
+                # clean premove
                 self.board_model.set_premove(None)
                 self.board_model.make_move(move)
 
@@ -64,7 +64,7 @@ class OfflineGameModel(PlayableGameModelBase):
             raise Warning("Game has already ended")
         
     def make_premove(self, move: str):
-        """Sends the move to the board model for it to be made"""
+        """Verify move and Set board model premove"""
         if self.game_in_progress:
             try:
                 if self.board_model.board.is_game_over():
@@ -77,14 +77,16 @@ class OfflineGameModel(PlayableGameModelBase):
                 move = move.strip()
                 if not move:
                     raise Warning("No move specified")
+                # use a temporary board skip one turn to verify the move
                 fen = self.board_model.board.fen()
                 tmp_board = Board(fen)
                 tmp_board.turn = not tmp_board.turn
                 try:
                     move = tmp_board.push_san(move).uci()
-                except ValueError as e:
-                    raise Warning("Invalid move")
+                except ValueError:
+                    raise Warning("Invalid premove")
                 self.board_model.set_premove(move)
+                # to update highlight for premove
                 self.board_model._notify_board_model_updated(successfulMoveMade=True)
             except Exception:
                 raise
