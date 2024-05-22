@@ -39,6 +39,7 @@ class OnlineGameView(PlayableGameViewBase):
                         self.move_list_container,
                         self.material_diff_lower_container,
                         self.player_info_lower_container,
+                        self.premove_container,
                         self.clock_lower
                     ])
                 ]),

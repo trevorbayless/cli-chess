@@ -181,6 +181,15 @@ class BoardPresenter:
             if self.model.is_square_in_check(square):
                 square_color = "in-check"
 
+            # premove highlight
+            if self.model.get_premove() is not None:
+                try:
+                    move = chess.Move.from_uci(self.model.get_premove())
+                    if square == move.from_square or square == move.to_square:
+                        square_color = "pre-move"
+                except Exception:
+                    pass
+
         return square_color
 
     def handle_resignation(self, color_resigning: chess.Color) -> None:

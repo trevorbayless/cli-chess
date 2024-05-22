@@ -61,6 +61,9 @@ class GameModelBase:
             except AttributeError:
                 log.error(f"{type(model).__name__} does not have a cleanup method")
 
+    def clear_premove(self) -> None:
+        self.board_model.set_premove(None)
+
     def _notify_game_model_updated(self, **kwargs) -> None:
         """Notify listeners that the model has updated"""
         self.e_game_model_updated.notify(**kwargs)
@@ -127,6 +130,10 @@ class PlayableGameModelBase(GameModelBase, ABC):
 
     @abstractmethod
     def make_move(self, move: str) -> None:
+        pass
+
+    @abstractmethod
+    def make_premove(self, move: str) -> None:
         pass
 
     @abstractmethod

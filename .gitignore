@@ -7,3 +7,5 @@ config.ini
 dist/
 build/
 __pycache__/
+.venv/
+.vscode/

@@ -20,6 +20,7 @@ from cli_chess.modules.move_list import MoveListPresenter
 from cli_chess.modules.material_difference import MaterialDifferencePresenter
 from cli_chess.modules.player_info import PlayerInfoPresenter
 from cli_chess.modules.clock import ClockPresenter
+from cli_chess.modules.premove import PremovePresenter
 from cli_chess.utils import log, AlertType, RequestSuccessfullySent
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING
@@ -35,6 +36,7 @@ class GamePresenterBase(ABC):
         self.material_diff_presenter = MaterialDifferencePresenter(model.material_diff_model)
         self.player_info_presenter = PlayerInfoPresenter(model)
         self.clock_presenter = ClockPresenter(model)
+        self.premove_presenter = PremovePresenter(model)
         self.view = self._get_view()
 
         self.model.e_game_model_updated.add_listener(self.update)
@@ -89,8 +91,10 @@ class PlayableGamePresenterBase(GamePresenterBase, ABC):
             self.offer_draw()
         elif inpt_lower == "takeback" or inpt_lower == "back" or inpt_lower == "undo":
             self.propose_takeback()
-        else:
+        elif self.model.is_my_turn():
             self.make_move(inpt)
+        else:
+            self.make_premove(inpt)
 
     def make_move(self, move: str) -> None:
         """Make the passed in move on the board"""
@@ -98,6 +102,15 @@ class PlayableGamePresenterBase(GamePresenterBase, ABC):
             move = move.strip()
             if move:
                 self.model.make_move(move)
+        except Exception as e:
+            self.view.alert.show_alert(str(e))
+
+    def make_premove(self, move: str) -> None:
+        """Make a premove"""
+        try:
+            move = move.strip()
+            if move:
+                self.model.make_premove(move)
         except Exception as e:
             self.view.alert.show_alert(str(e))
 
@@ -130,6 +143,10 @@ class PlayableGamePresenterBase(GamePresenterBase, ABC):
                 self.exit()
         except Exception as e:
             self.view.alert.show_alert(str(e))
+
+    def clear_premove(self) -> None:
+        """Cleans the premove"""
+        self.model.clear_premove()
 
     def is_game_in_progress(self) -> bool:
         return self.model.game_in_progress

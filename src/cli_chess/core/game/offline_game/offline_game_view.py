@@ -38,6 +38,7 @@ class OfflineGameView(PlayableGameViewBase):
                         self.move_list_container,
                         self.material_diff_lower_container,
                         self.player_info_lower_container,
+                        self.premove_container,
                     ]), padding=0, padding_top=1)
                 ]),
                 self.input_field_container,

@@ -17,7 +17,7 @@ from cli_chess.core.game import PlayableGameModelBase
 from cli_chess.core.game.game_options import GameOption
 from cli_chess.core.api import GameStateDispatcher
 from cli_chess.utils import log, threaded, RequestSuccessfullySent
-from chess import COLOR_NAMES, WHITE
+from chess import COLOR_NAMES, WHITE, Board
 from typing import Optional
 
 
@@ -122,6 +122,12 @@ class OnlineGameModel(PlayableGameModelBase):
             # and our local board are in sync (eg. takebacks, moves played on website, etc)
             self.board_model.reset(notify=False)
             self.board_model.make_moves_from_list(event.get('moves', []).split())
+            # if board_model.premove is set, make the move
+            if self.is_my_turn() and self.board_model.get_premove() is not None:
+                try:
+                    self.make_move(self.board_model.get_premove())
+                except Exception:
+                    self.board_model.set_premove(None)
 
             if kwargs['gameOver']:
                 self._report_game_over(status=event.get('status'), winner=event.get('winner', ""))
@@ -154,6 +160,41 @@ class OnlineGameModel(PlayableGameModelBase):
 
                 move = self.board_model.verify_move(move)
                 self.game_state_dispatcher.make_move(move)
+                # clean premove
+                self.board_model.set_premove(None)
+            except Exception:
+                raise
+        else:
+            log.warning("Attempted to make a move in a game that's not in progress")
+            if self.searching:
+                raise Warning("Still searching for opponent")
+            else:
+                raise Warning("Game has already ended")
+
+    def make_premove(self, move: str):
+        """ Verify move and Set board model premove """
+        if self.game_in_progress:
+            try:
+                if self.board_model.get_premove() is not None:
+                    raise Warning("You already have a premove set")
+
+                move = move.strip()
+                if not move:
+                    raise Warning("No move specified")
+
+                if move == "0000":
+                    raise Warning("Null moves are not supported in online games")
+
+                # use a temporary board skip one turn to verify the move
+                fen = self.board_model.board.fen()
+                tmp_board = Board(fen)
+                if tmp_board.turn != self.my_color:
+                    tmp_board.turn = not tmp_board.turn
+                try:
+                    move = tmp_board.push_san(move).uci()
+                except ValueError:
+                    raise Warning("Invalid premove")
+                self.board_model.set_premove(move)
             except Exception:
                 raise
         else:
