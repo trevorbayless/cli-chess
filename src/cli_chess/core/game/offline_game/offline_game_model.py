@@ -65,15 +65,13 @@ class OfflineGameModel(PlayableGameModelBase):
 
     def make_premove(self, move: str):
         """Verify move and Set board model premove"""
-        if self.game_in_progress:
+        if self.game_in_progress and not self.is_my_turn():
             try:
                 if self.board_model.board.is_game_over():
                     self.game_in_progress = False
                     raise Warning("Game has already ended")
                 if self.board_model.get_premove() is not None:
                     raise Warning("You already have a premove set")
-                if self.is_my_turn():
-                    raise Warning("It is your turn, cant not make a premove")
                 move = move.strip()
                 if not move:
                     raise Warning("No move specified")

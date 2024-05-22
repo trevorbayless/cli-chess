@@ -25,10 +25,9 @@ class PremoveView:
     def __init__(self, presenter: PremovePresenter, premove: str | None = None):
         self.presenter = presenter
         self.premove = premove
-        self.update(premove)
         if not self.premove:
             self.premove = "None"
-        self._premove_control = FormattedTextControl(text=lambda: "PreMove: " + self.premove, style="class:player-info.title")
+        self._premove_control = FormattedTextControl(text=lambda: "PreMove: " + self.premove, style="class:pre-move")
         self._container = self._create_container()
 
     def _create_container(self) -> Container:
@@ -37,7 +36,7 @@ class PremoveView:
         ], width=D(min=1), height=D(max=1), window_too_small=ConditionalContainer(Window(), False))
 
     def update(self, premove: str) -> None:
-        """Updates the player info using the data passed in"""
+        """Updates the pre-move text display with the pre-move passed in"""
         if not premove:
             self.premove = "None"
         else:

@@ -124,7 +124,10 @@ class OnlineGameModel(PlayableGameModelBase):
             self.board_model.make_moves_from_list(event.get('moves', []).split())
             # if board_model.premove is set, make the move
             if self.is_my_turn() and self.board_model.get_premove() is not None:
-                self.make_move(self.board_model.get_premove())
+                try:
+                    self.make_move(self.board_model.get_premove())
+                except Exception:
+                    self.board_model.set_premove(None)
 
             if kwargs['gameOver']:
                 self._report_game_over(status=event.get('status'), winner=event.get('winner', ""))

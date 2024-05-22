@@ -24,13 +24,13 @@ class PremovePresenter:
     def __init__(self, model: GameModelBase):
         self.model = model
 
-        self.view = PremoveView(self, self.get_permove())
+        self.view = PremoveView(self, self.get_premove())
 
         self.model.e_game_model_updated.add_listener(self.update)
 
     def update(self, **kwargs) -> None:
         """Updates the view based on specific model updates"""
-        self.view.update(self.get_permove())
+        self.view.update(self.get_premove())
 
-    def get_permove(self) -> dict:
+    def get_premove(self) -> dict:
         return self.model.board_model.get_premove()
