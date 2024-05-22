@@ -62,7 +62,7 @@ class OfflineGameModel(PlayableGameModelBase):
         else:
             log.warning("Attempted to make a move in a game that's not in progress")
             raise Warning("Game has already ended")
-        
+
     def make_premove(self, move: str):
         """Verify move and Set board model premove"""
         if self.game_in_progress:

@@ -16,14 +16,13 @@
 from __future__ import annotations
 from prompt_toolkit.layout import Container, ConditionalContainer, VSplit, D, Window, FormattedTextControl, WindowAlign
 from prompt_toolkit.widgets import Box
-from prompt_toolkit.filters import Condition
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from cli_chess.modules.premove import PremovePresenter
 
 
 class PremoveView:
-    def __init__(self, presenter: PremovePresenter, premove: str|None = None):
+    def __init__(self, presenter: PremovePresenter, premove: str | None = None):
         self.presenter = presenter
         self.premove = premove
         self.update(premove)
@@ -42,7 +41,7 @@ class PremoveView:
         if not premove:
             self.premove = "None"
         else:
-            self.premove= premove
+            self.premove = premove
 
     def __pt_container__(self) -> Container:
         """Returns this views container"""

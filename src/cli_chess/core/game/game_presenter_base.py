@@ -104,7 +104,7 @@ class PlayableGamePresenterBase(GamePresenterBase, ABC):
                 self.model.make_move(move)
         except Exception as e:
             self.view.alert.show_alert(str(e))
-            
+
     def make_premove(self, move: str) -> None:
         """Make a premove"""
         try:
@@ -143,7 +143,7 @@ class PlayableGamePresenterBase(GamePresenterBase, ABC):
                 self.exit()
         except Exception as e:
             self.view.alert.show_alert(str(e))
-            
+
     def clear_premove(self) -> None:
         """Cleans the premove"""
         self.model.clear_premove()

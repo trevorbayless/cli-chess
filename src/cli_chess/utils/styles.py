@@ -32,7 +32,7 @@ default = {
     "last-move": "bg:yellowgreen",
     "last-move.light-piece": f"fg:{light_piece_color}",
     "last-move.dark-piece": f"fg:{dark_piece_color}",
-    
+
     "pre-move": "bg:darkorange",
     "pre-move.light-piece": f"fg:{light_piece_color}",
     "pre-move.dark-piece": f"fg:{dark_piece_color}",

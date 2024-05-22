@@ -167,21 +167,21 @@ class OnlineGameModel(PlayableGameModelBase):
                 raise Warning("Still searching for opponent")
             else:
                 raise Warning("Game has already ended")
-            
+
     def make_premove(self, move: str):
         """ Verify move and Set board model premove """
         if self.game_in_progress:
             try:
                 if self.board_model.get_premove() is not None:
                     raise Warning("You already have a premove set")
-                
+
                 move = move.strip()
                 if not move:
                     raise Warning("No move specified")
 
                 if move == "0000":
                     raise Warning("Null moves are not supported in online games")
-                
+
                 # use a temporary board skip one turn to verify the move
                 fen = self.board_model.board.fen()
                 tmp_board = Board(fen)
@@ -189,7 +189,7 @@ class OnlineGameModel(PlayableGameModelBase):
                     tmp_board.turn = not tmp_board.turn
                 try:
                     move = tmp_board.push_san(move).uci()
-                except ValueError as e:
+                except ValueError:
                     raise Warning("Invalid premove")
                 self.board_model.set_premove(move)
             except Exception:
@@ -200,7 +200,7 @@ class OnlineGameModel(PlayableGameModelBase):
                 raise Warning("Still searching for opponent")
             else:
                 raise Warning("Game has already ended")
-            
+
     def propose_takeback(self) -> None:
         """Notifies the game state dispatcher to propose a takeback"""
         if self.game_in_progress:

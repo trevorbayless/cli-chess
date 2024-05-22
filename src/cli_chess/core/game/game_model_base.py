@@ -60,7 +60,7 @@ class GameModelBase:
                 log.debug(f"Finished cleaning up after {type(model).__name__} (id={id(model)})")
             except AttributeError:
                 log.error(f"{type(model).__name__} does not have a cleanup method")
-    
+
     def clear_premove(self) -> None:
         self.board_model.set_premove(None)
 
@@ -135,7 +135,7 @@ class PlayableGameModelBase(GameModelBase, ABC):
     @abstractmethod
     def make_premove(self, move: str) -> None:
         pass
-    
+
     @abstractmethod
     def propose_takeback(self) -> None:
         pass

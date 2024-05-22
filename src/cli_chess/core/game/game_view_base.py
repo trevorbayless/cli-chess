@@ -148,7 +148,7 @@ class PlayableGameViewBase(GameViewBase, ABC):
         @bindings.add(Keys.F8, filter=~Condition(self.presenter.is_game_in_progress), eager=True)
         def _(event): # noqa
             self.presenter.exit()
-            
+
         @bindings.add(Keys.Escape, filter=Condition(self.presenter.is_game_in_progress), eager=True)
         def _(event):
             self.presenter.clear_premove()

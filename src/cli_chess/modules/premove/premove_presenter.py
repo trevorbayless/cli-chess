@@ -15,7 +15,6 @@
 
 from __future__ import annotations
 from cli_chess.modules.premove import PremoveView
-from chess import Color, COLOR_NAMES
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from cli_chess.core.game import GameModelBase
