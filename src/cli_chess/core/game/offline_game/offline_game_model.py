@@ -1,4 +1,4 @@
-# Copyright (C) 2021-2023 Trevor Bayless <trevorbayless1@gmail.com>
+# Copyright (C) 2021-2024 Trevor Bayless <trevorbayless1@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,7 +18,6 @@ from cli_chess.modules.engine import EngineModel
 from cli_chess.core.game.game_options import GameOption
 from cli_chess.utils.logging import log
 from cli_chess.utils.config import player_info_config
-from chess import Board
 from chess import COLOR_NAMES
 
 
@@ -75,17 +74,14 @@ class OfflineGameModel(PlayableGameModelBase):
                 move = move.strip()
                 if not move:
                     raise Warning("No move specified")
-                # use a temporary board skip one turn to verify the move
-                fen = self.board_model.board.fen()
-                tmp_board = Board(fen)
+
+                tmp_board = self.board_model.board.copy()
                 tmp_board.turn = not tmp_board.turn
                 try:
                     move = tmp_board.push_san(move).uci()
                 except ValueError:
                     raise Warning("Invalid premove")
                 self.board_model.set_premove(move)
-                # to update highlight for premove
-                self.board_model._notify_board_model_updated(successfulMoveMade=True)
             except Exception:
                 raise
         else:
