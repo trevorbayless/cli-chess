@@ -32,3 +32,6 @@ class PremovePresenter:
 
     def get_premove(self) -> dict:
         return self.model.board_model.get_premove()
+
+    def clear_premove(self) -> None:
+        self.model.board_model.set_premove(None)

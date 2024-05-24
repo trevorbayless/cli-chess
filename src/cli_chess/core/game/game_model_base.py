@@ -151,9 +151,6 @@ class PlayableGameModelBase(GameModelBase, ABC):
             log.warning("Attempted to make a move in a game that's not in progress")
             raise Warning("Game has already ended")
 
-    def clear_premove(self) -> None:
-        self.board_model.set_premove(None)
-
     @abstractmethod
     def make_move(self, move: str) -> None:
         pass

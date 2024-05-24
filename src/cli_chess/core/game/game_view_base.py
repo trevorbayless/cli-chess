@@ -109,8 +109,8 @@ class PlayableGameViewBase(GameViewBase, ABC):
                 ("class:function-bar.key", "F4", handle_mouse_click(self.presenter.resign)),
                 ("class:function-bar.label", f"{'Resign':<11}", handle_mouse_click(self.presenter.resign)),
                 ("class:function-bar.spacer", " "),
-                ("class:function-bar.key", "Escape", handle_mouse_click(self.presenter.clear_premove)),
-                ("class:function-bar.label", f"{'Clear Premove':<11}", handle_mouse_click(self.presenter.clear_premove)),
+                ("class:function-bar.key", "Escape", handle_mouse_click(self.presenter.premove_presenter.clear_premove)),
+                ("class:function-bar.label", f"{'Clear Premove':<11}", handle_mouse_click(self.presenter.premove_presenter.clear_premove)),
                 ("class:function-bar.spacer", " ")
             ])
 
@@ -151,7 +151,7 @@ class PlayableGameViewBase(GameViewBase, ABC):
 
         @bindings.add(Keys.Escape, filter=Condition(self.presenter.is_game_in_progress), eager=True)
         def _(event):
-            self.presenter.clear_premove()
+            self.presenter.premove_presenter.clear_premove()
 
         return merge_key_bindings([bindings, super().get_key_bindings()])
 
