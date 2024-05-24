@@ -45,9 +45,6 @@ class MoveListView:
         """Loops through the passed in move list
            and updates the move list display
         """
-        # TODO: When the move list is displayed as unicode, frequently the
-        #       moves do not line up. Need to rework how the container handles
-        #       the text with (hopefully) not losing the ability to scroll the list
         output = ""
         for i, move in enumerate(formatted_move_list):
             if i % 2 == 0 and i != 0:
