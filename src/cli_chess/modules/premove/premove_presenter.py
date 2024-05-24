@@ -17,11 +17,11 @@ from __future__ import annotations
 from cli_chess.modules.premove import PremoveView
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from cli_chess.core.game import GameModelBase
+    from cli_chess.core.game import PlayableGameModelBase
 
 
 class PremovePresenter:
-    def __init__(self, model: GameModelBase):
+    def __init__(self, model: PlayableGameModelBase):
         self.model = model
         self.view = PremoveView(self, self.get_premove())
         self.model.e_game_model_updated.add_listener(self.update)

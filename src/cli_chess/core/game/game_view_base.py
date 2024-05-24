@@ -1,4 +1,4 @@
-# Copyright (C) 2021-2023 Trevor Bayless <trevorbayless1@gmail.com>
+# Copyright (C) 2021-2024 Trevor Bayless <trevorbayless1@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -40,7 +40,6 @@ class GameViewBase(ABC):
         self.player_info_lower_container = presenter.player_info_presenter.view_lower
         self.clock_upper = presenter.clock_presenter.view_upper
         self.clock_lower = presenter.clock_presenter.view_lower
-        self.premove_container = presenter.premove_presenter.view
         self.alert = AlertContainer()
         self._container = self._create_container()
 
@@ -88,6 +87,7 @@ class PlayableGameViewBase(GameViewBase, ABC):
     """Implements a base game view which has a move input field"""
     def __init__(self, presenter: PlayableGamePresenterBase):
         self.presenter = presenter
+        self.premove_container = presenter.premove_presenter.view
         self.input_field_container = self._create_input_field_container()
         super().__init__(presenter)
 

@@ -1,4 +1,4 @@
-# Copyright (C) 2021-2023 Trevor Bayless <trevorbayless1@gmail.com>
+# Copyright (C) 2021-2024 Trevor Bayless <trevorbayless1@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -36,7 +36,6 @@ class GamePresenterBase(ABC):
         self.material_diff_presenter = MaterialDifferencePresenter(model.material_diff_model)
         self.player_info_presenter = PlayerInfoPresenter(model)
         self.clock_presenter = ClockPresenter(model)
-        self.premove_presenter = PremovePresenter(model)
         self.view = self._get_view()
 
         self.model.e_game_model_updated.add_listener(self.update)
@@ -67,6 +66,7 @@ class GamePresenterBase(ABC):
 
 class PlayableGamePresenterBase(GamePresenterBase, ABC):
     def __init__(self, model: PlayableGameModelBase):
+        self.premove_presenter = PremovePresenter(model)
         super().__init__(model)
         self.model = model
 
@@ -145,7 +145,7 @@ class PlayableGamePresenterBase(GamePresenterBase, ABC):
             self.view.alert.show_alert(str(e))
 
     def clear_premove(self) -> None:
-        """Cleans the premove"""
+        """Clears any currently set premove"""
         self.model.clear_premove()
 
     def is_game_in_progress(self) -> bool:
