@@ -1,4 +1,4 @@
-# Copyright (C) 2021-2023 Trevor Bayless <trevorbayless1@gmail.com>
+# Copyright (C) 2021-2024 Trevor Bayless <trevorbayless1@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -152,6 +152,10 @@ class OfflineGamePresenter(PlayableGamePresenterBase):
             output = "Game over • Draw"
 
         self.view.alert.show_alert(output, AlertType.NEUTRAL)
+
+    def is_vs_ai(self) -> bool:
+        """Returns True if the game is being played against an engine"""
+        return True
 
     def exit(self) -> None:
         """Exit current presenter/view"""

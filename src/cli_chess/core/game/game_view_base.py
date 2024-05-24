@@ -24,7 +24,7 @@ from prompt_toolkit.keys import Keys
 from prompt_toolkit.buffer import Buffer
 from prompt_toolkit.filters import Condition
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING
+from typing import Tuple, TYPE_CHECKING
 if TYPE_CHECKING:
     from cli_chess.core.game import GamePresenterBase, PlayableGamePresenterBase
 
@@ -50,12 +50,27 @@ class GameViewBase(ABC):
         pass
 
     def _base_function_bar_fragments(self) -> StyleAndTextTuples:
-        """Return the base function bar fragments"""
-        return ([
+        """Return the minimum function bar fragments for a game"""
+        fragments = ([])
+        fragments.extend(self._flip_board_fb_fragments())
+        fragments.extend(self._exit_fb_fragments())
+        return fragments
+
+    def _flip_board_fb_fragments(self) -> Tuple:
+        """Returns the function bar fragments for flipping the board"""
+        return (
             ("class:function-bar.key", "F1", handle_mouse_click(self.presenter.flip_board)),
             ("class:function-bar.label", f"{'Flip board':<11}", handle_mouse_click(self.presenter.flip_board)),
-            ("class:function-bar.spacer", " ")
-        ])
+            ("class:function-bar.spacer", " "),
+        )
+
+    def _exit_fb_fragments(self) -> Tuple:
+        """Returns the function bar fragments for exiting the game view"""
+        return (
+            ("class:function-bar.key", "F8", handle_mouse_click(self.presenter.exit)),
+            ("class:function-bar.label", f"{'Exit':<11}", handle_mouse_click(self.presenter.exit)),
+            ("class:function-bar.spacer", " "),
+        )
 
     def _create_function_bar(self) -> VSplit:
         """Creates the views function bar"""
@@ -70,6 +85,10 @@ class GameViewBase(ABC):
         @bindings.add(Keys.F1, eager=True)
         def _(event): # noqa
             self.presenter.flip_board()
+
+        @bindings.add(Keys.F8, eager=True)
+        def _(event): # noqa
+            self.presenter.exit()
 
         return merge_key_bindings([bindings, self.move_list_container.key_bindings])
 
@@ -95,37 +114,55 @@ class PlayableGameViewBase(GameViewBase, ABC):
     def _create_container(self) -> Container:
         pass
 
+    def _takeback_fb_fragments(self) -> Tuple:
+        """Returns the function bar fragments for propsing a takeback"""
+        return (
+            ("class:function-bar.key", "F2", handle_mouse_click(self.presenter.propose_takeback)),
+            ("class:function-bar.label", f"{'Takeback':<11}", handle_mouse_click(self.presenter.propose_takeback)),
+            ("class:function-bar.spacer", " "),
+        )
+
+    def _draw_fb_fragments(self) -> Tuple:
+        """Returns the function bar fragments for offering a draw"""
+        return (
+            ("class:function-bar.key", "F3", handle_mouse_click(self.presenter.offer_draw)),
+            ("class:function-bar.label", f"{'Offer draw':<11}", handle_mouse_click(self.presenter.offer_draw)),
+            ("class:function-bar.spacer", " "),
+        )
+
+    def _resign_fb_fragments(self) -> Tuple:
+        """Returns the function bar fragments for resigning"""
+        return (
+            ("class:function-bar.key", "F4", handle_mouse_click(self.presenter.resign)),
+            ("class:function-bar.label", f"{'Resign':<11}", handle_mouse_click(self.presenter.resign)),
+            ("class:function-bar.spacer", " "),
+        )
+
+    def _clear_premove_fb_fragments(self) -> Tuple:
+        """Returns the function bar fragments for clearing the set premove"""
+        return (
+            ("class:function-bar.key", "Esc", handle_mouse_click(self.presenter.premove_presenter.clear_premove)),
+            ("class:function-bar.label", f"{'Clear Premove':<11}", handle_mouse_click(self.presenter.premove_presenter.clear_premove)),
+            ("class:function-bar.spacer", " "),
+        )
+
     def _create_function_bar(self) -> VSplit:
         """Create the conditional function bar"""
         def _get_function_bar_fragments() -> StyleAndTextTuples:
-            fragments = self._base_function_bar_fragments()
-            game_in_progress_fragments = ([
-                ("class:function-bar.key", "F2", handle_mouse_click(self.presenter.propose_takeback)),
-                ("class:function-bar.label", f"{'Takeback':<11}", handle_mouse_click(self.presenter.propose_takeback)),
-                ("class:function-bar.spacer", " "),
-                ("class:function-bar.key", "F3", handle_mouse_click(self.presenter.offer_draw)),
-                ("class:function-bar.label", f"{'Offer draw':<11}", handle_mouse_click(self.presenter.offer_draw)),
-                ("class:function-bar.spacer", " "),
-                ("class:function-bar.key", "F4", handle_mouse_click(self.presenter.resign)),
-                ("class:function-bar.label", f"{'Resign':<11}", handle_mouse_click(self.presenter.resign)),
-                ("class:function-bar.spacer", " "),
-            ])
-
-            premove_fragments = ([
-                ("class:function-bar.key", "Esc", handle_mouse_click(self.presenter.premove_presenter.clear_premove)),
-                ("class:function-bar.label", f"{'Clear Premove':<11}", handle_mouse_click(self.presenter.premove_presenter.clear_premove)),
-                ("class:function-bar.spacer", " ")
-            ])
+            fragments = ([])
+            fragments.extend(self._flip_board_fb_fragments())
 
             if self.presenter.is_game_in_progress():
-                fragments.extend(game_in_progress_fragments)
+                fragments.extend(self._takeback_fb_fragments())
+
+                if not self.presenter.is_vs_ai():
+                    fragments.extend(self._draw_fb_fragments())
+
+                fragments.extend(self._resign_fb_fragments())
                 if self.presenter.premove_presenter.get_premove():
-                    fragments.extend(premove_fragments)
+                    fragments.extend(self._clear_premove_fb_fragments())
             else:
-                fragments.extend([
-                    ("class:function-bar.key", "F8", handle_mouse_click(self.presenter.exit)),
-                    ("class:function-bar.label", f"{'Exit':<11}", handle_mouse_click(self.presenter.exit))
-                ])
+                fragments.extend(self._exit_fb_fragments())
             return fragments
 
         return VSplit([
@@ -140,10 +177,11 @@ class PlayableGameViewBase(GameViewBase, ABC):
         def _(event): # noqa
             self.presenter.propose_takeback()
 
-        @bindings.add(Keys.F3, filter=Condition(self.presenter.is_game_in_progress), eager=True)
-        def _(event):
-            if not event.is_repeat:
-                self.presenter.offer_draw()
+        if not self.presenter.is_vs_ai():
+            @bindings.add(Keys.F3, filter=Condition(self.presenter.is_game_in_progress), eager=True)
+            def _(event):
+                if not event.is_repeat:
+                    self.presenter.offer_draw()
 
         @bindings.add(Keys.F4, filter=Condition(self.presenter.is_game_in_progress), eager=True)
         def _(event):

@@ -74,7 +74,7 @@ class OfflineGameModel(PlayableGameModelBase):
             raise
 
     def offer_draw(self) -> None:
-        raise Warning("Engines do not accept draw offers")
+        raise Warning("Offline engine does not accept draw offers")
 
     def resign(self) -> None:
         """Handles resigning the game"""

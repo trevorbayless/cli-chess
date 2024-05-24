@@ -75,6 +75,13 @@ class PlayableGamePresenterBase(GamePresenterBase, ABC):
         """Returns the view to use for this presenter"""
         return PlayableGameViewBase(self)
 
+    @abstractmethod
+    def is_vs_ai(self) -> bool:
+        """Inheriting classes must specify if the game
+           is versus AI (offline engine or Lichess)
+        """
+        pass
+
     def update(self, **kwargs) -> None:
         """Update method called on game model updates. Overrides base."""
         if "successfulMoveMade" in kwargs:

@@ -1,4 +1,4 @@
-# Copyright (C) 2021-2023 Trevor Bayless <trevorbayless1@gmail.com>
+# Copyright (C) 2021-2024 Trevor Bayless <trevorbayless1@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -24,10 +24,10 @@ def start_online_game(game_parameters: dict, is_vs_ai: bool) -> None:
     """Start an online game. If `is_vs_ai` is True a challenge will be sent to
        the Lichess AI (stockfish). Otherwise, a seek vs a random opponent will be created
     """
-    model = OnlineGameModel(game_parameters)
+    model = OnlineGameModel(game_parameters, is_vs_ai)
     presenter = OnlineGamePresenter(model)
     change_views(presenter.view, presenter.view.input_field_container) # noqa
-    model.create_a_game(is_vs_ai)
+    model.create_game()
 
 
 class OnlineGamePresenter(PlayableGamePresenterBase):
@@ -121,3 +121,7 @@ class OnlineGamePresenter(PlayableGamePresenterBase):
             log.debug(f"Received game over with uncaught status: {status}")
 
         self.view.alert.show_alert(output, AlertType.NEUTRAL)
+
+    def is_vs_ai(self) -> bool:
+        """Returns true if the game being played is versus lichess AI"""
+        return self.model.vs_ai

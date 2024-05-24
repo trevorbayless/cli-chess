@@ -25,14 +25,14 @@ class OnlineGameModel(PlayableGameModelBase):
     """This model must only be used for games owned by the linked lichess user.
        Games not owned by this account must directly use the base model instead.
     """
-    def __init__(self, game_parameters: dict):
+    def __init__(self, game_parameters: dict, is_vs_ai: bool):
         super().__init__(play_as_color=game_parameters[GameOption.COLOR], variant=game_parameters[GameOption.VARIANT], fen=None)
         self._save_game_metadata(game_parameters=game_parameters)
 
         self.game_state_dispatcher = Optional[GameStateDispatcher]
         self.playing_game_id = None
         self.searching = False
-        self.vs_ai = False
+        self.vs_ai = is_vs_ai
 
         try:
             from cli_chess.core.api.api_manager import api_client, api_iem
@@ -44,12 +44,11 @@ class OnlineGameModel(PlayableGameModelBase):
             raise ImportError("API client not setup. Do you have an API token linked?")
 
     @threaded
-    def create_a_game(self, is_vs_ai: bool) -> None:
+    def create_game(self) -> None:
         """Sends a request to lichess to start an AI challenge using the selected game parameters"""
         # Note: Only subscribe to IEM events right before creating challenge to lessen chance of grabbing another game
         self.api_iem.subscribe_to_events(self.handle_iem_event)
         self._notify_game_model_updated(searchingForOpponent=True)
-        self.vs_ai = is_vs_ai
         self.searching = True
 
         if self.vs_ai:  # Challenge Lichess AI (stockfish)
@@ -205,7 +204,7 @@ class OnlineGameModel(PlayableGameModelBase):
         """Notifies the game state dispatcher to offer a draw"""
         if self.game_in_progress:
             if self.vs_ai:
-                raise Warning("AI does not accept draw offers")
+                raise Warning("Lichess AI does not accept draw offers")
 
             try:
                 self.game_state_dispatcher.send_draw_offer()
