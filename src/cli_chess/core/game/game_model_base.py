@@ -17,7 +17,7 @@ from cli_chess.modules.board import BoardModel
 from cli_chess.modules.move_list import MoveListModel
 from cli_chess.modules.material_difference import MaterialDifferenceModel
 from cli_chess.utils import EventManager, log
-from chess import Color, WHITE, COLOR_NAMES
+from chess import Color, WHITE, COLOR_NAMES, InvalidMoveError, IllegalMoveError, AmbiguousMoveError
 from random import getrandbits
 from abc import ABC, abstractmethod
 
@@ -142,14 +142,20 @@ class PlayableGameModelBase(GameModelBase, ABC):
                 tmp_board.turn = not tmp_board.turn
                 try:
                     move = tmp_board.push_san(move).uci()
-                except ValueError:
-                    raise Warning("Invalid premove")
+
+                except Exception as e:
+                    if isinstance(e, InvalidMoveError):
+                        raise ValueError(f"Invalid premove: {move}")
+                    elif isinstance(e, IllegalMoveError):
+                        raise ValueError(f"Illegal premove: {move}")
+                    elif isinstance(e, AmbiguousMoveError):
+                        raise ValueError(f"Ambiguous premove: {move}")
+                    else:
+                        raise e
+
                 self.board_model.set_premove(move)
             except Exception:
                 raise
-        else:
-            log.warning("Attempted to make a move in a game that's not in progress")
-            raise Warning("Game has already ended")
 
     @abstractmethod
     def make_move(self, move: str) -> None:
