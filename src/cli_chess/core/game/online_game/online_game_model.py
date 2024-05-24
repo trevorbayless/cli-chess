@@ -17,7 +17,7 @@ from cli_chess.core.game import PlayableGameModelBase
 from cli_chess.core.game.game_options import GameOption
 from cli_chess.core.api import GameStateDispatcher
 from cli_chess.utils import log, threaded, RequestSuccessfullySent
-from chess import COLOR_NAMES, WHITE, Board
+from chess import COLOR_NAMES, WHITE
 from typing import Optional
 
 

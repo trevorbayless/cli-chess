@@ -30,7 +30,7 @@ class PremovePresenter:
         """Updates the view based on specific model updates"""
         self.view.update(self.get_premove())
 
-    def get_premove(self) -> dict:
+    def get_premove(self) -> str:
         return self.model.board_model.get_premove()
 
     def clear_premove(self) -> None:
