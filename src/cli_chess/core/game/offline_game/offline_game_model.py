@@ -62,32 +62,6 @@ class OfflineGameModel(PlayableGameModelBase):
             log.warning("Attempted to make a move in a game that's not in progress")
             raise Warning("Game has already ended")
 
-    def make_premove(self, move: str):
-        """Verify move and Set board model premove"""
-        if self.game_in_progress and not self.is_my_turn():
-            try:
-                if self.board_model.board.is_game_over():
-                    self.game_in_progress = False
-                    raise Warning("Game has already ended")
-                if self.board_model.get_premove() is not None:
-                    raise Warning("You already have a premove set")
-                move = move.strip()
-                if not move:
-                    raise Warning("No move specified")
-
-                tmp_board = self.board_model.board.copy()
-                tmp_board.turn = not tmp_board.turn
-                try:
-                    move = tmp_board.push_san(move).uci()
-                except ValueError:
-                    raise Warning("Invalid premove")
-                self.board_model.set_premove(move)
-            except Exception:
-                raise
-        else:
-            log.warning("Attempted to make a move in a game that's not in progress")
-            raise Warning("Game has already ended")
-
     def propose_takeback(self) -> None:
         """Take back the previous move"""
         try:

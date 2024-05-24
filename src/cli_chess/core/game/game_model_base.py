@@ -1,4 +1,4 @@
-# Copyright (C) 2021-2023 Trevor Bayless <trevorbayless1@gmail.com>
+# Copyright (C) 2021-2024 Trevor Bayless <trevorbayless1@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -128,12 +128,34 @@ class PlayableGameModelBase(GameModelBase, ABC):
         else:  # Get random color to play as
             return Color(getrandbits(1))
 
-    @abstractmethod
-    def make_move(self, move: str) -> None:
-        pass
+    def make_premove(self, move: str):
+        """Make a premove on the board"""
+        if self.game_in_progress and not self.is_my_turn():
+            try:
+                if self.board_model.board.is_game_over():
+                    self.game_in_progress = False
+                    raise Warning("Game has already ended")
+                if self.board_model.get_premove() is not None:
+                    raise Warning("You already have a premove set")
+                move = move.strip()
+                if not move:
+                    raise Warning("No move specified")
+
+                tmp_board = self.board_model.board.copy()
+                tmp_board.turn = not tmp_board.turn
+                try:
+                    move = tmp_board.push_san(move).uci()
+                except ValueError:
+                    raise Warning("Invalid premove")
+                self.board_model.set_premove(move)
+            except Exception:
+                raise
+        else:
+            log.warning("Attempted to make a move in a game that's not in progress")
+            raise Warning("Game has already ended")
 
     @abstractmethod
-    def make_premove(self, move: str) -> None:
+    def make_move(self, move: str) -> None:
         pass
 
     @abstractmethod

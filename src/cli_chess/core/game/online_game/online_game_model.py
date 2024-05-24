@@ -1,4 +1,4 @@
-# Copyright (C) 2021-2023 Trevor Bayless <trevorbayless1@gmail.com>
+# Copyright (C) 2021-2024 Trevor Bayless <trevorbayless1@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -172,37 +172,15 @@ class OnlineGameModel(PlayableGameModelBase):
                 raise Warning("Game has already ended")
 
     def make_premove(self, move: str):
-        """ Verify move and Set board model premove """
+        """Make a premove on the board"""
         if self.game_in_progress:
             try:
-                if self.board_model.get_premove() is not None:
-                    raise Warning("You already have a premove set")
-
-                move = move.strip()
-                if not move:
-                    raise Warning("No move specified")
-
                 if move == "0000":
                     raise Warning("Null moves are not supported in online games")
-
-                # use a temporary board skip one turn to verify the move
-                fen = self.board_model.board.fen()
-                tmp_board = Board(fen)
-                if tmp_board.turn != self.my_color:
-                    tmp_board.turn = not tmp_board.turn
-                try:
-                    move = tmp_board.push_san(move).uci()
-                except ValueError:
-                    raise Warning("Invalid premove")
-                self.board_model.set_premove(move)
             except Exception:
                 raise
-        else:
-            log.warning("Attempted to make a move in a game that's not in progress")
-            if self.searching:
-                raise Warning("Still searching for opponent")
-            else:
-                raise Warning("Game has already ended")
+
+            super().make_premove(move)
 
     def propose_takeback(self) -> None:
         """Notifies the game state dispatcher to propose a takeback"""
