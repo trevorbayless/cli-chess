@@ -1,4 +1,4 @@
-# Copyright (C) 2021-2023 Trevor Bayless <trevorbayless1@gmail.com>
+# Copyright (C) 2021-2024 Trevor Bayless <trevorbayless1@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -24,10 +24,8 @@ if TYPE_CHECKING:
 class PremoveView:
     def __init__(self, presenter: PremovePresenter, premove: str | None = None):
         self.presenter = presenter
-        self.premove = premove
-        if not self.premove:
-            self.premove = "None"
-        self._premove_control = FormattedTextControl(text=lambda: "PreMove: " + self.premove, style="class:pre-move")
+        self.premove = premove if premove else "None"
+        self._premove_control = FormattedTextControl(text=lambda: "Premove: " + self.premove, style="class:pre-move")
         self._container = self._create_container()
 
     def _create_container(self) -> Container:
@@ -37,10 +35,7 @@ class PremoveView:
 
     def update(self, premove: str) -> None:
         """Updates the pre-move text display with the pre-move passed in"""
-        if not premove:
-            self.premove = "None"
-        else:
-            self.premove = premove
+        self.premove = premove if premove else "None"
 
     def __pt_container__(self) -> Container:
         """Returns this views container"""

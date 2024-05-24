@@ -57,7 +57,6 @@ class OfflineGamePresenter(PlayableGamePresenterBase):
                 self.model.make_move(move)
                 self.make_engine_move()
             else:
-                # if not my turn, set premove
                 self.model.make_premove(move)
         except Exception as e:
             self.view.alert.show_alert(str(e))

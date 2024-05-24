@@ -1,4 +1,4 @@
-# Copyright (C) 2021-2023 Trevor Bayless <trevorbayless1@gmail.com>
+# Copyright (C) 2021-2024 Trevor Bayless <trevorbayless1@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -23,9 +23,7 @@ if TYPE_CHECKING:
 class PremovePresenter:
     def __init__(self, model: GameModelBase):
         self.model = model
-
         self.view = PremoveView(self, self.get_premove())
-
         self.model.e_game_model_updated.add_listener(self.update)
 
     def update(self, **kwargs) -> None:
