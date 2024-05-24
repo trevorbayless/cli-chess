@@ -1,4 +1,4 @@
-# Copyright (C) 2021-2023 Trevor Bayless <trevorbayless1@gmail.com>
+# Copyright (C) 2021-2024 Trevor Bayless <trevorbayless1@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -39,11 +39,11 @@ class OnlineGameView(PlayableGameViewBase):
                         self.move_list_container,
                         self.material_diff_lower_container,
                         self.player_info_lower_container,
-                        self.premove_container,
                         self.clock_lower
                     ])
                 ]),
                 self.input_field_container,
+                self.premove_container,
                 self.alert,
             ]),
             padding=0

@@ -109,13 +109,18 @@ class PlayableGameViewBase(GameViewBase, ABC):
                 ("class:function-bar.key", "F4", handle_mouse_click(self.presenter.resign)),
                 ("class:function-bar.label", f"{'Resign':<11}", handle_mouse_click(self.presenter.resign)),
                 ("class:function-bar.spacer", " "),
-                ("class:function-bar.key", "Escape", handle_mouse_click(self.presenter.premove_presenter.clear_premove)),
+            ])
+
+            premove_fragments = ([
+                ("class:function-bar.key", "Esc", handle_mouse_click(self.presenter.premove_presenter.clear_premove)),
                 ("class:function-bar.label", f"{'Clear Premove':<11}", handle_mouse_click(self.presenter.premove_presenter.clear_premove)),
                 ("class:function-bar.spacer", " ")
             ])
 
             if self.presenter.is_game_in_progress():
                 fragments.extend(game_in_progress_fragments)
+                if self.presenter.premove_presenter.get_premove():
+                    fragments.extend(premove_fragments)
             else:
                 fragments.extend([
                     ("class:function-bar.key", "F8", handle_mouse_click(self.presenter.exit)),
@@ -149,7 +154,7 @@ class PlayableGameViewBase(GameViewBase, ABC):
         def _(event): # noqa
             self.presenter.exit()
 
-        @bindings.add(Keys.Escape, filter=Condition(self.presenter.is_game_in_progress), eager=True)
+        @bindings.add(Keys.Escape, filter=Condition(self.presenter.premove_presenter.get_premove), eager=True)
         def _(event):
             self.presenter.premove_presenter.clear_premove()
 
