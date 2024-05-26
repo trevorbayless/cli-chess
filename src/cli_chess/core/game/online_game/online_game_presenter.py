@@ -48,6 +48,7 @@ class OnlineGamePresenter(PlayableGamePresenterBase):
             self.view.alert.clear_alert()
         if 'onlineGameOver' in kwargs:
             self._parse_and_present_game_over()
+            self.premove_presenter.clear_premove()
 
     def _parse_and_present_game_over(self) -> None:
         """Triages game over status for parsing and sending to the view for display"""

@@ -16,6 +16,7 @@
 from cli_chess.modules.board import BoardModel
 from cli_chess.modules.move_list import MoveListModel
 from cli_chess.modules.material_difference import MaterialDifferenceModel
+from cli_chess.modules.premove import PremoveModel
 from cli_chess.utils import EventManager, log
 from chess import Color, WHITE, COLOR_NAMES, InvalidMoveError, IllegalMoveError, AmbiguousMoveError
 from random import getrandbits
@@ -109,7 +110,10 @@ class PlayableGameModelBase(GameModelBase, ABC):
     def __init__(self, play_as_color: str, variant="standard", fen=""):
         self.my_color = self._get_side_to_play_as(play_as_color)
         self.game_in_progress = False
+
         super().__init__(orientation=self.my_color, variant=variant, fen=fen)
+        self.premove_model = PremoveModel(self.board_model)
+        self._assoc_models = self._assoc_models + [self.premove_model]
 
     def is_my_turn(self) -> bool:
         """Return True if it's our turn"""
@@ -125,40 +129,12 @@ class PlayableGameModelBase(GameModelBase, ABC):
         else:  # Get random color to play as
             return Color(getrandbits(1))
 
-    def make_premove(self, move: str):
-        """Make a premove on the board"""
-        if self.game_in_progress and not self.is_my_turn():
-            try:
-                if self.board_model.board.is_game_over():
-                    self.game_in_progress = False
-                    raise Warning("Game has already ended")
-                if self.board_model.get_premove() is not None:
-                    raise Warning("You already have a premove set")
-                move = move.strip()
-                if not move:
-                    raise Warning("No move specified")
-
-                tmp_board = self.board_model.board.copy()
-                tmp_board.turn = not tmp_board.turn
-                try:
-                    move = tmp_board.push_san(move).uci()
-
-                except Exception as e:
-                    if isinstance(e, InvalidMoveError):
-                        raise ValueError(f"Invalid premove: {move}")
-                    elif isinstance(e, IllegalMoveError):
-                        raise ValueError(f"Illegal premove: {move}")
-                    elif isinstance(e, AmbiguousMoveError):
-                        raise ValueError(f"Ambiguous premove: {move}")
-                    else:
-                        raise e
-
-                self.board_model.set_premove(move)
-            except Exception:
-                raise
-
     @abstractmethod
     def make_move(self, move: str) -> None:
+        pass
+
+    @abstractmethod
+    def set_premove(self, move) -> None:
         pass
 
     @abstractmethod

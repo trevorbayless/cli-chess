@@ -27,7 +27,7 @@ class BoardModel:
         self.initial_fen = self.board.fen()
         self.orientation = chess.WHITE if variant.lower() == "racingkings" else orientation
         self.highlight_move = chess.Move.null()
-        self.premove: str = None
+        self.premove_highlight = chess.Move.null()
         self._game_over_result: Optional[chess.Outcome] = None
         self._log_init_info()
 
@@ -204,15 +204,6 @@ class BoardModel:
         """
         return self.highlight_move
 
-    def get_premove(self) -> str:
-        """Returns the premove"""
-        return self.premove
-
-    def set_premove(self, move: str = None) -> None:
-        """Sets the premove"""
-        self.premove = move
-        self._notify_board_model_updated(successfulMoveMade=True)
-
     def set_board_orientation(self, color: chess.Color, notify=True) -> None:
         """Sets the board's orientation to the color passed in.
            If notify is false, a model update notification will not be sent.
@@ -337,6 +328,23 @@ class BoardModel:
         """
         self._game_over_result = chess.Outcome("resignation", not color_resigning)  # noqa
         self._notify_board_model_updated(isGameOver=True)
+
+    def set_premove_highlight(self, move: chess.Move) -> None:
+        """Sets the move that should be highlighted on the board.
+           indicating a premove. The board model itself does not
+           manage premoves but instead should be handled by an outside
+           class and passes to the board model for updating. This move
+           should never be popped from the board as it is a future
+           (possible) move.
+        """
+        if bool(move):
+            self.premove_highlight = move
+            self._notify_board_model_updated(premoveHighlightSet=True)
+
+    def clear_premove_highlight(self):
+        """Clears the set premove highlight"""
+        self.premove_highlight = chess.Move.null()
+        self._notify_board_model_updated(premoveHighlightCleared=True)
 
     def cleanup(self) -> None:
         """Handles model cleanup tasks. This should only ever

@@ -121,12 +121,17 @@ class OnlineGameModel(PlayableGameModelBase):
             # and our local board are in sync (eg. takebacks, moves played on website, etc)
             self.board_model.reset(notify=False)
             self.board_model.make_moves_from_list(event.get('moves', []).split())
-            # if board_model.premove is set, make the move
-            if self.is_my_turn() and self.board_model.get_premove() is not None:
+
+            if self.is_my_turn():
+                premove = self.premove_model.pop_premove()
                 try:
-                    self.make_move(self.board_model.get_premove())
-                except Exception:
-                    self.board_model.set_premove(None)
+                    if premove:
+                        self.make_move(premove)
+                except Exception as e:
+                    if isinstance(e, ValueError):
+                        log.debug(f"The premove set was invalid in the new context, skipping: {e}")
+                    else:
+                        log.exception(e)
 
             if kwargs['gameOver']:
                 self._report_game_over(status=event.get('status'), winner=event.get('winner', ""))
@@ -147,20 +152,14 @@ class OnlineGameModel(PlayableGameModelBase):
         """
         if self.game_in_progress:
             try:
-                if not self.is_my_turn():
-                    raise Warning("Not your turn")
-
-                move = move.strip()
                 if not move:
                     raise Warning("No move specified")
 
                 if move == "0000":
                     raise Warning("Null moves are not supported in online games")
 
-                move = self.board_model.verify_move(move)
+                move = self.board_model.verify_move(move.strip())
                 self.game_state_dispatcher.make_move(move)
-                # clean premove
-                self.board_model.set_premove(None)
             except Exception:
                 raise
         else:
@@ -170,16 +169,12 @@ class OnlineGameModel(PlayableGameModelBase):
             else:
                 raise Warning("Game has already ended")
 
-    def make_premove(self, move: str):
-        """Make a premove on the board"""
-        if self.game_in_progress:
-            try:
-                if move == "0000":
-                    raise Warning("Null moves are not supported in online games")
-            except Exception:
-                raise
-
-            super().make_premove(move)
+    def set_premove(self, move: str) -> None:
+        """Sets the premove. Raises an exception on an invalid premove"""
+        if self.game_in_progress and move and not self.is_my_turn():
+            if move == "0000":
+                raise Warning("Null moves are not supported in online games")
+            self.premove_model.set_premove(move)
 
     def propose_takeback(self) -> None:
         """Notifies the game state dispatcher to propose a takeback"""
@@ -187,6 +182,8 @@ class OnlineGameModel(PlayableGameModelBase):
             try:
                 if len(self.board_model.get_move_stack()) < 2:
                     raise Warning("Cannot send takeback with less than two moves")
+
+                self.premove_model.clear_premove()
                 self.game_state_dispatcher.send_takeback_request()
 
                 if not self.vs_ai:

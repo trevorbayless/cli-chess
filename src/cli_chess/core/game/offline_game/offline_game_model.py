@@ -49,12 +49,9 @@ class OfflineGameModel(PlayableGameModelBase):
 
                 if not self.is_my_turn():
                     raise Warning("Not your turn")
-                move = move.strip()
-                if not move:
-                    raise Warning("No move specified")
-                # clean premove
-                self.board_model.set_premove(None)
-                self.board_model.make_move(move)
+
+                self.board_model.make_move(move.strip())
+                self.premove_model.clear_premove()
 
             except Exception:
                 raise
@@ -62,12 +59,17 @@ class OfflineGameModel(PlayableGameModelBase):
             log.warning("Attempted to make a move in a game that's not in progress")
             raise Warning("Game has already ended")
 
+    def set_premove(self, move: str) -> None:
+        """Sets the premove"""
+        self.premove_model.set_premove(move)
+
     def propose_takeback(self) -> None:
         """Take back the previous move"""
         try:
             if self.board_model.board.is_game_over():
                 raise Warning("Game has already ended")
 
+            self.premove_model.clear_premove()
             self.board_model.takeback(self.my_color)
         except Exception as e:
             log.error(f"Takeback failed - {e}")

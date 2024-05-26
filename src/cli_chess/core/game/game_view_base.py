@@ -159,7 +159,7 @@ class PlayableGameViewBase(GameViewBase, ABC):
                     fragments.extend(self._draw_fb_fragments())
 
                 fragments.extend(self._resign_fb_fragments())
-                if self.presenter.premove_presenter.get_premove():
+                if self.presenter.premove_presenter.is_premove_set():
                     fragments.extend(self._clear_premove_fb_fragments())
             else:
                 fragments.extend(self._exit_fb_fragments())
@@ -192,7 +192,7 @@ class PlayableGameViewBase(GameViewBase, ABC):
         def _(event): # noqa
             self.presenter.exit()
 
-        @bindings.add(Keys.Escape, filter=Condition(self.presenter.premove_presenter.get_premove), eager=True)
+        @bindings.add(Keys.Escape, filter=Condition(self.presenter.premove_presenter.is_premove_set), eager=True)
         def _(event):
             self.presenter.premove_presenter.clear_premove()
 

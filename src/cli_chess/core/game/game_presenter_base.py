@@ -66,7 +66,7 @@ class GamePresenterBase(ABC):
 
 class PlayableGamePresenterBase(GamePresenterBase, ABC):
     def __init__(self, model: PlayableGameModelBase):
-        self.premove_presenter = PremovePresenter(model)
+        self.premove_presenter = PremovePresenter(model.premove_model)
         super().__init__(model)
         self.model = model
 
@@ -91,17 +91,20 @@ class PlayableGamePresenterBase(GamePresenterBase, ABC):
         """Respond to the users input. This input can either be the
            move input, or game actions (such as resign)
         """
-        inpt_lower = inpt.lower()
-        if inpt_lower == "resign" or inpt_lower == "quit" or inpt_lower == "exit":
-            self.resign()
-        elif inpt_lower == "draw" or inpt_lower == "offer draw":
-            self.offer_draw()
-        elif inpt_lower == "takeback" or inpt_lower == "back" or inpt_lower == "undo":
-            self.propose_takeback()
-        elif self.model.is_my_turn():
-            self.make_move(inpt)
-        else:
-            self.make_premove(inpt)
+        try:
+            inpt_lower = inpt.lower()
+            if inpt_lower == "resign" or inpt_lower == "quit" or inpt_lower == "exit":
+                self.resign()
+            elif inpt_lower == "draw" or inpt_lower == "offer draw":
+                self.offer_draw()
+            elif inpt_lower == "takeback" or inpt_lower == "back" or inpt_lower == "undo":
+                self.propose_takeback()
+            elif self.model.is_my_turn():
+                self.make_move(inpt)
+            else:
+                self.model.set_premove(inpt)
+        except Exception as e:
+            self.view.alert.show_alert(str(e))
 
     def make_move(self, move: str) -> None:
         """Make the passed in move on the board"""
@@ -109,15 +112,6 @@ class PlayableGamePresenterBase(GamePresenterBase, ABC):
             move = move.strip()
             if move:
                 self.model.make_move(move)
-        except Exception as e:
-            self.view.alert.show_alert(str(e))
-
-    def make_premove(self, move: str) -> None:
-        """Make a premove"""
-        try:
-            move = move.strip()
-            if move:
-                self.model.make_premove(move)
         except Exception as e:
             self.view.alert.show_alert(str(e))
 

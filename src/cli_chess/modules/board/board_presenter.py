@@ -170,25 +170,20 @@ class BoardPresenter:
 
         show_board_highlights = self.game_config_values[game_config.Keys.SHOW_BOARD_HIGHLIGHTS]
         if show_board_highlights:
+            # TODO: Lighten last move square color if on light square
             try:
                 last_move = self.model.get_highlight_move()
                 if bool(last_move) and (square == last_move.to_square or square == last_move.from_square):
                     square_color = "last-move"
-                    # TODO: Lighten last move square color if on light square
+
+                premove_highlight = self.model.premove_highlight
+                if bool(premove_highlight) and (square == premove_highlight.from_square or square == premove_highlight.to_square):
+                    square_color = "pre-move"
             except IndexError:
                 pass
 
             if self.model.is_square_in_check(square):
                 square_color = "in-check"
-
-            # premove highlight
-            if self.model.get_premove() is not None:
-                try:
-                    move = chess.Move.from_uci(self.model.get_premove())
-                    if square == move.from_square or square == move.to_square:
-                        square_color = "pre-move"
-                except Exception:
-                    pass
 
         return square_color
 
