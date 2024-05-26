@@ -23,7 +23,7 @@ if TYPE_CHECKING:
 class PremovePresenter:
     def __init__(self, model: PlayableGameModelBase):
         self.model = model
-        self.view = PremoveView(self, self.get_premove())
+        self.view = PremoveView(self)
         self.model.e_game_model_updated.add_listener(self.update)
 
     def update(self, **kwargs) -> None:

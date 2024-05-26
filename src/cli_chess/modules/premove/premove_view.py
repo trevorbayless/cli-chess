@@ -23,9 +23,9 @@ if TYPE_CHECKING:
 
 
 class PremoveView:
-    def __init__(self, presenter: PremovePresenter, premove: str | None = None):
+    def __init__(self, presenter: PremovePresenter):
         self.presenter = presenter
-        self.premove = premove if premove else ""
+        self.premove = ""
         self._premove_control = FormattedTextControl(text=lambda: "Premove: " + self.premove, style="class:pre-move")
         self._container = self._create_container()
 
