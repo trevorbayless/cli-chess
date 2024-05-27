@@ -1,4 +1,4 @@
-# Copyright (C) 2021-2023 Trevor Bayless <trevorbayless1@gmail.com>
+# Copyright (C) 2021-2024 Trevor Bayless <trevorbayless1@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@ metadata = dict(findall(r'__(\w*)__\s*=\s*"([^"]+)"', metadata_file))
 dependencies = [
     "chess>=1.9.4,<2.0.0",
     "berserk>=0.13.1,<0.14.0",
-    "prompt-toolkit==3.0.39"  # pin as breaking changes have been
+    "prompt-toolkit==3.0.44"  # pin as breaking changes have been
                               # introduced in previous patch versions
                               # read PT changelog before bumping
 ]
