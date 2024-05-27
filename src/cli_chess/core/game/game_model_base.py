@@ -18,7 +18,7 @@ from cli_chess.modules.move_list import MoveListModel
 from cli_chess.modules.material_difference import MaterialDifferenceModel
 from cli_chess.modules.premove import PremoveModel
 from cli_chess.utils import EventManager, log
-from chess import Color, WHITE, COLOR_NAMES, InvalidMoveError, IllegalMoveError, AmbiguousMoveError
+from chess import Color, WHITE, COLOR_NAMES
 from random import getrandbits
 from abc import ABC, abstractmethod
 
