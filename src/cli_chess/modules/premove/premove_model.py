@@ -72,7 +72,7 @@ class PremoveModel:
             if self.premove:
                 raise Warning("You already have a premove set")
 
-            tmp_premove_board = self.board_model.board.copy()
+            tmp_premove_board = self.board_model.board.copy(stack=False)
             tmp_premove_board.turn = not tmp_premove_board.turn
             try:
                 return tmp_premove_board.push_san(move.strip())
