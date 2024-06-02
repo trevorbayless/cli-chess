@@ -1,4 +1,5 @@
 from __future__ import annotations
+from cli_chess.core.game.game_metadata import Player
 from prompt_toolkit.layout import Container, ConditionalContainer, VSplit, D, Window, FormattedTextControl, WindowAlign
 from prompt_toolkit.widgets import Box
 from prompt_toolkit.filters import Condition
@@ -8,12 +9,8 @@ if TYPE_CHECKING:
 
 
 class PlayerInfoView:
-    def __init__(self, presenter: PlayerInfoPresenter, player_info: dict):
+    def __init__(self, presenter: PlayerInfoPresenter, player_info: Player):
         self.presenter = presenter
-        self.player_title = ""
-        self.player_name = ""
-        self.player_rating = ""
-        self.rating_diff = ""
         self.update(player_info)
 
         self._player_title_control = FormattedTextControl(text=lambda: self.player_title, style="class:player-info.title")
@@ -34,19 +31,28 @@ class PlayerInfoView:
 
         ], width=D(min=1), height=D(max=1), window_too_small=ConditionalContainer(Window(), False))
 
-    def update(self, player_info: dict) -> None:
+    def update(self, player_info: Player) -> None:
         """Updates the player info using the data passed in"""
-        self.player_title = player_info.get('title', "")
-        self.player_name = player_info.get('name', "?")
-        self._format_rating_diff(player_info.get('rating_diff', None))
+        self._set_player_title(player_info.title)
+        self._set_player_name(player_info.name)
+        self._set_player_rating(player_info.rating, player_info.is_provisional_rating)
+        self._set_rating_diff(player_info.rating_diff)
 
-        rating = player_info.get('rating', "")
-        self.player_rating = (f"({rating})" if not player_info.get('provisional') else f"({rating}?)") if rating else ""
-
-        if self.player_title == "BOT":
+    def _set_player_title(self, title: str):
+        title = title if title else ""
+        if title == "BOT":
             self._player_title_control.style = "class:player-info.title.bot"
 
-    def _format_rating_diff(self, rating_diff: int) -> None:
+        self.player_title = title
+
+    def _set_player_name(self, name: str):
+        self.player_name = name if name else ""
+
+    def _set_player_rating(self, rating: str, provisional: bool):
+        rating = rating if rating else ""
+        self.player_rating = (f"({rating})" if not provisional else f"({rating}?)") if rating else ""
+
+    def _set_rating_diff(self, rating_diff: int):
         """Handles formatting and updating the rating diff control"""
         if rating_diff:
             if rating_diff < 0:

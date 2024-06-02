@@ -74,34 +74,20 @@ class OfflineGameModel(PlayableGameModelBase):
             log.warning("Attempted to resign a game that's not in progress")
             raise Warning("Game has already ended")
 
-    def _default_game_metadata(self) -> dict:
-        """Returns the default structure for game metadata"""
-        game_metadata = super()._default_game_metadata()
-        game_metadata.update({
-            'my_color_str': ""
-        })
-        return game_metadata
-
     def _save_game_metadata(self, **kwargs) -> None:
         """Parses and saves the data of the game being played"""
         try:
             if 'game_parameters' in kwargs:
                 data = kwargs['game_parameters']
-                self.game_metadata['my_color_str'] = COLOR_NAMES[self.my_color]
-                self.game_metadata['variant'] = data[GameOption.VARIANT]
+                self.game_metadata.my_color = COLOR_NAMES[self.my_color]
 
-                # My player information
-                my_name = player_info_config.get_value(player_info_config.Keys.OFFLINE_PLAYER_NAME)
-                self.game_metadata['players'][COLOR_NAMES[self.my_color]]['title'] = ""
-                self.game_metadata['players'][COLOR_NAMES[self.my_color]]['name'] = my_name
-                self.game_metadata['players'][COLOR_NAMES[self.my_color]]['rating'] = ""
+                self.game_metadata.variant = data[GameOption.VARIANT]
+                self.game_metadata.players[self.my_color].name = player_info_config.get_value(player_info_config.Keys.OFFLINE_PLAYER_NAME)  # noqa: E501
 
-                # Engine information
-                engine_name = "Fairy-Stockfish"  # TODO: Implement a better solution for when other engines are supported
+                engine_name = "Fairy-Stockfish"
                 engine_name = engine_name + f" Lvl {data.get(GameOption.COMPUTER_SKILL_LEVEL)}" if not data.get(GameOption.SPECIFY_ELO) else engine_name  # noqa: E501
-                self.game_metadata['players'][COLOR_NAMES[not self.my_color]]['title'] = ""
-                self.game_metadata['players'][COLOR_NAMES[not self.my_color]]['name'] = engine_name
-                self.game_metadata['players'][COLOR_NAMES[not self.my_color]]['rating'] = data.get(GameOption.COMPUTER_ELO, "")
+                self.game_metadata.players[not self.my_color].name = engine_name
+                self.game_metadata.players[not self.my_color].rating = data.get(GameOption.COMPUTER_ELO, "")
 
             self._notify_game_model_updated()
         except KeyError as e:
@@ -113,8 +99,8 @@ class OfflineGameModel(PlayableGameModelBase):
         """
         self.game_in_progress = False
         outcome = self.board_model.get_game_over_result()
-        self.game_metadata['state']['status'] = outcome.termination
-        self.game_metadata['state']['winner'] = COLOR_NAMES[outcome.winner]
+        self.game_metadata.game_status.status = outcome.termination
+        self.game_metadata.game_status.winner = COLOR_NAMES[outcome.winner]
 
         log.info(f"Game over (status={outcome.termination} winner={COLOR_NAMES[outcome.winner]})")
         self._notify_game_model_updated(offlineGameOver=True)

@@ -3,6 +3,7 @@ from cli_chess.modules.move_list import MoveListModel
 from cli_chess.modules.material_difference import MaterialDifferenceModel
 from cli_chess.modules.premove import PremoveModel
 from cli_chess.utils import EventManager, log
+from .game_metadata import GameMetadata
 from chess import Color, WHITE, COLOR_NAMES
 from random import getrandbits
 from abc import ABC, abstractmethod
@@ -10,7 +11,7 @@ from abc import ABC, abstractmethod
 
 class GameModelBase:
     def __init__(self, orientation: Color = WHITE, variant="standard", fen=""):
-        self.game_metadata = self._default_game_metadata()
+        self.game_metadata = GameMetadata()
 
         self.board_model = BoardModel(orientation, variant, fen)
         self.move_list_model = MoveListModel(self.board_model)
@@ -51,44 +52,44 @@ class GameModelBase:
         """Notify listeners that the model has updated"""
         self.e_game_model_updated.notify(**kwargs)
 
-    @staticmethod
-    def _default_game_metadata() -> dict:
-        """Returns the default structure for game metadata"""
-        return {
-            'gameId': "",
-            'variant': "",
-            'players': {
-                'white': {
-                    'title': "",
-                    'name': "",
-                    'rating': "",
-                    'rating_diff': "",
-                    'provisional': False,
-                },
-                'black': {
-                    'title': "",
-                    'name': "",
-                    'rating': "",
-                    'rating_diff': "",
-                    'provisional': False,
-                },
-            },
-            'clock': {
-                'units': "ms",
-                'white': {
-                    'time': 0,
-                    'increment': 0
-                },
-                'black': {
-                    'time': 0,
-                    'increment': 0
-                },
-            },
-            'state': {
-                'status': "",
-                'winner': "",
-            }
-        }
+    # @staticmethod
+    # def _default_game_metadata() -> dict:
+    #     """Returns the default structure for game metadata"""
+    #     return {
+    #         'gameId': "",
+    #         'variant': "",
+    #         'players': {
+    #             'white': {
+    #                 'title': "",
+    #                 'name': "",
+    #                 'rating': "",
+    #                 'rating_diff': "",
+    #                 'provisional': False,
+    #             },
+    #             'black': {
+    #                 'title': "",
+    #                 'name': "",
+    #                 'rating': "",
+    #                 'rating_diff': "",
+    #                 'provisional': False,
+    #             },
+    #         },
+    #         'clock': {
+    #             'units': "ms",
+    #             'white': {
+    #                 'time': 0,
+    #                 'increment': 0
+    #             },
+    #             'black': {
+    #                 'time': 0,
+    #                 'increment': 0
+    #             },
+    #         },
+    #         'state': {
+    #             'status': "",
+    #             'winner': "",
+    #         }
+    #     }
 
 
 class PlayableGameModelBase(GameModelBase, ABC):

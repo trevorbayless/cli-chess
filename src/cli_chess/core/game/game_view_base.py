@@ -23,8 +23,9 @@ class GameViewBase(ABC):
         self.material_diff_lower_container = presenter.material_diff_presenter.view_lower
         self.player_info_upper_container = presenter.player_info_presenter.view_upper
         self.player_info_lower_container = presenter.player_info_presenter.view_lower
-        self.clock_upper = presenter.clock_presenter.view_upper
-        self.clock_lower = presenter.clock_presenter.view_lower
+        # TODO: Revert this after testing
+        # self.clock_upper = presenter.clock_presenter.view_upper
+        # self.clock_lower = presenter.clock_presenter.view_lower
         self.alert = AlertContainer()
         self._container = self._create_container()
 

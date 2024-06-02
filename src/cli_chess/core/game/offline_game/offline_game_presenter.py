@@ -71,8 +71,8 @@ class OfflineGamePresenter(PlayableGamePresenterBase):
     def _parse_and_present_game_over(self) -> None:
         """Triages game over status for parsing and sending to the view for display"""
         if not self.is_game_in_progress():
-            status: Termination = self.model.game_metadata['state']['status']
-            winner_str: str = self.model.game_metadata['state']['winner']
+            status: Termination = self.model.game_metadata.game_status.status
+            winner_str: str = self.model.game_metadata.game_status.winner
 
             if winner_str:  # Handle win/loss output
                 self._display_win_loss_output(status, winner_str)
