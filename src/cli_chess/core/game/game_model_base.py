@@ -52,45 +52,6 @@ class GameModelBase:
         """Notify listeners that the model has updated"""
         self.e_game_model_updated.notify(**kwargs)
 
-    # @staticmethod
-    # def _default_game_metadata() -> dict:
-    #     """Returns the default structure for game metadata"""
-    #     return {
-    #         'gameId': "",
-    #         'variant': "",
-    #         'players': {
-    #             'white': {
-    #                 'title': "",
-    #                 'name': "",
-    #                 'rating': "",
-    #                 'rating_diff': "",
-    #                 'provisional': False,
-    #             },
-    #             'black': {
-    #                 'title': "",
-    #                 'name': "",
-    #                 'rating': "",
-    #                 'rating_diff': "",
-    #                 'provisional': False,
-    #             },
-    #         },
-    #         'clock': {
-    #             'units': "ms",
-    #             'white': {
-    #                 'time': 0,
-    #                 'increment': 0
-    #             },
-    #             'black': {
-    #                 'time': 0,
-    #                 'increment': 0
-    #             },
-    #         },
-    #         'state': {
-    #             'status': "",
-    #             'winner': "",
-    #         }
-    #     }
-
 
 class PlayableGameModelBase(GameModelBase, ABC):
     def __init__(self, play_as_color: str, variant="standard", fen=""):
