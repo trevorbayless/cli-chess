@@ -1,8 +1,8 @@
-from cli_chess.core.game import GameModelBase
+from cli_chess.core.game import GameModelBase, GameMetadata
 from cli_chess.menus.tv_channel_menu import TVChannelMenuOptions
 from cli_chess.utils.event import Event
 from cli_chess.utils.logging import log
-from chess import COLOR_NAMES
+from chess import COLOR_NAMES, Color, WHITE, BLACK
 from berserk.exceptions import ResponseError
 from time import sleep
 import threading
@@ -15,15 +15,6 @@ class WatchTVModel(GameModelBase):
         self._tv_stream = StreamTVChannel(self.channel)
         self._tv_stream.e_tv_stream_event.add_listener(self.stream_event_received)
 
-    def _default_game_metadata(self) -> dict:
-        """Returns the default structure for game metadata"""
-        game_metadata = super()._default_game_metadata()
-        game_metadata.update({
-            'rated': None,
-            'speed': None,
-        })
-        return game_metadata
-
     def start_watching(self):
         """Notify the TV stream thread to start"""
         self._tv_stream.start()
@@ -33,34 +24,39 @@ class WatchTVModel(GameModelBase):
         if self._tv_stream.is_alive():
             self._tv_stream.stop_watching()
 
-    def _save_game_metadata(self, **kwargs) -> None:
+    def _update_game_metadata(self, **kwargs) -> None:
         """Parses and saves the data of the game being played"""
         try:
             if 'tv_descriptionEvent' in kwargs:
                 data = kwargs['tv_descriptionEvent']
                 if 'tv_startGameEvent' in kwargs:
-                    self.game_metadata = self._default_game_metadata()
+                    self.game_metadata = GameMetadata()
 
-                self.game_metadata['gameId'] = data.get('id')
-                self.game_metadata['rated'] = data.get('rated')
-                self.game_metadata['variant'] = data.get('variant')
-                self.game_metadata['speed'] = data.get('speed')
-                self.game_metadata['state']['status'] = data.get('status')
-                self.game_metadata['state']['winner'] = data.get('winner')  # Not included on draws or abort
+                self.game_metadata.game_id = data.get('id')
+                self.game_metadata.rated = data.get('rated')
+                self.game_metadata.variant = data.get('variant')
+                self.game_metadata.speed = data.get('speed')
+                self.game_metadata.game_status.status = data.get('status')
+                self.game_metadata.game_status.winner = data.get('winner')  # Not included on draws or abort
 
                 for color in COLOR_NAMES:
-                    if data.get('players', {}).get(color, {}).get('user'):  # non-ai player data
-                        self.game_metadata['players'][color] = data.get('players', {}).get(color, {}).get('user', "")
-                        self.game_metadata['players'][color]['rating'] = data.get('players', {}).get(color, {}).get('rating', "")
-                        self.game_metadata['players'][color]['rating_diff'] = data.get('players', {}).get(color, {}).get('ratingDiff', "")
-                    elif data.get('players', {}).get(color, {}).get('aiLevel'):  # ai data
-                        self.game_metadata['players'][color]['name'] = f"Stockfish level {data.get('players', {}).get(color, {}).get('aiLevel', '')}"
+                    color_as_bool = Color(COLOR_NAMES.index(color))
+                    side_data = data.get('players', {}).get(color, {})
+                    player_data = side_data.get('user')
+                    ai_level = player_data.get('aiLevel')
+                    if side_data and player_data:  # non-ai player data
+                        self.game_metadata.players[color_as_bool].name = player_data.get('name', "")
+                        self.game_metadata.players[color_as_bool].rating = side_data.get('rating', "")
+                        self.game_metadata.players[color_as_bool].rating_diff = side_data.get('ratingDiff', "")
+                    elif ai_level:  # ai data
+                        self.game_metadata.players[color_as_bool].name = f"Stockfish level {ai_level}"
 
             if 'tv_coreGameEvent' in kwargs:
                 data = kwargs['tv_coreGameEvent']
-                self.game_metadata['clock']['units'] = "sec"
-                self.game_metadata['clock']['white']['time'] = data.get('wc')
-                self.game_metadata['clock']['black']['time'] = data.get('bc')
+                self.game_metadata.clocks[WHITE].units = "sec"
+                self.game_metadata.clocks[BLACK].units = "sec"
+                self.game_metadata.clocks[WHITE].time = data.get('wc')
+                self.game_metadata.clocks[BLACK].time = data.get('bc')
 
             self.e_game_model_updated.notify()
         except Exception as e:
@@ -83,7 +79,7 @@ class WatchTVModel(GameModelBase):
                 black_rating = int(event.get('players', {}).get('black', {}).get('rating') or 0)
                 orientation = True if ((white_rating >= black_rating) or self.channel.key == "racingKings") else False
 
-                self._save_game_metadata(tv_descriptionEvent=event, tv_startGameEvent=True)
+                self._update_game_metadata(tv_descriptionEvent=event, tv_startGameEvent=True)
                 last_move = event.get('lastMove', "")
                 if variant == "crazyhouse" and len(last_move) == 4 and last_move[:2] == last_move[2:]:
                     # NOTE: This is a dirty fix. When streaming a crazyhouse game from lichess, if the
@@ -101,13 +97,13 @@ class WatchTVModel(GameModelBase):
                 # NOTE: the `lm` field that lichess sends is not valid UCI. It should only be used
                 #       for highlighting move squares (invalid castle notation, missing promotion piece, etc).
                 event = kwargs['coreGameEvent']
-                self._save_game_metadata(tv_coreGameEvent=event)
+                self._update_game_metadata(tv_coreGameEvent=event)
                 self.board_model.set_board_position(event.get('fen'), uci_last_move=event.get('lm'))
                 self.e_game_model_updated.notify(tvPositionUpdated=True)
 
             if 'endGameEvent' in kwargs:
                 event = kwargs['endGameEvent']
-                self._save_game_metadata(tv_descriptionEvent=event)
+                self._update_game_metadata(tv_descriptionEvent=event)
                 self.e_game_model_updated.notify(onlineGameOver=True)
 
             if 'tvError' in kwargs:
