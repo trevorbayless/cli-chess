@@ -13,7 +13,7 @@ class OfflineGameModel(PlayableGameModelBase):
 
         self.engine_model = EngineModel(self.board_model, game_parameters)
         self.game_in_progress = True
-        self._save_game_metadata(game_parameters=game_parameters)
+        self._update_game_metadata(game_parameters=game_parameters)
 
     def update(self, **kwargs) -> None:
         """Called automatically as part of an event listener. This method
@@ -74,7 +74,7 @@ class OfflineGameModel(PlayableGameModelBase):
             log.warning("Attempted to resign a game that's not in progress")
             raise Warning("Game has already ended")
 
-    def _save_game_metadata(self, **kwargs) -> None:
+    def _update_game_metadata(self, **kwargs) -> None:
         """Parses and saves the data of the game being played"""
         try:
             if 'game_parameters' in kwargs:

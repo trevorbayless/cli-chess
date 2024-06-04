@@ -12,7 +12,7 @@ class OnlineGameModel(PlayableGameModelBase):
     """
     def __init__(self, game_parameters: dict, is_vs_ai: bool):
         super().__init__(play_as_color=game_parameters[GameOption.COLOR], variant=game_parameters[GameOption.VARIANT], fen=None)
-        self._save_game_metadata(game_parameters=game_parameters)
+        self._update_game_metadata(game_parameters=game_parameters)
 
         self.game_state_dispatcher = Optional[GameStateDispatcher]
         self.playing_game_id = None
@@ -78,12 +78,12 @@ class OnlineGameModel(PlayableGameModelBase):
             # TODO: There has to be a better way to ensure this is the right game...
             #  add some further specific clauses like color, time control, date, etc?
             if not self.game_in_progress and not event.get('hasMoved') and event.get('compat', {}).get('board'):
-                self._save_game_metadata(iem_gameStart=event)
+                self._update_game_metadata(iem_gameStart=event)
                 self._start_game(event.get('gameId'))
 
         elif 'gameFinish' in kwargs:
             event = kwargs['gameFinish'].get('game')
-            self._save_game_metadata(iem_gameFinish=event)
+            self._update_game_metadata(iem_gameFinish=event)
             if self.game_in_progress and self.playing_game_id == event.get('gameId'):
                 self._game_end()
 
@@ -91,7 +91,7 @@ class OnlineGameModel(PlayableGameModelBase):
         """Handles received from the GameStateDispatcher"""
         if 'gameFull' in kwargs:
             event = kwargs['gameFull']
-            self._save_game_metadata(gsd_gameFull=event)
+            self._update_game_metadata(gsd_gameFull=event)
             self.board_model.reinitialize_board(variant=self.game_metadata['variant'],
                                                 orientation=(self.my_color if self.board_model.get_variant_name() != "racingkings" else WHITE),
                                                 fen=event.get('initialFen', ""))
@@ -99,7 +99,7 @@ class OnlineGameModel(PlayableGameModelBase):
 
         elif 'gameState' in kwargs:
             event = kwargs['gameState']
-            self._save_game_metadata(gsd_gameState=event)
+            self._update_game_metadata(gsd_gameState=event)
 
             # TODO: Take some time measurements to see how much of an impact this approach is
             # Resetting and replaying the moves guarantees the game between lichess
@@ -123,12 +123,12 @@ class OnlineGameModel(PlayableGameModelBase):
 
         elif 'chatLine' in kwargs:
             event = kwargs['chatLine']
-            self._save_game_metadata(gsd_chatLine=event)
+            self._update_game_metadata(gsd_chatLine=event)
 
         elif 'opponentGone' in kwargs:
             # TODO: Show alert to user
             event = kwargs['opponentGone']
-            self._save_game_metadata(gsd_opponentGone=event)
+            self._update_game_metadata(gsd_opponentGone=event)
 
     def make_move(self, move: str):
         """Sends the move to the board model for a validity check. If valid this
@@ -214,7 +214,7 @@ class OnlineGameModel(PlayableGameModelBase):
             else:
                 raise Warning("Game has already ended")
 
-    def _save_game_metadata(self, **kwargs) -> None:
+    def _update_game_metadata(self, **kwargs) -> None:
         """Parses and saves the data of the game being played."""
         try:
             if 'game_parameters' in kwargs:  # This is the data that came from the menu selections
@@ -233,7 +233,7 @@ class OnlineGameModel(PlayableGameModelBase):
 
             elif 'iem_gameStart' in kwargs:
                 # Reset game metadata
-                self.game_metadata = self._default_game_metadata()
+                # self.game_metadata = self._default_game_metadata()
 
                 data = kwargs['iem_gameStart']
                 self.game_metadata['gameId'] = data.get('gameId')
@@ -274,17 +274,6 @@ class OnlineGameModel(PlayableGameModelBase):
         except Exception as e:
             log.exception(f"Error saving online game metadata: {e}")
             raise
-
-    def _default_game_metadata(self) -> dict:
-        """Returns the default structure for game metadata"""
-        game_metadata = super()._default_game_metadata()
-        game_metadata.update({
-            'my_color_str': "",
-            'ai_level': None,
-            'rated': False,
-            'speed': None,
-        })
-        return game_metadata
 
     def _report_game_over(self, status: str, winner: str) -> None:
         """Saves game information and notifies listeners that the game has ended.
