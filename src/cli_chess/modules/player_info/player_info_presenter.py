@@ -1,10 +1,10 @@
 from __future__ import annotations
 from cli_chess.modules.player_info import PlayerInfoView
-from cli_chess.core.game.game_metadata import Player
-from chess import Color, COLOR_NAMES
+from chess import Color
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from cli_chess.core.game import GameModelBase
+    from cli_chess.core.game import Player
 
 
 class PlayerInfoPresenter:

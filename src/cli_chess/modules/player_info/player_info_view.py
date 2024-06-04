@@ -1,11 +1,11 @@
 from __future__ import annotations
-from cli_chess.core.game.game_metadata import Player
 from prompt_toolkit.layout import Container, ConditionalContainer, VSplit, D, Window, FormattedTextControl, WindowAlign
 from prompt_toolkit.widgets import Box
 from prompt_toolkit.filters import Condition
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from cli_chess.modules.player_info import PlayerInfoPresenter
+    from cli_chess.core.game import Player
 
 
 class PlayerInfoView:
