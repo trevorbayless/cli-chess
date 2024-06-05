@@ -1,8 +1,8 @@
-from cli_chess.core.game import GameModelBase, GameMetadata
+from cli_chess.core.game import GameModelBase
 from cli_chess.menus.tv_channel_menu import TVChannelMenuOptions
 from cli_chess.utils.event import Event
 from cli_chess.utils.logging import log
-from chess import COLOR_NAMES, Color, WHITE, BLACK
+from chess import COLOR_NAMES, COLORS, Color, WHITE, BLACK
 from berserk.exceptions import ResponseError
 from time import sleep
 import threading
@@ -30,7 +30,7 @@ class WatchTVModel(GameModelBase):
             if 'tv_descriptionEvent' in kwargs:
                 data = kwargs['tv_descriptionEvent']
                 if 'tv_startGameEvent' in kwargs:
-                    self.game_metadata = GameMetadata()
+                    self.game_metadata.reset()
 
                 self.game_metadata.game_id = data.get('id')
                 self.game_metadata.rated = data.get('rated')
@@ -43,20 +43,21 @@ class WatchTVModel(GameModelBase):
                     color_as_bool = Color(COLOR_NAMES.index(color))
                     side_data = data.get('players', {}).get(color, {})
                     player_data = side_data.get('user')
-                    ai_level = player_data.get('aiLevel')
-                    if side_data and player_data:  # non-ai player data
-                        self.game_metadata.players[color_as_bool].name = player_data.get('name', "")
-                        self.game_metadata.players[color_as_bool].rating = side_data.get('rating', "")
+                    ai_level = side_data.get('aiLevel')
+                    if side_data and player_data:
+                        self.game_metadata.players[color_as_bool].title = player_data.get('title')
+                        self.game_metadata.players[color_as_bool].name = player_data.get('name', "?")
+                        self.game_metadata.players[color_as_bool].rating = side_data.get('rating', "?")
+                        self.game_metadata.players[color_as_bool].is_provisional_rating = side_data.get('provisional', False)
                         self.game_metadata.players[color_as_bool].rating_diff = side_data.get('ratingDiff', "")
-                    elif ai_level:  # ai data
+                    elif ai_level:
                         self.game_metadata.players[color_as_bool].name = f"Stockfish level {ai_level}"
 
             if 'tv_coreGameEvent' in kwargs:
                 data = kwargs['tv_coreGameEvent']
-                self.game_metadata.clocks[WHITE].units = "sec"
-                self.game_metadata.clocks[BLACK].units = "sec"
-                self.game_metadata.clocks[WHITE].time = data.get('wc')
-                self.game_metadata.clocks[BLACK].time = data.get('bc')
+                for color in COLORS:
+                    self.game_metadata.clocks[color].units = "sec"
+                    self.game_metadata.clocks[color].time = data.get('wc' if color == WHITE else 'bc')
 
             self.e_game_model_updated.notify()
         except Exception as e:
@@ -77,7 +78,7 @@ class WatchTVModel(GameModelBase):
                 variant = event.get('variant', {}).get('key')
                 white_rating = int(event.get('players', {}).get('white', {}).get('rating') or 0)
                 black_rating = int(event.get('players', {}).get('black', {}).get('rating') or 0)
-                orientation = True if ((white_rating >= black_rating) or self.channel.key == "racingKings") else False
+                orientation = WHITE if ((white_rating >= black_rating) or self.channel.key == "racingKings") else BLACK
 
                 self._update_game_metadata(tv_descriptionEvent=event, tv_startGameEvent=True)
                 last_move = event.get('lastMove', "")

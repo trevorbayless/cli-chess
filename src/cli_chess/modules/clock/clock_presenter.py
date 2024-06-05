@@ -1,6 +1,6 @@
 from __future__ import annotations
 from cli_chess.modules.clock import ClockView
-from chess import Color, COLOR_NAMES
+from chess import Color
 from datetime import datetime, timezone
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -26,17 +26,16 @@ class ClockPresenter:
 
     def get_clock_display(self, color: Color) -> str:
         """Returns the formatted clock display for the color passed in"""
-        clock_data = self.model.game_metadata.get('clock')
-        units = clock_data.get('units')
-        time = clock_data.get(COLOR_NAMES[color]).get('time')
+        clock_data = self.model.game_metadata.clocks[color]
+        time = clock_data.time
 
         if not time:
             return "--:--"
 
         if not isinstance(time, datetime):
-            if units == "ms":
+            if clock_data.units == "ms":
                 time = datetime.fromtimestamp(time / 1000, timezone.utc)
-            elif units == "sec":
+            elif clock_data.units == "sec":
                 time = datetime.fromtimestamp(time, timezone.utc)
 
         return time.strftime("%M:%S") if not time.hour else time.strftime("%H:%M:%S")

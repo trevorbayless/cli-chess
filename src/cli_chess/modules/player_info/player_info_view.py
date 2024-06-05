@@ -5,12 +5,16 @@ from prompt_toolkit.filters import Condition
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from cli_chess.modules.player_info import PlayerInfoPresenter
-    from cli_chess.core.game import Player
+    from cli_chess.core.game import PlayerMetadata
 
 
 class PlayerInfoView:
-    def __init__(self, presenter: PlayerInfoPresenter, player_info: Player):
+    def __init__(self, presenter: PlayerInfoPresenter, player_info: PlayerMetadata):
         self.presenter = presenter
+        self.player_title = ""
+        self.player_name = ""
+        self.player_rating = ""
+        self.rating_diff = ""
         self.update(player_info)
 
         self._player_title_control = FormattedTextControl(text=lambda: self.player_title, style="class:player-info.title")
@@ -31,7 +35,7 @@ class PlayerInfoView:
 
         ], width=D(min=1), height=D(max=1), window_too_small=ConditionalContainer(Window(), False))
 
-    def update(self, player_info: Player) -> None:
+    def update(self, player_info: PlayerMetadata) -> None:
         """Updates the player info using the data passed in"""
         self._set_player_title(player_info.title)
         self._set_player_name(player_info.name)

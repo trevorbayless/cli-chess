@@ -20,8 +20,7 @@ class GamePresenterBase(ABC):
         self.move_list_presenter = MoveListPresenter(model.move_list_model)
         self.material_diff_presenter = MaterialDifferencePresenter(model.material_diff_model)
         self.player_info_presenter = PlayerInfoPresenter(model)
-        # TODO: Revert this after testing
-        # self.clock_presenter = ClockPresenter(model)
+        self.clock_presenter = ClockPresenter(model)
         self.view = self._get_view()
 
         self.model.e_game_model_updated.add_listener(self.update)

@@ -4,7 +4,7 @@ from chess import Color
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from cli_chess.core.game import GameModelBase
-    from cli_chess.core.game import Player
+    from cli_chess.core.game import PlayerMetadata
 
 
 class PlayerInfoPresenter:
@@ -24,6 +24,6 @@ class PlayerInfoPresenter:
             self.view_upper.update(self.get_player_info(not orientation))
             self.view_lower.update(self.get_player_info(orientation))
 
-    def get_player_info(self, color: Color) -> Player:
+    def get_player_info(self, color: Color) -> PlayerMetadata:
         """Returns the player metadata for the passed in color"""
         return self.model.game_metadata.players[color]

@@ -20,13 +20,13 @@ class WatchTVView(GameViewBase):
                 VSplit([
                     self.board_output_container,
                     HSplit([
-                        #self.clock_upper,
+                        self.clock_upper,
                         self.player_info_upper_container,
                         self.material_diff_upper_container,
                         Box(self.move_list_placeholder, height=D(min=1, max=4)),
                         self.material_diff_lower_container,
                         self.player_info_lower_container,
-                        #self.clock_lower
+                        self.clock_lower
                     ]),
                 ]),
                 self.alert

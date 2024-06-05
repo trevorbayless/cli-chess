@@ -79,7 +79,7 @@ class OfflineGameModel(PlayableGameModelBase):
         try:
             if 'game_parameters' in kwargs:
                 data = kwargs['game_parameters']
-                self.game_metadata.my_color = COLOR_NAMES[self.my_color]
+                self.game_metadata.my_color = self.my_color
 
                 self.game_metadata.variant = data[GameOption.VARIANT]
                 self.game_metadata.players[self.my_color].name = player_info_config.get_value(player_info_config.Keys.OFFLINE_PLAYER_NAME)  # noqa: E501

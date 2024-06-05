@@ -1,36 +1,41 @@
 from dataclasses import dataclass
+from chess import Color
+from typing import Optional
 
 
 @dataclass
-class Player:
-    title: str = None
-    name: str = None
-    rating: str = None
-    ai_level: str = None  # only used online
-    rating_diff: int = None
-    is_provisional_rating: bool = False  # only used online
+class PlayerMetadata:
+    title: Optional[str] = None
+    name: Optional[str] = None
+    rating: Optional[str] = None
+    rating_diff: Optional[int] = None
+    is_provisional_rating: bool = False
+    ai_level: Optional[str] = None
 
 
 @dataclass
-class Clock:
+class ClockMetadata:
     units: str = "ms"
-    time: int = 0
-    increment: int = 0
+    time: Optional[int] = None
+    increment: Optional[int] = None
 
 
 @dataclass
-class GameStatus:
-    status: str = None
-    winner: str = None
+class GameStatusMetadata:
+    status: Optional[str] = None
+    winner: Optional[str] = None
 
 
-@dataclass
 class GameMetadata:
-    players = [Player(), Player()]
-    clocks = [Clock(), Clock()]
-    game_status = GameStatus()
-    game_id: str = None
-    variant: str = None
-    my_color: str = None  # TODO: Find a better solution
-    rated: bool = False  # only used online
-    speed: str = None  # only used online
+    def __init__(self):
+        self.players = [PlayerMetadata(), PlayerMetadata()]
+        self.clocks = [ClockMetadata(), ClockMetadata()]
+        self.game_status = GameStatusMetadata()
+        self.game_id: Optional[str] = None
+        self.variant: Optional[str] = None
+        self.my_color: Optional[Color] = None
+        self.rated: bool = False
+        self.speed: Optional[str] = None
+
+    def reset(self):
+        self.__init__()
