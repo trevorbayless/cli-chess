@@ -11,7 +11,7 @@ class PremovePresenter:
         self.view = PremoveView(self)
         self.model.e_premove_model_updated.add_listener(self.update)
 
-    def update(self, **kwargs) -> None:
+    def update(self, *args, **kwargs) -> None:
         """Updates the view based on specific model updates"""
         self.view.update(self.model.premove)
 

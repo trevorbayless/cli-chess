@@ -17,12 +17,11 @@ class ClockPresenter:
 
         self.model.e_game_model_updated.add_listener(self.update)
 
-    def update(self, **kwargs) -> None:
+    def update(self, *args, **kwargs) -> None:
         """Updates the view based on specific model updates"""
-        if 'boardOrientationChanged' in kwargs or 'successfulMoveMade' in kwargs or 'onlineGameOver' in kwargs or 'tvPositionUpdated' in kwargs:
-            orientation = self.model.board_model.get_board_orientation()
-            self.view_upper.update(self.get_clock_display(not orientation))
-            self.view_lower.update(self.get_clock_display(orientation))
+        orientation = self.model.board_model.get_board_orientation()
+        self.view_upper.update(self.get_clock_display(not orientation))
+        self.view_lower.update(self.get_clock_display(orientation))
 
     def get_clock_display(self, color: Color) -> str:
         """Returns the formatted clock display for the color passed in"""

@@ -331,16 +331,14 @@ def test_is_white_orientation():
 
 def test_set_board_position(model: BoardModel, board_updated_listener: Mock):
     # Test with all valid parameters
-    model.set_board_position(fen="8/8/8/8/6K1/8/8/4Q1k1 b - - 21 61", orientation=chess.BLACK, uci_last_move="e2e1")
+    model.set_board_position(fen="8/8/8/8/6K1/8/8/4Q1k1 b - - 21 61", uci_last_move="e2e1")
     assert model.board.fen() == "8/8/8/8/6K1/8/8/4Q1k1 b - - 21 61"
-    assert model.get_board_orientation() == chess.BLACK
     assert model.get_highlight_move() == chess.Move.from_uci("e2e1")
 
     # Test without orientation and uci_last_move forced highlight
     board_updated_listener.reset_mock()
     model.set_board_position(fen="8/4p3/pP2p2K/1N1qnp2/4k1P1/7P/5PR1/3BB3 w - - 0 1")
     assert model.board.fen() == "8/4p3/pP2p2K/1N1qnp2/4k1P1/7P/5PR1/3BB3 w - - 0 1"
-    assert model.get_board_orientation() == chess.BLACK
     board_updated_listener.assert_called()
     assert model.get_highlight_move() == chess.Move.null()
 

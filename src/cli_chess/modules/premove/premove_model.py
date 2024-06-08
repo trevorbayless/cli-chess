@@ -1,5 +1,5 @@
 from cli_chess.modules.board import BoardModel
-from cli_chess.utils import EventManager, log
+from cli_chess.utils import EventManager, EventTopics, log
 from chess import Move, InvalidMoveError, IllegalMoveError, AmbiguousMoveError
 
 
@@ -12,9 +12,9 @@ class PremoveModel:
         self._event_manager = EventManager()
         self.e_premove_model_updated = self._event_manager.create_event()
 
-    def update(self, **kwargs) -> None: # noqa
+    def update(self, *args, **kwargs) -> None: # noqa
         """Updates the premove model based on board updates"""
-        if kwargs.get('isGameOver', False):
+        if EventTopics.GAME_END in args:
             self.clear_premove()
 
     def pop_premove(self) -> str:

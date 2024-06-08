@@ -1,6 +1,6 @@
 from cli_chess.core.game import GameModelBase
 from cli_chess.menus.tv_channel_menu import TVChannelMenuOptions
-from cli_chess.utils.event import Event
+from cli_chess.utils.event import Event, EventTopics
 from cli_chess.utils.logging import log
 from chess import COLOR_NAMES, COLORS, Color, WHITE, BLACK
 from berserk.exceptions import ResponseError
@@ -59,7 +59,7 @@ class WatchTVModel(GameModelBase):
                     self.game_metadata.clocks[color].units = "sec"
                     self.game_metadata.clocks[color].time = data.get('wc' if color == WHITE else 'bc')
 
-            self.e_game_model_updated.notify()
+            self._notify_game_model_updated()
         except Exception as e:
             log.error(f"Error saving game metadata: {e}")
             raise
@@ -68,10 +68,10 @@ class WatchTVModel(GameModelBase):
         """An event was received from the TV thread. Raises exception on invalid data"""
         try:
             if 'searchingForGame' in kwargs:
-                self.e_game_model_updated.notify(searchingForGame=True)
+                self._notify_game_model_updated(EventTopics.GAME_SEARCH)
 
             if 'tvGameFound' in kwargs:
-                self.e_game_model_updated.notify(tvGameFound=True)
+                self._notify_game_model_updated(EventTopics.GAME_START)
 
             if 'startGameEvent' in kwargs:
                 event = kwargs['startGameEvent']
@@ -92,7 +92,6 @@ class WatchTVModel(GameModelBase):
                     last_move = "k@" + last_move[2:]
 
                 self.board_model.reinitialize_board(variant, orientation, event.get('fen'), last_move)
-                self.e_game_model_updated.notify(tvPositionUpdated=True)
 
             if 'coreGameEvent' in kwargs:
                 # NOTE: the `lm` field that lichess sends is not valid UCI. It should only be used
@@ -100,15 +99,14 @@ class WatchTVModel(GameModelBase):
                 event = kwargs['coreGameEvent']
                 self._update_game_metadata(tv_coreGameEvent=event)
                 self.board_model.set_board_position(event.get('fen'), uci_last_move=event.get('lm'))
-                self.e_game_model_updated.notify(tvPositionUpdated=True)
 
             if 'endGameEvent' in kwargs:
                 event = kwargs['endGameEvent']
                 self._update_game_metadata(tv_descriptionEvent=event)
-                self.e_game_model_updated.notify(onlineGameOver=True)
+                self._notify_game_model_updated(EventTopics.GAME_END)  # TODO: notification happens right after update game, which already notifies
 
             if 'tvError' in kwargs:
-                self.e_game_model_updated.notify(tvError=True, msg=kwargs.get('msg'))
+                self._notify_game_model_updated(EventTopics.ERROR, msg=kwargs.get('msg'))
         except Exception as e:
             log.error(f"Error parsing stream data: {e}")
             raise

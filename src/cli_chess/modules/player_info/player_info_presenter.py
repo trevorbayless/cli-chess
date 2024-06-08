@@ -1,5 +1,6 @@
 from __future__ import annotations
 from cli_chess.modules.player_info import PlayerInfoView
+from cli_chess.utils import EventTopics
 from chess import Color
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -17,9 +18,9 @@ class PlayerInfoPresenter:
 
         self.model.e_game_model_updated.add_listener(self.update)
 
-    def update(self, **kwargs) -> None:
+    def update(self, *args, **kwargs) -> None:
         """Updates the view based on specific model updates"""
-        if 'boardOrientationChanged' in kwargs or 'onlineGameOver' in kwargs:
+        if EventTopics.BOARD_ORIENTATION_CHANGED in args or EventTopics.GAME_END in kwargs:
             orientation = self.model.board_model.get_board_orientation()
             self.view_upper.update(self.get_player_info(not orientation))
             self.view_lower.update(self.get_player_info(orientation))

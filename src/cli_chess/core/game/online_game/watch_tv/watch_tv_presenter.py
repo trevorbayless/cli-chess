@@ -2,7 +2,7 @@ from cli_chess.core.game import GamePresenterBase
 from cli_chess.core.game.online_game.watch_tv import WatchTVModel, WatchTVView
 from cli_chess.menus.tv_channel_menu import TVChannelMenuOptions
 from cli_chess.utils.ui_common import change_views
-from cli_chess.utils import AlertType
+from cli_chess.utils import AlertType, EventTopics
 
 
 def start_watching_tv(channel: TVChannelMenuOptions) -> None:
@@ -21,14 +21,14 @@ class WatchTVPresenter(GamePresenterBase):
         """Sets and returns the view to use"""
         return WatchTVView(self)
 
-    def update(self, **kwargs) -> None:
+    def update(self, *args, **kwargs) -> None:
         """Update method called on game model updates. Overrides base."""
-        super().update(**kwargs)
-        if 'searchingForGame' in kwargs:
+        super().update(*args, **kwargs)
+        if EventTopics.GAME_SEARCH in args:
             self.view.alert.show_alert("Searching for TV game...", AlertType.NEUTRAL)
-        if 'tvGameFound' in kwargs:
+        if EventTopics.GAME_START in args:
             self.view.alert.clear_alert()
-        if 'tvError' in kwargs:
+        if EventTopics.ERROR in args and 'msg' in kwargs:
             self.view.alert.show_alert(kwargs.get('msg'), AlertType.ERROR)
 
     def exit(self) -> None:

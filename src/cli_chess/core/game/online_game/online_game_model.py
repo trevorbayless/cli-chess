@@ -1,7 +1,7 @@
 from cli_chess.core.game import PlayableGameModelBase
 from cli_chess.core.game.game_options import GameOption
 from cli_chess.core.api import GameStateDispatcher
-from cli_chess.utils import log, threaded, RequestSuccessfullySent
+from cli_chess.utils import log, threaded, RequestSuccessfullySent, EventTopics
 from chess import COLORS, COLOR_NAMES, WHITE, BLACK, Color
 from typing import Optional
 
@@ -277,7 +277,7 @@ class OnlineGameModel(PlayableGameModelBase):
         self._game_end()
         self.game_metadata.game_status.status = status  # status list can be found in lila status.ts
         self.game_metadata.game_status.winner = winner
-        self._notify_game_model_updated(onlineGameOver=True)
+        self._notify_game_model_updated(EventTopics.GAME_END)
 
     def cleanup(self) -> None:
         """Cleans up after this model by clearing event listeners and subscriptions.

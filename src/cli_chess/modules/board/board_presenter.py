@@ -18,7 +18,7 @@ class BoardPresenter:
         self.model.e_board_model_updated.add_listener(self.update)
         game_config.e_game_config_updated.add_listener(self._update_cached_config_values)
 
-    def update(self, **kwargs) -> None: # noqa
+    def update(self, *args, **kwargs) -> None: # noqa
         """Updates the board output"""
         # TODO: Update this so the view utilizes a lambda pointing to the presenter?
         #       This would allow for this update function to be removed
@@ -129,7 +129,8 @@ class BoardPresenter:
 
         return piece_str
 
-    def get_piece_display_color(self, piece: chess.Piece) -> str:
+    @staticmethod
+    def get_piece_display_color(piece: chess.Piece) -> str:
         """Returns a string with the color to display the
            piece based on configuration settings
         """

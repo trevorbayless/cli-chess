@@ -29,13 +29,6 @@ class OfflineGamePresenter(PlayableGamePresenterBase):
         """Sets and returns the view to use"""
         return OfflineGameView(self)
 
-    def update(self, **kwargs) -> None:
-        """Update method called on game model updates. Overrides base."""
-        super().update(**kwargs)
-        if "offlineGameOver" in kwargs:
-            self._parse_and_present_game_over()
-            self.premove_presenter.clear_premove()
-
     def make_move(self, move: str) -> None:
         """Make the users move on the board"""
         try:

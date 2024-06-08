@@ -14,7 +14,7 @@ class MoveListModel:
         self.e_move_list_model_updated = self._event_manager.create_event()
         self.update()
 
-    def update(self, **kwargs) -> None: # noqa
+    def update(self, *args, **kwargs) -> None: # noqa
         """Updates the move list data using the latest move stack"""
         self.move_list_data.clear()
 

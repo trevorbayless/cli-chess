@@ -6,7 +6,7 @@ from cli_chess.modules.material_difference import MaterialDifferencePresenter
 from cli_chess.modules.player_info import PlayerInfoPresenter
 from cli_chess.modules.clock import ClockPresenter
 from cli_chess.modules.premove import PremovePresenter
-from cli_chess.utils import log, AlertType, RequestSuccessfullySent
+from cli_chess.utils import log, AlertType, RequestSuccessfullySent, EventTopics
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -32,7 +32,7 @@ class GamePresenterBase(ABC):
         pass
 
     @abstractmethod
-    def update(self, **kwargs) -> None:
+    def update(self, *args, **kwargs) -> None:
         """Listens to game model updates when notified.
            See model for specific kwargs that are currently being sent.
         """
@@ -67,10 +67,13 @@ class PlayableGamePresenterBase(GamePresenterBase, ABC):
         """
         pass
 
-    def update(self, **kwargs) -> None:
+    def update(self, *args, **kwargs) -> None:
         """Update method called on game model updates. Overrides base."""
-        if "successfulMoveMade" in kwargs:
+        if EventTopics.MOVE_MADE in args:
             self.view.alert.clear_alert()
+        if EventTopics.GAME_END in args:
+            self._parse_and_present_game_over()
+            self.premove_presenter.clear_premove()
 
     def user_input_received(self, inpt: str) -> None:
         """Respond to the users input. This input can either be the

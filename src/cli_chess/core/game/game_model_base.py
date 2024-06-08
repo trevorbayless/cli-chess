@@ -26,13 +26,12 @@ class GameModelBase:
 
         log.debug(f"Created {type(self).__name__} (id={id(self)})")
 
-    def update(self, **kwargs) -> None:
+    def update(self, *args, **kwargs) -> None:
         """Called automatically as part of an event listener. This method
            listens to subscribed model update events and if deemed necessary
            triages and notifies listeners of the event.
         """
-        if 'boardOrientationChanged' in kwargs or 'successfulMoveMade' in kwargs:
-            self._notify_game_model_updated(**kwargs)
+        self._notify_game_model_updated(*args, **kwargs)
 
     def cleanup(self) -> None:
         """Cleans up after this model by clearing all associated models event listeners.
@@ -48,9 +47,9 @@ class GameModelBase:
             except AttributeError:
                 log.error(f"{type(model).__name__} does not have a cleanup method")
 
-    def _notify_game_model_updated(self, **kwargs) -> None:
+    def _notify_game_model_updated(self, *args, **kwargs) -> None:
         """Notify listeners that the model has updated"""
-        self.e_game_model_updated.notify(**kwargs)
+        self.e_game_model_updated.notify(*args, **kwargs)
 
 
 class PlayableGameModelBase(GameModelBase, ABC):

@@ -1,7 +1,7 @@
 from cli_chess.core.game import PlayableGameModelBase
 from cli_chess.modules.engine import EngineModel
 from cli_chess.core.game.game_options import GameOption
-from cli_chess.utils.logging import log
+from cli_chess.utils import EventTopics, log
 from cli_chess.utils.config import player_info_config
 from chess import COLOR_NAMES
 
@@ -15,13 +15,13 @@ class OfflineGameModel(PlayableGameModelBase):
         self.game_in_progress = True
         self._update_game_metadata(game_parameters=game_parameters)
 
-    def update(self, **kwargs) -> None:
+    def update(self, *args, **kwargs) -> None:
         """Called automatically as part of an event listener. This method
            listens to subscribed model update events and if deemed necessary
            triages and notifies listeners of the event.
         """
-        super().update(**kwargs)
-        if kwargs.get('isGameOver', False):
+        super().update(*args, **kwargs)
+        if EventTopics.GAME_END in args:
             self._report_game_over()
 
     def make_move(self, move: str):
@@ -103,4 +103,4 @@ class OfflineGameModel(PlayableGameModelBase):
         self.game_metadata.game_status.winner = COLOR_NAMES[outcome.winner]
 
         log.info(f"Game over (status={outcome.termination} winner={COLOR_NAMES[outcome.winner]})")
-        self._notify_game_model_updated(offlineGameOver=True)
+        self._notify_game_model_updated(EventTopics.GAME_END)

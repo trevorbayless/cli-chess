@@ -1,4 +1,4 @@
-from cli_chess.utils.event import EventManager
+from cli_chess.utils.event import EventManager, EventTopics
 from cli_chess.utils.logging import log
 import chess
 import chess.variant
@@ -53,7 +53,7 @@ class BoardModel:
             self._game_over_result = None
 
             self._log_init_info()
-            self._notify_board_model_updated(boardOrientationChanged=True)
+            self._notify_board_model_updated(EventTopics.GAME_START)
         except ValueError as e:
             log.error(f"Error while trying to reinitialize the board: {e}")
             raise
@@ -67,7 +67,7 @@ class BoardModel:
         self._game_over_result = None
 
         if notify:
-            self._notify_board_model_updated()
+            self._notify_board_model_updated(EventTopics.GAME_START)
 
     def make_move(self, move: str, notify=True) -> chess.Move:
         """Attempts to make a move on the board. If successful, returns
@@ -83,7 +83,7 @@ class BoardModel:
 
             if notify:
                 log.debug(f"Made move ({move})")
-                self._notify_board_model_updated(isGameOver=self.is_game_over(), successfulMoveMade=True)
+                self._notify_board_model_updated(EventTopics.MOVE_MADE)
         except Exception as e:
             log.error(e)
             if isinstance(e, chess.InvalidMoveError):
@@ -131,7 +131,7 @@ class BoardModel:
 
         if move_list:
             log.debug(f"Updated board with moves from list. Last move played: {move_list[-1]}")
-            self._notify_board_model_updated(successfulMoveMade=True)
+            self._notify_board_model_updated(EventTopics.MOVE_MADE)
 
     def takeback(self, caller_color: chess.Color):
         """Issues a takeback, so it's the callers move again. Raises a Warning if the move
@@ -152,7 +152,7 @@ class BoardModel:
                 self.board.pop()
 
             self.highlight_move = self.board.peek() if len(self.board.move_stack) > 0 else chess.Move.null()
-            self._notify_board_model_updated(successfulMoveMade=True)
+            self._notify_board_model_updated(EventTopics.MOVE_MADE)
 
         except Exception as e:
             if isinstance(e, Warning):
@@ -197,7 +197,7 @@ class BoardModel:
         log.debug(f"Board orientation set to {chess.COLOR_NAMES[self.orientation].upper()}")
 
         if notify:
-            self._notify_board_model_updated(boardOrientationChanged=True)
+            self._notify_board_model_updated(EventTopics.BOARD_ORIENTATION_CHANGED)
 
     def set_fen(self, fen: str, notify=True) -> None:
         """Sets the board FEN. Raises ValueError if syntactically invalid.
@@ -237,7 +237,7 @@ class BoardModel:
 
     def get_file_labels(self) -> str:
         """Returns a string containing the file
-           labels based on the board orientation'
+           labels based on the board orientation
         """
         file_labels = ""
         if self.orientation is chess.BLACK:
@@ -280,7 +280,7 @@ class BoardModel:
         """Returns True if the board orientation is set as white"""
         return self.orientation is chess.WHITE
 
-    def set_board_position(self, fen: str, orientation: chess.Color = None, uci_last_move=""):
+    def set_board_position(self, fen: str, uci_last_move=""):
         """Sets up the board using the passed in FEN. In addition, optionally the
            board orientation and last move can also be passed in. The last move must be
            passed in using the UCI format. Passing in the last move is only for handling
@@ -290,9 +290,6 @@ class BoardModel:
             if fen:
                 self.set_fen(fen, notify=False)
                 self.highlight_move = chess.Move.from_uci(uci_last_move) if uci_last_move else chess.Move.null()
-                if isinstance(orientation, bool):
-                    self.set_board_orientation(orientation, notify=False)
-
                 self._notify_board_model_updated()
         except Exception as e:
             log.error(f"Error caught setting board position: {e}")
@@ -300,7 +297,12 @@ class BoardModel:
     def is_game_over(self) -> bool:
         """Returns True if the game is over"""
         self._game_over_result = self.board.outcome() if self._game_over_result is None else self._game_over_result
-        return self._game_over_result is not None
+
+        is_game_over = self._game_over_result is not None
+        if is_game_over:
+            self._notify_board_model_updated(EventTopics.GAME_END)
+
+        return is_game_over
 
     def get_game_over_result(self) -> chess.Outcome:
         """Returns the reason the game ended as an Outcome object"""
@@ -312,7 +314,7 @@ class BoardModel:
            listeners that the game is over.
         """
         self._game_over_result = chess.Outcome("resignation", not color_resigning)  # noqa
-        self._notify_board_model_updated(isGameOver=True)
+        self._notify_board_model_updated(EventTopics.GAME_END)
 
     def set_premove_highlight(self, move: chess.Move) -> None:
         """Sets the move that should be highlighted on the board.
@@ -324,12 +326,12 @@ class BoardModel:
         """
         if bool(move):
             self.premove_highlight = move
-            self._notify_board_model_updated(premoveHighlightSet=True)
+            self._notify_board_model_updated()
 
     def clear_premove_highlight(self):
         """Clears the set premove highlight"""
         self.premove_highlight = chess.Move.null()
-        self._notify_board_model_updated(premoveHighlightCleared=True)
+        self._notify_board_model_updated()
 
     def cleanup(self) -> None:
         """Handles model cleanup tasks. This should only ever
@@ -337,9 +339,9 @@ class BoardModel:
         """
         self._event_manager.purge_all_events()
 
-    def _notify_board_model_updated(self, **kwargs) -> None:
+    def _notify_board_model_updated(self, *args, **kwargs) -> None:
         """Notifies listeners of board model updates"""
-        self.e_board_model_updated.notify(**kwargs)
+        self.e_board_model_updated.notify(*args, **kwargs)
 
     def _log_init_info(self):
         """Logs class initialization"""

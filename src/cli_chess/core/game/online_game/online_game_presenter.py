@@ -24,16 +24,13 @@ class OnlineGamePresenter(PlayableGamePresenterBase):
         """Sets and returns the view to use"""
         return OnlineGameView(self)
 
-    def update(self, **kwargs) -> None:
+    def update(self, *args, **kwargs) -> None:
         """Update method called on game model updates. Overrides base."""
-        super().update(**kwargs)
+        super().update(*args, **kwargs)
         if 'searchingForOpponent' in kwargs:
             self.view.alert.show_alert("Searching for opponent...", AlertType.NEUTRAL)
         if 'opponentFound' in kwargs:
             self.view.alert.clear_alert()
-        if 'onlineGameOver' in kwargs:
-            self._parse_and_present_game_over()
-            self.premove_presenter.clear_premove()
 
     def _parse_and_present_game_over(self) -> None:
         """Triages game over status for parsing and sending to the view for display"""

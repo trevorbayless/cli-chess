@@ -1,11 +1,22 @@
 from __future__ import annotations
+from enum import Enum, auto
 from typing import Callable, List
+
+
+class EventTopics(Enum):
+    ALL = auto()
+    MOVE_MADE = auto()
+    BOARD_ORIENTATION_CHANGED = auto()
+    GAME_SEARCH = auto()
+    GAME_START = auto()
+    GAME_END = auto()
+    ERROR = auto()
 
 
 class Event:
     """Event notification class. This class creates a singular event instance
        which listeners can subscribe to with a callable. The callable will be
-       notified when the event is triggered (using notify()). Generallty, this
+       notified when the event is triggered (using notify()). Generally, this
        class should not be instantiated directly, but rather from the EventManager class.
     """
     def __init__(self):
