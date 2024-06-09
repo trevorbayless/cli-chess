@@ -20,7 +20,7 @@ class PlayerInfoPresenter:
 
     def update(self, *args, **kwargs) -> None:
         """Updates the view based on specific model updates"""
-        if EventTopics.BOARD_ORIENTATION_CHANGED in args or EventTopics.GAME_END in kwargs:
+        if any(e in args for e in [EventTopics.GAME_START, EventTopics.GAME_END, EventTopics.BOARD_ORIENTATION_CHANGED]):
             orientation = self.model.board_model.get_board_orientation()
             self.view_upper.update(self.get_player_info(not orientation))
             self.view_lower.update(self.get_player_info(orientation))
