@@ -116,15 +116,13 @@ class StreamTVChannel(threading.Thread):
         try:
             from cli_chess.core.api.api_manager import api_client
             self.api_client = api_client
-        except ImportError:
-            # TODO: Clean this up so the error is displayed on the main screen
-            log.error("Failed to import api_client")
-            raise ImportError("API client not setup. Do you have an API token linked?")
+        except Exception as e:
+            self.handle_exceptions(e)
 
         # Current flow that has to be followed to watch the "variant" tv channels
         # as /api/tv/feed is only for the top-rated game, and doesn't allow channel specification
         # 1. Get current tv game (/api/tv/channels) -> Get the game ID for the game we're interested in
-        # 2. Start streaming game, on initial input set board orientation, show player names, etc. On follow up set pos.
+        # 2. Start streaming game, on initial input set board orientation, show player names, etc. On follow-up set pos.
         # 3. When the game completes, start this loop over.
 
     def get_channel_game_id(self, channel: TVChannelMenuOptions) -> str:
@@ -195,8 +193,8 @@ class StreamTVChannel(threading.Thread):
 
     def handle_exceptions(self, e: Exception):
         """Handles the passed in exception and responds appropriately"""
+        log.error(e)
         if self.retries <= self.max_retries:
-            log.error(e)
             self.current_game = ""
             delay = 2 * (self.retries + 1)
 
@@ -204,16 +202,15 @@ class StreamTVChannel(threading.Thread):
                 if e.status_code == 429:
                     delay = 60
 
-            # TODO: Send event to model with retry notification so we can display it to the user
             log.info(f"Sleeping {delay} seconds before retrying ({self.max_retries - self.retries} retries left).")
             self.e_tv_stream_event.notify(EventTopics.ERROR, msg=f"Error streaming. Retrying in {delay} seconds.", data=None)
             sleep(delay)
             self.retries += 1
         else:
+            self.e_tv_stream_event.notify(EventTopics.ERROR, msg="Retries exhausted. Stopping TV.", data=None)
             self.stop_watching()
 
     def stop_watching(self):
         log.info("Stopping TV stream")
-        self.e_tv_stream_event.notify(EventTopics.ERROR, msg="Retries exhausted. Stopping TV.", data=None)
         self.e_tv_stream_event.remove_all_listeners()
         self.running = False

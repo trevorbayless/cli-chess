@@ -28,8 +28,8 @@ class WatchTVPresenter(GamePresenterBase):
             self.view.alert.show_alert("Searching for TV game...", AlertType.NEUTRAL)
         if EventTopics.GAME_START in args:
             self.view.alert.clear_alert()
-        if EventTopics.ERROR in args and 'msg' in kwargs:
-            self.view.alert.show_alert(kwargs.get('msg'), AlertType.ERROR)
+        if EventTopics.ERROR in args:
+            self.view.alert.show_alert(kwargs.get('msg', "An unspecified TV error has occurred"), AlertType.ERROR)
 
     def exit(self) -> None:
         """Stops TV and returns to the main menu"""
