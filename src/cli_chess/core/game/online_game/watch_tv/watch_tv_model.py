@@ -32,48 +32,48 @@ class WatchTVModel(GameModelBase):
     def _handle_game_end(self, data: Dict):
         """Parses and saves the game end data"""
 
-    def _update_game_metadata(self, data: Optional[Dict], *args) -> None:
+    def _update_game_metadata(self, *args, data: Optional[Dict] = None) -> None:
         """Parses and saves the data of the game being played"""
+        if not data:
+            return
         try:
-            if data:
-                if EventTopics.GAME_START or EventTopics.GAME_END in args:
-                    if EventTopics.GAME_START in args:
-                        self.game_metadata.reset()
+            if EventTopics.GAME_START or EventTopics.GAME_END in args:
+                if EventTopics.GAME_START in args:
+                    self.game_metadata.reset()
 
-                    self.game_metadata.game_id = data.get('id')
-                    self.game_metadata.rated = data.get('rated')
-                    self.game_metadata.variant = data.get('variant')
-                    self.game_metadata.speed = data.get('speed')
-                    self.game_metadata.game_status.status = data.get('status')
-                    self.game_metadata.game_status.winner = data.get('winner')  # Not included on draws or abort
+                self.game_metadata.game_id = data.get('id')
+                self.game_metadata.rated = data.get('rated')
+                self.game_metadata.variant = data.get('variant')
+                self.game_metadata.speed = data.get('speed')
+                self.game_metadata.game_status.status = data.get('status')
+                self.game_metadata.game_status.winner = data.get('winner')  # Not included on draws or abort
 
-                    for color in COLOR_NAMES:
-                        color_as_bool = Color(COLOR_NAMES.index(color))
-                        side_data = data.get('players', {}).get(color, {})
-                        player_data = side_data.get('user')
-                        ai_level = side_data.get('aiLevel')
-                        if side_data and player_data:
-                            self.game_metadata.players[color_as_bool].title = player_data.get('title')
-                            self.game_metadata.players[color_as_bool].name = player_data.get('name', "?")
-                            self.game_metadata.players[color_as_bool].rating = side_data.get('rating', "?")
-                            self.game_metadata.players[color_as_bool].is_provisional_rating = side_data.get('provisional', False)
-                            self.game_metadata.players[color_as_bool].rating_diff = side_data.get('ratingDiff', "")
-                        elif ai_level:
-                            self.game_metadata.players[color_as_bool].name = f"Stockfish level {ai_level}"
+                for color in COLOR_NAMES:
+                    color_as_bool = Color(COLOR_NAMES.index(color))
+                    side_data = data.get('players', {}).get(color, {})
+                    player_data = side_data.get('user')
+                    ai_level = side_data.get('aiLevel')
+                    if side_data and player_data:
+                        self.game_metadata.players[color_as_bool].title = player_data.get('title')
+                        self.game_metadata.players[color_as_bool].name = player_data.get('name', "?")
+                        self.game_metadata.players[color_as_bool].rating = side_data.get('rating', "?")
+                        self.game_metadata.players[color_as_bool].is_provisional_rating = side_data.get('provisional', False)
+                        self.game_metadata.players[color_as_bool].rating_diff = side_data.get('ratingDiff', "")
+                    elif ai_level:
+                        self.game_metadata.players[color_as_bool].name = f"Stockfish level {ai_level}"
 
-                if EventTopics.MOVE_MADE in args:
-                    for color in COLORS:
-                        self.game_metadata.clocks[color].units = "sec"
-                        self.game_metadata.clocks[color].time = data.get('wc' if color == WHITE else 'bc')
+            if EventTopics.MOVE_MADE in args:
+                for color in COLORS:
+                    self.game_metadata.clocks[color].units = "sec"
+                    self.game_metadata.clocks[color].time = data.get('wc' if color == WHITE else 'bc')
 
         except Exception as e:
             log.error(f"Error saving game metadata: {e}")
             raise
 
-    def stream_event_received(self, *args, **kwargs):
+    def stream_event_received(self, *args, data: Optional[Dict] = None, **kwargs):
         """An event was received from the TV thread. Raises exception on invalid data"""
         try:
-            data = kwargs.get('data')
             if data:
                 if EventTopics.GAME_START in args:
                     variant = data.get('variant', {}).get('key')
@@ -96,7 +96,7 @@ class WatchTVModel(GameModelBase):
                     #       for highlighting move squares (invalid castle notation, missing promotion piece, etc).
                     self.board_model.set_board_position(data.get('fen'), uci_last_move=data.get('lm'))
 
-            self._update_game_metadata(data, *args)
+            self._update_game_metadata(*args, data=data)
             self._notify_game_model_updated(*args, **kwargs)
         except Exception as e:
             log.error(f"Error parsing stream data: {e}")
@@ -139,7 +139,7 @@ class StreamTVChannel(threading.Thread):
         self.running = True
         while self.running:
             try:
-                self.e_tv_stream_event.notify(None, EventTopics.GAME_SEARCH)
+                self.e_tv_stream_event.notify(EventTopics.GAME_SEARCH)
                 game_id = self.get_channel_game_id(self.channel)
 
                 if game_id != self.current_game:
@@ -203,11 +203,11 @@ class StreamTVChannel(threading.Thread):
                     delay = 60
 
             log.info(f"Sleeping {delay} seconds before retrying ({self.max_retries - self.retries} retries left).")
-            self.e_tv_stream_event.notify(EventTopics.ERROR, msg=f"Error streaming. Retrying in {delay} seconds.", data=None)
+            self.e_tv_stream_event.notify(EventTopics.ERROR, msg=f"Error streaming. Retrying in {delay} seconds.")
             sleep(delay)
             self.retries += 1
         else:
-            self.e_tv_stream_event.notify(EventTopics.ERROR, msg="Retries exhausted. Stopping TV.", data=None)
+            self.e_tv_stream_event.notify(EventTopics.ERROR, msg="Retries exhausted. Stopping TV.")
             self.stop_watching()
 
     def stop_watching(self):
