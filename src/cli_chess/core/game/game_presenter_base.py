@@ -36,7 +36,8 @@ class GamePresenterBase(ABC):
         """Listens to game model updates when notified.
            See model for specific kwargs that are currently being sent.
         """
-        pass
+        if EventTopics.GAME_START in args:
+            self.view.alert.clear_alert()
 
     def flip_board(self) -> None:
         """Flip the board orientation"""
@@ -69,6 +70,7 @@ class PlayableGamePresenterBase(GamePresenterBase, ABC):
 
     def update(self, *args, **kwargs) -> None:
         """Update method called on game model updates. Overrides base."""
+        super().update(*args, **kwargs)
         if EventTopics.MOVE_MADE in args:
             self.view.alert.clear_alert()
         if EventTopics.GAME_END in args:

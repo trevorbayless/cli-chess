@@ -26,8 +26,6 @@ class WatchTVPresenter(GamePresenterBase):
         super().update(*args, **kwargs)
         if EventTopics.GAME_SEARCH in args:
             self.view.alert.show_alert("Searching for TV game...", AlertType.NEUTRAL)
-        if EventTopics.GAME_START in args:
-            self.view.alert.clear_alert()
         if EventTopics.ERROR in args:
             self.view.alert.show_alert(kwargs.get('msg', "An unspecified TV error has occurred"), AlertType.ERROR)
 
