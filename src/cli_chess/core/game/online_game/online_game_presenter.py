@@ -1,7 +1,7 @@
 from cli_chess.core.game import PlayableGamePresenterBase
 from cli_chess.core.game.online_game import OnlineGameModel, OnlineGameView
 from cli_chess.utils.ui_common import change_views
-from cli_chess.utils import log, AlertType
+from cli_chess.utils import log, AlertType, EventTopics
 from chess import Color, COLOR_NAMES
 
 
@@ -27,10 +27,8 @@ class OnlineGamePresenter(PlayableGamePresenterBase):
     def update(self, *args, **kwargs) -> None:
         """Update method called on game model updates. Overrides base."""
         super().update(*args, **kwargs)
-        if 'searchingForOpponent' in kwargs:
+        if EventTopics.GAME_SEARCH in args:
             self.view.alert.show_alert("Searching for opponent...", AlertType.NEUTRAL)
-        if 'opponentFound' in kwargs:
-            self.view.alert.clear_alert()
 
     def _parse_and_present_game_over(self) -> None:
         """Triages game over status for parsing and sending to the view for display"""

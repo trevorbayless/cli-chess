@@ -32,7 +32,7 @@ class OnlineGameModel(PlayableGameModelBase):
         """Sends a request to lichess to start an AI challenge using the selected game parameters"""
         # Note: Only subscribe to IEM events right before creating challenge to lessen chance of grabbing another game
         self.api_iem.subscribe_to_events(self.handle_iem_event)
-        self._notify_game_model_updated(searchingForOpponent=True)
+        self._notify_game_model_updated(EventTopics.GAME_SEARCH)
         self.searching = True
 
         if self.vs_ai:  # Challenge Lichess AI (stockfish)
@@ -54,7 +54,7 @@ class OnlineGameModel(PlayableGameModelBase):
            and starts and registers game stream event callback
         """
         if game_id and not self.game_in_progress:
-            self._notify_game_model_updated(opponentFound=True)
+            self._notify_game_model_updated(EventTopics.GAME_START)
             self.game_in_progress = True
             self.searching = False
             self.playing_game_id = game_id
