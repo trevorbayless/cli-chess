@@ -1,13 +1,32 @@
-from cli_chess.utils.event import Event
+from cli_chess.utils.event import Event, EventTopics
 from cli_chess.utils.logging import log
 from typing import Callable
+from enum import Enum, auto
+from types import MappingProxyType
 import threading
+
+
+class IEMEventTopics(Enum):
+    CHALLENGE = auto()  # A challenge sent by us or to us
+    CHALLENGE_CANCELLED = auto()
+    CHALLENGE_DECLINED = auto()
+    NOT_IMPLEMENTED = auto()
+
+
+iem_type_to_event_dict = MappingProxyType({
+    "gameStart": EventTopics.GAME_START,
+    "gameFinish": EventTopics.GAME_END,
+    "challenge": IEMEventTopics.CHALLENGE,
+    "challengeCanceled": IEMEventTopics.CHALLENGE_CANCELLED,
+    "challengeDeclined": IEMEventTopics.CHALLENGE_DECLINED,
+})
 
 
 class IncomingEventManager(threading.Thread):
     """Opens a stream and keeps track of Lichess incoming
        events (such as game start, game finish).
     """
+
     def __init__(self):
         super().__init__(daemon=True)
         self.e_new_event_received = Event()
@@ -22,43 +41,28 @@ class IncomingEventManager(threading.Thread):
             raise ImportError("API client not setup. Do you have an API token linked?")
 
         log.info("Started listening to Lichess incoming events")
-
         for event in api_client.board.stream_incoming_events():
-            if event['type'] == 'gameStart':
-                game_id = event['game']['gameId']
-                log.info(f"Received gameStart for: {game_id}")
-                self.my_games.append(game_id)
-                self.e_new_event_received.notify(gameStart=event)
+            data = None
+            event_topic = iem_type_to_event_dict.get(event['type'], IEMEventTopics.NOT_IMPLEMENTED)
+            log.debug(f"IEM event received: {event}")
 
-            elif event['type'] == 'gameFinish':
-                game_id = event['game']['gameId']
+            if event_topic is EventTopics.GAME_START:
+                data = event['game']
+                self.my_games.append(data['gameId'])
+
+            elif event_topic is EventTopics.GAME_END:
                 try:
-                    self.my_games.remove(event['game']['gameId'])
+                    data = event['game']
+                    self.my_games.remove(data['gameId'])
                 except ValueError:
                     pass
 
-                log.info(f"Received gameEnd for: {game_id}")
-                self.e_new_event_received.notify(gameFinish=event)
+            elif (event_topic is IEMEventTopics.CHALLENGE or
+                  event_topic is IEMEventTopics.CHALLENGE_CANCELLED or
+                  event_topic is IEMEventTopics.CHALLENGE_DECLINED):
+                data = event['challenge']
 
-            elif event['type'] == 'challenge':
-                # A challenge was sent by us or to us
-                challenge_id = event['challenge']['id']
-                log.info(f"Received challenge event for: {challenge_id}")
-                self.e_new_event_received.notify(challenge=event)
-
-            elif event['type'] == 'challengeCanceled':
-                challenge_id = event['challenge']['id']
-                log.info(f"Received challengeCanceled event for: {challenge_id}")
-                self.e_new_event_received.notify(challengeCanceled=event)
-
-            elif event['type'] == 'challengeDeclined':
-                challenge_id = event['challenge']['id']
-                log.info(f"Received challengeDeclined event for: {challenge_id}")
-                self.e_new_event_received.notify(challengeCanceled=event)
-
-            else:
-                log.info(f"Received other event: {event}")
-                self.e_new_event_received.notify(other=event)
+            self.e_new_event_received.notify(event_topic, data=data)
 
     def get_active_games(self) -> list:
         """Returns a list of games in progress for this account"""

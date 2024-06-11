@@ -1,6 +1,22 @@
-from cli_chess.utils import Event, log, retry
+from cli_chess.utils import Event, EventTopics, log, retry
 from typing import Callable
 from threading import Thread
+from enum import Enum, auto
+from types import MappingProxyType
+
+
+class GSDEventTopics(Enum):
+    CHAT_RECEIVED = auto()
+    OPPONENT_GONE = auto()
+    NOT_IMPLEMENTED = auto()
+
+
+gsd_type_to_event_dict = MappingProxyType({
+    "gameFull": EventTopics.GAME_START,
+    "gameState": EventTopics.MOVE_MADE,
+    "chatLine": GSDEventTopics.CHAT_RECEIVED,
+    "opponentGone": GSDEventTopics.OPPONENT_GONE,
+})
 
 
 class GameStateDispatcher(Thread):
@@ -8,10 +24,10 @@ class GameStateDispatcher(Thread):
        using the Board API. The game that is streamed using this class must be owned
        by the account linked to the api token.
     """
-
     def __init__(self, game_id=""):
         super().__init__()
         self.game_id = game_id
+        self.is_game_over = False
         self.e_game_state_dispatcher_event = Event()
 
         try:
@@ -29,22 +45,14 @@ class GameStateDispatcher(Thread):
         log.info(f"Started streaming game state: {self.game_id}")
 
         for event in self.api_client.board.stream_game_state(self.game_id):
-            log.debug(f"Stream event received: {event['type']}")
-            if event['type'] == "gameFull":
-                self.e_game_state_dispatcher_event.notify(gameFull=event)
+            event_topic = gsd_type_to_event_dict.get(event['type'], GSDEventTopics.NOT_IMPLEMENTED)
+            log.debug(f"GSD Stream event type received: {event['type']} // topic: {event_topic}")
 
-            elif event['type'] == "gameState":
+            if event_topic is EventTopics.MOVE_MADE:
                 status = event.get('status', None)
-                is_game_over = status and status != "started" and status != "created"
+                self.is_game_over = status and status != "started" and status != "created"
 
-                self.e_game_state_dispatcher_event.notify(gameState=event, gameOver=is_game_over)
-                if is_game_over:
-                    self._game_ended()
-
-            elif event['type'] == "chatLine":
-                self.e_game_state_dispatcher_event.notify(chatLine=event)
-
-            elif event['type'] == "opponentGone":
+            elif event_topic is GSDEventTopics.OPPONENT_GONE:
                 is_gone = event.get('gone', False)
                 secs_until_claim = event.get('claimWinInSeconds', None)
 
@@ -54,7 +62,11 @@ class GameStateDispatcher(Thread):
                 if not is_gone:
                     pass  # TODO: Cancel auto-claim countdown
 
-                self.e_game_state_dispatcher_event.notify(opponentGone=event)
+            game_end_event = EventTopics.GAME_END if self.is_game_over else None
+            self.e_game_state_dispatcher_event.notify(event_topic, game_end_event, data=event)
+
+            if self.is_game_over:
+                self._game_ended()
 
         log.info(f"Completed streaming of: {self.game_id}")
 
@@ -94,6 +106,8 @@ class GameStateDispatcher(Thread):
 
     def _game_ended(self) -> None:
         """Handles removing all event listeners since the game has completed"""
+        log.info("GAME ENDED: Removing existing GSD listeners")
+        self.is_game_over = True
         self.e_game_state_dispatcher_event.remove_all_listeners()
 
     def subscribe_to_events(self, listener: Callable) -> None:

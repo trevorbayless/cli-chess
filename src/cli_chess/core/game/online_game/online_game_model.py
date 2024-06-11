@@ -3,7 +3,14 @@ from cli_chess.core.game.game_options import GameOption
 from cli_chess.core.api import GameStateDispatcher
 from cli_chess.utils import log, threaded, RequestSuccessfullySent, EventTopics
 from chess import COLORS, COLOR_NAMES, WHITE, BLACK, Color
-from typing import Optional
+from enum import Enum, auto
+from typing import Optional, Dict
+
+
+class EventSender(Enum):
+    LOCAL = auto()
+    FROM_IEM = auto()
+    FROM_GSD = auto()
 
 
 class OnlineGameModel(PlayableGameModelBase):
@@ -15,7 +22,7 @@ class OnlineGameModel(PlayableGameModelBase):
         self.vs_ai = is_vs_ai
         self.playing_game_id = None
         self.searching = False
-        self._update_game_metadata(game_parameters=game_parameters)
+        self._update_game_metadata(EventTopics.GAME_PARAMS, sender=EventSender.LOCAL, data=game_parameters)
         self.game_state_dispatcher = Optional[GameStateDispatcher]
 
         try:
@@ -31,7 +38,7 @@ class OnlineGameModel(PlayableGameModelBase):
     def create_game(self) -> None:
         """Sends a request to lichess to start an AI challenge using the selected game parameters"""
         # Note: Only subscribe to IEM events right before creating challenge to lessen chance of grabbing another game
-        self.api_iem.subscribe_to_events(self.handle_iem_event)
+        self.api_iem.subscribe_to_events(self._handle_iem_event)
         self._notify_game_model_updated(EventTopics.GAME_SEARCH)
         self.searching = True
 
@@ -60,7 +67,7 @@ class OnlineGameModel(PlayableGameModelBase):
             self.playing_game_id = game_id
 
             self.game_state_dispatcher = GameStateDispatcher(game_id)
-            self.game_state_dispatcher.subscribe_to_events(self.handle_game_state_dispatcher_event)
+            self.game_state_dispatcher.subscribe_to_events(self._handle_gsd_event)
             self.game_state_dispatcher.start()
 
     def _game_end(self) -> None:
@@ -68,66 +75,7 @@ class OnlineGameModel(PlayableGameModelBase):
         self.game_in_progress = False
         self.searching = False
         self.playing_game_id = None
-        self.api_iem.unsubscribe_from_events(self.handle_iem_event)
-
-    def handle_iem_event(self, **kwargs) -> None:
-        """Handles events received from the IncomingEventManager"""
-        if 'gameStart' in kwargs:
-            event = kwargs['gameStart'].get('game')
-            # TODO: There has to be a better way to ensure this is the right game...
-            #  add some further specific clauses like color, time control, date, etc?
-            if not self.game_in_progress and not event.get('hasMoved') and event.get('compat', {}).get('board'):
-                self._update_game_metadata(iem_gameStart=event)
-                self._start_game(event.get('gameId'))
-
-        elif 'gameFinish' in kwargs:
-            event = kwargs['gameFinish'].get('game')
-            self._update_game_metadata(iem_gameFinish=event)
-            if self.game_in_progress and self.playing_game_id == event.get('gameId'):
-                self._game_end()
-
-    def handle_game_state_dispatcher_event(self, **kwargs) -> None:
-        """Handles received from the GameStateDispatcher"""
-        if 'gameFull' in kwargs:
-            event = kwargs['gameFull']
-            self._update_game_metadata(gsd_gameFull=event)
-            self.board_model.reinitialize_board(variant=self.game_metadata.variant,
-                                                orientation=(self.my_color if self.board_model.get_variant_name() != "racingkings" else WHITE),
-                                                fen=event.get('initialFen', ""))
-            self.board_model.make_moves_from_list(event.get('state', {}).get('moves', []).split())
-
-        elif 'gameState' in kwargs:
-            event = kwargs['gameState']
-            self._update_game_metadata(gsd_gameState=event)
-
-            # TODO: Take some time measurements to see how much of an impact this approach is
-            # Resetting and replaying the moves guarantees the game between lichess
-            # and our local board are in sync (eg. takebacks, moves played on website, etc)
-            self.board_model.reset(notify=False)
-            self.board_model.make_moves_from_list(event.get('moves', []).split())
-
-            if self.is_my_turn():
-                premove = self.premove_model.pop_premove()
-                try:
-                    if premove:
-                        self.make_move(premove)
-                except Exception as e:
-                    if isinstance(e, ValueError):
-                        log.debug(f"The premove set was invalid in the new context, skipping: {e}")
-                    else:
-                        log.exception(e)
-
-            if kwargs['gameOver']:
-                self._report_game_over(status=event.get('status'), winner=event.get('winner', ""))
-
-        elif 'chatLine' in kwargs:
-            event = kwargs['chatLine']
-            self._update_game_metadata(gsd_chatLine=event)
-
-        elif 'opponentGone' in kwargs:
-            # TODO: Show alert to user
-            event = kwargs['opponentGone']
-            self._update_game_metadata(gsd_opponentGone=event)
+        self.api_iem.unsubscribe_from_events(self._handle_iem_event)
 
     def make_move(self, move: str):
         """Sends the move to the board model for a validity check. If valid this
@@ -213,59 +161,126 @@ class OnlineGameModel(PlayableGameModelBase):
             else:
                 raise Warning("Game has already ended")
 
-    def _update_game_metadata(self, **kwargs) -> None:
-        """Parses and saves the data of the game being played."""
+    def _handle_iem_event(self, *args, data: Optional[Dict] = None) -> None:
+        """Handles events received from the IncomingEventManager. NOTE: Events coming in
+           are global to the account, therefore multiple game start/end events can come in based
+           on how many games are being played. Updates to game_metadata should only happen for
+           the game actively being played.
+        """
+        if not data:
+            return
         try:
-            if 'game_parameters' in kwargs:  # This is the data that came from the menu selections
-                data = kwargs['game_parameters']
-                self.game_metadata.my_color = self.my_color
-                self.game_metadata.variant = data.get(GameOption.VARIANT)
-                self.game_metadata.rated = data.get(GameOption.RATED, False)
-                self.game_metadata.players[not self.my_color].ai_level = data.get(GameOption.COMPUTER_SKILL_LEVEL) if self.vs_ai else None
+            if EventTopics.GAME_START in args:
+                # TODO: There has to be a better way to ensure this is the right game...
+                #  add some further specific clauses like color, time control, date, etc?
+                if not self.game_in_progress and not data.get('hasMoved') and data.get('compat', {}).get('board'):
+                    self._update_game_metadata(*args, sender=EventSender.FROM_IEM, data=data)
+                    self._start_game(data.get('gameId'))
 
-                for color in COLORS:
-                    self.game_metadata.clocks[color].time = data.get(GameOption.TIME_CONTROL)[0]       # mins
-                    self.game_metadata.clocks[color].increment = data.get(GameOption.TIME_CONTROL)[1]  # secs
+            elif EventTopics.GAME_END in args:
+                if self.game_in_progress and self.playing_game_id == data.get('gameId'):
+                    self._update_game_metadata(*args, sender=EventSender.FROM_IEM, data=data)
+                    self._game_end()
+        except Exception as e:
+            log.error(f"Error handling IncomingEventManager event: {e}")
+            raise
 
-            elif 'iem_gameStart' in kwargs:
-                self.game_metadata.reset()
+    def _handle_gsd_event(self, *args, data: Optional[Dict] = None) -> None:
+        """Handles received from the GameStateDispatcher. Incoming events are
+           specific to this game being played
+        """
+        if not data:
+            return
+        try:
+            if EventTopics.GAME_START in args:
+                self.board_model.reinitialize_board(variant=self.game_metadata.variant,
+                                                    orientation=(self.my_color if self.board_model.get_variant_name() != "racingkings" else WHITE),
+                                                    fen=data.get('initialFen', ""))
+                self.board_model.make_moves_from_list(data.get('state', {}).get('moves', []).split())
 
-                data = kwargs['iem_gameStart']
-                self.game_metadata.game_id = data.get('gameId')
-                self.game_metadata.my_color = self.my_color
-                self.game_metadata.rated = data.get('rated')
-                self.game_metadata.variant = data.get('variant', {}).get('name')
-                self.game_metadata.speed = data['speed']
+            elif EventTopics.MOVE_MADE in args:
+                # TODO: Take some time measurements to see how much of an impact this approach is
+                # Resetting and replaying the moves guarantees the game between lichess
+                # and our local board are in sync (eg. takebacks, moves played on website, etc)
+                self.board_model.reset(notify=False)
+                self.board_model.make_moves_from_list(data.get('moves', []).split())
 
-            elif 'iem_gameFinish' in kwargs:
-                data = kwargs['iem_gameFinish']
-                self.game_metadata.players[self.my_color].rating_diff = data.get('ratingDiff', "")
-                self.game_metadata.players[not self.my_color].rating_diff = data.get('opponent', {}).get('ratingDiff', "")
+                if self.is_my_turn():
+                    premove = self.premove_model.pop_premove()
+                    try:
+                        if premove:
+                            self.make_move(premove)
+                    except Exception as e:
+                        if isinstance(e, ValueError):
+                            log.debug(f"The premove set was invalid in the new context, skipping: {e}")
+                        else:
+                            log.exception(e)
 
-            elif 'gsd_gameFull' in kwargs:
-                data = kwargs['gsd_gameFull']
+                if EventTopics.GAME_END in args:
+                    self._report_game_over(status=data.get('status'), winner=data.get('winner', ""))
 
-                for color in COLOR_NAMES:
-                    side_data = data.get(color, {})
-                    color_as_bool = Color(COLOR_NAMES.index(color))
-                    if side_data.get('name'):
-                        self.game_metadata.players[color_as_bool].title = side_data.get('title')
-                        self.game_metadata.players[color_as_bool].name = side_data.get('name', "?")
-                        self.game_metadata.players[color_as_bool].rating = side_data.get('rating', "?")
-                        self.game_metadata.players[color_as_bool].is_provisional_rating = side_data.get('provisional', False)
-                    elif self.vs_ai:
-                        self.game_metadata.players[color_as_bool].name = f"Stockfish level {side_data.get('aiLevel', '?')}"
+            self._update_game_metadata(*args, sender=EventSender.FROM_GSD, data=data)
+        except Exception as e:
+            log.error(f"Error handling GameStateDispatcher event: {e}")
+            raise
 
-                    self.game_metadata.clocks[color_as_bool].units = "ms"
-                    self.game_metadata.clocks[color_as_bool].time = data.get('state', {}).get('wtime' if color == "white" else 'btime')
-                    self.game_metadata.clocks[color_as_bool].increment = data.get('state', {}).get('winc' if color == "white" else 'binc')
+    def _update_game_metadata(self, *args, sender: Optional[EventSender] = None, data: Optional[Dict] = None, **kwargs) -> None:
+        """Parses and saves the data of the game being played. Events come from senders
+           in differing formats, which is why they are separated
+        """
+        if not sender or not data:
+            return
+        try:
+            if sender is EventSender.LOCAL:
+                if EventTopics.GAME_PARAMS in args:  # This is the data that came from the menu selections
+                    self.game_metadata.my_color = self.my_color
+                    self.game_metadata.variant = data.get(GameOption.VARIANT)
+                    self.game_metadata.rated = data.get(GameOption.RATED, False)
+                    self.game_metadata.players[not self.my_color].ai_level = data.get(GameOption.COMPUTER_SKILL_LEVEL) if self.vs_ai else None
 
-            elif 'gsd_gameState' in kwargs:
-                data = kwargs['gsd_gameState']
-                self.game_metadata.clocks[WHITE].time = data.get('wtime')
-                self.game_metadata.clocks[BLACK].time = data.get('btime')
+                    for color in COLORS:
+                        self.game_metadata.clocks[color].time = data.get(GameOption.TIME_CONTROL)[0]       # mins
+                        self.game_metadata.clocks[color].increment = data.get(GameOption.TIME_CONTROL)[1]  # secs
 
-            self._notify_game_model_updated()
+            elif sender is EventSender.FROM_IEM:
+                if EventTopics.GAME_START in args:
+                    self.game_metadata.reset()
+                    self.game_metadata.game_id = data.get('gameId')
+                    self.game_metadata.my_color = self.my_color
+                    self.game_metadata.rated = data.get('rated')
+                    self.game_metadata.variant = data.get('variant', {}).get('name')
+                    self.game_metadata.speed = data['speed']
+
+                elif EventTopics.GAME_END in args:
+                    self.game_metadata.players[self.my_color].rating_diff = data.get('ratingDiff', "")
+                    self.game_metadata.players[not self.my_color].rating_diff = data.get('opponent', {}).get('ratingDiff', "")
+
+            elif sender is EventSender.FROM_GSD:
+                if EventTopics.GAME_START in args:
+                    for color in COLOR_NAMES:
+                        side_data = data.get(color, {})
+                        color_as_bool = Color(COLOR_NAMES.index(color))
+                        if side_data.get('name'):
+                            self.game_metadata.players[color_as_bool].title = side_data.get('title')
+                            self.game_metadata.players[color_as_bool].name = side_data.get('name', "?")
+                            self.game_metadata.players[color_as_bool].rating = side_data.get('rating', "?")
+                            self.game_metadata.players[color_as_bool].is_provisional_rating = side_data.get(
+                                'provisional', False)
+                        elif self.vs_ai:
+                            self.game_metadata.players[
+                                color_as_bool].name = f"Stockfish level {side_data.get('aiLevel', '?')}"
+
+                        self.game_metadata.clocks[color_as_bool].units = "ms"
+                        self.game_metadata.clocks[color_as_bool].time = data.get('state', {}).get(
+                            'wtime' if color == "white" else 'btime')
+                        self.game_metadata.clocks[color_as_bool].increment = data.get('state', {}).get(
+                            'winc' if color == "white" else 'binc')
+
+                elif EventTopics.MOVE_MADE in args:
+                    self.game_metadata.clocks[WHITE].time = data.get('wtime')
+                    self.game_metadata.clocks[BLACK].time = data.get('btime')
+
+            self._notify_game_model_updated(*args, **kwargs)
         except Exception as e:
             log.exception(f"Error saving online game metadata: {e}")
             raise
@@ -287,9 +302,9 @@ class OnlineGameModel(PlayableGameModelBase):
         super().cleanup()
 
         if self.api_iem:
-            self.api_iem.unsubscribe_from_events(self.handle_iem_event)
+            self.api_iem.unsubscribe_from_events(self._handle_iem_event)
             log.debug(f"Cleared subscription from {type(self.api_iem).__name__} (id={id(self.api_iem)})")
 
         if self.game_in_progress:
-            self.game_state_dispatcher.unsubscribe_from_events(self.handle_game_state_dispatcher_event)
+            self.game_state_dispatcher.unsubscribe_from_events(self._handle_gsd_event)
             log.debug(f"Cleared subscription from {type(self.game_state_dispatcher).__name__} (id={id(self.game_state_dispatcher)})")
