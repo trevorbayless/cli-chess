@@ -4,6 +4,7 @@ from cli_chess.core.game.game_options import GameOption
 from cli_chess.utils import EventTopics, log
 from cli_chess.utils.config import player_info_config
 from chess import COLOR_NAMES
+from typing import Optional, Dict
 
 
 class OfflineGameModel(PlayableGameModelBase):
@@ -13,7 +14,7 @@ class OfflineGameModel(PlayableGameModelBase):
 
         self.engine_model = EngineModel(self.board_model, game_parameters)
         self.game_in_progress = True
-        self._update_game_metadata(game_parameters=game_parameters)
+        self._update_game_metadata(EventTopics.GAME_PARAMS, data=game_parameters)
 
     def update(self, *args, **kwargs) -> None:
         """Called automatically as part of an event listener. This method
@@ -74,13 +75,13 @@ class OfflineGameModel(PlayableGameModelBase):
             log.warning("Attempted to resign a game that's not in progress")
             raise Warning("Game has already ended")
 
-    def _update_game_metadata(self, **kwargs) -> None:
+    def _update_game_metadata(self, *args, data: Optional[Dict] = None, **kwargs) -> None:
         """Parses and saves the data of the game being played"""
+        if not data:
+            return
         try:
-            if 'game_parameters' in kwargs:
-                data = kwargs['game_parameters']
+            if EventTopics.GAME_PARAMS in args:
                 self.game_metadata.my_color = self.my_color
-
                 self.game_metadata.variant = data[GameOption.VARIANT]
                 self.game_metadata.players[self.my_color].name = player_info_config.get_value(player_info_config.Keys.OFFLINE_PLAYER_NAME)  # noqa: E501
 
@@ -89,7 +90,7 @@ class OfflineGameModel(PlayableGameModelBase):
                 self.game_metadata.players[not self.my_color].name = engine_name
                 self.game_metadata.players[not self.my_color].rating = data.get(GameOption.COMPUTER_ELO, "")
 
-            self._notify_game_model_updated()
+            self._notify_game_model_updated(*args, **kwargs)
         except KeyError as e:
             log.error(f"Error saving offline game metadata: {e}")
 

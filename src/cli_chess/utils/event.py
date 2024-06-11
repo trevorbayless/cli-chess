@@ -6,6 +6,7 @@ from typing import Callable, List
 class EventTopics(Enum):
     MOVE_MADE = auto()
     BOARD_ORIENTATION_CHANGED = auto()
+    GAME_PARAMS = auto()
     GAME_SEARCH = auto()
     GAME_START = auto()
     GAME_END = auto()
