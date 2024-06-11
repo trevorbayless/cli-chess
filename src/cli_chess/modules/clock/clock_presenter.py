@@ -1,8 +1,10 @@
 from __future__ import annotations
 from cli_chess.modules.clock import ClockView
+from cli_chess.utils import EventTopics
 from chess import Color
 from datetime import datetime, timezone
 from typing import TYPE_CHECKING
+
 if TYPE_CHECKING:
     from cli_chess.core.game import GameModelBase
 
@@ -19,9 +21,11 @@ class ClockPresenter:
 
     def update(self, *args, **kwargs) -> None:
         """Updates the view based on specific model updates"""
-        orientation = self.model.board_model.get_board_orientation()
-        self.view_upper.update(self.get_clock_display(not orientation))
-        self.view_lower.update(self.get_clock_display(orientation))
+        if (EventTopics.GAME_START in args or EventTopics.GAME_END in args or
+                EventTopics.MOVE_MADE in args or EventTopics.BOARD_ORIENTATION_CHANGED in args):
+            orientation = self.model.board_model.get_board_orientation()
+            self.view_upper.update(self.get_clock_display(not orientation))
+            self.view_lower.update(self.get_clock_display(orientation))
 
     def get_clock_display(self, color: Color) -> str:
         """Returns the formatted clock display for the color passed in"""
