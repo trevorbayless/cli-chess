@@ -18,7 +18,6 @@ dev_dependencies = {
         'pytest-cov>=4.0.0,<5.0.0',
         'pytest-socket>=0.6.0,<1.0.0',
         'flake8>=5.0.4,<7.0.0',
-        'vulture>=2.7,<3.0'
     ]
 }
 
