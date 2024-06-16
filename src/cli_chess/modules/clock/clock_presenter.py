@@ -32,7 +32,7 @@ class ClockPresenter:
         clock_data = self.model.game_metadata.clocks[color]
         time = clock_data.time
 
-        if not time:
+        if time is None:
             return "--:--"
 
         if not isinstance(time, datetime):
