@@ -52,6 +52,7 @@ class WatchTVModel(GameModelBase):
                         self.game_metadata.players[color_as_bool].name = f"Stockfish level {ai_level}"
 
             if EventTopics.MOVE_MADE in args:
+                self.game_metadata.set_clock_ticking(self.board_model.get_turn())
                 for color in COLORS:
                     self.game_metadata.clocks[color].units = "sec"
                     self.game_metadata.clocks[color].time = data.get('wc' if color == WHITE else 'bc')

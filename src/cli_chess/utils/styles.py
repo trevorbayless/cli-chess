@@ -36,6 +36,9 @@ default = {
     "player-info.pos-rating-diff": "fg:darkgreen",
     "player-info.neg-rating-diff": "fg:darkred",
 
+    "clock": "fg:white",
+    "clock.ticking": "bg:green",
+
     # Program styling
     "menu": "bg:",
     "menu.category-title": "fg:black bg:limegreen",

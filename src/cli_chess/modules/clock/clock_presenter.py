@@ -24,8 +24,8 @@ class ClockPresenter:
         if (EventTopics.GAME_START in args or EventTopics.GAME_END in args or
                 EventTopics.MOVE_MADE in args or EventTopics.BOARD_ORIENTATION_CHANGED in args):
             orientation = self.model.board_model.get_board_orientation()
-            self.view_upper.update(self.get_clock_display(not orientation))
-            self.view_lower.update(self.get_clock_display(orientation))
+            self.view_upper.update(self.get_clock_display(not orientation), self.model.game_metadata.clocks[not orientation].ticking)
+            self.view_lower.update(self.get_clock_display(orientation), self.model.game_metadata.clocks[orientation].ticking)
 
     def get_clock_display(self, color: Color) -> str:
         """Returns the formatted clock display for the color passed in"""

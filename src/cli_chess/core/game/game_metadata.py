@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from chess import Color
+from chess import Color, COLORS
 from typing import Optional
 
 
@@ -18,6 +18,7 @@ class ClockMetadata:
     units: str = "ms"
     time: Optional[int] = None
     increment: Optional[int] = None
+    ticking: bool = False
 
 
 @dataclass
@@ -36,6 +37,14 @@ class GameMetadata:
         self.my_color: Optional[Color] = None
         self.rated: bool = False
         self.speed: Optional[str] = None
+
+    def set_clock_ticking(self, color: Optional[Color]):
+        if color is None:
+            for c in COLORS:
+                self.clocks[c].ticking = False
+        else:
+            self.clocks[color].ticking = True
+            self.clocks[not color].ticking = False
 
     def reset(self):
         self.__init__()

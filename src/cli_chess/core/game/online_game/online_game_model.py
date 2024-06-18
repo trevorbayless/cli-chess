@@ -257,6 +257,7 @@ class OnlineGameModel(PlayableGameModelBase):
 
             elif sender is EventSender.FROM_GSD:
                 if EventTopics.GAME_START in args:
+                    self.game_metadata.set_clock_ticking(self.board_model.get_turn())
                     for color in COLOR_NAMES:
                         side_data = data.get(color, {})
                         color_as_bool = Color(COLOR_NAMES.index(color))
@@ -271,14 +272,13 @@ class OnlineGameModel(PlayableGameModelBase):
                                 color_as_bool].name = f"Stockfish level {side_data.get('aiLevel', '?')}"
 
                         self.game_metadata.clocks[color_as_bool].units = "ms"
-                        self.game_metadata.clocks[color_as_bool].time = data.get('state', {}).get(
-                            'wtime' if color == "white" else 'btime')
-                        self.game_metadata.clocks[color_as_bool].increment = data.get('state', {}).get(
-                            'winc' if color == "white" else 'binc')
+                        self.game_metadata.clocks[color_as_bool].time = data.get('state', {}).get('wtime' if color == "white" else 'btime')
+                        self.game_metadata.clocks[color_as_bool].increment = data.get('state', {}).get('winc' if color == "white" else 'binc')
 
                 elif EventTopics.MOVE_MADE in args:
                     self.game_metadata.clocks[WHITE].time = data.get('wtime')
                     self.game_metadata.clocks[BLACK].time = data.get('btime')
+                    self.game_metadata.set_clock_ticking(self.board_model.get_turn()) if EventTopics.GAME_END not in args else None
 
             self._notify_game_model_updated(*args, **kwargs)
         except Exception as e:
@@ -292,6 +292,7 @@ class OnlineGameModel(PlayableGameModelBase):
         self._game_end()
         self.game_metadata.game_status.status = status  # status list can be found in lila status.ts
         self.game_metadata.game_status.winner = winner
+        self.game_metadata.set_clock_ticking(None)
         self._notify_game_model_updated(EventTopics.GAME_END)
 
     def cleanup(self) -> None:

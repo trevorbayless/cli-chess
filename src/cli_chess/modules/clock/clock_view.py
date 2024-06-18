@@ -13,9 +13,13 @@ class ClockView:
         self._clock_control = FormattedTextControl(text=lambda: self.time_str, style="class:clock")
         self._container = Box(Window(self._clock_control, align=WindowAlign.LEFT), padding=0, padding_right=1, height=D(max=1))
 
-    def update(self, time: str) -> None:
+    def update(self, time: str, is_ticking: bool) -> None:
         """Updates the clock using the data passed in"""
         self.time_str = time
+        if is_ticking:
+            self._clock_control.style = "class:clock.ticking"
+        else:
+            self._clock_control.style = "class:clock"
 
     def __pt_container__(self) -> Box:
         """Returns this views container"""
