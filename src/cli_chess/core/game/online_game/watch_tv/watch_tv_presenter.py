@@ -32,4 +32,4 @@ class WatchTVPresenter(GamePresenterBase):
     def exit(self) -> None:
         """Stops TV and returns to the main menu"""
         self.model.stop_watching()
-        self.view.exit()
+        super().exit()
