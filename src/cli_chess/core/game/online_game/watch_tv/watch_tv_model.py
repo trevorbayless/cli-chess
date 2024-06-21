@@ -88,9 +88,9 @@ class StreamTVChannel(threading.Thread):
     def __init__(self, channel: TVChannelMenuOptions):
         super().__init__(daemon=True)
         self.channel = channel
-        self.running = False
         self.max_retries = 10
         self.retries = 0
+        self._stopped = threading.Event()
         self.e_tv_stream_event = Event()
 
         try:
@@ -102,8 +102,7 @@ class StreamTVChannel(threading.Thread):
     def run(self):
         """Main entrypoint for the thread"""
         log.info(f"Started watching {self.channel.value} TV")
-        self.running = True
-        while self.running:
+        while not self._stopped.is_set():
             try:
                 self.e_tv_stream_event.notify(EventTopics.GAME_SEARCH)
 
@@ -111,11 +110,10 @@ class StreamTVChannel(threading.Thread):
                 stream = self.api_client.tv._r.get(f"/api/tv/{self.channel.key}/feed", stream=True)  # noqa
 
                 for event in stream:
-                    # TODO: This does close the stream, but not until the next event comes in (which can be a while
-                    #  sometimes (especially in longer time format games like Classical). Ideally there's
-                    #  a way to immediately kill the stream, without waiting for another event.
-                    if not self.running:
-                        stream.close()
+                    if self._stopped.is_set():
+                        # TODO: This does close the stream, but not until the next event comes in (which can be a while
+                        #  sometimes (especially in longer time format games like Classical). Ideally there's
+                        #  a way to immediately kill the stream, without waiting for another event.
                         break
 
                     t = event.get('t')
@@ -134,7 +132,7 @@ class StreamTVChannel(threading.Thread):
                 self.handle_exceptions(e)
 
             else:
-                if self.running:
+                if not self._stopped.is_set():
                     self.retries = 0
                     log.debug("Sleeping 2 seconds before finding next TV game")
                     sleep(2)
@@ -159,5 +157,5 @@ class StreamTVChannel(threading.Thread):
 
     def stop_watching(self):
         log.info("Stopping TV stream")
+        self._stopped.set()
         self.e_tv_stream_event.remove_all_listeners()
-        self.running = False
