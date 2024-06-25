@@ -29,6 +29,8 @@ class OnlineGamePresenter(PlayableGamePresenterBase):
         super().update(*args, **kwargs)
         if EventTopics.GAME_SEARCH in args:
             self.view.alert.show_alert("Searching for opponent...", AlertType.NEUTRAL)
+        elif EventTopics.ERROR in args:
+            self.view.alert.show_alert(kwargs.get('msg', "An unspecified error has occurred"), AlertType.ERROR)
 
     def _parse_and_present_game_over(self) -> None:
         """Triages game over status for parsing and sending to the view for display"""

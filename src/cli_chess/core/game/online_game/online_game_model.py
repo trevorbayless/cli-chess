@@ -38,30 +38,36 @@ class OnlineGameModel(PlayableGameModelBase):
     @threaded
     def create_game(self) -> None:
         """Sends a request to lichess to start an AI challenge using the selected game parameters"""
-        # Note: Only subscribe to IEM events right before creating challenge to lessen chance of grabbing another game
-        self.api_iem.add_event_listener(self._handle_iem_event)
-        self._notify_game_model_updated(EventTopics.GAME_SEARCH)
-        self.searching = True
+        try:
+            # Note: Only subscribe to IEM events right before creating challenge to lessen chance of grabbing another game
+            self.api_iem.add_event_listener(self._handle_iem_event)
+            self._notify_game_model_updated(EventTopics.GAME_SEARCH)
+            self.searching = True
 
-        if self.vs_ai:  # Challenge Lichess AI (stockfish)
-            self.api_client.challenges.create_ai(level=self.game_metadata.players[not self.my_color].ai_level,
-                                                 clock_limit=self.game_metadata.clocks[WHITE].time * 60,  # challenges need time in seconds
-                                                 clock_increment=self.game_metadata.clocks[WHITE].increment,
-                                                 color=COLOR_NAMES[self.game_metadata.my_color],
-                                                 variant=self.game_metadata.variant)
-        else:  # Find a random opponent
-            payload = {
-                "rated": str(self.game_metadata.rated).lower(),
-                "time": self.game_metadata.clocks[WHITE].time,
-                "increment": self.game_metadata.clocks[WHITE].increment,
-                "variant": self.game_metadata.variant,
-                "color": COLOR_NAMES[self.game_metadata.my_color],
-                "ratingRange": "",
-            }
-
-            for _ in self.api_client.board._r.post("/api/board/seek", data=payload, fmt=TEXT, stream=True):
-                if not self.searching:
-                    break
+            if self.vs_ai:  # Challenge Lichess AI (stockfish)
+                self.api_client.challenges.create_ai(level=self.game_metadata.players[not self.my_color].ai_level,
+                                                     clock_limit=self.game_metadata.clocks[WHITE].time * 60,  # challenges need time in seconds
+                                                     clock_increment=self.game_metadata.clocks[WHITE].increment,
+                                                     color=COLOR_NAMES[self.game_metadata.my_color],
+                                                     variant=self.game_metadata.variant)
+            else:  # Find a random opponent
+                payload = {
+                    "rated": str(self.game_metadata.rated).lower(),
+                    "time": self.game_metadata.clocks[WHITE].time,
+                    "increment": self.game_metadata.clocks[WHITE].increment,
+                    "variant": self.game_metadata.variant,
+                    "color": COLOR_NAMES[self.game_metadata.my_color],
+                    "ratingRange": "",
+                }
+                for _ in self.api_client.board._r.post("/api/board/seek", data=payload, fmt=TEXT, stream=True):
+                    if not self.searching:
+                        break
+        except Exception as e:
+            # Since this exception happened in a thread, notify via the model event instead of raising
+            self.searching = False
+            msg = f"Error creating online game: {e}"
+            log.error(msg)
+            self._notify_game_model_updated(EventTopics.ERROR, msg=msg)
 
     def _start_game(self, game_id: str) -> None:
         """Called when a game is started. Sets proper class variables
