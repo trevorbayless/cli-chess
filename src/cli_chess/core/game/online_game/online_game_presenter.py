@@ -106,3 +106,8 @@ class OnlineGamePresenter(PlayableGamePresenterBase):
     def is_vs_ai(self) -> bool:
         """Returns true if the game being played is versus lichess AI"""
         return self.model.vs_ai
+
+    def exit(self) -> None:
+        """Exits the game and returns to the main menu"""
+        self.model.exit()
+        super().exit()

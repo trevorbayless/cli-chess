@@ -3,6 +3,7 @@ from cli_chess.core.game.game_options import GameOption
 from cli_chess.core.api import GameStateDispatcher
 from cli_chess.utils import log, threaded, RequestSuccessfullySent, EventTopics
 from chess import COLORS, COLOR_NAMES, WHITE, BLACK, Color
+from berserk.formats import TEXT
 from enum import Enum, auto
 from typing import Optional, Dict
 
@@ -49,12 +50,18 @@ class OnlineGameModel(PlayableGameModelBase):
                                                  color=COLOR_NAMES[self.game_metadata.my_color],
                                                  variant=self.game_metadata.variant)
         else:  # Find a random opponent
-            self.api_client.board.seek(time=self.game_metadata.clocks[WHITE].time,
-                                       increment=self.game_metadata.clocks[WHITE].increment,
-                                       color=COLOR_NAMES[self.game_metadata.my_color],
-                                       variant=self.game_metadata.variant,
-                                       rated=self.game_metadata.rated,
-                                       rating_range=None)
+            payload = {
+                "rated": str(self.game_metadata.rated).lower(),
+                "time": self.game_metadata.clocks[WHITE].time,
+                "increment": self.game_metadata.clocks[WHITE].increment,
+                "variant": self.game_metadata.variant,
+                "color": COLOR_NAMES[self.game_metadata.my_color],
+                "ratingRange": "",
+            }
+
+            for _ in self.api_client.board._r.post("/api/board/seek", data=payload, fmt=TEXT, stream=True):
+                if not self.searching:
+                    break
 
     def _start_game(self, game_id: str) -> None:
         """Called when a game is started. Sets proper class variables
@@ -309,3 +316,9 @@ class OnlineGameModel(PlayableGameModelBase):
         if self.game_in_progress:
             self.game_state_dispatcher.unsubscribe_from_events(self._handle_gsd_event)
             log.debug(f"Cleared subscription from {type(self.game_state_dispatcher).__name__} (id={id(self.game_state_dispatcher)})")
+
+    def exit(self):
+        """Gracefully exit the online game model. Ensure subscriptions are
+           cleaned up and any active game searches are closed
+        """
+        self._game_end()
