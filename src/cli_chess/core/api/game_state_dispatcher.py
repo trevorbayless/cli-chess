@@ -110,6 +110,6 @@ class GameStateDispatcher(Thread):
         self.is_game_over = True
         self.e_game_state_dispatcher_event.remove_all_listeners()
 
-    def subscribe_to_events(self, listener: Callable) -> None:
+    def add_event_listener(self, listener: Callable) -> None:
         """Subscribes the passed in method to GSD events"""
         self.e_game_state_dispatcher_event.add_listener(listener)

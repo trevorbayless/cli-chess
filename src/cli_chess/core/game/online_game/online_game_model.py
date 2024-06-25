@@ -39,7 +39,7 @@ class OnlineGameModel(PlayableGameModelBase):
     def create_game(self) -> None:
         """Sends a request to lichess to start an AI challenge using the selected game parameters"""
         # Note: Only subscribe to IEM events right before creating challenge to lessen chance of grabbing another game
-        self.api_iem.subscribe_to_events(self._handle_iem_event)
+        self.api_iem.add_event_listener(self._handle_iem_event)
         self._notify_game_model_updated(EventTopics.GAME_SEARCH)
         self.searching = True
 
@@ -74,7 +74,7 @@ class OnlineGameModel(PlayableGameModelBase):
             self.playing_game_id = game_id
 
             self.game_state_dispatcher = GameStateDispatcher(game_id)
-            self.game_state_dispatcher.subscribe_to_events(self._handle_gsd_event)
+            self.game_state_dispatcher.add_event_listener(self._handle_gsd_event)
             self.game_state_dispatcher.start()
 
     def _game_end(self) -> None:
