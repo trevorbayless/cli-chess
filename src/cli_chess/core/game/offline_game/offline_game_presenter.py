@@ -29,7 +29,7 @@ class OfflineGamePresenter(PlayableGamePresenterBase):
         """Sets and returns the view to use"""
         return OfflineGameView(self)
 
-    def make_move(self, move: str) -> None:
+    def make_move(self, move: str, is_premove=False) -> None:
         """Make the users move on the board"""
         try:
             if self.model.is_my_turn() and move:
@@ -38,7 +38,13 @@ class OfflineGamePresenter(PlayableGamePresenterBase):
             else:
                 self.premove_presenter.set_premove(move)
         except Exception as e:
-            self.view.alert.show_alert(str(e))
+            if is_premove and isinstance(e, ValueError):
+                # Don't show an alert if move made is a premove and is invalid
+                # Just allow the user to make a new move. This matches how online games.
+                log.debug("Attempted to push the premove but the premove is invalid in the new position")
+                log.debug("Waiting for user to make a new move...")
+            else:
+                self.view.alert.show_alert(str(e))
 
     @threaded
     def make_engine_move(self) -> None:
@@ -56,7 +62,7 @@ class OfflineGamePresenter(PlayableGamePresenterBase):
                 self.board_presenter.make_move(move)
 
                 # After the engine moves, make the premove if set
-                self.make_move(self.premove_presenter.pop_premove())
+                self.make_move(self.premove_presenter.pop_premove(), is_premove=True)
         except Exception as e:
             log.error(e)
             self.view.alert.show_alert(str(e))
