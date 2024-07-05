@@ -21,9 +21,12 @@ offline against the Fairy-Stockfish engine. All Lichess variants are supported.
 
 <details><summary>Demo</summary>
 
-Offline against Fairy-Stockfish            |  Watching Lichess Bullet TV
-:-------------------------:|:-------------------------:
-<img src=https://user-images.githubusercontent.com/3620552/229156062-309d5ae9-bcc2-43bc-ab4c-714e2a9c9c83.gif width=450 width=222> | <img src=https://user-images.githubusercontent.com/3620552/229156269-8a0bb436-ab9e-4e55-9218-b488e5a2eccb.gif width=430 height=245>
+#### Offline against Fairy-Stockfish
+![offline-against-stockfish](https://github.com/trevorbayless/cli-chess/assets/3620552/6d02585e-bca7-4260-aa5c-ccb228d41033)
+
+#### Watching Lichess UltraBullet TV
+![ultrabullet-tv](https://github.com/trevorbayless/cli-chess/assets/3620552/759ae63b-9e8b-4bee-adb0-1762b13c41a7)
+
 
 </details>
 
