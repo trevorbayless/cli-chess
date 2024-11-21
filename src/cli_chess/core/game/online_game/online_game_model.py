@@ -19,7 +19,7 @@ class OnlineGameModel(PlayableGameModelBase):
        Games not owned by this account must directly use the base model instead.
     """
     def __init__(self, game_parameters: dict, is_vs_ai: bool):
-        super().__init__(play_as_color=game_parameters[GameOption.COLOR], variant=game_parameters[GameOption.VARIANT], fen=None)
+        super().__init__(play_as_color=game_parameters[GameOption.COLOR], variant=game_parameters[GameOption.VARIANT], fen=None, side_confirmed=is_vs_ai)  # noqa: E501
         self.vs_ai = is_vs_ai
         self.playing_game_id = None
         self.searching = False
@@ -48,7 +48,7 @@ class OnlineGameModel(PlayableGameModelBase):
                 self.api_client.challenges.create_ai(level=self.game_metadata.players[not self.my_color].ai_level,
                                                      clock_limit=self.game_metadata.clocks[WHITE].time * 60,  # challenges need time in seconds
                                                      clock_increment=self.game_metadata.clocks[WHITE].increment,
-                                                     color=COLOR_NAMES[self.game_metadata.my_color],
+                                                     color=COLOR_NAMES[self.my_color],
                                                      variant=self.game_metadata.variant)
             else:  # Find a random opponent
                 payload = {
@@ -56,7 +56,7 @@ class OnlineGameModel(PlayableGameModelBase):
                     "time": self.game_metadata.clocks[WHITE].time,
                     "increment": self.game_metadata.clocks[WHITE].increment,
                     "variant": self.game_metadata.variant,
-                    "color": COLOR_NAMES[self.game_metadata.my_color],
+                    "color": "random",  # lila PR# 15969
                     "ratingRange": "",
                 }
                 for _ in self.api_client.board._r.post("/api/board/seek", data=payload, fmt=TEXT, stream=True):
@@ -246,7 +246,6 @@ class OnlineGameModel(PlayableGameModelBase):
         try:
             if sender is EventSender.LOCAL:
                 if EventTopics.GAME_PARAMS in args:  # This is the data that came from the menu selections
-                    self.game_metadata.my_color = self.my_color
                     self.game_metadata.variant = data.get(GameOption.VARIANT)
                     self.game_metadata.rated = data.get(GameOption.RATED, False)
                     self.game_metadata.players[not self.my_color].ai_level = data.get(GameOption.COMPUTER_SKILL_LEVEL) if self.vs_ai else None
@@ -259,8 +258,9 @@ class OnlineGameModel(PlayableGameModelBase):
                 if EventTopics.GAME_START in args:
                     self.game_metadata.reset()
                     self.game_metadata.game_id = data.get('gameId')
-                    self.game_metadata.my_color = self.my_color
                     self.game_metadata.rated = data.get('rated')
+                    # Since lila PR# 15969, color seeks can only be random. This resets `my_color` to the color received
+                    self.my_color = Color(COLOR_NAMES.index(data.get('color')))
                     self.game_metadata.variant = data.get('variant', {}).get('name')
                     self.game_metadata.speed = data['speed']
 

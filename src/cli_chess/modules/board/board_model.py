@@ -7,10 +7,11 @@ from typing import List, Optional
 
 
 class BoardModel:
-    def __init__(self, orientation: chess.Color = chess.WHITE, variant="standard", fen="") -> None:
+    def __init__(self, orientation: chess.Color = chess.WHITE, variant="standard", fen="", side_confirmed=True) -> None:
         self.board = self._initialize_board(variant, fen)
         self.initial_fen = self.board.fen()
         self.orientation = chess.WHITE if variant.lower() == "racingkings" else orientation
+        self.side_confirmed = side_confirmed  # flag to indicate if the users color is fully confirmed (e.g. online)
         self.highlight_move = chess.Move.null()
         self.premove_highlight = chess.Move.null()
         self._game_over_result: Optional[chess.Outcome] = None
@@ -41,9 +42,10 @@ class BoardModel:
             else:
                 return chess.variant.find_variant(variant)()
 
-    def reinitialize_board(self, variant: str, orientation: chess.Color, fen: str = "", uci_last_move=""):
+    def reinitialize_board(self, variant: str, orientation: chess.Color, fen: str = "", uci_last_move="", is_side_confirmed=True):
         """Reinitializes the existing board object to the new variant/fen.
            An optional uci_last_move can be passed in to highlight the last known move
+           Sets the "side_confirmed" to the passed in "is_side_confirmed" value. Defaults to true.
         """
         try:
             self.board = self._initialize_board(variant, fen)
@@ -51,6 +53,7 @@ class BoardModel:
             self.set_board_orientation(chess.WHITE if variant.lower() == "racingkings" else orientation, notify=False)
             self.highlight_move = chess.Move.from_uci(uci_last_move) if uci_last_move else chess.Move.null()
             self._game_over_result = None
+            self.side_confirmed = is_side_confirmed
 
             self._log_init_info()
             self._notify_board_model_updated(EventTopics.GAME_START)
@@ -279,6 +282,14 @@ class BoardModel:
     def is_white_orientation(self) -> bool:
         """Returns True if the board orientation is set as white"""
         return self.orientation is chess.WHITE
+
+    def is_side_confirmed(self) -> bool:
+        """Returns true if the users playing color is confirmed. This should always
+           be true once a game starts and an opponent is found. In Lichess online games
+           versus a random opponent, we need to wait until Lichess responds with our
+           starting color in order to know what color we start with
+        """
+        return self.side_confirmed
 
     def set_board_position(self, fen: str, uci_last_move=""):
         """Sets up the board using the passed in FEN. In addition, optionally the

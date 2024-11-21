@@ -1,5 +1,5 @@
 from cli_chess.menus import MenuModel, MenuOption, MenuCategory
-from cli_chess.core.game.game_options import OnlineGameOptions
+from cli_chess.core.game.game_options import OnlinePublicGameOptions
 from types import MappingProxyType
 from enum import Enum
 
@@ -44,7 +44,7 @@ class TVChannelMenuOptions(Enum):
     @property
     def variant(self) -> str:
         """Return the chess variant related to the enum"""
-        variant = OnlineGameOptions.variant_options_dict.get(self.value)
+        variant = OnlinePublicGameOptions.variant_options_dict.get(self.value)
         if not variant:
             variant = "standard"
         return variant

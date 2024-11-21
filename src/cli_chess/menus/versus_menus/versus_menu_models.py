@@ -1,5 +1,5 @@
 from cli_chess.menus import MultiValueMenuModel, MultiValueMenuOption, MenuCategory
-from cli_chess.core.game.game_options import GameOption, OfflineGameOptions, OnlineGameOptions, OnlineDirectChallengesGameOptions
+from cli_chess.core.game.game_options import GameOption, OfflineGameOptions, OnlinePublicGameOptions, OnlineDirectChallengesGameOptions
 
 
 class VersusMenuModel(MultiValueMenuModel):
@@ -63,9 +63,9 @@ class OnlineVsRandomOpponentMenuModel(VersusMenuModel):
     def _create_menu() -> MenuCategory:
         """Create the online menu options"""
         menu_options = [
-            MultiValueMenuOption(GameOption.VARIANT, "Choose the variant to play", [option for option in OnlineGameOptions.variant_options_dict]),  # noqa: E501
-            MultiValueMenuOption(GameOption.TIME_CONTROL, "Choose the time control", [option for option in OnlineGameOptions.time_control_options_dict]),  # noqa: E501
-            MultiValueMenuOption(GameOption.RATED, "Choose if you'd like to play a casual or rated game", [option for option in OnlineGameOptions.rated_options_dict]),  # noqa: E501
-            MultiValueMenuOption(GameOption.COLOR, "Choose the side you would like to play as", [option for option in OnlineGameOptions.color_options]),  # noqa: E501
+            MultiValueMenuOption(GameOption.VARIANT, "Choose the variant to play", [option for option in OnlinePublicGameOptions.variant_options_dict]),  # noqa: E501
+            MultiValueMenuOption(GameOption.TIME_CONTROL, "Choose the time control", [option for option in OnlinePublicGameOptions.time_control_options_dict]),  # noqa: E501
+            MultiValueMenuOption(GameOption.RATED, "Choose if you'd like to play a casual or rated game", [option for option in OnlinePublicGameOptions.rated_options_dict]),  # noqa: E501
+            MultiValueMenuOption(GameOption.COLOR, "The side you play for an online public game is determined by Lichess", [option for option in OnlinePublicGameOptions.color_options]),  # noqa: E501
         ]
         return MenuCategory("Play Online vs Random Opponent", menu_options)

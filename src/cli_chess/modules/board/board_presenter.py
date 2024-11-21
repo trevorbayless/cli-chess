@@ -70,7 +70,7 @@ class BoardPresenter:
            is disabled in the configuration.
         """
         file_labels = ""
-        show_board_coordinates = self.game_config_values[game_config.Keys.SHOW_BOARD_COORDINATES]
+        show_board_coordinates = self.game_config_values[game_config.Keys.SHOW_BOARD_COORDINATES] and self.model.is_side_confirmed()
 
         if show_board_coordinates:
             file_labels = self.model.get_file_labels()
@@ -83,7 +83,7 @@ class BoardPresenter:
         """
         rank_label = ""
         rank_index = self.model.get_square_rank_index(square)
-        show_board_coordinates = self.game_config_values[game_config.Keys.SHOW_BOARD_COORDINATES]
+        show_board_coordinates = self.game_config_values[game_config.Keys.SHOW_BOARD_COORDINATES] and self.model.is_side_confirmed()
 
         if self.is_square_start_of_rank(square) and show_board_coordinates:
             rank_label = self.model.get_rank_label(rank_index)

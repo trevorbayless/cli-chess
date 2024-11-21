@@ -105,18 +105,20 @@ class OfflineGameOptions(BaseGameOptions):
     time_control_options_dict.update(additional_time_controls)
 
 
-class OnlineGameOptions(BaseGameOptions):
-    """Game Options class with defined options permitted for board API use"""
+class OnlinePublicGameOptions(BaseGameOptions):
+    """Game Options class with defined options permitted for public seek board API use"""
     def __init__(self):
         super().__init__()
         self.dict_map = {
             GameOption.VARIANT: BaseGameOptions.variant_options_dict,
-            GameOption.TIME_CONTROL: self.time_control_options_dict,
-            GameOption.COMPUTER_SKILL_LEVEL: BaseGameOptions.skill_level_options_dict,
+            GameOption.TIME_CONTROL: BaseGameOptions.time_control_options_dict,
             GameOption.RATED: self.rated_options_dict,
-            GameOption.RATING_RANGE: None,
-            GameOption.COLOR: BaseGameOptions.color_options,
+            GameOption.COLOR: self.color_options
         }
+
+    color_options = {
+        "Random": "random"  # Online public seeks must be random (lila PR# 15969)
+    }
 
     rated_options_dict = {
         "No": False,
@@ -124,12 +126,18 @@ class OnlineGameOptions(BaseGameOptions):
     }
 
 
-class OnlineDirectChallengesGameOptions(OnlineGameOptions):
+class OnlineDirectChallengesGameOptions(BaseGameOptions):
     """Game Options class with defined options for direct challenges.
-       Brings in the additional permitted time controls.
+       Brings in the additional side to play as and permitted time controls options.
     """
     def __init__(self):
         super().__init__()
+        self.dict_map = {
+            GameOption.VARIANT: BaseGameOptions.variant_options_dict,
+            GameOption.TIME_CONTROL: self.time_control_options_dict,
+            GameOption.COMPUTER_SKILL_LEVEL: BaseGameOptions.skill_level_options_dict,
+            GameOption.COLOR: BaseGameOptions.color_options,
+        }
 
     time_control_options_dict = dict(BaseGameOptions.time_control_options_dict)
     additional_time_controls = {

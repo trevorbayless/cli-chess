@@ -10,10 +10,10 @@ from abc import ABC, abstractmethod
 
 
 class GameModelBase:
-    def __init__(self, orientation: Color = WHITE, variant="standard", fen=""):
+    def __init__(self, orientation: Color = WHITE, variant="standard", fen="", side_confirmed=True):
         self.game_metadata = GameMetadata()
 
-        self.board_model = BoardModel(orientation, variant, fen)
+        self.board_model = BoardModel(orientation, variant, fen, side_confirmed)
         self.move_list_model = MoveListModel(self.board_model)
         self.material_diff_model = MaterialDifferenceModel(self.board_model)
 
@@ -53,11 +53,11 @@ class GameModelBase:
 
 
 class PlayableGameModelBase(GameModelBase, ABC):
-    def __init__(self, play_as_color: str, variant="standard", fen=""):
+    def __init__(self, play_as_color: str, variant="standard", fen="", side_confirmed=True):
         self.my_color = self._get_side_to_play_as(play_as_color)
         self.game_in_progress = False
 
-        super().__init__(orientation=self.my_color, variant=variant, fen=fen)
+        super().__init__(orientation=self.my_color, variant=variant, fen=fen, side_confirmed=side_confirmed)
         self.premove_model = PremoveModel(self.board_model)
         self._assoc_models = self._assoc_models + [self.premove_model]
 
