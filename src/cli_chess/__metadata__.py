@@ -1,5 +1,5 @@
 __name__ = "cli-chess"
-__version__ = "1.4.0"
+__version__ = "1.4.1"
 __description__ = "A highly customizable way to play chess in your terminal"
 __url__ = "https://github.com/trevorbayless/cli-chess"
 __author__ = "Trevor Bayless"
