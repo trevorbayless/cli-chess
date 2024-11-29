@@ -21,9 +21,10 @@ class OfflineGameModel(PlayableGameModelBase):
            listens to subscribed model update events and if deemed necessary
            triages and notifies listeners of the event.
         """
-        super().update(*args, **kwargs)
         if EventTopics.GAME_END in args:
             self._report_game_over()
+
+        super().update(*args, **kwargs)
 
     def make_move(self, move: str):
         """Sends the move to the board model for it to be made"""
