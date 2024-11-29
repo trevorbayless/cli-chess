@@ -170,6 +170,8 @@ def test_get_move_stack(model: BoardModel):
     model.takeback(chess.WHITE)
     assert model.get_move_stack() == model.board.move_stack
 
+    assert model.get_move_stack(as_string=True) == "e2e4 d7d6 d2d4 g8f6"
+
 
 def test_get_variant_name():
     # Test chess960

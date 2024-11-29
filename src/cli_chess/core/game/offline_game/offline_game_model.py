@@ -104,4 +104,7 @@ class OfflineGameModel(PlayableGameModelBase):
         self.game_metadata.game_status.winner = COLOR_NAMES[outcome.winner]
 
         log.info(f"Game over (status={outcome.termination} winner={COLOR_NAMES[outcome.winner]})")
+        log.debug(f"Ending fen: {self.board_model.board.fen()}")
+        log.debug(f"Final move stack: {self.board_model.get_move_stack(as_string=True)}")
+
         self._notify_game_model_updated(EventTopics.GAME_END)

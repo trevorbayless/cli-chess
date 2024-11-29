@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from cli_chess.utils.event import EventManager, EventTopics
 from cli_chess.utils.logging import log
 import chess
@@ -155,6 +157,8 @@ class BoardModel:
                 self.board.pop()
 
             self.highlight_move = self.board.peek() if len(self.board.move_stack) > 0 else chess.Move.null()
+
+            log.debug(f"Takeback issued. New fen: {self.board.fen()}")
             self._notify_board_model_updated(EventTopics.MOVE_MADE)
 
         except Exception as e:
@@ -164,9 +168,15 @@ class BoardModel:
                 log.error(e)
             raise
 
-    def get_move_stack(self) -> List[chess.Move]:
+    def get_move_stack(self, as_string: bool = False) -> List[chess.Move] | str:
         """Returns the boards move stack"""
-        return self.board.move_stack
+        if as_string:
+            moves = ""
+            for move in self.board.move_stack:
+                moves += f"{move.uci()} "
+            return moves.strip()
+        else:
+            return self.board.move_stack
 
     def get_variant_name(self) -> str:
         """Returns a string holding the board variant name"""
