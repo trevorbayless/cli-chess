@@ -88,7 +88,10 @@ class BoardModel:
 
             if notify:
                 log.debug(f"Made move ({move})")
-                self._notify_board_model_updated(EventTopics.MOVE_MADE)
+                if not self.is_game_over():
+                    self._notify_board_model_updated(EventTopics.MOVE_MADE)
+                else:
+                    self._notify_board_model_updated(EventTopics.MOVE_MADE, EventTopics.GAME_END)
         except Exception as e:
             log.error(e)
             if isinstance(e, chess.InvalidMoveError):
