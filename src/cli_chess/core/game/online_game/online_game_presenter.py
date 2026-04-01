@@ -19,7 +19,6 @@ def start_online_game(game_parameters: dict, is_vs_ai: bool) -> None:
 class OnlineGamePresenter(PlayableGamePresenterBase):
     def __init__(self, model: OnlineGameModel):
         self.model = model
-        self.chat_presenter = ChatPresenter(model.chat_model)
         super().__init__(model)
 
     def _get_view(self) -> OnlineGameView:
