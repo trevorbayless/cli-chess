@@ -89,6 +89,8 @@ class PlayableGamePresenterBase(GamePresenterBase, ABC):
                 self.offer_draw()
             elif inpt_lower == "takeback" or inpt_lower == "back" or inpt_lower == "undo":
                 self.propose_takeback()
+            elif inpt_lower.find("send") == 0:
+                self.post_message(inpt.replace("send", "", 1))
             elif self.model.is_my_turn():
                 self.make_move(inpt)
             else:
@@ -132,6 +134,13 @@ class PlayableGamePresenterBase(GamePresenterBase, ABC):
                 self.model.resign()
             else:
                 self.exit()
+        except Exception as e:
+            self.view.alert.show_alert(str(e))
+
+    def post_message(self, text: str) -> None:
+        """Send message to opponent"""
+        try:
+            self.model.post_message(text)
         except Exception as e:
             self.view.alert.show_alert(str(e))
 

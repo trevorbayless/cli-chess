@@ -9,9 +9,10 @@ if TYPE_CHECKING:
 
 
 class BoardView:
-    def __init__(self, presenter: BoardPresenter, initial_board_output: list):
+    def __init__(self, presenter: BoardPresenter, initial_board_output: list, initial_game_chat: list):
         self.presenter = presenter
         self.board_output = FormattedTextControl(HTML(self._build_output(initial_board_output)))
+        self.chat_output = FormattedTextControl(self._build_chat(initial_game_chat))
         self._container = self._create_container()
 
     def _create_container(self):
@@ -44,9 +45,21 @@ class BoardView:
 
         return board_output_str
 
-    def update(self, board_output_list: list):
+    def _build_chat(self, game_chat: list):
+        """Returns a string containing the chat output to be used for
+        display."""
+        
+        chat_output_str = ""
+        
+        for message in game_chat:
+            print(message)
+
+    def update(self, board_output_list: list | None, game_chat_list: list | None):
         """Updates the board output with the passed in text"""
-        self.board_output.text = HTML(self._build_output(board_output_list))
+        if board_output_list is not None:
+            self.board_output.text = HTML(self._build_output(board_output_list))
+        if game_chat_list is not None:
+            self.chat_output.text = self._build_chat(game_chat_list)
         repaint_ui()
 
     def __pt_container__(self) -> Box:

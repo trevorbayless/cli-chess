@@ -13,7 +13,7 @@ class BoardPresenter:
     def __init__(self, model: BoardModel) -> None:
         self.model = model
         self.game_config_values = game_config.get_all_values()
-        self.view = BoardView(self, self.get_board_display())
+        self.view = BoardView(self, self.get_board_display(), self.get_game_chat())
 
         self.model.e_board_model_updated.add_listener(self.update)
         game_config.e_game_config_updated.add_listener(self._update_cached_config_values)
@@ -22,7 +22,7 @@ class BoardPresenter:
         """Updates the board output"""
         # TODO: Update this so the view utilizes a lambda pointing to the presenter?
         #       This would allow for this update function to be removed
-        self.view.update(self.get_board_display())
+        self.view.update(self.get_board_display(), self.get_game_chat())
 
     def _update_cached_config_values(self):
         """Updates the 'game_config_values' variable with the
@@ -63,6 +63,9 @@ class BoardPresenter:
             board_output.append(data)
 
         return board_output
+
+    def get_game_chat(self) -> List[Dict]:
+        return self.model.get_board_squares()
 
     def get_file_labels(self) -> str:
         """Returns a string containing the file labels. An empty

@@ -174,6 +174,20 @@ class OnlineGameModel(PlayableGameModelBase):
             else:
                 raise Warning("Game has already ended")
 
+    def post_message(self, text: str):
+        """Send message to opponent"""
+        if self.game_in_progress:
+            try:
+                self.game_state_dispatcher.post_message(text)
+            except Exception:
+                raise
+        else:
+            log.warning("Attempted to send message a game that's not in progress")
+            if self.searching:
+                raise Warning("Still searching for opponent")
+            else:
+                raise Warning("Game has already ended")
+
     def _handle_iem_event(self, *args, data: Optional[Dict] = None) -> None:
         """Handles events received from the IncomingEventManager. NOTE: Events coming in
            are global to the account, therefore multiple game start/end events can come in based
