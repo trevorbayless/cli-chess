@@ -1,6 +1,7 @@
 from cli_chess.core.game import PlayableGamePresenterBase
 from cli_chess.core.game.online_game import OnlineGameModel, OnlineGameView
 from cli_chess.utils.ui_common import change_views
+from cli_chess.modules.chat import ChatPresenter
 from cli_chess.utils import log, AlertType, EventTopics
 from chess import Color, COLOR_NAMES
 
@@ -18,6 +19,7 @@ def start_online_game(game_parameters: dict, is_vs_ai: bool) -> None:
 class OnlineGamePresenter(PlayableGamePresenterBase):
     def __init__(self, model: OnlineGameModel):
         self.model = model
+        self.chat_presenter = ChatPresenter(model.chat_model)
         super().__init__(model)
 
     def _get_view(self) -> OnlineGameView:

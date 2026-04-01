@@ -10,6 +10,7 @@ if TYPE_CHECKING:
 class OnlineGameView(PlayableGameViewBase):
     def __init__(self, presenter: OnlineGamePresenter):
         self.presenter = presenter
+        self.chat_container = presenter.chat_presenter.view
         super().__init__(presenter)
 
     def _create_container(self) -> Container:
@@ -25,7 +26,8 @@ class OnlineGameView(PlayableGameViewBase):
                         self.material_diff_lower_container,
                         self.player_info_lower_container,
                         self.clock_lower
-                    ])
+                    ]),
+                    self.chat_container
                 ]),
                 self.input_field_container,
                 self.premove_container,

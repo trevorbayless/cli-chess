@@ -6,6 +6,7 @@ from chess import COLORS, COLOR_NAMES, WHITE, BLACK, Color
 from berserk.formats import TEXT
 from enum import Enum, auto
 from typing import Optional, Dict
+from cli_chess.modules.chat import ChatModel
 
 
 class EventSender(Enum):
@@ -25,6 +26,8 @@ class OnlineGameModel(PlayableGameModelBase):
         self.searching = False
         self._update_game_metadata(EventTopics.GAME_PARAMS, sender=EventSender.LOCAL, data=game_parameters)
         self.game_state_dispatcher = Optional[GameStateDispatcher]
+        
+        self.chat_model = ChatModel()
 
         try:
             from cli_chess.core.api.api_manager import api_client, api_iem
@@ -245,6 +248,11 @@ class OnlineGameModel(PlayableGameModelBase):
 
                 if EventTopics.GAME_END in args:
                     self._report_game_over(status=data.get('status'), winner=data.get('winner', ""))
+
+            elif EventTopics.CHAT_RECEIVED in args:
+                username = data.get("username", "?")
+                text = data.get("text", "")
+                self.chat_model.add_message(username, text)
 
             self._update_game_metadata(*args, sender=EventSender.FROM_GSD, data=data)
         except Exception as e:

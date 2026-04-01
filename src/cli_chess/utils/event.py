@@ -5,6 +5,7 @@ from typing import Callable, List
 
 class EventTopics(Enum):
     MOVE_MADE = auto()
+    CHAT_RECEIVED = auto()
     BOARD_ORIENTATION_CHANGED = auto()
     GAME_PARAMS = auto()
     GAME_SEARCH = auto()
