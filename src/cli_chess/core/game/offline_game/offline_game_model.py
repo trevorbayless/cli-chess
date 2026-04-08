@@ -75,7 +75,7 @@ class OfflineGameModel(PlayableGameModelBase):
         else:
             log.warning("Attempted to resign a game that's not in progress")
             raise Warning("Game has already ended")
-    
+
     def post_message(self, text: str):
         raise Warning("Offline engine does not accept messaging")
 

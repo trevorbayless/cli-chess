@@ -26,7 +26,7 @@ class OnlineGameModel(PlayableGameModelBase):
         self.searching = False
         self._update_game_metadata(EventTopics.GAME_PARAMS, sender=EventSender.LOCAL, data=game_parameters)
         self.game_state_dispatcher = Optional[GameStateDispatcher]
-        
+
         self.chat_model = ChatModel()
 
         try:

@@ -97,7 +97,7 @@ class GameStateDispatcher(Thread):
         """Resigns the game"""
         log.debug("Sending resignation")
         self.api_client.board.resign_game(self.game_id)
-        
+
     @retry(times=3, exceptions=(Exception,))
     def post_message(self, text: str) -> None:
         """Send message to our opponent"""

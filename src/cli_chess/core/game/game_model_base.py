@@ -94,7 +94,7 @@ class PlayableGameModelBase(GameModelBase, ABC):
     @abstractmethod
     def resign(self) -> None:
         pass
-    
+
     @abstractmethod
     def post_message(self, text: str) -> None:
         pass
