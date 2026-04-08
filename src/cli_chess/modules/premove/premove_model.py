@@ -66,7 +66,7 @@ class PremoveModel:
                 if isinstance(e, InvalidMoveError):
                     raise ValueError(f"Invalid premove: {move}")
                 elif isinstance(e, IllegalMoveError):
-                    raise ValueError(f"Illegal premove: {move}")
+                    return
                 elif isinstance(e, AmbiguousMoveError):
                     raise ValueError(f"Ambiguous premove: {move}")
                 else:
