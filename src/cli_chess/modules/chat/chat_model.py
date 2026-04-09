@@ -1,3 +1,6 @@
+from __future__ import annotations
+
+
 class ChatModel:
     def __init__(self):
         self._messages: list[dict] = []
