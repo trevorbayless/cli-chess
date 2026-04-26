@@ -76,6 +76,9 @@ class OfflineGameModel(PlayableGameModelBase):
             log.warning("Attempted to resign a game that's not in progress")
             raise Warning("Game has already ended")
 
+    def post_message(self, text: str):
+        raise Warning("Offline engine does not accept messaging")
+
     def _update_game_metadata(self, *args, data: Optional[Dict] = None, **kwargs) -> None:
         """Parses and saves the data of the game being played"""
         if not data:

@@ -6,6 +6,7 @@ from chess import COLORS, COLOR_NAMES, WHITE, BLACK, Color
 from berserk.formats import TEXT
 from enum import Enum, auto
 from typing import Optional, Dict
+from cli_chess.modules.chat import ChatModel
 
 
 class EventSender(Enum):
@@ -25,6 +26,8 @@ class OnlineGameModel(PlayableGameModelBase):
         self.searching = False
         self._update_game_metadata(EventTopics.GAME_PARAMS, sender=EventSender.LOCAL, data=game_parameters)
         self.game_state_dispatcher = Optional[GameStateDispatcher]
+
+        self.chat_model = ChatModel()
 
         try:
             from cli_chess.core.api.api_manager import api_client, api_iem
@@ -174,6 +177,20 @@ class OnlineGameModel(PlayableGameModelBase):
             else:
                 raise Warning("Game has already ended")
 
+    def post_message(self, text: str):
+        """Send message to opponent"""
+        if self.game_in_progress:
+            try:
+                self.game_state_dispatcher.post_message(text)
+            except Exception:
+                raise
+        else:
+            log.warning("Attempted to send message a game that's not in progress")
+            if self.searching:
+                raise Warning("Still searching for opponent")
+            else:
+                raise Warning("Game has already ended")
+
     def _handle_iem_event(self, *args, data: Optional[Dict] = None) -> None:
         """Handles events received from the IncomingEventManager. NOTE: Events coming in
            are global to the account, therefore multiple game start/end events can come in based
@@ -231,6 +248,11 @@ class OnlineGameModel(PlayableGameModelBase):
 
                 if EventTopics.GAME_END in args:
                     self._report_game_over(status=data.get('status'), winner=data.get('winner', ""))
+
+            elif EventTopics.CHAT_RECEIVED in args:
+                username = data.get("username", "?")
+                text = data.get("text", "")
+                self.chat_model.add_message(username, text)
 
             self._update_game_metadata(*args, sender=EventSender.FROM_GSD, data=data)
         except Exception as e:

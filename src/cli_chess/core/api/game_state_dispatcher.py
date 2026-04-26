@@ -6,7 +6,6 @@ from types import MappingProxyType
 
 
 class GSDEventTopics(Enum):
-    CHAT_RECEIVED = auto()
     OPPONENT_GONE = auto()
     NOT_IMPLEMENTED = auto()
 
@@ -14,7 +13,7 @@ class GSDEventTopics(Enum):
 gsd_type_to_event_dict = MappingProxyType({
     "gameFull": EventTopics.GAME_START,
     "gameState": EventTopics.MOVE_MADE,
-    "chatLine": GSDEventTopics.CHAT_RECEIVED,
+    "chatLine": EventTopics.CHAT_RECEIVED,
     "opponentGone": GSDEventTopics.OPPONENT_GONE,
 })
 
@@ -61,6 +60,8 @@ class GameStateDispatcher(Thread):
 
                 if not is_gone:
                     pass  # TODO: Cancel auto-claim countdown
+            elif event_topic is EventTopics.CHAT_RECEIVED:
+                pass
 
             game_end_event = EventTopics.GAME_END if self.is_game_over else None
             self.e_game_state_dispatcher_event.notify(event_topic, game_end_event, data=event)
@@ -96,6 +97,12 @@ class GameStateDispatcher(Thread):
         """Resigns the game"""
         log.debug("Sending resignation")
         self.api_client.board.resign_game(self.game_id)
+
+    @retry(times=3, exceptions=(Exception,))
+    def post_message(self, text: str) -> None:
+        """Send message to our opponent"""
+        log.debug("Sending message to opponent")
+        self.api_client.board.post_message(self.game_id, text)
 
     @retry(times=3, exceptions=(Exception,))
     def claim_victory(self) -> None:
