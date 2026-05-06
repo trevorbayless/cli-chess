@@ -69,12 +69,14 @@ class GameViewBase(ABC):
 
         @bindings.add(Keys.F1, eager=True)
         @bindings.add(Keys.ControlQ, eager=True)
+
         def _(event): # noqa
             
             self.presenter.flip_board()
 
         @bindings.add(Keys.F8, eager=True)
         @bindings.add(Keys.ControlR, eager=True)
+
         def _(event): # noqa
             self.presenter.exit()
 
@@ -160,8 +162,11 @@ class PlayableGameViewBase(GameViewBase, ABC):
     def get_key_bindings(self) -> "_MergedKeyBindings":  # noqa: F821:
         """Returns the key bindings for this container"""
         bindings = KeyBindings()
+        
         @bindings.add(Keys.ControlW, filter=Condition(self.presenter.is_game_in_progress), eager=True)
+
         @bindings.add(Keys.F2, filter=Condition(self.presenter.is_game_in_progress), eager=True)
+
         def _(event): # noqa
             self.presenter.propose_takeback()
 
@@ -170,12 +175,15 @@ class PlayableGameViewBase(GameViewBase, ABC):
             def _(event):
                 if not event.is_repeat:
                     self.presenter.offer_draw()
+
         @bindings.add(Keys.ControlE, filter=Condition(self.presenter.is_game_in_progress), eager=True)
         @bindings.add(Keys.F4, filter=Condition(self.presenter.is_game_in_progress), eager=True)
         def _(event):
             if not event.is_repeat:
                 self.presenter.resign()
+
         @bindings.add(Keys.ControlR, filter=Condition(self.presenter.is_game_in_progress), eager=True)
+
         @bindings.add(Keys.F8, filter=~Condition(self.presenter.is_game_in_progress), eager=True)
         def _(event): # noqa
             self.presenter.exit()
