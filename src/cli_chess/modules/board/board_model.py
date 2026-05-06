@@ -5,7 +5,7 @@ from cli_chess.utils.logging import log
 import chess
 import chess.variant
 from random import randint
-from typing import List, Optional
+from typing import List, Optional, Set
 
 
 class BoardModel:
@@ -16,6 +16,9 @@ class BoardModel:
         self.side_confirmed = side_confirmed  # flag to indicate if the users color is fully confirmed (e.g. online)
         self.highlight_move = chess.Move.null()
         self.premove_highlight = chess.Move.null()
+        self._move_input_from_squares: frozenset = frozenset()
+        self._move_input_to_squares: frozenset = frozenset()
+        self._move_input_preview_move: chess.Move = chess.Move.null()
         self._game_over_result: Optional[chess.Outcome] = None
         self._log_init_info()
 
@@ -54,6 +57,9 @@ class BoardModel:
             self.initial_fen = self.board.fen()
             self.set_board_orientation(chess.WHITE if variant.lower() == "racingkings" else orientation, notify=False)
             self.highlight_move = chess.Move.from_uci(uci_last_move) if uci_last_move else chess.Move.null()
+            self._move_input_from_squares = frozenset()
+            self._move_input_to_squares = frozenset()
+            self._move_input_preview_move = chess.Move.null()
             self._game_over_result = None
             self.side_confirmed = is_side_confirmed
 
@@ -69,6 +75,9 @@ class BoardModel:
         """
         self.board.reset()
         self.set_fen(self.initial_fen, notify=False)
+        self._move_input_from_squares = frozenset()
+        self._move_input_to_squares = frozenset()
+        self._move_input_preview_move = chess.Move.null()
         self._game_over_result = None
 
         if notify:
@@ -205,6 +214,45 @@ class BoardModel:
         """
         return self.highlight_move
 
+    def get_move_input_from_squares(self) -> frozenset:
+        """Squares to highlight as candidate moving pieces while typing a move."""
+        return self._move_input_from_squares
+
+    def get_move_input_to_squares(self) -> frozenset:
+        """Destination squares to highlight for in-progress move input (optional)."""
+        return self._move_input_to_squares
+
+    def get_move_input_preview_move(self) -> chess.Move:
+        """When input resolves to exactly one legal move, both ends are highlighted."""
+        return self._move_input_preview_move
+
+    def set_move_input_highlights(
+        self,
+        from_squares: Set[chess.Square],
+        to_squares: Set[chess.Square],
+        preview_move: chess.Move,
+        notify: bool = True,
+    ) -> None:
+        """Updates transient highlights driven by the move input field."""
+        self._move_input_from_squares = frozenset(from_squares)
+        self._move_input_to_squares = frozenset(to_squares)
+        self._move_input_preview_move = preview_move
+        if notify:
+            self._notify_board_model_updated()
+
+    def clear_move_input_highlights(self, notify: bool = True) -> None:
+        """Clears move-input-driven highlights."""
+        if (
+            self._move_input_from_squares
+            or self._move_input_to_squares
+            or bool(self._move_input_preview_move)
+        ):
+            self._move_input_from_squares = frozenset()
+            self._move_input_to_squares = frozenset()
+            self._move_input_preview_move = chess.Move.null()
+            if notify:
+                self._notify_board_model_updated()
+
     def set_board_orientation(self, color: chess.Color, notify=True) -> None:
         """Sets the board's orientation to the color passed in.
            If notify is false, a model update notification will not be sent.
@@ -314,6 +362,9 @@ class BoardModel:
             if fen:
                 self.set_fen(fen, notify=False)
                 self.highlight_move = chess.Move.from_uci(uci_last_move) if uci_last_move else chess.Move.null()
+                self._move_input_from_squares = frozenset()
+                self._move_input_to_squares = frozenset()
+                self._move_input_preview_move = chess.Move.null()
                 self._notify_board_model_updated()
         except Exception as e:
             log.error(f"Error caught setting board position: {e}")

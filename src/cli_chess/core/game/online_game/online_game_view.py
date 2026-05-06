@@ -1,6 +1,6 @@
 from __future__ import annotations
 from cli_chess.core.game import PlayableGameViewBase
-from prompt_toolkit.layout import Container, HSplit, VSplit, VerticalAlign
+from prompt_toolkit.layout import Container, HSplit, VSplit, VerticalAlign, D
 from prompt_toolkit.widgets import Box
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -29,7 +29,10 @@ class OnlineGameView(PlayableGameViewBase):
                     ]),
                     self.chat_container
                 ]),
-                self.input_field_container,
+                HSplit([
+                    self.input_field_container,
+                    self.move_input_hint_window,
+                ], height=D(max=2, preferred=2)),
                 self.premove_container,
                 self.alert,
             ]),
