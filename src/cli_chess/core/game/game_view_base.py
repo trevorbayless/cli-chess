@@ -30,7 +30,7 @@ class GameViewBase(ABC):
 
         log.debug(f"Created {type(self).__name__} (id={id(self)})")
 
-    @abstractmethod
+    @abstractmethod 
     def _create_container(self) -> Container:
         pass
 
@@ -44,7 +44,7 @@ class GameViewBase(ABC):
     def _flip_board_fb_fragments(self) -> Tuple:
         """Returns the function bar fragments for flipping the board"""
         return (
-            ("class:function-bar.key", "F1", handle_mouse_click(self.presenter.flip_board)),
+            ("class:function-bar.key", "F1/Ctrl+Q", handle_mouse_click(self.presenter.flip_board)),
             ("class:function-bar.label", f"{'Flip board':<11}", handle_mouse_click(self.presenter.flip_board)),
             ("class:function-bar.spacer", " "),
         )
@@ -52,7 +52,7 @@ class GameViewBase(ABC):
     def _exit_fb_fragments(self) -> Tuple:
         """Returns the function bar fragments for exiting the game view"""
         return (
-            ("class:function-bar.key", "F8", handle_mouse_click(self.presenter.exit)),
+            ("class:function-bar.key", "F8/Ctrl+R", handle_mouse_click(self.presenter.exit)),
             ("class:function-bar.label", f"{'Exit':<11}", handle_mouse_click(self.presenter.exit)),
             ("class:function-bar.spacer", " "),
         )
@@ -68,10 +68,13 @@ class GameViewBase(ABC):
         bindings = KeyBindings()
 
         @bindings.add(Keys.F1, eager=True)
+        @bindings.add(Keys.ControlQ, eager=True)
         def _(event): # noqa
+            
             self.presenter.flip_board()
 
         @bindings.add(Keys.F8, eager=True)
+        @bindings.add(Keys.ControlR, eager=True)
         def _(event): # noqa
             self.presenter.exit()
 
@@ -102,7 +105,7 @@ class PlayableGameViewBase(GameViewBase, ABC):
     def _takeback_fb_fragments(self) -> Tuple:
         """Returns the function bar fragments for propsing a takeback"""
         return (
-            ("class:function-bar.key", "F2", handle_mouse_click(self.presenter.propose_takeback)),
+            ("class:function-bar.key", "F2/Ctrl+W", handle_mouse_click(self.presenter.propose_takeback)),
             ("class:function-bar.label", f"{'Takeback':<11}", handle_mouse_click(self.presenter.propose_takeback)),
             ("class:function-bar.spacer", " "),
         )
@@ -118,7 +121,7 @@ class PlayableGameViewBase(GameViewBase, ABC):
     def _resign_fb_fragments(self) -> Tuple:
         """Returns the function bar fragments for resigning"""
         return (
-            ("class:function-bar.key", "F4", handle_mouse_click(self.presenter.resign)),
+            ("class:function-bar.key", "F4/Ctrl+E", handle_mouse_click(self.presenter.resign)),
             ("class:function-bar.label", f"{'Resign':<11}", handle_mouse_click(self.presenter.resign)),
             ("class:function-bar.spacer", " "),
         )
@@ -157,7 +160,7 @@ class PlayableGameViewBase(GameViewBase, ABC):
     def get_key_bindings(self) -> "_MergedKeyBindings":  # noqa: F821:
         """Returns the key bindings for this container"""
         bindings = KeyBindings()
-
+        @bindings.add(Keys.ControlW, filter=Condition(self.presenter.is_game_in_progress), eager=True)
         @bindings.add(Keys.F2, filter=Condition(self.presenter.is_game_in_progress), eager=True)
         def _(event): # noqa
             self.presenter.propose_takeback()
@@ -167,12 +170,12 @@ class PlayableGameViewBase(GameViewBase, ABC):
             def _(event):
                 if not event.is_repeat:
                     self.presenter.offer_draw()
-
+        @bindings.add(Keys.ControlE, filter=Condition(self.presenter.is_game_in_progress), eager=True)
         @bindings.add(Keys.F4, filter=Condition(self.presenter.is_game_in_progress), eager=True)
         def _(event):
             if not event.is_repeat:
                 self.presenter.resign()
-
+        @bindings.add(Keys.ControlR, filter=Condition(self.presenter.is_game_in_progress), eager=True)
         @bindings.add(Keys.F8, filter=~Condition(self.presenter.is_game_in_progress), eager=True)
         def _(event): # noqa
             self.presenter.exit()

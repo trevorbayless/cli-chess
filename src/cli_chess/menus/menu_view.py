@@ -148,11 +148,12 @@ class MultiValueMenuView(MenuView):
 
     def _create_key_bindings(self) -> KeyBindings:
         bindings = super()._create_key_bindings()
-
         @bindings.add(Keys.Enter, eager=True)
         @bindings.add(" ", eager=True)
+        @bindings.add(Keys.PageUp, eager=True)
+        @bindings.add(Keys.PageDown, eager=True)
         def _(event): # noqa
-            """Handle Enter/Space key press"""
+            """Handle PageUp/PageDown key press"""
             self.cycle_value(self.selected_option)
 
         return bindings

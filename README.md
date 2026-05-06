@@ -47,7 +47,7 @@ offline against the Fairy-Stockfish engine. All Lichess variants are supported.
 1. Open your terminal and run `pip install cli-chess`
 2. Type `cli-chess` to start
 3. Use your keyboard arrows, tab, or click to navigate the menus. Multi-value menu options
-   (e.g. changing the variant) can be cycled by pressing the spacebar, enter, or by clicking
+   (e.g. changing the variant) can be cycled by pressing page up/down, or by clicking
    on the value.
 
 ## Playing Online
