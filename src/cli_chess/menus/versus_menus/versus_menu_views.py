@@ -16,7 +16,7 @@ class VersusMenuView(MultiValueMenuView):
 
     def get_function_bar_fragments(self) -> StyleAndTextTuples:
         return [
-            ("class:function-bar.key", "F1", handle_mouse_click(self.presenter.handle_start_game)),
+            ("class:function-bar.key", "F1/Ctrl+Q", handle_mouse_click(self.presenter.handle_start_game)),
             ("class:function-bar.label", f"{'Start game':<14}", handle_mouse_click(self.presenter.handle_start_game)),
         ]
 
@@ -24,4 +24,5 @@ class VersusMenuView(MultiValueMenuView):
         """Creates the key bindings associated to the function bar fragments"""
         kb = KeyBindings()
         kb.add(Keys.F1)(handle_bound_key_pressed(self.presenter.handle_start_game))
+        kb.add(Keys.ControlQ)(handle_bound_key_pressed(self.presenter.handle_start_game))
         return kb

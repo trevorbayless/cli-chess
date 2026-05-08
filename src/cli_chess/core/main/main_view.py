@@ -65,7 +65,7 @@ class MainView:
     @staticmethod
     def _create_navigation_hint() -> Box:
         """Creates the navigation hint container"""
-        message = "Use [ARROWS] to navigate the menus. Use [SPACEBAR] or [ENTER] to modify values."
+        message = "Use [ARROWS] to navigate the menus. Use [PAGE UP/DOWN/SPACE/ENTER] to modify values."
         return Box(
             Window(FormattedTextControl(HTML(f"<i>{message}</i>"), style="class:label.dim"), align=WindowAlign.CENTER),
             padding=0, padding_bottom=1, height=D(max=2)
@@ -80,7 +80,7 @@ class MainView:
                 fragments.append(("class:function-bar.spacer", " "))
 
             fragments.extend([
-                ("class:function-bar.key", "F8", handle_mouse_click(exit_app)),
+                ("class:function-bar.key", "F8/Ctrl+R", handle_mouse_click(exit_app)),
                 ("class:function-bar.label", f"{'Quit':<14}", handle_mouse_click(exit_app))
             ])
 
@@ -96,7 +96,7 @@ class MainView:
         main_menu_fb_key_bindings = self.presenter.main_menu_presenter.view.get_function_bar_key_bindings()
         main_view_fb_key_bindings = KeyBindings()
         main_view_fb_key_bindings.add(Keys.F8)(exit_app)
-
+        main_view_fb_key_bindings.add(Keys.ControlC)(exit_app)
         return merge_key_bindings([main_view_fb_key_bindings, main_menu_fb_key_bindings])
 
     def get_global_key_bindings(self) -> KeyBindings():
