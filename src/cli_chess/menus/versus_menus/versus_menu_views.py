@@ -7,6 +7,7 @@ from prompt_toolkit.keys import Keys
 from prompt_toolkit.formatted_text import StyleAndTextTuples
 from prompt_toolkit.widgets import Label, TextArea, ValidationToolbar
 from prompt_toolkit.validation import Validator
+from prompt_toolkit.application import get_app
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from cli_chess.menus.versus_menus.versus_menu_presenters import VersusMenuPresenter, OnlineVsPlayerMenuPresenter
@@ -38,13 +39,14 @@ class OnlineVsPlayerMenuView(VersusMenuView):
     def _create_container(self) -> Container:
         """Creates the container for the challenge a player menu"""
         self._username_input = self._create_username_input_area()
+        self._menu_container = super()._create_container()
         return HSplit([
             VSplit([
                 Label("Opponent: ", style="bold", dont_extend_width=True),
                 self._username_input,
-            ], height=D(min=1, max=1)),
+            ], height=D(min=1, max=1), key_bindings=self._create_username_key_bindings()),
             ValidationToolbar(),
-            super()._create_container(),
+            self._menu_container,
         ])
 
     def _create_username_input_area(self) -> TextArea:
@@ -65,9 +67,29 @@ class OnlineVsPlayerMenuView(VersusMenuView):
             height=D(max=1),
         )
 
+    def _create_username_key_bindings(self) -> KeyBindings:
+        """Creates the key bindings associated to the username input"""
+        bindings = KeyBindings()
+
+        @bindings.add(Keys.Up)
+        @bindings.add(Keys.Down)
+        def _(event): # noqa
+            """Move focus to the menu options"""
+            self.focus()
+
+        return bindings
+
     def get_username(self) -> str:
         """Returns the username of the player to challenge"""
         return self._username_input.text.strip()
+
+    def has_focus(self) -> bool:
+        """Returns true if the menu options have focus"""
+        return get_app().layout.has_focus(self._menu_container)
+
+    def focus(self) -> None:
+        """Focus on the menu options"""
+        get_app().layout.focus(self._menu_container)
 
     def get_function_bar_fragments(self) -> StyleAndTextTuples:
         return [
