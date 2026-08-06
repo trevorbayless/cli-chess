@@ -1,7 +1,7 @@
 from __future__ import annotations
 from cli_chess.modules.token_manager import TokenManagerView
 from cli_chess.utils.common import open_url_in_browser
-from cli_chess.core.api.api_manager import required_token_scopes
+from cli_chess.core.api.api_manager import required_token_scopes, optional_token_scopes
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from cli_chess.modules.token_manager import TokenManagerModel
@@ -28,7 +28,7 @@ class TokenManagerPresenter:
         """Open the URL to create a Lichess API token"""
         url = f"{self.model.base_url}/account/oauth/token/create?"
 
-        for scope in required_token_scopes:
+        for scope in required_token_scopes | optional_token_scopes:
             url = url + f"scopes[]={scope}&"
 
         url = url + "description=cli-chess+token"
