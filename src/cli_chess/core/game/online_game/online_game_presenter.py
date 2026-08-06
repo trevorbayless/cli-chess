@@ -30,7 +30,7 @@ class OnlineGamePresenter(PlayableGamePresenterBase):
         """Update method called on game model updates. Overrides base."""
         super().update(*args, **kwargs)
         if EventTopics.GAME_SEARCH in args:
-            self.view.alert.show_alert(kwargs.get('msg') or "Searching for opponent...", AlertType.NEUTRAL)
+            self.view.alert.show_alert(kwargs.get('msg', "Searching for opponent..."), AlertType.NEUTRAL)
         elif EventTopics.ERROR in args:
             self.view.alert.show_alert(kwargs.get('msg', "An unspecified error has occurred"), AlertType.ERROR)
 

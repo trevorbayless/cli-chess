@@ -61,17 +61,14 @@ class OnlineGameModel(PlayableGameModelBase):
                                                      color=COLOR_NAMES[self.my_color],
                                                      variant=self.game_metadata.variant)
             elif self.vs_opponent:  # Challenge a specific player
-                response = self.api_client.challenges.create(
-                    username=self.vs_opponent,
-                    rated=self.game_metadata.rated,
-                    clock_limit=self.game_metadata.clocks[WHITE].time * 60,  # challenges need time in seconds
-                    clock_increment=self.game_metadata.clocks[WHITE].increment,
-                    color=self.challenge_color,
-                    variant=self.game_metadata.variant,
-                )
+                response = self.api_client.challenges.create(username=self.vs_opponent,
+                                                             rated=self.game_metadata.rated,
+                                                             clock_limit=self.game_metadata.clocks[WHITE].time * 60,
+                                                             clock_increment=self.game_metadata.clocks[WHITE].increment,
+                                                             color=self.challenge_color,
+                                                             variant=self.game_metadata.variant)
                 self.sent_challenge_id = response.get('id')
                 self._notify_game_model_updated(EventTopics.GAME_SEARCH, msg=f"Challenge sent to {self.vs_opponent}. Waiting for a response...")
-
             else:  # Find a random opponent
                 payload = {
                     "rated": str(self.game_metadata.rated).lower(),

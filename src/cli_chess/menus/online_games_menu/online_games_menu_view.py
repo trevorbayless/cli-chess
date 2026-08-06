@@ -6,7 +6,7 @@ from prompt_toolkit.layout import Container, ConditionalContainer, VSplit, HSpli
 from prompt_toolkit.filters import Condition, is_done
 from prompt_toolkit.key_binding import merge_key_bindings, ConditionalKeyBindings
 from prompt_toolkit.formatted_text import StyleAndTextTuples
-from prompt_toolkit.widgets import Box, TextArea
+from prompt_toolkit.widgets import Box, Label
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from cli_chess.menus.online_games_menu import OnlineGamesMenuPresenter
@@ -35,12 +35,9 @@ class OnlineGamesMenuView(MenuView):
                     & Condition(lambda: api_token_has_scope("challenge:write"))
                 ),
                 ConditionalContainer(
-                    TextArea(
-                        "Your Lichess API token is missing the 'challenge:write' scope.\n"
-                        "Use 'Settings' to link a new token with this scope\n"
-                        "to challenge other players.",
-                        wrap_lines=True, read_only=True, focusable=False
-                    ),
+                    Box(Label("Your Lichess API token is missing the 'challenge:write' scope.\n"
+                              "Use 'Settings' to link a new token with this scope\n"
+                              "to challenge other players.", dont_extend_width=True), padding=0, padding_right=1),
                     filter=~is_done
                     & Condition(lambda: self.presenter.selection == OnlineGamesMenuOptions.CHALLENGE_PLAYER)
                     & ~Condition(lambda: api_token_has_scope("challenge:write"))

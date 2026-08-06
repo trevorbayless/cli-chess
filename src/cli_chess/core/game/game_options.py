@@ -118,7 +118,7 @@ class OnlinePublicGameOptions(BaseGameOptions):
         self.dict_map = {
             GameOption.VARIANT: BaseGameOptions.variant_options_dict,
             GameOption.TIME_CONTROL: BaseGameOptions.time_control_options_dict,
-            GameOption.RATED: self.rated_options_dict,
+            GameOption.RATED: BaseGameOptions.rated_options_dict,
             GameOption.COLOR: self.color_options
         }
 

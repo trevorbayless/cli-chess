@@ -5,16 +5,16 @@ from cli_chess.core.game.game_options import GameOption, BaseGameOptions, Offlin
 from cli_chess.core.game import start_online_game, start_offline_game
 from cli_chess.utils import log
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, Type
+from typing import TYPE_CHECKING, Type, Optional
 if TYPE_CHECKING:
     from cli_chess.menus.versus_menus import VersusMenuModel, OfflineVsComputerMenuModel
 
 
 class VersusMenuPresenter(MultiValueMenuPresenter, ABC):
     """Base presenter for the VsComputer menus"""
-    def __init__(self, model: VersusMenuModel, view: VersusMenuView = None):
+    def __init__(self, model: VersusMenuModel, view: Optional[VersusMenuView] = None):
         self.model = model
-        self.view = view if view else VersusMenuView(self)
+        self.view = view or VersusMenuView(self)
         super().__init__(self.model, self.view)
 
     @abstractmethod
