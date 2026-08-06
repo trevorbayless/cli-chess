@@ -14,6 +14,7 @@ class GameOption(Enum):
     RATED = "Rated"
     RATING_RANGE = "Rating Range"
     COLOR = "Side to play as"
+    OPPONENT = "Opponent"
 
 
 class BaseGameOptions(ABC):
@@ -79,6 +80,11 @@ class BaseGameOptions(ABC):
         "Black": "black"
     })
 
+    rated_options_dict = {
+        "No": False,
+        "Yes": True
+    }
+
 
 class OfflineGameOptions(BaseGameOptions):
     """Game Options class with defined options for playing offline games"""
@@ -120,14 +126,9 @@ class OnlinePublicGameOptions(BaseGameOptions):
         "Random": "random"  # Online public seeks must be random (lila PR# 15969)
     }
 
-    rated_options_dict = {
-        "No": False,
-        "Yes": True
-    }
 
-
-class OnlineDirectChallengesGameOptions(BaseGameOptions):
-    """Game Options class with defined options for direct challenges.
+class OnlineVsComputerGameOptions(BaseGameOptions):
+    """Game Options class with defined options for online games vs the computer.
        Brings in the additional side to play as and permitted time controls options.
     """
     def __init__(self):
@@ -136,6 +137,27 @@ class OnlineDirectChallengesGameOptions(BaseGameOptions):
             GameOption.VARIANT: BaseGameOptions.variant_options_dict,
             GameOption.TIME_CONTROL: self.time_control_options_dict,
             GameOption.COMPUTER_SKILL_LEVEL: BaseGameOptions.skill_level_options_dict,
+            GameOption.COLOR: BaseGameOptions.color_options,
+        }
+
+    time_control_options_dict = dict(BaseGameOptions.time_control_options_dict)
+    additional_time_controls = {
+        "5+3 (Blitz)": (5, 3),
+        "5+0 (Blitz)": (5, 0),
+        "3+2 (Blitz)": (3, 2),
+        "3+0 (Blitz)": (3, 0)
+    }
+    time_control_options_dict.update(additional_time_controls)
+
+
+class OnlineDirectChallengesGameOptions(BaseGameOptions):
+    """Game Options class with defined options for directly challenging another player"""
+    def __init__(self):
+        super().__init__()
+        self.dict_map = {
+            GameOption.VARIANT: BaseGameOptions.variant_options_dict,
+            GameOption.TIME_CONTROL: self.time_control_options_dict,
+            GameOption.RATED: BaseGameOptions.rated_options_dict,
             GameOption.COLOR: BaseGameOptions.color_options,
         }
 

@@ -4,6 +4,7 @@ from enum import Enum
 
 class OnlineGamesMenuOptions(Enum):
     CREATE_GAME = "Create a game"
+    CHALLENGE_PLAYER = "Challenge a player"
     VS_COMPUTER_ONLINE = "Play vs Computer"
     WATCH_LICHESS_TV = "Watch Lichess TV"
 
@@ -18,6 +19,7 @@ class OnlineGamesMenuModel(MenuModel):
         """Create the menu options"""
         menu_options = [
             MenuOption(OnlineGamesMenuOptions.CREATE_GAME, "Create an online game against a random opponent"),
+            MenuOption(OnlineGamesMenuOptions.CHALLENGE_PLAYER, "Challenge a Lichess player by username"),
             MenuOption(OnlineGamesMenuOptions.VS_COMPUTER_ONLINE, "Play online against the computer"),
             MenuOption(OnlineGamesMenuOptions.WATCH_LICHESS_TV, "Watch top rated Lichess players compete live"),
         ]
