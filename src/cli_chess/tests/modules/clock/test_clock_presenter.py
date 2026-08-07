@@ -1,6 +1,7 @@
 from cli_chess.core.game import GameModelBase
 from cli_chess.modules.clock import ClockPresenter
 from chess import WHITE, BLACK
+from datetime import datetime, timezone
 import pytest
 
 
@@ -81,6 +82,25 @@ def test_game_end_freezes_both_clocks(model: GameModelBase, presenter: ClockPres
     fake_time[0] += 60.0
     assert presenter.get_clock_display(WHITE) == "01:00"
     assert presenter.get_clock_display(BLACK) == "00:30"
+
+
+def test_ticking_datetime_clock_decrements(model: GameModelBase, presenter: ClockPresenter, fake_time: list):
+    # berserk converts the top level wtime/btime of a `gameState` event into datetimes
+    model.game_metadata.clocks[WHITE].units = "ms"
+    model.game_metadata.clocks[WHITE].time = datetime.fromtimestamp(60, timezone.utc)
+    model.game_metadata.set_clock_ticking(WHITE)
+
+    fake_time[0] += 5.0
+    assert presenter.get_clock_display(WHITE) == "00:55"
+
+
+def test_ticking_datetime_clock_floors_at_zero(model: GameModelBase, presenter: ClockPresenter, fake_time: list):
+    model.game_metadata.clocks[WHITE].units = "ms"
+    model.game_metadata.clocks[WHITE].time = datetime.fromtimestamp(3, timezone.utc)
+    model.game_metadata.set_clock_ticking(WHITE)
+
+    fake_time[0] += 10.0
+    assert presenter.get_clock_display(WHITE) == "00:00"
 
 
 def test_hour_formatting_preserved(model: GameModelBase, presenter: ClockPresenter, fake_time: list):

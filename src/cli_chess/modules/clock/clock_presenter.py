@@ -2,7 +2,7 @@ from __future__ import annotations
 from cli_chess.modules.clock import ClockView
 from cli_chess.utils import EventTopics
 from chess import Color
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from time import monotonic
 from typing import TYPE_CHECKING
 
@@ -36,15 +36,13 @@ class ClockPresenter:
             return "--:--"
 
         if not isinstance(time, datetime):
-            if clock_data.ticking and clock_data.tick_started_at is not None:
-                elapsed = monotonic() - clock_data.tick_started_at
-                if clock_data.units == "ms":
-                    time = max(0.0, time - elapsed * 1000)
-                elif clock_data.units == "sec":
-                    time = max(0.0, time - elapsed)
             if clock_data.units == "ms":
                 time = datetime.fromtimestamp(time / 1000, timezone.utc)
             elif clock_data.units == "sec":
                 time = datetime.fromtimestamp(time, timezone.utc)
+
+        if clock_data.ticking and clock_data.tick_started_at is not None:
+            elapsed = monotonic() - clock_data.tick_started_at
+            time = max(datetime.fromtimestamp(0, timezone.utc), time - timedelta(seconds=elapsed))
 
         return time.strftime("%M:%S") if not time.hour else time.strftime("%H:%M:%S")
