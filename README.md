@@ -111,6 +111,8 @@ Pawn promotions must specify the promotion piece type (e.g. `e8=Q` or `e7e8q`).
 Moves that are ambiguous must specify the _from square_ when using SAN (e.g. `Ncd6`).
 To drop a piece in Crazyhouse, use the `@` symbol (e.g. `Q@g4`).
 
+While in game, you can press "F5" to toggle a notation cheat sheet.
+
 If you need more information on move notation, see Appendix C of [FIDE Laws of Chess](https://www.fide.com/FIDE/handbook/LawsOfChess.pdf).
 
 #### 2. How do I increase the size of the board?
