@@ -4,6 +4,7 @@ from berserk import Client, TokenSession
 from typing import Optional
 
 required_token_scopes: set = {"board:play"}
+optional_token_scopes: set = {"challenge:write"}
 api_session: Optional[TokenSession]
 api_client: Optional[Client]
 api_iem: Optional[IncomingEventManager]
@@ -32,3 +33,9 @@ def api_is_ready() -> bool:
        this is used for toggling the online menu availability
     """
     return api_ready
+
+
+def api_token_has_scope(scope: str) -> bool:
+    """Check if the linked token has the passed in scope"""
+    from cli_chess.modules.token_manager import token_manager_model
+    return scope in token_manager_model.linked_token_scopes

@@ -1,6 +1,7 @@
 from cli_chess.core.game import PlayableGameModelBase
 from cli_chess.core.game.game_options import GameOption
 from cli_chess.core.api import GameStateDispatcher
+from cli_chess.core.api.incoming_event_manger import IEMEventTopics
 from cli_chess.utils import log, threaded, RequestSuccessfullySent, EventTopics
 from chess import COLORS, COLOR_NAMES, WHITE, BLACK, Color
 from berserk.formats import TEXT
@@ -24,6 +25,9 @@ class OnlineGameModel(PlayableGameModelBase):
         self.vs_ai = is_vs_ai
         self.playing_game_id = None
         self.searching = False
+        self.vs_opponent = game_parameters.get(GameOption.OPPONENT)
+        self.challenge_color = game_parameters.get(GameOption.COLOR)
+        self.sent_challenge_id = None
         self._update_game_metadata(EventTopics.GAME_PARAMS, sender=EventSender.LOCAL, data=game_parameters)
         self.game_state_dispatcher = Optional[GameStateDispatcher]
 
@@ -40,7 +44,10 @@ class OnlineGameModel(PlayableGameModelBase):
 
     @threaded
     def create_game(self) -> None:
-        """Sends a request to lichess to start an AI challenge using the selected game parameters"""
+        """Sends a request to lichess to start a game using the selected game parameters. Depending
+           on the parameters this will either challenge the Lichess AI (stockfish), send a challenge
+           to a specific player, or create a seek against a random opponent.
+        """
         try:
             # Note: Only subscribe to IEM events right before creating challenge to lessen chance of grabbing another game
             self.api_iem.add_event_listener(self._handle_iem_event)
@@ -53,6 +60,15 @@ class OnlineGameModel(PlayableGameModelBase):
                                                      clock_increment=self.game_metadata.clocks[WHITE].increment,
                                                      color=COLOR_NAMES[self.my_color],
                                                      variant=self.game_metadata.variant)
+            elif self.vs_opponent:  # Challenge a specific player
+                response = self.api_client.challenges.create(username=self.vs_opponent,
+                                                             rated=self.game_metadata.rated,
+                                                             clock_limit=self.game_metadata.clocks[WHITE].time * 60,
+                                                             clock_increment=self.game_metadata.clocks[WHITE].increment,
+                                                             color=self.challenge_color,
+                                                             variant=self.game_metadata.variant)
+                self.sent_challenge_id = response.get('id')
+                self._notify_game_model_updated(EventTopics.GAME_SEARCH, msg=f"Challenge sent to {self.vs_opponent}. Waiting for a response...")
             else:  # Find a random opponent
                 payload = {
                     "rated": str(self.game_metadata.rated).lower(),
@@ -211,6 +227,18 @@ class OnlineGameModel(PlayableGameModelBase):
                 if self.game_in_progress and self.playing_game_id == data.get('gameId'):
                     self._update_game_metadata(*args, sender=EventSender.FROM_IEM, data=data)
                     self._game_end()
+
+            elif IEMEventTopics.CHALLENGE_DECLINED in args:
+                if self.searching and data.get('id') == self.sent_challenge_id:
+                    self.searching = False
+                    self.sent_challenge_id = None
+                    self._notify_game_model_updated(EventTopics.ERROR, msg=data.get('declineReason', f"{self.vs_opponent} declined the challenge"))  # noqa: E501
+
+            elif IEMEventTopics.CHALLENGE_CANCELLED in args:
+                if self.searching and data.get('id') == self.sent_challenge_id:
+                    self.searching = False
+                    self.sent_challenge_id = None
+                    self._notify_game_model_updated(EventTopics.ERROR, msg="The challenge has been cancelled")
         except Exception as e:
             log.error(f"Error handling IncomingEventManager event: {e}")
             raise
@@ -356,4 +384,11 @@ class OnlineGameModel(PlayableGameModelBase):
         """Gracefully exit the online game model. Ensure subscriptions are
            cleaned up and any active game searches are closed
         """
+        if self.searching and self.sent_challenge_id:
+            try:
+                self.api_client.challenges.cancel(self.sent_challenge_id)
+            except Exception as e:
+                log.debug(f"Unable to cancel pending challenge: {e}")
+            self.sent_challenge_id = None
+
         self._game_end()
