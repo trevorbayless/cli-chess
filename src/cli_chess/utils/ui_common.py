@@ -3,7 +3,7 @@ from cli_chess.utils import AlertType, log
 from cli_chess.utils.common import VALID_COLOR_DEPTHS
 from cli_chess.utils.config import get_config_path
 from prompt_toolkit.layout import Window, FormattedTextControl, ConditionalContainer
-from prompt_toolkit.filters import to_filter
+from prompt_toolkit.filters import to_filter, Condition
 from prompt_toolkit.mouse_events import MouseEvent, MouseEventType
 from prompt_toolkit.key_binding import KeyPressEvent, merge_key_bindings
 from prompt_toolkit.application import get_app
@@ -148,3 +148,33 @@ class AlertContainer:
 
     def __pt_container__(self):
         return self._alert_container
+
+
+NOTATION_HELP_TEXT = (
+    "Notation help — press F5 to close\n"
+    "\n"
+    "  Move a piece     e4    Nf3   Bd3\n"
+    "  Capture          Bxe5  Nxe5  exd5\n"
+    "  Castle           O-O   O-O-O\n"
+    "  Promote a pawn   e8=Q  (UCI: e7e8q)\n"
+    "  Specify piece    Nbd2  R1e2"
+)
+
+
+class NotationHelpContainer:
+    """A toggleable container that displays a chess notation cheat sheet"""
+    def __init__(self):
+        self._visible = False
+        self._label = FormattedTextControl(text=NOTATION_HELP_TEXT, show_cursor=False)
+        self._container = ConditionalContainer(
+            Window(self._label, always_hide_cursor=True, wrap_lines=True),
+            filter=Condition(lambda: self._visible)
+        )
+
+    def toggle(self) -> None:
+        """Flip the visibility of the cheat sheet"""
+        self._visible = not self._visible
+        repaint_ui()
+
+    def __pt_container__(self):
+        return self._container

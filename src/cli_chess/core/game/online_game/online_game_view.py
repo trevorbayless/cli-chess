@@ -32,6 +32,7 @@ class OnlineGameView(PlayableGameViewBase):
                 self.input_field_container,
                 self.premove_container,
                 self.alert,
+                self.notation_help,
             ]),
             padding=0
         )
