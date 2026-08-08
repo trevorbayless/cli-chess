@@ -24,14 +24,19 @@ class AboutView:
     @staticmethod
     def _create_container() -> Container:
         """Creates the container for the token manager view"""
-        return VSplit([
-            HSplit([
-                Window(FormattedTextControl(HTML("<b>Author:</b> Trevor Bayless"), style="class:label"), dont_extend_width=True, dont_extend_height=True),  # noqa: E501
-                Window(FormattedTextControl(HTML("<b>License:</b> GPL v3.0"), style="class:label"), dont_extend_width=True, dont_extend_height=True),
-                Window(FormattedTextControl(HTML(f"<b>Version:</b> {__version__}"), style="class:label"), dont_extend_width=True, dont_extend_height=True),  # noqa: E501
-            ]),
-            Box(Window(FormattedTextControl(CLI_CHESS_LINES)), padding=0, padding_left=2, width=D(min=1))
-        ], width=D(min=1, max=80))
+        thanks = "A special thanks to all of the contributors who have dedicated their time to improve cli-chess!"
+        return HSplit([
+            VSplit([
+                HSplit([
+                    Window(FormattedTextControl(HTML("<b>Author:</b> Trevor Bayless"), style="class:label"), dont_extend_width=True, dont_extend_height=True),  # noqa: E501
+                    Window(FormattedTextControl(HTML("<b>License:</b> GPL v3.0"), style="class:label"), dont_extend_width=True, dont_extend_height=True),  # noqa: E501
+                    Window(FormattedTextControl(HTML(f"<b>Version:</b> {__version__}"), style="class:label"), dont_extend_width=True, dont_extend_height=True),  # noqa: E501
+                ]),
+                Box(Window(FormattedTextControl(CLI_CHESS_LINES)), padding=0, padding_left=2, width=D(min=1))
+            ], width=D(min=1, max=80)),
+            Box(Window(), height=D(min=1, max=1)),
+            Window(FormattedTextControl(HTML(f"<i>{thanks}</i>"), style="class:label.dim"), wrap_lines=True, width=D(min=1, max=80), dont_extend_height=True)  # noqa: E501
+        ], width=D(min=1, max=48))
 
     def get_function_bar_fragments(self) -> StyleAndTextTuples:
         """Returns a set of function bar fragments to use if
