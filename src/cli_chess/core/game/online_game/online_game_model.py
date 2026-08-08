@@ -259,6 +259,13 @@ class OnlineGameModel(PlayableGameModelBase):
             log.error(f"Error handling GameStateDispatcher event: {e}")
             raise
 
+    def _start_clock_on_side_to_move(self) -> None:
+        """Starts the clock of the side to move. Lichess does not charge either
+           player until they have both made their first move.
+        """
+        if len(self.board_model.get_move_stack()) >= 2:
+            self.game_metadata.set_clock_ticking(self.board_model.get_turn())
+
     def _update_game_metadata(self, *args, sender: Optional[EventSender] = None, data: Optional[Dict] = None, **kwargs) -> None:
         """Parses and saves the data of the game being played. Events come from senders
            in differing formats, which is why they are separated
@@ -292,7 +299,7 @@ class OnlineGameModel(PlayableGameModelBase):
 
             elif sender is EventSender.FROM_GSD:
                 if EventTopics.GAME_START in args:
-                    self.game_metadata.set_clock_ticking(self.board_model.get_turn())
+                    self._start_clock_on_side_to_move()
                     for color in COLOR_NAMES:
                         side_data = data.get(color, {})
                         color_as_bool = Color(COLOR_NAMES.index(color))
@@ -313,7 +320,7 @@ class OnlineGameModel(PlayableGameModelBase):
                 elif EventTopics.MOVE_MADE in args:
                     self.game_metadata.clocks[WHITE].time = data.get('wtime')
                     self.game_metadata.clocks[BLACK].time = data.get('btime')
-                    self.game_metadata.set_clock_ticking(self.board_model.get_turn()) if EventTopics.GAME_END not in args else None
+                    self._start_clock_on_side_to_move() if EventTopics.GAME_END not in args else None
 
             self._notify_game_model_updated(*args, **kwargs)
         except Exception as e:

@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from chess import Color, COLORS
+from time import monotonic
 from typing import Optional
 
 
@@ -19,6 +20,7 @@ class ClockMetadata:
     time: Optional[int] = None
     increment: Optional[int] = None
     ticking: bool = False
+    tick_started_at: Optional[float] = None
 
 
 @dataclass
@@ -42,9 +44,12 @@ class GameMetadata:
         if color is None:
             for c in COLORS:
                 self.clocks[c].ticking = False
+                self.clocks[c].tick_started_at = None
         else:
             self.clocks[color].ticking = True
+            self.clocks[color].tick_started_at = monotonic()
             self.clocks[not color].ticking = False
+            self.clocks[not color].tick_started_at = None
 
     def reset(self):
         self.__init__()
