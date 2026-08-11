@@ -31,6 +31,7 @@ class OfflineGameView(PlayableGameViewBase):
                 ], height=D(max=2, preferred=2)),
                 self.premove_container,
                 self.alert,
+                self.notation_help,
             ]),
             padding=0
         )

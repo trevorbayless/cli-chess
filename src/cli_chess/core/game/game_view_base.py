@@ -1,5 +1,5 @@
 from __future__ import annotations
-from cli_chess.utils.ui_common import handle_mouse_click, go_back_to_main_menu, AlertContainer
+from cli_chess.utils.ui_common import handle_mouse_click, go_back_to_main_menu, AlertContainer, NotationHelpContainer
 from cli_chess.utils.logging import log
 from prompt_toolkit.widgets import TextArea
 from prompt_toolkit.layout import Window, Container, FormattedTextControl, VSplit, D
@@ -98,6 +98,7 @@ class PlayableGameViewBase(GameViewBase, ABC):
             FormattedTextControl(lambda: self._move_input_hint_fragments()),
             height=D(max=1),
         )
+        self.notation_help = NotationHelpContainer()
         super().__init__(presenter)
 
     @abstractmethod
@@ -128,6 +129,14 @@ class PlayableGameViewBase(GameViewBase, ABC):
             ("class:function-bar.spacer", " "),
         )
 
+    def _notation_help_fb_fragments(self) -> Tuple:
+        """Returns the function bar fragments for toggling the notation cheat sheet"""
+        return (
+            ("class:function-bar.key", "F5", handle_mouse_click(self.notation_help.toggle)),
+            ("class:function-bar.label", f"{'Notation':<11}", handle_mouse_click(self.notation_help.toggle)),
+            ("class:function-bar.spacer", " "),
+        )
+
     def _clear_premove_fb_fragments(self) -> Tuple:
         """Returns the function bar fragments for clearing the set premove"""
         return (
@@ -149,6 +158,7 @@ class PlayableGameViewBase(GameViewBase, ABC):
                     fragments.extend(self._draw_fb_fragments())
 
                 fragments.extend(self._resign_fb_fragments())
+                fragments.extend(self._notation_help_fb_fragments())
                 if self.presenter.premove_presenter.is_premove_set():
                     fragments.extend(self._clear_premove_fb_fragments())
             else:
@@ -177,6 +187,10 @@ class PlayableGameViewBase(GameViewBase, ABC):
         def _(event):
             if not event.is_repeat:
                 self.presenter.resign()
+
+        @bindings.add(Keys.F5, filter=Condition(self.presenter.is_game_in_progress), eager=True)
+        def _(event): # noqa
+            self.notation_help.toggle()
 
         @bindings.add(Keys.F8, filter=~Condition(self.presenter.is_game_in_progress), eager=True)
         def _(event): # noqa

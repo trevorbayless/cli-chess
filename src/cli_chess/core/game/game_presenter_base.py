@@ -6,7 +6,7 @@ from cli_chess.modules.material_difference import MaterialDifferencePresenter
 from cli_chess.modules.player_info import PlayerInfoPresenter
 from cli_chess.modules.clock import ClockPresenter
 from cli_chess.modules.premove import PremovePresenter
-from cli_chess.utils import log, AlertType, RequestSuccessfullySent, EventTopics
+from cli_chess.utils import log, AlertType, RequestSuccessfullySent, EventTopics, save_game_pgn
 from cli_chess.utils.config import game_config
 from cli_chess.utils.move_input_preview import analyze_move_input, longest_matching_san_prefix
 from abc import ABC, abstractmethod
@@ -81,6 +81,7 @@ class PlayableGamePresenterBase(GamePresenterBase, ABC):
         if EventTopics.GAME_END in args:
             self._parse_and_present_game_over()
             self.premove_presenter.clear_premove()
+            self._save_pgn()
 
     def on_move_input_changed(self, text: str) -> None:
         """Refresh live board hints and the move preview line while typing."""
@@ -226,3 +227,14 @@ class PlayableGamePresenterBase(GamePresenterBase, ABC):
     @abstractmethod
     def _parse_and_present_game_over(self) -> str:
         pass
+
+    def _save_pgn(self) -> None:
+        """Save PGN to save locaton and print path on screen"""
+        try:
+            is_online = self.model.game_metadata.game_id is not None
+            path = save_game_pgn(self.model.board_model, self.model.game_metadata, is_online=is_online)
+            if path:
+                existing = self.view.alert._alert_label.text or ""
+                self.view.alert._alert_label.text = f"{existing}\nGame saved: {path}" if existing else f"Game saved: {path}"
+        except Exception as e:
+            log.error(f"Unexpected error saving PGN: {e}")
