@@ -9,3 +9,4 @@ build/
 __pycache__/
 *venv/
 .vscode/
+.python-version
