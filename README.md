@@ -41,6 +41,8 @@ offline against the Fairy-Stockfish engine. All Lichess variants are supported.
 - Supports making moves in UCI, SAN, or LAN
 - Play blindfold chess
 - Watch Lichess TV
+- Chat with your opponent
+- PGN exports of completed games
 
 ## Getting started
 
