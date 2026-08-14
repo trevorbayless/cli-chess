@@ -60,5 +60,9 @@ jobs:
           pip install -e .[dev]
 
       - name: Run pytest
+        # Note - ignore needed here due to https://github.com/niklasf/python-chess/issues/1170
+        # this ignore can be removed once python-chess releases a new version (current = 1.11.2)
+        env:
+          PYTHONWARNINGS: "ignore:'asyncio.DefaultEventLoopPolicy' is deprecated:DeprecationWarning"
         run: |
           pytest
