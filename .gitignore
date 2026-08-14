@@ -7,6 +7,6 @@ config.ini
 dist/
 build/
 __pycache__/
-*venv/
+*venv*/
 .vscode/
 .python-version
