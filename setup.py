@@ -6,18 +6,18 @@ metadata = dict(findall(r'__(\w*)__\s*=\s*"([^"]+)"', metadata_file))
 
 dependencies = [
     "chess>=1.9.4,<2.0.0",
-    "berserk>=0.13.1,<0.14.0",
-    "prompt-toolkit==3.0.47"  # pin as breaking changes have been
+    "berserk>=0.14.0,<0.15.0",
+    "prompt-toolkit==3.0.53"  # pin as breaking changes have been
                               # introduced in previous patch versions
                               # read PT changelog before bumping
 ]
 
 dev_dependencies = {
     'dev': [
-        'pytest>=7.2.1,<8.0.0',
-        'pytest-cov>=4.0.0,<5.0.0',
-        'pytest-socket>=0.6.0,<1.0.0',
-        'flake8>=5.0.4,<7.0.0',
+        'pytest>=9.0.0,<10.0.0',
+        'pytest-cov>=7.0.0,<8.0.0',
+        'pytest-socket>=0.8.0,<1.0.0',
+        'flake8>=7.0.0,<8.0.0',
     ]
 }
 
