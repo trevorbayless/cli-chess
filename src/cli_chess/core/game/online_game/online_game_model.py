@@ -201,11 +201,11 @@ class OnlineGameModel(PlayableGameModelBase):
             except Exception:
                 raise
         else:
-            log.warning("Attempted to send message a game that's not in progress")
+            log.warning("Attempted to chat in a game that's not in progress")
             if self.searching:
                 raise Warning("Still searching for opponent")
             else:
-                raise Warning("Game has already ended")
+                raise Warning("Unable to chat as the game has ended")
 
     def _handle_iem_event(self, *args, data: Optional[Dict] = None) -> None:
         """Handles events received from the IncomingEventManager. NOTE: Events coming in
