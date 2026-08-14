@@ -1,8 +1,8 @@
 from __future__ import annotations
-from cli_chess.__metadata__ import __version__
 from cli_chess.utils.ui_common import handle_mouse_click, exit_app, get_custom_style
 from cli_chess.utils import is_windows_os, default, log
 from cli_chess.utils.config import terminal_config
+from importlib.metadata import version
 from prompt_toolkit.application import Application
 from prompt_toolkit.patch_stdout import patch_stdout
 from prompt_toolkit.layout import Layout, Window, Container, FormattedTextControl, VSplit, HSplit, VerticalAlign, WindowAlign, D
@@ -88,7 +88,7 @@ class MainView:
 
         return VSplit([
             Window(FormattedTextControl(_get_function_bar_fragments)),
-            Window(FormattedTextControl(f"cli-chess {__version__}", style="class:label"), align=WindowAlign.RIGHT)
+            Window(FormattedTextControl(f"cli-chess {version('cli-chess')}", style="class:label"), align=WindowAlign.RIGHT)
         ], height=D(max=1, preferred=1))
 
     def _create_function_bar_key_bindings(self) -> "_MergedKeyBindings":  # noqa: F821
