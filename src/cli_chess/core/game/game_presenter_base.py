@@ -53,6 +53,7 @@ class GamePresenterBase(ABC):
 class PlayableGamePresenterBase(GamePresenterBase, ABC):
     def __init__(self, model: PlayableGameModelBase):
         self.premove_presenter = PremovePresenter(model.premove_model)
+        self._game_over_handled = False
         super().__init__(model)
         self.model = model
 
@@ -71,9 +72,16 @@ class PlayableGamePresenterBase(GamePresenterBase, ABC):
     def update(self, *args, **kwargs) -> None:
         """Update method called on game model updates. Overrides base."""
         super().update(*args, **kwargs)
-        if EventTopics.MOVE_MADE in args:
+        if EventTopics.GAME_START in args:
+            self._game_over_handled = False
+        # Guarded too, otherwise the (MOVE_MADE, GAME_END) event that follows a
+        # checkmate clears the result off the screen
+        if EventTopics.MOVE_MADE in args and not self._game_over_handled:
             self.view.alert.clear_alert()
-        if EventTopics.GAME_END in args:
+        if EventTopics.GAME_END in args and not self._game_over_handled:
+            # The game end is broadcast more than once per game (e.g. the model reports
+            # the game over and then rebroadcasts the event it was triaging)
+            self._game_over_handled = True
             self._parse_and_present_game_over()
             self.premove_presenter.clear_premove()
             self._save_pgn()
@@ -158,7 +166,6 @@ class PlayableGamePresenterBase(GamePresenterBase, ABC):
             is_online = self.model.game_metadata.game_id is not None
             path = save_game_pgn(self.model.board_model, self.model.game_metadata, is_online=is_online)
             if path:
-                existing = self.view.alert._alert_label.text or ""
-                self.view.alert._alert_label.text = f"{existing}\nGame saved: {path}" if existing else f"Game saved: {path}"
+                self.view.alert.append_alert(f"Game saved: {path}")
         except Exception as e:
             log.error(f"Unexpected error saving PGN: {e}")
