@@ -59,7 +59,7 @@ dev = [
     "pytest>=9.0.0,<10.0.0",
     "pytest-cov>=7.0.0,<8.0.0",
     "pytest-socket>=0.8.0,<1.0.0",
-    "flake8>=7.0.0,<8.0.0",
+    "ruff>=0.16.0,<0.17.0",
 ]
 
 [project.scripts]
@@ -81,3 +81,8 @@ filterwarnings = [
     # this ignore can be removed once python-chess releases a new version (current = 1.11.2)
 ]
 addopts = "--disable-socket"
+
+[tool.ruff]
+line-length = 150
+
+[tool.ruff.lint]
