@@ -2,6 +2,7 @@ from cli_chess.core.game.game_options import GameOption
 from cli_chess.core.game.online_game import OnlineGameModel
 from cli_chess.core.api.incoming_event_manger import IEMEventTopics
 from cli_chess.utils import EventTopics
+from chess import WHITE, BLACK
 from unittest.mock import Mock
 import threading
 import pytest
@@ -112,3 +113,26 @@ def test_exit_without_pending_challenge(model):
 
     model.api_client.challenges.cancel.assert_not_called()
     assert not model.game_in_progress
+
+
+def game_full_event_data(moves: str = "") -> dict:
+    return {
+        'white': {'name': "testWhite", 'rating': 1500},
+        'black': {'name': "testBlack", 'rating': 1500},
+        'state': {'moves': moves, 'wtime': 180000, 'btime': 180000, 'winc': 2000, 'binc': 2000},
+    }
+
+
+def test_game_start_saves_initial_clock_time(model):
+    model._handle_gsd_event(EventTopics.GAME_START, data=game_full_event_data())
+
+    assert model.game_metadata.clocks[WHITE].initial_time == 180000
+    assert model.game_metadata.clocks[BLACK].initial_time == 180000
+
+
+def test_initial_clock_time_is_kept_as_moves_are_made(model):
+    model._handle_gsd_event(EventTopics.GAME_START, data=game_full_event_data())
+    model._handle_gsd_event(EventTopics.MOVE_MADE, data={'moves': "e2e4 e7e5", 'wtime': 37000, 'btime': 42000})
+
+    assert model.game_metadata.clocks[WHITE].time == 37000
+    assert model.game_metadata.clocks[WHITE].initial_time == 180000

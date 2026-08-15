@@ -343,6 +343,7 @@ class OnlineGameModel(PlayableGameModelBase):
 
                         self.game_metadata.clocks[color_as_bool].units = "ms"
                         self.game_metadata.clocks[color_as_bool].time = data.get('state', {}).get('wtime' if color == "white" else 'btime')
+                        self.game_metadata.clocks[color_as_bool].initial_time = self.game_metadata.clocks[color_as_bool].time
                         self.game_metadata.clocks[color_as_bool].increment = data.get('state', {}).get('winc' if color == "white" else 'binc')
 
                 elif EventTopics.MOVE_MADE in args:

@@ -18,6 +18,7 @@ class PlayerMetadata:
 class ClockMetadata:
     units: str = "ms"
     time: Optional[int] = None
+    initial_time: Optional[int] = None
     increment: Optional[int] = None
     ticking: bool = False
     tick_started_at: Optional[float] = None

@@ -50,12 +50,24 @@ def _result_string(metadata) -> str:
     return "*"
 
 
+def _clock_seconds(value, units: str) -> Optional[int]:
+    """Returns the passed in clock value in seconds. Berserk hands back clock
+       durations as datetime objects (millis since the epoch), see berserk models.GameState
+    """
+    if value is None:
+        return None
+    if isinstance(value, datetime):
+        return int(value.timestamp())
+    return int(value // 1000) if units == "ms" else int(value)
+
+
 def _time_control(metadata) -> Optional[str]:
     clock = metadata.clocks[chess.WHITE]
-    if clock.time is None or clock.increment is None:
+    base_seconds = _clock_seconds(clock.initial_time, clock.units)
+    increment_seconds = _clock_seconds(clock.increment, clock.units)
+    if base_seconds is None or increment_seconds is None:
         return None
-    base_seconds = clock.time // 1000 if clock.units == "ms" else clock.time * 60
-    return f"{base_seconds}+{clock.increment}"
+    return f"{base_seconds}+{increment_seconds}"
 
 
 def build_pgn_game(board_model: "BoardModel", metadata: "GameMetadata", is_online: bool):
