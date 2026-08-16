@@ -225,8 +225,10 @@ class OnlineGameModel(PlayableGameModelBase):
 
             elif EventTopics.GAME_END in args:
                 if self.game_in_progress and self.playing_game_id == data.get('gameId'):
-                    self._update_game_metadata(*args, sender=EventSender.FROM_IEM, data=data)
+                    # The game must be marked as ended before listeners are notified, otherwise
+                    # the game over is presented while the game still reads as in progress
                     self._game_end()
+                    self._update_game_metadata(*args, sender=EventSender.FROM_IEM, data=data)
 
             elif IEMEventTopics.CHALLENGE_DECLINED in args:
                 if self.searching and data.get('id') == self.sent_challenge_id:
@@ -322,6 +324,10 @@ class OnlineGameModel(PlayableGameModelBase):
                     self.game_metadata.speed = data['speed']
 
                 elif EventTopics.GAME_END in args:
+                    # The game end can be reported by the IEM before the game state dispatcher
+                    # sends the final game state, so the status is taken from here as well
+                    self.game_metadata.game_status.status = data.get('status', {}).get('name', "")
+                    self.game_metadata.game_status.winner = data.get('winner', "")
                     self.game_metadata.players[self.my_color].rating_diff = data.get('ratingDiff', "")
                     self.game_metadata.players[not self.my_color].rating_diff = data.get('opponent', {}).get('ratingDiff', "")
 
