@@ -2,7 +2,7 @@ from __future__ import annotations
 from cli_chess.menus import MenuView
 from cli_chess.menus.main_menu import MainMenuOptions
 from cli_chess.core.api.api_manager import api_is_ready
-from cli_chess.__metadata__ import __url__
+from importlib.metadata import metadata
 from prompt_toolkit.layout import Container, ConditionalContainer, VSplit, HSplit
 from prompt_toolkit.key_binding import KeyBindings, ConditionalKeyBindings, merge_key_bindings
 from prompt_toolkit.keys import Keys
@@ -13,6 +13,9 @@ from prompt_toolkit.widgets import Box, TextArea
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from cli_chess.menus.main_menu import MainMenuPresenter
+
+package_metadata = metadata("cli-chess")
+github_page = package_metadata["Home-page"]
 
 
 class MainMenuView(MenuView):
@@ -36,7 +39,7 @@ class MainMenuView(MenuView):
                         "Missing API Token or API client unavailable.\n"
                         "Go to 'Settings' to link your Lichess API token.\n\n"
                         "For further assistance check out the Github page:\n"
-                        f"{__url__}",
+                        f"{github_page}",
                         wrap_lines=True, read_only=True, focusable=False
                     ),
                     filter=~is_done
