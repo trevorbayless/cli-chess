@@ -97,6 +97,27 @@ def test_iem_challenge_cancelled_stops_search(model):
     assert received['msg'] == "The challenge has been cancelled"
 
 
+def test_iem_game_end_records_result_before_notifying(model):
+    observed = {}
+
+    def listener(*args, **kwargs):
+        if EventTopics.GAME_END in args:
+            observed.update(game_in_progress=model.game_in_progress,
+                            status=model.game_metadata.game_status.status,
+                            winner=model.game_metadata.game_status.winner)
+
+    model.e_game_model_updated.add_listener(listener)
+    model.game_in_progress = True
+    model.playing_game_id = 'abc123'
+    model._handle_iem_event(EventTopics.GAME_END, data={'gameId': 'abc123',
+                                                        'status': {'id': 31, 'name': 'resign'},
+                                                        'winner': 'white'})
+
+    assert observed['game_in_progress'] is False
+    assert observed['status'] == 'resign'
+    assert observed['winner'] == 'white'
+
+
 def test_exit_cancels_pending_challenge(model):
     model.searching = True
     model.sent_challenge_id = 'abc123'
