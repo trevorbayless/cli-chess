@@ -24,22 +24,43 @@ jobs:
       - name: Install AppImage dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y libfuse2
+          sudo apt-get install -y libfuse2 zsync
 
       - name: Install AppImage builder
         run: python -m pip install "appimage==2.0.1"
 
+      - name: Determine version
+        id: version
+        run: |
+          if [[ "${{ github.event_name }}" == "release" ]]; then
+            echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+          else
+            echo "version=dev-${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Build AppImage
         run: python -m appimage.build --python 3.11
+
+      - name: Rename AppImage
+        run: |
+          mv dist/cli-chess-x86_64.AppImage \
+             "dist/cli-chess-${{ steps.version.outputs.version }}-x86_64.AppImage"
+
+      - name: Create zsync file
+        run: zsyncmake dist/*.AppImage
 
       - name: Upload AppImage artifact
         uses: actions/upload-artifact@v4
         with:
           name: cli-chess-AppImage
-          path: dist/*.AppImage
+          path: |
+            dist/*.AppImage
+            dist/*.AppImage.zsync
 
       - name: Upload AppImage to release
         if: github.event_name == 'release'
         uses: softprops/action-gh-release@v2
         with:
-          files: dist/*.AppImage
+          files: |
+            dist/*.AppImage
+            dist/*.AppImage.zsync
