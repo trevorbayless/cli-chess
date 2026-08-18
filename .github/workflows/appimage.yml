@@ -47,12 +47,14 @@ jobs:
              "dist/cli-chess-${{ steps.version.outputs.version }}-x86_64.AppImage"
 
       - name: Create zsync file
-        run: zsyncmake dist/*.AppImage
+        run: |
+          zsyncmake dist/*.AppImage
+          mv *.AppImage.zsync dist/
 
       - name: Upload AppImage artifact
         uses: actions/upload-artifact@v4
         with:
-          name: cli-chess-AppImage
+          name: cli-chess-${{ steps.version.outputs.version }}
           path: |
             dist/*.AppImage
             dist/*.AppImage.zsync
