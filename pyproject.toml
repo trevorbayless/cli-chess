@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "cli-chess"
-version = "1.7.0"
+version = "1.7.1"
 description = "A highly customizable way to play chess in your terminal"
 readme = { file = "README.md", content-type = "text/markdown" }
 requires-python = ">=3.10"
