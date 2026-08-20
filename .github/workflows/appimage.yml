@@ -36,7 +36,6 @@ jobs:
         run: |
           pacman -Syu --noconfirm
           pacman -S --noconfirm python python-pip
-          get-debloated-pkgs --add-common --prefer-nano
 
       - name: Install cli-chess
         run: |
