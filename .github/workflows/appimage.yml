@@ -1,3 +1,5 @@
+# This workflow is based off the recommended template here: https://github.com/pkgforge-dev/TEMPLATE-AppImage
+# and by following the guide here: https://github.com/pkgforge-dev/Anylinux-AppImages/blob/main/HOW-TO-MAKE-THESE.md
 name: Build AppImage
 
 on:
@@ -10,24 +12,35 @@ permissions:
 
 jobs:
   build-appimage:
-    runs-on: ubuntu-latest
+    name: Build AppImage (${{ matrix.arch }})
+    runs-on: ${{ matrix.runs-on }}
+
+    strategy:
+      matrix:
+        include:
+          - runs-on: ubuntu-latest
+            arch: x86_64
+          - runs-on: ubuntu-24.04-arm
+            arch: aarch64
+
+    container: ghcr.io/pkgforge-dev/archlinux:latest
 
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
+      - name: Prepare container
+        uses: pkgforge-dev/anylinux-setup-action@v2
 
-      - name: Install AppImage dependencies
+      - name: Install dependencies
         run: |
-          sudo apt-get update
-          sudo apt-get install -y libfuse2 zsync
+          pacman -Syu --noconfirm
+          pacman -S --noconfirm python python-pip
+          get-debloated-pkgs --add-common --prefer-nano
 
-      - name: Install AppImage builder
-        run: python -m pip install "appimage==2.0.1"
+      - name: Install cli-chess
+        run: |
+          python -m pip install --break-system-packages .
 
       - name: Determine version
         id: version
@@ -39,22 +52,26 @@ jobs:
           fi
 
       - name: Build AppImage
-        run: python -m appimage.build --python 3.11
-
-      - name: Rename AppImage
+        env:
+          ARCH: ${{ matrix.arch }}
+          ICON: ${{ github.workspace }}/packaging/appimage/cli-chess.png
+          DESKTOP: ${{ github.workspace }}/packaging/appimage/cli-chess.desktop
+          DEPLOY_PYTHON: 1
+          OUTPATH: ${{ github.workspace }}/dist
+          OUTNAME: cli-chess-${{ steps.version.outputs.version }}-${{ matrix.arch }}.AppImage
         run: |
-          mv dist/cli-chess-x86_64.AppImage \
-             "dist/cli-chess-${{ steps.version.outputs.version }}-x86_64.AppImage"
+          mkdir -p dist
+          quick-sharun "$(which cli-chess)"
+          quick-sharun --make-appimage
 
-      - name: Create zsync file
+      - name: Test AppImage
         run: |
-          zsyncmake dist/*.AppImage
-          mv *.AppImage.zsync dist/
+          quick-sharun --simple-test ./dist/*.AppImage
 
       - name: Upload AppImage artifact
         uses: actions/upload-artifact@v4
         with:
-          name: cli-chess-${{ steps.version.outputs.version }}
+          name: cli-chess-${{ steps.version.outputs.version }}-${{ matrix.arch }}
           path: |
             dist/*.AppImage
             dist/*.AppImage.zsync
