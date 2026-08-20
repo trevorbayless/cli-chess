@@ -51,7 +51,9 @@ classifiers = [
 dependencies = [
     "chess>=1.9.4,<2.0.0",
     "berserk>=0.14.0,<0.15.0",
-    "prompt-toolkit==3.0.53",
+    "prompt-toolkit==3.0.53",  # pin as breaking changes have been
+                               # introduced in previous patch versions
+                               # read PT changelog before bumping
 ]
 
 [project.optional-dependencies]
