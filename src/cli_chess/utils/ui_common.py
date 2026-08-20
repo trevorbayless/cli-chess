@@ -140,6 +140,17 @@ class AlertContainer:
         self._alert_container.filter = to_filter(True)
         repaint_ui()
 
+    def append_alert(self, text: str) -> None:
+        """Appends the text passed in as a new line of the alert label.
+           The existing style is kept as the label carries a single style.
+        """
+        if not self._alert_label.text:
+            self.show_alert(text, AlertType.NEUTRAL)
+            return
+
+        self._alert_label.text = f"{self._alert_label.text}\n{text}"
+        repaint_ui()
+
     def clear_alert(self) -> None:
         """Clears the alert container"""
         self._alert_label.text = ""

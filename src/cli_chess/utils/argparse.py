@@ -1,8 +1,14 @@
 import argparse
-from cli_chess.__metadata__ import __name__, __version__, __description__
 from cli_chess.utils.logging import log, redact_from_logs
 from cli_chess.utils.config import get_config_path
 from cli_chess.core.api import required_token_scopes
+from importlib.metadata import metadata
+
+package_metadata = metadata("cli-chess")
+
+package_name = package_metadata["Name"]
+package_version = package_metadata["Version"]
+package_description = package_metadata["Summary"]
 
 
 class ArgumentParser(argparse.ArgumentParser):
@@ -24,7 +30,7 @@ class ArgumentParser(argparse.ArgumentParser):
 
 def setup_argparse() -> ArgumentParser:
     """Sets up argparse and parses the arguments passed in at startup"""
-    parser = ArgumentParser(description=f"{__name__}: {__description__}")
+    parser = ArgumentParser(description=f"{package_name}: {package_description}")
     parser.add_argument(
         "--token",
         metavar="API_TOKEN",
@@ -39,7 +45,7 @@ def setup_argparse() -> ArgumentParser:
     parser.add_argument(
         "-v", "--version",
         action="version",
-        version=f"cli-chess v{__version__}",
+        version=f"cli-chess v{package_version}",
     )
 
     debug_group = parser.add_argument_group("debugging")

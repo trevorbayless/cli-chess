@@ -1,0 +1,84 @@
+# This workflow is based off the recommended template here: https://github.com/pkgforge-dev/TEMPLATE-AppImage
+# and by following the guide here: https://github.com/pkgforge-dev/Anylinux-AppImages/blob/main/HOW-TO-MAKE-THESE.md
+name: Build AppImage
+
+on:
+  workflow_dispatch:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  build-appimage:
+    name: Build AppImage (${{ matrix.arch }})
+    runs-on: ${{ matrix.runs-on }}
+
+    strategy:
+      matrix:
+        include:
+          - runs-on: ubuntu-latest
+            arch: x86_64
+          - runs-on: ubuntu-24.04-arm
+            arch: aarch64
+
+    container: ghcr.io/pkgforge-dev/archlinux:latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Prepare container
+        uses: pkgforge-dev/anylinux-setup-action@v2
+
+      - name: Install dependencies
+        run: |
+          pacman -Syu --noconfirm
+          pacman -S --noconfirm python python-pip
+
+      - name: Install cli-chess
+        run: |
+          python -m pip install --break-system-packages .
+
+      - name: Determine version
+        id: version
+        run: |
+          if [[ "${{ github.event_name }}" == "release" ]]; then
+            echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+          else
+            echo "version=dev-${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Build AppImage
+        env:
+          ARCH: ${{ matrix.arch }}
+          ICON: ${{ github.workspace }}/packaging/appimage/cli-chess.png
+          DESKTOP: ${{ github.workspace }}/packaging/appimage/cli-chess.desktop
+          DEPLOY_PYTHON: 1
+          OUTPATH: ${{ github.workspace }}/dist
+          OUTNAME: cli-chess-${{ steps.version.outputs.version }}-${{ matrix.arch }}.AppImage
+        run: |
+          mkdir -p dist
+          quick-sharun "$(which cli-chess)"
+          quick-sharun --make-appimage
+
+      - name: Test AppImage
+        run: |
+          quick-sharun --simple-test ./dist/*.AppImage
+
+      - name: Upload AppImage artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: cli-chess-${{ steps.version.outputs.version }}-${{ matrix.arch }}
+          path: |
+            dist/*.AppImage
+            dist/*.AppImage.zsync
+
+      - name: Upload AppImage to release
+        if: github.event_name == 'release'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/*.AppImage
+            dist/*.AppImage.zsync

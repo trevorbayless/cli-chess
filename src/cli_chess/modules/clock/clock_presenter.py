@@ -1,6 +1,6 @@
 from __future__ import annotations
 from cli_chess.modules.clock import ClockView
-from cli_chess.utils import EventTopics
+from cli_chess.utils import EventTopics, log
 from chess import Color
 from datetime import datetime, timedelta, timezone
 from time import monotonic
@@ -35,14 +35,20 @@ class ClockPresenter:
         if time is None:
             return "--:--"
 
-        if not isinstance(time, datetime):
-            if clock_data.units == "ms":
-                time = datetime.fromtimestamp(time / 1000, timezone.utc)
-            elif clock_data.units == "sec":
-                time = datetime.fromtimestamp(time, timezone.utc)
+        try:
+            if not isinstance(time, datetime):
+                if isinstance(time, timedelta):
+                    seconds = time.total_seconds()
+                else:
+                    seconds = float(time) / 1000 if clock_data.units == "ms" else float(time)
 
-        if clock_data.ticking and clock_data.tick_started_at is not None:
-            elapsed = monotonic() - clock_data.tick_started_at
-            time = max(datetime.fromtimestamp(0, timezone.utc), time - timedelta(seconds=elapsed))
+                time = datetime.fromtimestamp(seconds, timezone.utc)
 
-        return time.strftime("%M:%S") if not time.hour else time.strftime("%H:%M:%S")
+            if clock_data.ticking and clock_data.tick_started_at is not None:
+                elapsed = monotonic() - clock_data.tick_started_at
+                time = max(datetime.fromtimestamp(0, timezone.utc), time - timedelta(seconds=elapsed))
+
+            return time.strftime("%M:%S") if not time.hour else time.strftime("%H:%M:%S")
+        except Exception as e:
+            log.error(f"Error formatting clock display for color {color}: {e}")
+            return "--:--"

@@ -1,6 +1,6 @@
 from __future__ import annotations
-from cli_chess.__metadata__ import __version__
 from cli_chess.utils.ui_common import handle_mouse_click, handle_bound_key_pressed
+from importlib.metadata import version
 from prompt_toolkit.layout import Window, VSplit, HSplit, D, FormattedTextControl, Container
 from prompt_toolkit.key_binding import KeyBindings
 from prompt_toolkit.keys import Keys
@@ -30,7 +30,7 @@ class AboutView:
                 HSplit([
                     Window(FormattedTextControl(HTML("<b>Author:</b> Trevor Bayless"), style="class:label"), dont_extend_width=True, dont_extend_height=True),  # noqa: E501
                     Window(FormattedTextControl(HTML("<b>License:</b> GPL v3.0"), style="class:label"), dont_extend_width=True, dont_extend_height=True),  # noqa: E501
-                    Window(FormattedTextControl(HTML(f"<b>Version:</b> {__version__}"), style="class:label"), dont_extend_width=True, dont_extend_height=True),  # noqa: E501
+                    Window(FormattedTextControl(HTML(f"<b>Version:</b> {version('cli-chess')}"), style="class:label"), dont_extend_width=True, dont_extend_height=True),  # noqa: E501
                 ]),
                 Box(Window(FormattedTextControl(CLI_CHESS_LINES)), padding=0, padding_left=2, width=D(min=1))
             ], width=D(min=1, max=80)),

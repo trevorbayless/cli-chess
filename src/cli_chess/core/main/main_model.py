@@ -1,6 +1,6 @@
 from cli_chess.utils.logging import configure_logger
 from cli_chess.utils import setup_argparse
-from cli_chess.__metadata__ import __version__
+from importlib.metadata import version
 from platform import python_version, system, release, machine
 
 
@@ -14,7 +14,7 @@ class MainModel:
     def _start_loggers():
         """Start the loggers"""
         log = configure_logger("cli-chess")
-        log.info(f"cli-chess v{__version__} // python {python_version()}")
+        log.info(f"cli-chess v{version('cli-chess')} // python {python_version()}")
         log.info(f"System information: system={system()} // release={release()} // machine={machine()}")
 
         configure_logger("chess.engine")

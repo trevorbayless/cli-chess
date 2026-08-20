@@ -1,0 +1,85 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cli-chess"
+version = "1.7.2"
+description = "A highly customizable way to play chess in your terminal"
+readme = { file = "README.md", content-type = "text/markdown" }
+requires-python = ">=3.10"
+
+license = { text = "GPL-3.0+" }
+
+authors = [
+    { name = "Trevor Bayless", email = "dev@trevor.simplelogin.com" },
+]
+
+urls = { Homepage = "https://github.com/trevorbayless/cli-chess" }
+
+keywords = [
+    "chess",
+    "terminal",
+    "fairy-stockfish",
+    "stockfish",
+    "lichess",
+    "lichess.org",
+    "cli",
+    "san",
+    "uci",
+]
+
+classifiers = [
+    "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+    "Operating System :: POSIX :: Linux",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: MacOS",
+    "Environment :: Console",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Games/Entertainment :: Board Games",
+    "Topic :: Games/Entertainment :: Turn Based Strategy",
+    "Intended Audience :: End Users/Desktop",
+    "Intended Audience :: Developers",
+    "Natural Language :: English",
+]
+
+dependencies = [
+    "chess>=1.9.4,<2.0.0",
+    "berserk>=0.14.0,<0.15.0",
+    "prompt-toolkit==3.0.53",  # pin as breaking changes have been
+                               # introduced in previous patch versions
+                               # read PT changelog before bumping
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=9.0.0,<10.0.0",
+    "pytest-cov>=7.0.0,<8.0.0",
+    "pytest-socket>=0.8.0,<1.0.0",
+    "flake8>=7.0.0,<8.0.0",
+]
+
+[project.scripts]
+cli-chess = "cli_chess.__main__:main"
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+include-package-data = true
+zip-safe = false
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+filterwarnings = [
+    "error",
+    "ignore:'asyncio.DefaultEventLoopPolicy' is deprecated:DeprecationWarning",
+    # ignore needed here due to https://github.com/niklasf/python-chess/issues/1170
+    # this ignore can be removed once python-chess releases a new version (current = 1.11.2)
+]
+addopts = "--disable-socket"

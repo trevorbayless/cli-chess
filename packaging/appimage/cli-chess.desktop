@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=cli-chess
+Comment=Play chess in your terminal
+Exec=cli-chess
+Icon=cli-chess
+Type=Application
+Terminal=true
+Categories=Game;BoardGame;
