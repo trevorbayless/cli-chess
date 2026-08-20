@@ -7,7 +7,7 @@ from prompt_toolkit.formatted_text import StyleAndTextTuples
 from prompt_toolkit.key_binding import KeyBindings, merge_key_bindings
 from prompt_toolkit.keys import Keys
 from prompt_toolkit.buffer import Buffer
-from prompt_toolkit.filters import Condition
+from prompt_toolkit.filters import Condition, has_focus
 from abc import ABC, abstractmethod
 from typing import Tuple, TYPE_CHECKING
 if TYPE_CHECKING:
@@ -93,6 +93,11 @@ class PlayableGameViewBase(GameViewBase, ABC):
         self.presenter = presenter
         self.premove_container = presenter.premove_presenter.view
         self.input_field_container = self._create_input_field_container()
+        self.input_field_container.buffer.on_text_changed.add_handler(self._on_move_input_buffer_changed)
+        self.move_input_hint_window = Window(
+            FormattedTextControl(lambda: self._move_input_hint_fragments()),
+            height=D(max=1),
+        )
         self.notation_help = NotationHelpContainer()
         super().__init__(presenter)
 
@@ -195,6 +200,11 @@ class PlayableGameViewBase(GameViewBase, ABC):
         def _(event):
             self.presenter.premove_presenter.clear_premove()
 
+        @bindings.add(Keys.Tab, filter=has_focus(self.input_field_container), eager=True)
+        def _(event):
+            if self.presenter.try_tab_complete_move_input(self.input_field_container.buffer):
+                event.app.invalidate()
+
         return merge_key_bindings([bindings, super().get_key_bindings()])
 
     def _create_input_field_container(self) -> TextArea:
@@ -213,3 +223,10 @@ class PlayableGameViewBase(GameViewBase, ABC):
         """Accept handler for the input field"""
         self.presenter.user_input_received(input.text)
         self.input_field_container.text = ''
+
+    def _on_move_input_buffer_changed(self, buffer: Buffer) -> None:
+        self.presenter.on_move_input_changed(buffer.text)
+
+    def _move_input_hint_fragments(self) -> StyleAndTextTuples:
+        text = self.presenter.get_move_input_hint_text()
+        return [("class:label.dim", text)] if text else []

@@ -7,10 +7,14 @@ from cli_chess.modules.player_info import PlayerInfoPresenter
 from cli_chess.modules.clock import ClockPresenter
 from cli_chess.modules.premove import PremovePresenter
 from cli_chess.utils import log, AlertType, RequestSuccessfullySent, EventTopics, save_game_pgn
+from cli_chess.utils.config import game_config
+from cli_chess.utils.move_input_preview import analyze_move_input, longest_matching_san_prefix
 from abc import ABC, abstractmethod
+import chess
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from cli_chess.core.game import GameModelBase, PlayableGameModelBase
+    from prompt_toolkit.buffer import Buffer
 
 
 class GamePresenterBase(ABC):
@@ -56,6 +60,7 @@ class PlayableGamePresenterBase(GamePresenterBase, ABC):
         self._game_over_handled = False
         super().__init__(model)
         self.model = model
+        self._move_input_hint_text = ""
 
     @abstractmethod
     def _get_view(self) -> PlayableGameViewBase:
@@ -85,6 +90,77 @@ class PlayableGamePresenterBase(GamePresenterBase, ABC):
             self._parse_and_present_game_over()
             self.premove_presenter.clear_premove()
             self._save_pgn()
+
+    def on_move_input_changed(self, text: str) -> None:
+        """Refresh live board hints and the move preview line while typing."""
+        self._refresh_move_input_preview(text)
+
+    def get_move_input_hint_text(self) -> str:
+        """Resolved SAN when input matches exactly one legal move (for the hint line)."""
+        return self._move_input_hint_text
+
+    def try_tab_complete_move_input(self, buffer: "Buffer") -> bool:
+        """Extend partial SAN to the longest common prefix of matching moves. Returns True if applied."""
+        if not game_config.get_boolean(game_config.Keys.LIVE_MOVE_INPUT_HIGHLIGHTS):
+            return False
+        if not game_config.get_boolean(game_config.Keys.LIVE_MOVE_INPUT_AUTOCOMPLETE):
+            return False
+        if self.model.board_model.is_game_over():
+            return False
+
+        current = buffer.text.strip()
+        if not current or current.lower().startswith("send"):
+            return False
+
+        board = self.model.board_model.board
+        next_prefix = longest_matching_san_prefix(board, current)
+        if not next_prefix or next_prefix == current:
+            return False
+
+        buffer.text = next_prefix
+        buffer.cursor_position = len(next_prefix)
+        return True
+
+    def _refresh_move_input_preview(self, text: str) -> None:
+        self._move_input_hint_text = ""
+        board_model = self.model.board_model
+
+        if not game_config.get_boolean(game_config.Keys.LIVE_MOVE_INPUT_HIGHLIGHTS):
+            board_model.clear_move_input_highlights()
+            return
+
+        if board_model.is_game_over():
+            board_model.clear_move_input_highlights()
+            return
+
+        stripped = text.strip()
+        if not stripped:
+            board_model.clear_move_input_highlights()
+            return
+
+        if stripped.lower().startswith("send"):
+            board_model.clear_move_input_highlights()
+            return
+
+        analysis = analyze_move_input(board_model.board, stripped)
+        if not analysis.from_squares:
+            board_model.clear_move_input_highlights()
+            return
+
+        show_targets = game_config.get_boolean(game_config.Keys.LIVE_MOVE_INPUT_SHOW_TARGETS)
+
+        if analysis.preview_move:
+            board_model.set_move_input_highlights(
+                set(),
+                set(),
+                analysis.preview_move,
+            )
+            self._move_input_hint_text = (
+                f"If you press Enter: {board_model.board.san(analysis.preview_move)}"
+            )
+        else:
+            to_sq = set(analysis.to_squares) if show_targets else set()
+            board_model.set_move_input_highlights(set(analysis.from_squares), to_sq, chess.Move.null())
 
     def user_input_received(self, inpt: str) -> None:
         """Respond to the users input. This input can either be the

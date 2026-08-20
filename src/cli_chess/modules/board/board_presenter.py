@@ -168,8 +168,21 @@ class BoardPresenter:
             except IndexError:
                 pass
 
-            if self.model.is_square_in_check(square):
-                square_color = "in-check"
+        live_hints = self.game_config_values.get(game_config.Keys.LIVE_MOVE_INPUT_HIGHLIGHTS, False)
+        if live_hints:
+            try:
+                preview = self.model.get_move_input_preview_move()
+                if bool(preview) and (square == preview.from_square or square == preview.to_square):
+                    square_color = "move-input-preview"
+                elif square in self.model.get_move_input_to_squares():
+                    square_color = "move-input-target"
+                elif square in self.model.get_move_input_from_squares():
+                    square_color = "move-input-piece"
+            except IndexError:
+                pass
+
+        if show_board_highlights and self.model.is_square_in_check(square):
+            square_color = "in-check"
 
         return square_color
 
