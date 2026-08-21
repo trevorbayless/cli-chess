@@ -74,7 +74,7 @@ in the `custom_style.py` file. This file will be located at `$HOME/.config/cli-c
 `$APPDATA/cli-chess/` for Windows.
 
 Colors are expected to be [HTML color names](https://www.w3schools.com/tags/ref_colornames.asp) (e.g. `seagreen`)
-or [HTML hex colors](https://www.w3schools.com/colors/colors_picker.asp) (e.g. `#2E8B57`). The display of selected
+or [hex color codes](https://www.w3schools.com/colors/colors_picker.asp) (e.g. `#2E8B57`). The display of selected
 colors is dependent on the terminal supporting true colors and the `Terminal Color Depth` option in cli-chess program
 settings being set to `True Colors`. If the terminal does not support true colors, the colors selected will be mapped
 to the closest supported color.
