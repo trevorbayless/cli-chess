@@ -40,7 +40,7 @@ class OfflineGamePresenter(PlayableGamePresenterBase):
         except Exception as e:
             if is_premove and isinstance(e, ValueError):
                 # Don't show an alert if move made is a premove and is invalid
-                # Just allow the user to make a new move. This matches how online games.
+                # Just allow the user to make a new move, as his matches how online games work.
                 log.debug("Attempted to push the premove but the premove is invalid in the new position")
                 log.debug("Waiting for user to make a new move...")
             else:

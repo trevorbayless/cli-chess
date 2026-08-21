@@ -92,12 +92,7 @@ class PlayableGameViewBase(GameViewBase, ABC):
     def __init__(self, presenter: PlayableGamePresenterBase):
         self.presenter = presenter
         self.premove_container = presenter.premove_presenter.view
-        self.input_field_container = self._create_input_field_container()
-        self.input_field_container.buffer.on_text_changed.add_handler(self._on_move_input_buffer_changed)
-        self.move_input_hint_window = Window(
-            FormattedTextControl(lambda: self._move_input_hint_fragments()),
-            height=D(max=1),
-        )
+        self.move_input_container = presenter.move_input_presenter.view
         self.notation_help = NotationHelpContainer()
         super().__init__(presenter)
 
@@ -207,26 +202,7 @@ class PlayableGameViewBase(GameViewBase, ABC):
 
         return merge_key_bindings([bindings, super().get_key_bindings()])
 
-    def _create_input_field_container(self) -> TextArea:
-        """Returns a TextArea to use as the input field"""
-        input_field = TextArea(height=D(max=1),
-                               prompt="Move:",
-                               style="class:move-input",
-                               multiline=False,
-                               wrap_lines=True,
-                               focus_on_click=True)
-
-        input_field.accept_handler = self._accept_input
-        return input_field
-
     def _accept_input(self, input: Buffer) -> None: # noqa
         """Accept handler for the input field"""
         self.presenter.user_input_received(input.text)
         self.input_field_container.text = ''
-
-    def _on_move_input_buffer_changed(self, buffer: Buffer) -> None:
-        self.presenter.on_move_input_changed(buffer.text)
-
-    def _move_input_hint_fragments(self) -> StyleAndTextTuples:
-        text = self.presenter.get_move_input_hint_text()
-        return [("class:label.dim", text)] if text else []
