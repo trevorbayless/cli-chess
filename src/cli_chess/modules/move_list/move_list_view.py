@@ -11,7 +11,8 @@ if TYPE_CHECKING:
 class MoveListView:
     def __init__(self, presenter: MoveListPresenter):
         self.presenter = presenter
-        self._move_list_output = TextArea(text="No moves...",
+        self._initial_text = "No moves..."
+        self._move_list_output = TextArea(text=self._initial_text,
                                           style="class:move-list",
                                           line_numbers=True,
                                           multiline=True,
@@ -36,7 +37,7 @@ class MoveListView:
                 output += "\n"
             output += move.ljust(8)
 
-        self._move_list_output.text = output if output else "No moves..."
+        self._move_list_output.text = output if output else self._initial_text
         self._scroll_to_bottom()
 
     def _scroll_to_bottom(self) -> None:
