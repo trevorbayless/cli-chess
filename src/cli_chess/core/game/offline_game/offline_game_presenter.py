@@ -9,7 +9,7 @@ from chess import Termination, COLOR_NAMES, Color
 def start_offline_game(game_parameters: dict):
     """Start an offline game vs the engine"""
     presenter = OfflineGamePresenter(OfflineGameModel(game_parameters))
-    change_views(presenter.view, presenter.view.input_field_container)
+    change_views(presenter.view, presenter.view.game_input_container)
 
 
 class OfflineGamePresenter(PlayableGamePresenterBase):

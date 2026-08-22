@@ -25,10 +25,7 @@ class OfflineGameView(PlayableGameViewBase):
                         self.player_info_lower_container,
                     ]), padding=0, padding_top=1)
                 ]),
-                HSplit([
-                    self.input_field_container,
-                    self.move_input_hint_window,
-                ], height=D(max=2, preferred=2)),
+                self.game_input_container,
                 self.premove_container,
                 self.alert,
                 self.notation_help,

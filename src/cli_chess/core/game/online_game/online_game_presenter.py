@@ -12,7 +12,7 @@ def start_online_game(game_parameters: dict, is_vs_ai: bool) -> None:
     """
     model = OnlineGameModel(game_parameters, is_vs_ai)
     presenter = OnlineGamePresenter(model)
-    change_views(presenter.view, presenter.view.input_field_container) # noqa
+    change_views(presenter.view, presenter.view.game_input_container) # noqa
     model.create_game()
 
 

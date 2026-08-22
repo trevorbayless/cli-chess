@@ -1,13 +1,11 @@
 from __future__ import annotations
 from cli_chess.utils.ui_common import handle_mouse_click, go_back_to_main_menu, AlertContainer, NotationHelpContainer
 from cli_chess.utils.logging import log
-from prompt_toolkit.widgets import TextArea
 from prompt_toolkit.layout import Window, Container, FormattedTextControl, VSplit, D
 from prompt_toolkit.formatted_text import StyleAndTextTuples
 from prompt_toolkit.key_binding import KeyBindings, merge_key_bindings
 from prompt_toolkit.keys import Keys
-from prompt_toolkit.buffer import Buffer
-from prompt_toolkit.filters import Condition, has_focus
+from prompt_toolkit.filters import Condition
 from abc import ABC, abstractmethod
 from typing import Tuple, TYPE_CHECKING
 if TYPE_CHECKING:
@@ -92,7 +90,7 @@ class PlayableGameViewBase(GameViewBase, ABC):
     def __init__(self, presenter: PlayableGamePresenterBase):
         self.presenter = presenter
         self.premove_container = presenter.premove_presenter.view
-        self.move_input_container = presenter.move_input_presenter.view
+        self.game_input_container = presenter.game_input_presenter.view
         self.notation_help = NotationHelpContainer()
         super().__init__(presenter)
 
@@ -132,6 +130,7 @@ class PlayableGameViewBase(GameViewBase, ABC):
             ("class:function-bar.spacer", " "),
         )
 
+    # TODO: Move this to the premove view
     def _clear_premove_fb_fragments(self) -> Tuple:
         """Returns the function bar fragments for clearing the set premove"""
         return (
@@ -191,18 +190,9 @@ class PlayableGameViewBase(GameViewBase, ABC):
         def _(event): # noqa
             self.presenter.exit()
 
+        # TODO: Move this to the premove view
         @bindings.add(Keys.Escape, filter=Condition(self.presenter.premove_presenter.is_premove_set), eager=True)
         def _(event):
             self.presenter.premove_presenter.clear_premove()
 
-        @bindings.add(Keys.Tab, filter=has_focus(self.input_field_container), eager=True)
-        def _(event):
-            if self.presenter.try_tab_complete_move_input(self.input_field_container.buffer):
-                event.app.invalidate()
-
-        return merge_key_bindings([bindings, super().get_key_bindings()])
-
-    def _accept_input(self, input: Buffer) -> None: # noqa
-        """Accept handler for the input field"""
-        self.presenter.user_input_received(input.text)
-        self.input_field_container.text = ''
+        return merge_key_bindings([bindings, self.game_input_container.key_bindings, super().get_key_bindings()])
