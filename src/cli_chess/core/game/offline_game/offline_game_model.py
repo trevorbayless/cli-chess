@@ -88,9 +88,9 @@ class OfflineGameModel(PlayableGameModelBase):
                 self.game_metadata.variant = data[GameOption.VARIANT]
                 self.game_metadata.players[self.my_color].name = player_info_config.get_value(player_info_config.Keys.OFFLINE_PLAYER_NAME)  # noqa: E501
 
-                engine_name = "Fairy-Stockfish"
-                engine_name = engine_name + f" Lvl {data.get(GameOption.COMPUTER_SKILL_LEVEL)}" if not data.get(GameOption.SPECIFY_ELO) else engine_name  # noqa: E501
-                self.game_metadata.players[not self.my_color].name = engine_name
+                engine_name = self.engine_model.engine_name
+                engine_display_name = engine_name + f" Lvl {data.get(GameOption.COMPUTER_SKILL_LEVEL)}" if not data.get(GameOption.SPECIFY_ELO) else engine_name  # noqa: E501
+                self.game_metadata.players[not self.my_color].name = engine_display_name
                 self.game_metadata.players[not self.my_color].rating = data.get(GameOption.COMPUTER_ELO, "")
 
             self._notify_game_model_updated(*args, **kwargs)

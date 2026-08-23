@@ -26,6 +26,7 @@ class EngineModel:
     def __init__(self, board_model: BoardModel, game_parameters: dict):
         self.engine: Optional[chess.engine.SimpleEngine] = None
         self.board_model = board_model
+        self.engine_name = "Fairy-Stockfish"
         self.game_parameters = game_parameters
 
     def start_engine(self):
@@ -46,6 +47,7 @@ class EngineModel:
                 'UCI_Elo': uci_elo if uci_elo else 1350
             }
             self.engine.configure(engine_cfg)
+            log.debug(f"Engine ({self.engine_name}) started with config: {engine_cfg}")
         except Exception as e:
             msg = f"Error starting engine: {e}"
             log.error(msg)
