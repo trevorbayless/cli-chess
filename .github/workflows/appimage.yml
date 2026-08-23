@@ -50,6 +50,10 @@ jobs:
             echo "version=dev-${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
           fi
 
+      - name: Remove python-pip
+        run: |
+          pacman -Rsn --noconfirm python-pip
+
       - name: Build AppImage
         env:
           ARCH: ${{ matrix.arch }}
