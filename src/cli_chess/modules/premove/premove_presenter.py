@@ -17,7 +17,7 @@ class PremovePresenter:
 
     def set_premove(self, move: str) -> None:
         if move:
-            return self.model.set_premove(move)
+            self.model.set_premove(move)
 
     def pop_premove(self) -> str:
         """Returns the set premove, but also clears it after"""
