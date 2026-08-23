@@ -11,16 +11,15 @@ offline against the Fairy-Stockfish engine. All Lichess variants are supported.
     <a href="https://github.com/trevorbayless/cli-chess/actions/">
         <img alt="CI Workflow" src="https://github.com/trevorbayless/cli-chess/actions/workflows/ci.yml/badge.svg?branch=master&event=push">
     </a>
+    <a href="https://github.com/trevorbayless/cli-chess/actions/workflows/appimage.yml">
+        <img alt="AppImage" src="https://img.shields.io/github/actions/workflow/status/trevorbayless/cli-chess/appimage.yml?event=release&logo=linux&logoColor=white&label=Build%20AppImage">
+    </a>
     <a href="https://pypi.org/project/cli-chess/">
         <img alt="PyPI" src="https://img.shields.io/pypi/v/cli-chess?color=informational&label=PyPI&logo=PyPI">
     </a>
-    <a href="https://pkgforge-dev.github.io/Anylinux-AppImages/">
-       <img alt="AnyLinux" src="https://img.shields.io/badge/AnyLinux-compatible-green?logo=linux&logoColor=white"> 
-     </a>
     <a href="#">
         <img alt="Python" src="https://img.shields.io/static/v1?label=Python&message=3.10%2B&color=informational&logo=python">
     </a>
-  
 </p>
 
 <details><summary>Demo</summary>
