@@ -9,7 +9,6 @@ from typing import TYPE_CHECKING, Callable
 if TYPE_CHECKING:
     from cli_chess.core.game import PlayableGameModelBase
 
-# TODO: Passing the callback to set alert text here feels hacky and seems to be a crying for a rework
 class GameInputPresenter:
     def __init__(self, model: PlayableGameModelBase, show_alert_callback: Callable[[str], None] | None = None):
         self.model = model
@@ -20,6 +19,12 @@ class GameInputPresenter:
     # TODO: I don't think I like the hard coded keywords... maybe have this ask
     #       the individual models if they have a word they know that was entered
     #       and return a function pointer to call here?
+
+    # TODO: The problem here with the engine not moving was that I was calling the models
+    #       make_move - instead of the presenters. I believe what I need to do is create a model
+    #       for this game_input, which then emits an event on chat input. Then, anyone interested
+    #       in chat input can subscribe (the models), and then broadcast back to the necessary presenter.
+    #       This kind of goes hand in hand with the above comment as well.
     def input_received(self, inpt: str) -> None:
         """Respond to the users input. This input can either be the
            move input, game actions (such as resign), chat, etc
@@ -27,17 +32,17 @@ class GameInputPresenter:
         try:
             inpt_lower = inpt.lower()
             if inpt_lower == "resign" or inpt_lower == "quit" or inpt_lower == "exit":
-                self.model.resign()
+                self.resign()
             elif inpt_lower == "draw" or inpt_lower == "offer draw":
-                self.model.offer_draw()
+                self.offer_draw()
             elif inpt_lower == "takeback" or inpt_lower == "back" or inpt_lower == "undo":
-                self.model.propose_takeback()
+                self.propose_takeback()
             elif inpt_lower.find("send") == 0:
-                self.model.post_message(inpt.replace("send", "", 1))
-            elif self.model.is_my_turn():
-                self.model.make_move(inpt)
+                self.post_message(inpt.replace("send", "", 1))
+            elif self.is_my_turn():
+                self.make_move(inpt)
             else:
-                self.model.set_premove(inpt)
+                self.set_premove(inpt)
         except Exception as e:
             if self.cb_show_alert:
                 self.cb_show_alert(str(e))
@@ -74,6 +79,10 @@ class GameInputPresenter:
         buffer.cursor_position = len(next_prefix)
         return True
 
+    # TODO: This whole function should likely be split up. Have move input hint
+    #       rendered here, and logic for square highlighting of the hint done
+    #       from the board model. Have this class then register with an update
+    #       callback with returned move inputs?
     def _refresh_move_input_preview(self, text: str) -> None:
         self._move_input_hint_text = ""
         board_model = self.model.board_model
