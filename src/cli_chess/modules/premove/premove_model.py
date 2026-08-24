@@ -31,7 +31,7 @@ class PremoveModel:
         self.board_model.clear_premove_highlight()
         self._notify_premove_model_updated()
 
-    def set_premove(self, move: str = None) -> None:
+    def set_premove(self, move: str) -> None:
         """Sets the passed in move as the premove to make.
            Raises an exception if the premove is invalid.
         """
@@ -45,12 +45,13 @@ class PremoveModel:
 
         self._notify_premove_model_updated()
 
-    def _validate_premove(self, move: str = None) -> Move:
+    def _validate_premove(self, move: str) -> Move:
         """Checks if the premove passed in is valid in the context of game.
            Raises an exception if the premove is invalid. Returns the move
            in the format of chess.Move
         """
         try:
+            move = move.strip()
             if not move:
                 raise Warning("No move specified")
 

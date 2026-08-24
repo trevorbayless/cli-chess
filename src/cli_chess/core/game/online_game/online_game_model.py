@@ -116,13 +116,14 @@ class OnlineGameModel(PlayableGameModelBase):
         """
         if self.game_in_progress:
             try:
+                move = move.strip()
                 if not move:
                     raise Warning("No move specified")
 
                 if move == "0000":
                     raise Warning("Null moves are not supported in online games")
 
-                move = self.board_model.verify_move(move.strip())
+                move = self.board_model.verify_move(move)
                 self.game_state_dispatcher.make_move(move)
             except Exception:
                 raise

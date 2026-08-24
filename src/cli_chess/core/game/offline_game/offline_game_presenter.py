@@ -32,7 +32,7 @@ class OfflineGamePresenter(PlayableGamePresenterBase):
     def make_move(self, move: str, is_premove=False) -> None:
         """Make the users move on the board"""
         try:
-            if self.model.is_my_turn() and move:
+            if self.model.is_my_turn():
                 self.model.make_move(move)
                 self.make_engine_move()
             else:
@@ -62,7 +62,8 @@ class OfflineGamePresenter(PlayableGamePresenterBase):
                 self.board_presenter.make_move(move)
 
                 # After the engine moves, make the premove if set
-                self.make_move(self.premove_presenter.pop_premove(), is_premove=True)
+                if self.premove_presenter.is_premove_set():
+                    self.make_move(self.premove_presenter.pop_premove(), is_premove=True)
         except Exception as e:
             log.error(e)
             self.view.alert.show_alert(str(e))

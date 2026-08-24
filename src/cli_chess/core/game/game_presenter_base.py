@@ -110,9 +110,7 @@ class PlayableGamePresenterBase(GamePresenterBase, ABC):
     def make_move(self, move: str) -> None:
         """Make the passed in move on the board"""
         try:
-            move = move.strip()
-            if move:
-                self.model.make_move(move)
+            self.model.make_move(move)
         except Exception as e:
             self.view.alert.show_alert(str(e))
 
