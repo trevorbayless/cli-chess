@@ -54,7 +54,7 @@ class GamePresenterBase(ABC):
 class PlayableGamePresenterBase(GamePresenterBase, ABC):
     def __init__(self, model: PlayableGameModelBase):
         self.premove_presenter = PremovePresenter(model.premove_model)
-        self.game_input_presenter = GameInputPresenter(model)  # Set alert callback after base init below
+        self.game_input_presenter = GameInputPresenter(model.game_input_model)  # Set alert callback after base init below
         self._game_over_handled = False
         super().__init__(model)
         self.model = model

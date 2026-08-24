@@ -8,6 +8,8 @@ from chess import Color, WHITE, COLOR_NAMES
 from random import getrandbits
 from abc import ABC, abstractmethod
 
+from ...modules.game_input_field import GameInputModel
+
 
 class GameModelBase:
     def __init__(self, orientation: Color = WHITE, variant="standard", fen="", side_confirmed=True):
@@ -59,7 +61,8 @@ class PlayableGameModelBase(GameModelBase, ABC):
 
         super().__init__(orientation=self.my_color, variant=variant, fen=fen, side_confirmed=side_confirmed)
         self.premove_model = PremoveModel(self.board_model)
-        self._assoc_models = self._assoc_models + [self.premove_model]
+        self.game_input_model = GameInputModel(self.board_model)
+        self._assoc_models = self._assoc_models + [self.premove_model, self.game_input_model]
 
     def is_my_turn(self) -> bool:
         """Return True if it's our turn"""

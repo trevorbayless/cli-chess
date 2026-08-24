@@ -7,14 +7,13 @@ from chess import Move
 from typing import TYPE_CHECKING, Callable
 
 if TYPE_CHECKING:
-    from cli_chess.core.game import PlayableGameModelBase
+    from cli_chess.modules.game_input_field import GameInputModel
 
 class GameInputPresenter:
-    def __init__(self, model: PlayableGameModelBase, show_alert_callback: Callable[[str], None] | None = None):
+    def __init__(self, model: GameInputModel, show_alert_callback: Callable[[str], None] | None = None):
         self.model = model
         self.view = GameInputView(self)
         self.cb_show_alert: Callable[[str], None] | None = show_alert_callback
-        self._move_input_hint_text = ""
 
     # TODO: I don't think I like the hard coded keywords... maybe have this ask
     #       the individual models if they have a word they know that was entered
@@ -52,10 +51,6 @@ class GameInputPresenter:
     def on_move_input_changed(self, text: str) -> None:
         """Refresh live board hints and the move preview line while typing."""
         self._refresh_move_input_preview(text)
-
-    def get_move_input_hint_text(self) -> str:
-        """Resolved SAN when input matches exactly one legal move (for the hint line)."""
-        return self._move_input_hint_text
 
     def try_tab_complete_move_input(self, buffer: "Buffer") -> bool:
         """Extend partial SAN to the longest common prefix of matching moves. Returns True if applied."""
