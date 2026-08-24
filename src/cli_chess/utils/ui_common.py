@@ -7,7 +7,7 @@ from prompt_toolkit.filters import to_filter, Condition
 from prompt_toolkit.mouse_events import MouseEvent, MouseEventType
 from prompt_toolkit.key_binding import KeyPressEvent, merge_key_bindings
 from prompt_toolkit.application import get_app
-from prompt_toolkit.layout import Layout, Container
+from prompt_toolkit.layout import Layout, Container, D
 from typing import TypeVar, Callable, cast
 import os
 
@@ -129,7 +129,7 @@ class AlertContainer:
     def _create_alert_container(self) -> ConditionalContainer:
         """Create the error container"""
         return ConditionalContainer(
-            Window(self._alert_label, always_hide_cursor=True, wrap_lines=True),
+            Window(self._alert_label, always_hide_cursor=True, wrap_lines=True, dont_extend_height=True),
             filter=to_filter(False)
         )
 
@@ -162,7 +162,7 @@ class AlertContainer:
 
 
 NOTATION_HELP_TEXT = (
-    "Notation help — press F5 to close\n"
+    "\nNotation help — press F5 to close\n"
     "\n"
     "  Move a piece     e4    Nf3   Bd3\n"
     "  Capture          Bxe5  Nxe5  exd5\n"
@@ -176,7 +176,7 @@ class NotationHelpContainer:
     """A toggleable container that displays a chess notation cheat sheet"""
     def __init__(self):
         self._visible = False
-        self._label = FormattedTextControl(text=NOTATION_HELP_TEXT, show_cursor=False)
+        self._label = FormattedTextControl(text=NOTATION_HELP_TEXT, show_cursor=False, modal=True)
         self._container = ConditionalContainer(
             Window(self._label, always_hide_cursor=True, wrap_lines=True),
             filter=Condition(lambda: self._visible)
