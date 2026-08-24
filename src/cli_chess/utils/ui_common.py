@@ -3,11 +3,12 @@ from cli_chess.utils import AlertType, log
 from cli_chess.utils.common import VALID_COLOR_DEPTHS
 from cli_chess.utils.config import get_config_path
 from prompt_toolkit.layout import Window, FormattedTextControl, ConditionalContainer
+from prompt_toolkit.formatted_text import HTML
 from prompt_toolkit.filters import to_filter, Condition
 from prompt_toolkit.mouse_events import MouseEvent, MouseEventType
 from prompt_toolkit.key_binding import KeyPressEvent, merge_key_bindings
 from prompt_toolkit.application import get_app
-from prompt_toolkit.layout import Layout, Container, D
+from prompt_toolkit.layout import Layout, Container
 from typing import TypeVar, Callable, cast
 import os
 
@@ -160,15 +161,21 @@ class AlertContainer:
     def __pt_container__(self):
         return self._alert_container
 
+# TODO: Update this and the NotationHelpContainer class below to provide a helper to allow adding sections,
+#       section info, etc. This would then be a more re-usable container for other help pop ups.
+#       sections would then be able to be iterated through (like BoardPresenter does for board display)
+#       and content would be generated on the fly.
+
 
 NOTATION_HELP_TEXT = (
-    "\nNotation help — press F5 to close\n"
+    "\n<notation-help.header>Notation help — press F5 to close</notation-help.header>\n"
     "\n"
-    "  Move a piece     e4    Nf3   Bd3\n"
-    "  Capture          Bxe5  Nxe5  exd5\n"
-    "  Castle           O-O   O-O-O\n"
-    "  Promote a pawn   e8=Q  (UCI: e7e8q)\n"
-    "  Specify piece    Nbd2  R1e2"
+    "<notation-help.section.title>  Move a piece......... </notation-help.section.title>" + "<notation-help.section.info>e4    a2a4  Nf3   Bd3</notation-help.section.info>\n"  # noqa: E501
+    "<notation-help.section.title>  Capture.............. </notation-help.section.title>" + "<notation-help.section.info>Bxe5  Nxe5  exd5</notation-help.section.info>\n"  # noqa: E501
+    "<notation-help.section.title>  Castle............... </notation-help.section.title>" + "<notation-help.section.info>O-O   O-O-O</notation-help.section.info>\n"  # noqa: E501
+    "<notation-help.section.title>  Promote a pawn....... </notation-help.section.title>" + "<notation-help.section.info>e8=Q  (UCI: e7e8q)</notation-help.section.info>\n"  # noqa: E501
+    "<notation-help.section.title>  Specify piece........ </notation-help.section.title>" + "<notation-help.section.info>Nbd2  R1e2</notation-help.section.info>\n"  # noqa: E501
+    "<notation-help.section.title>  Chat with opponent... </notation-help.section.title>" + "<notation-help.section.info>send Good game!</notation-help.section.info>\n"  # noqa: E501
 )
 
 
@@ -176,7 +183,7 @@ class NotationHelpContainer:
     """A toggleable container that displays a chess notation cheat sheet"""
     def __init__(self):
         self._visible = False
-        self._label = FormattedTextControl(text=NOTATION_HELP_TEXT, show_cursor=False, modal=True)
+        self._label = FormattedTextControl(HTML(NOTATION_HELP_TEXT), show_cursor=False, modal=True)
         self._container = ConditionalContainer(
             Window(self._label, always_hide_cursor=True, wrap_lines=True),
             filter=Condition(lambda: self._visible)

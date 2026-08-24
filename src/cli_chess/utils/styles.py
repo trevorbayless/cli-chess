@@ -66,4 +66,8 @@ default = {
     "text-area.prompt": "fg:white bg:darkcyan bold noinherit",
 
     "validation-toolbar": "fg:white bg:darkred",
+
+    "notation-help.header": "fg:black bg:lightgreen bold",
+    "notation-help.section.title": "fg:white bold",
+    "notation-help.section.info": "fg:dimgray italic",
 }
