@@ -41,7 +41,7 @@ class GamePresenterBase(ABC):
 
     def flip_board(self) -> None:
         """Flip the board orientation"""
-        self.model.board_model.set_board_orientation(not self.model.board_model.get_board_orientation())
+        self.board_presenter.flip_board()
 
     def exit(self) -> None:
         """Exit current presenter/view"""

@@ -42,6 +42,10 @@ class BoardPresenter:
         except ValueError as e:
             raise e
 
+    def flip_board(self) -> None:
+        """Flip the board orientation"""
+        self.model.set_board_orientation(not self.model.get_board_orientation())
+
     def get_board_display(self) -> List[Dict]:
         """Returns a list containing the complete board display. Each item in the list
            is a dictionary containing the display data for that square (piece at,
