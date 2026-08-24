@@ -62,13 +62,6 @@ class PlayableGamePresenterBase(GamePresenterBase, ABC):
         """Returns the view to use for this presenter"""
         return PlayableGameViewBase(self)
 
-    @abstractmethod
-    def is_vs_ai(self) -> bool:
-        """Inheriting classes must specify if the game
-           is versus AI (offline engine or Lichess)
-        """
-        pass
-
     def update(self, *args, **kwargs) -> None:
         """Update method called on game model updates. Overrides base."""
         super().update(*args, **kwargs)
@@ -154,10 +147,6 @@ class PlayableGamePresenterBase(GamePresenterBase, ABC):
     def is_game_in_progress(self) -> bool:
         return self.model.game_in_progress
 
-    @abstractmethod
-    def _parse_and_present_game_over(self) -> str:
-        pass
-
     def _save_pgn(self) -> None:
         """Save PGN to save locaton and print path on screen"""
         try:
@@ -167,3 +156,14 @@ class PlayableGamePresenterBase(GamePresenterBase, ABC):
                 self.view.alert.append_alert(f"Game saved: {path}")
         except Exception as e:
             log.error(f"Unexpected error saving PGN: {e}")
+
+    @abstractmethod
+    def is_vs_ai(self) -> bool:
+        """Inheriting classes must specify if the game
+           is versus AI (offline engine or Lichess)
+        """
+        pass
+
+    @abstractmethod
+    def _parse_and_present_game_over(self) -> str:
+        pass

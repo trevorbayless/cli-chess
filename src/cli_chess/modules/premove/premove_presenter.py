@@ -16,6 +16,7 @@ class PremovePresenter:
         self.view.update(self.model.premove)
 
     def set_premove(self, move: str) -> None:
+        """Sets the premove to given move"""
         self.model.set_premove(move)
 
     def pop_premove(self) -> str:
@@ -23,6 +24,7 @@ class PremovePresenter:
         return self.model.pop_premove()
 
     def clear_premove(self) -> None:
+        """Clears the set premove"""
         self.model.clear_premove()
 
     def is_premove_set(self) -> bool:

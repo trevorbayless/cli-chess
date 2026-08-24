@@ -75,12 +75,12 @@ class PlayableGameModelBase(GameModelBase, ABC):
         else:  # Get random color to play as
             return Color(getrandbits(1))
 
-    @abstractmethod
-    def make_move(self, move: str) -> None:
-        pass
+    def set_premove(self, move: str) -> None:
+        """Sets the premove"""
+        self.premove_model.set_premove(move)
 
     @abstractmethod
-    def set_premove(self, move) -> None:
+    def make_move(self, move: str) -> None:
         pass
 
     @abstractmethod

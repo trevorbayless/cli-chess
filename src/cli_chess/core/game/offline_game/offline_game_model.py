@@ -49,10 +49,6 @@ class OfflineGameModel(PlayableGameModelBase):
             log.warning("Attempted to make a move in a game that's not in progress")
             raise Warning("Game has already ended")
 
-    def set_premove(self, move: str) -> None:
-        """Sets the premove"""
-        self.premove_model.set_premove(move)
-
     def propose_takeback(self) -> None:
         """Take back the previous move"""
         try:
