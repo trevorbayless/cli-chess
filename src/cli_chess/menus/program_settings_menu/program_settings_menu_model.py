@@ -19,6 +19,9 @@ class ProgramSettingsMenuModel(MultiValueMenuModel):
             MultiValueMenuOption(game_config.Keys.SHOW_MOVE_LIST_IN_UNICODE, "", self._get_available_game_config_options(game_config.Keys.SHOW_MOVE_LIST_IN_UNICODE), display_name="Show move list in unicode"),  # noqa: E501
             MultiValueMenuOption(game_config.Keys.SHOW_MATERIAL_DIFF_IN_UNICODE, "", self._get_available_game_config_options(game_config.Keys.SHOW_MATERIAL_DIFF_IN_UNICODE), display_name="Unicode material difference"),  # noqa: E501
             MultiValueMenuOption(game_config.Keys.PAD_UNICODE, "", self._get_available_game_config_options(game_config.Keys.PAD_UNICODE), display_name="Pad unicode (fix overlap)"),  # noqa: E501
+            MultiValueMenuOption(game_config.Keys.LIVE_MOVE_INPUT_HIGHLIGHTS, "", self._get_available_game_config_options(game_config.Keys.LIVE_MOVE_INPUT_HIGHLIGHTS), display_name="Live move input hints"),  # noqa: E501
+            MultiValueMenuOption(game_config.Keys.LIVE_MOVE_INPUT_SHOW_TARGETS, "", self._get_available_game_config_options(game_config.Keys.LIVE_MOVE_INPUT_SHOW_TARGETS), display_name="Show target squares"),  # noqa: E501
+            MultiValueMenuOption(game_config.Keys.LIVE_MOVE_INPUT_AUTOCOMPLETE, "", self._get_available_game_config_options(game_config.Keys.LIVE_MOVE_INPUT_AUTOCOMPLETE), display_name="Tab autocomplete"),  # noqa: E501
             MultiValueMenuOption(terminal_config.Keys.TERMINAL_COLOR_DEPTH, "", self._get_available_color_depth_options(), display_name="Terminal color depth"),  # noqa: E501
         ]
         return MenuCategory("Program Settings", menu_options)

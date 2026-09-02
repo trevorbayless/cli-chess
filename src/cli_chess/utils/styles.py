@@ -22,6 +22,18 @@ default = {
     "pre-move.light-piece": f"fg:{light_piece_color}",
     "pre-move.dark-piece": f"fg:{dark_piece_color}",
 
+    "move-input-piece": "bg:steelblue",
+    "move-input-piece.light-piece": f"fg:{light_piece_color}",
+    "move-input-piece.dark-piece": f"fg:{dark_piece_color}",
+
+    "move-input-target": "bg:darkseagreen",
+    "move-input-target.light-piece": f"fg:{light_piece_color}",
+    "move-input-target.dark-piece": f"fg:{dark_piece_color}",
+
+    "move-input-preview": "bg:mediumturquoise",
+    "move-input-preview.light-piece": f"fg:{light_piece_color}",
+    "move-input-preview.dark-piece": f"fg:{dark_piece_color}",
+
     "in-check": "bg:red",
     "in-check.light-piece": f"fg:{light_piece_color}",
     "in-check.dark-piece": f"fg:{dark_piece_color}",

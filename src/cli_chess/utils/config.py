@@ -233,6 +233,9 @@ class GameConfig(SectionBase):
         SHOW_MOVE_LIST_IN_UNICODE = "show_move_list_in_unicode"
         SHOW_MATERIAL_DIFF_IN_UNICODE = "show_material_diff_in_unicode"
         PAD_UNICODE = "pad_unicode"
+        LIVE_MOVE_INPUT_HIGHLIGHTS = "live_move_input_highlights"
+        LIVE_MOVE_INPUT_SHOW_TARGETS = "live_move_input_show_targets"
+        LIVE_MOVE_INPUT_AUTOCOMPLETE = "live_move_input_autocomplete"
 
         @property
         def default_value(self):
@@ -245,6 +248,9 @@ class GameConfig(SectionBase):
                 self.SHOW_MOVE_LIST_IN_UNICODE: False,
                 self.SHOW_MATERIAL_DIFF_IN_UNICODE: True,
                 self.PAD_UNICODE: True,
+                self.LIVE_MOVE_INPUT_HIGHLIGHTS: False,
+                self.LIVE_MOVE_INPUT_SHOW_TARGETS: False,
+                self.LIVE_MOVE_INPUT_AUTOCOMPLETE: False,
             }
             return default_lookup[self]
 
